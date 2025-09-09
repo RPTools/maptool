@@ -19,7 +19,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import javax.swing.JComponent;
-import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.lib.AwtUtil;
 
 @SuppressWarnings("serial")
 public class ImagePreviewPanel extends JComponent {
@@ -48,7 +48,7 @@ public class ImagePreviewPanel extends JComponent {
     Dimension size = getSize();
     if (img != null) {
       Dimension imgSize = new Dimension(img.getWidth(null), img.getHeight(null));
-      SwingUtil.constrainTo(imgSize, size.width, size.height);
+      AwtUtil.constrainTo(imgSize, size.width, size.height);
 
       // Border
       int x = (size.width - imgSize.width) / 2;

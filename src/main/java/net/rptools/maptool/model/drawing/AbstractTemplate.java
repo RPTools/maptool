@@ -19,7 +19,6 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Line2D;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -28,8 +27,6 @@ import net.rptools.maptool.model.ZonePoint;
  * Base class for the radius, line, and cone templates.
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
  */
 public abstract class AbstractTemplate extends AbstractDrawing {
   /*---------------------------------------------------------------------------------------------
@@ -42,8 +39,12 @@ public abstract class AbstractTemplate extends AbstractDrawing {
   /** The location of the vertex where painting starts. */
   private ZonePoint vertex = new ZonePoint(0, 0);
 
-  /** The id of the zone where this drawable is painted. */
-  private GUID zoneId;
+  /**
+   * @deprecated This used to indicate the zone where this drawable is painted. We no longer track
+   *     this in the drawing, but old campaign files may keep a reference to this field. So we have
+   *     to keep this around so XStream can find the value if it needs it.
+   */
+  @Deprecated private GUID zoneId;
 
   protected AbstractTemplate() {}
 
@@ -51,12 +52,20 @@ public abstract class AbstractTemplate extends AbstractDrawing {
     super(id);
   }
 
+  protected AbstractTemplate(AbstractTemplate other) {
+    super(other);
+    this.radius = other.radius;
+    this.vertex = new ZonePoint(other.vertex);
+  }
+
+  public Object readResolve() {
+    zoneId = null;
+    return this;
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Class Variables
    *-------------------------------------------------------------------------------------------*/
-
-  /** Maximum radius value allowed. */
-  public static final int MAX_RADIUS = 100;
 
   /** Minimum radius value allowed. */
   public static final int MIN_RADIUS = 1;
@@ -163,35 +172,17 @@ public abstract class AbstractTemplate extends AbstractDrawing {
   }
 
   /**
-   * Get the zoneId for this RadiusTemplate.
-   *
-   * @return Returns the current value of zoneId.
-   */
-  public GUID getZoneId() {
-    return zoneId;
-  }
-
-  /**
-   * Set the value of zoneId for this RadiusTemplate.
-   *
-   * @param zoneId The zoneId to set.
-   */
-  public void setZoneId(GUID zoneId) {
-    this.zoneId = zoneId;
-  }
-
-  /**
    * Paint the border or area of the template
    *
+   * @param zone The zone that is being painted
    * @param g Where to paint
    * @param border Paint the border?
    * @param area Paint the area?
    */
-  protected void paint(Graphics2D g, boolean border, boolean area) {
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
     if (radius == 0) {
       return;
     }
-    Zone zone = MapTool.getCampaign().getZone(zoneId);
     if (zone == null) {
       return;
     }
@@ -331,21 +322,20 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    * Overridden AbstractDrawing Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D) */
   @Override
-  protected void draw(Graphics2D g) {
-    paint(g, true, false);
+  protected void draw(Zone zone, Graphics2D g) {
+    paint(zone, g, true, false);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D) */
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
 
     // Adjust alpha automatically
     Composite old = g.getComposite();
-    if (old != AlphaComposite.Clear)
+    if (old != AlphaComposite.Clear) {
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
-    paint(g, false, true);
+    }
+    paint(zone, g, false, true);
     g.setComposite(old);
   }
 

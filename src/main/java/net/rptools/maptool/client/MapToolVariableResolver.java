@@ -26,9 +26,7 @@ import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.InitiativeList;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableModifiers;
@@ -42,10 +40,19 @@ public class MapToolVariableResolver implements VariableResolver {
   private static final Logger LOGGER = LogManager.getLogger(MapToolVariableResolver.class);
 
   /** The prefix for querying and setting state values . */
-  public static final String STATE_PREFIX = "state.";
+  public static final String BAR_PREFIX = "bar.";
+
+  /** The variable name for querying and setting the current round in initiative. */
+  public static final String INITIATIVE_ROUND = "init.round";
+
+  /** The variable name for querying and setting the current initiative. */
+  public static final String INITIATIVE_CURRENT = "init.current";
+
+  public static final String CAMPAIGN_PANEL = "campaign";
+  public static final String GM_PANEL = "gm";
 
   /** The prefix for querying and setting state values . */
-  public static final String BAR_PREFIX = "bar.";
+  public static final String STATE_PREFIX = "state.";
 
   /** The variable name for querying and setting token halos. */
   public static final String TOKEN_HALO = "token.halo";
@@ -65,23 +72,25 @@ public class MapToolVariableResolver implements VariableResolver {
   /** The variable name for querying and setting the initiative of the current token. */
   public static final String TOKEN_INITIATIVE_HOLD = "token.initHold";
 
-  /** The variable name for querying and setting the current round in initiative. */
-  public static final String INITIATIVE_ROUND = "init.round";
-
-  /** The variable name for querying and setting the current initiative. */
-  public static final String INITIATIVE_CURRENT = "init.current";
-
   /** The variable name for querying and setting token visible state */
   private static final String TOKEN_VISIBLE = "token.visible";
 
   private static final Map<String, Object> CONSTANTS =
       Map.of(
-          "true", BigDecimal.ONE,
-          "false", BigDecimal.ZERO,
-          "json.null", JsonNull.INSTANCE,
-          "json.true", new JsonPrimitive(true),
-          "json.false", new JsonPrimitive(false));
-
+          "true",
+          BigDecimal.ONE,
+          "false",
+          BigDecimal.ZERO,
+          "json.null",
+          JsonNull.INSTANCE,
+          "json.true",
+          new JsonPrimitive(true),
+          "json.false",
+          new JsonPrimitive(false),
+          "panel.campaign",
+          CAMPAIGN_PANEL,
+          "panel.gm",
+          GM_PANEL);
   private final Map<String, Object> variables = new CaseInsensitiveHashMap<>();
 
   private List<Runnable> delayedActionList;
@@ -110,7 +119,7 @@ public class MapToolVariableResolver implements VariableResolver {
       try {
         setVariable(entry.getKey(), entry.getValue());
       } catch (ParserException e) {
-        LOGGER.error("Error: Unable to set comstant " + entry.getKey() + " to " + entry.getValue());
+        LOGGER.error("Error: Unable to set constant " + entry.getKey() + " to " + entry.getValue());
       }
     }
   }
@@ -166,7 +175,6 @@ public class MapToolVariableResolver implements VariableResolver {
 
   @Override
   public boolean containsVariable(String name, VariableModifiers mods) {
-
     // If we don't have the value then we'll prompt for it
     return true;
   }
@@ -197,7 +205,6 @@ public class MapToolVariableResolver implements VariableResolver {
 
     Object result = null;
     if (tokenInContext != null) {
-
       if (name.startsWith(STATE_PREFIX)) {
         String stateName = name.substring(STATE_PREFIX.length());
         return TokenStateFunction.getState(tokenInContext, stateName);
@@ -276,7 +283,7 @@ public class MapToolVariableResolver implements VariableResolver {
       result =
           JOptionPane.showInputDialog(
               MapTool.getFrame(),
-              I18N.getText("lineParser.dialogValueFor") + " " + name,
+              I18N.getText("lineParser.dialogValueFor", name),
               DialogTitle,
               JOptionPane.QUESTION_MESSAGE,
               null,
@@ -290,9 +297,10 @@ public class MapToolVariableResolver implements VariableResolver {
 
     Object value;
 
-    if (result instanceof JsonArray) {
-      value = result;
-    } else if (result instanceof JsonObject) {
+    if (result instanceof JsonArray
+        || result instanceof JsonObject
+        || result instanceof JsonNull
+        || (result instanceof JsonPrimitive primitive && primitive.isBoolean())) {
       value = result;
     } else if (result instanceof BigDecimal) {
       value = result;
@@ -335,10 +343,8 @@ public class MapToolVariableResolver implements VariableResolver {
   protected void updateTokenProperty(Token token, String varname, String value) {
     // this logic allows unit tests to execute MT script that changes token properties
     // there should be no other context where we have no server of any kind
-    if (MapTool.serverCommand() != null)
-      MapTool.serverCommand()
-          .updateTokenProperty(tokenInContext, Token.Update.setProperty, varname, value);
-    else token.setProperty(varname, value);
+    MapTool.serverCommand()
+        .updateTokenProperty(tokenInContext, Token.Update.setProperty, varname, value);
   }
 
   @Override

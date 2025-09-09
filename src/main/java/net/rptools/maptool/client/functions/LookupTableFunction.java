@@ -31,7 +31,7 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class LookupTableFunction extends AbstractFunction {
 
@@ -59,6 +59,9 @@ public class LookupTableFunction extends AbstractFunction {
         "setTableImage",
         "copyTable",
         "getTableEntry",
+        "getTableEntryAtIndex",
+        "getTableEntries",
+        "getTableEntriesCount",
         "setTableEntry",
         "resetTablePicks",
         "getTablePickOnce",
@@ -173,7 +176,7 @@ public class LookupTableFunction extends AbstractFunction {
       String value = params.get(3).toString();
       MD5Key asset = null;
       if (params.size() > 4) {
-        asset = getAssetFromString(params.get(4).toString());
+        asset = FunctionUtil.getAssetKeyFromString(params.get(4).toString());
       }
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.addEntry(Integer.parseInt(min), Integer.parseInt(max), value, asset);
@@ -208,7 +211,7 @@ public class LookupTableFunction extends AbstractFunction {
       String lookups = params.get(2).toString();
       MD5Key asset = null;
       if (params.size() > 3) {
-        asset = getAssetFromString(params.get(3).toString());
+        asset = FunctionUtil.getAssetKeyFromString(params.get(3).toString());
       }
       LookupTable lookupTable = new LookupTable();
       lookupTable.setName(name);
@@ -244,7 +247,7 @@ public class LookupTableFunction extends AbstractFunction {
       checkTrusted(function);
       FunctionUtil.checkNumberParam("setTableImage", params, 2, 2);
       String name = params.get(0).toString();
-      MD5Key asset = getAssetFromString(params.get(1).toString());
+      MD5Key asset = FunctionUtil.getAssetKeyFromString(params.get(1).toString());
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.setTableImage(asset);
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
@@ -272,7 +275,7 @@ public class LookupTableFunction extends AbstractFunction {
       String result = params.get(2).toString();
       MD5Key imageId = null;
       if (params.size() == 4) {
-        imageId = getAssetFromString(params.get(3).toString());
+        imageId = FunctionUtil.getAssetKeyFromString(params.get(3).toString());
       }
       LookupTable lookupTable = getMaptoolTable(name, function);
       LookupEntry entry = lookupTable.getLookup(roll);
@@ -292,6 +295,7 @@ public class LookupTableFunction extends AbstractFunction {
         }
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return 1;
+
     } else if ("getTableEntry".equalsIgnoreCase(function)) {
 
       FunctionUtil.checkNumberParam(function, params, 2, 2);
@@ -299,25 +303,98 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       String roll = params.get(1).toString();
       LookupEntry entry = lookupTable.getLookupDirect(roll);
-      if (entry == null) return ""; // no entry was found
 
-      int rollInt = Integer.parseInt(roll);
-      if (rollInt < entry.getMin() || rollInt > entry.getMax())
-        return ""; // entry was found but doesn't match
-
-      JsonObject entryDetails = new JsonObject();
-      entryDetails.addProperty("min", entry.getMin());
-      entryDetails.addProperty("max", entry.getMax());
-      entryDetails.addProperty("value", entry.getValue());
-      entryDetails.addProperty("picked", entry.getPicked() == null ? false : entry.getPicked());
-
-      MD5Key imageId = entry.getImageId();
-      if (imageId != null) {
-        entryDetails.addProperty("assetid", "asset://" + imageId.toString());
-      } else {
-        entryDetails.addProperty("assetid", "");
+      if (entry == null) {
+        return ""; // no entry was found
       }
-      return entryDetails;
+      int rollInt = Integer.parseInt(roll);
+      if (rollInt < entry.getMin() || rollInt > entry.getMax()) {
+        return ""; // entry was found but doesn't match
+      }
+      return convertLookUpEntryToJson(entry);
+
+    } else if ("getTableEntryAtIndex".equalsIgnoreCase(function)) {
+      /*
+       * Parameters:
+       * name - the name of the table to get a table entry from
+       * index - the index of the entry value to return
+       */
+      FunctionUtil.checkNumberParam(function, params, 2, 2);
+      String name = params.get(0).toString();
+      int index = FunctionUtil.paramAsInteger(function, params, 1, false);
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      List<LookupEntry> entriesList = lookupTable.getEntryList();
+      if (index >= 0 && index < entriesList.size()) {
+        LookupEntry entry = entriesList.get(index);
+        return convertLookUpEntryToJson(entry);
+      } else {
+        return "";
+      }
+
+    } else if ("getTableEntries".equalsIgnoreCase(function)) {
+      /*
+       * Parameters:
+       * name - the name of the table to get entries from
+       * pattern - (optional) filter table entries where their value match the regex pattern
+       * limit - (optional) the maximum number of filtered entries to be returned
+       * offset - (optional) skip a certain number of filtered entries to be returned
+       */
+      FunctionUtil.checkNumberParam(function, params, 1, 4);
+      String name = params.get(0).toString();
+      String pattern = (params.size() > 1) ? params.get(1).toString() : "";
+      int limit = (params.size() > 2) ? FunctionUtil.paramAsInteger(function, params, 2, false) : 0;
+      int offset =
+          (params.size() > 3) ? FunctionUtil.paramAsInteger(function, params, 3, false) : 0;
+
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      List<LookupEntry> entriesList = lookupTable.getEntryList();
+
+      // Filter by regex pattern, then apply offset, then apply limit
+      if (!pattern.isEmpty()) {
+        entriesList =
+            entriesList.stream()
+                .filter(
+                    entry -> {
+                      assert entry.getValue() != null;
+                      return entry.getValue().matches(pattern);
+                    })
+                .toList();
+      }
+      if (offset > 0) {
+        entriesList = entriesList.stream().skip(offset).toList();
+      }
+      if (limit > 0) {
+        entriesList = entriesList.stream().limit(limit).toList();
+      }
+      JsonArray jarrEntries = new JsonArray();
+      for (LookupEntry entry : entriesList) {
+        jarrEntries.add(convertLookUpEntryToJson(entry));
+      }
+      return jarrEntries;
+
+    } else if ("getTableEntriesCount".equalsIgnoreCase(function)) {
+      /*
+       * Parameters:
+       * name - the name of the table to analyse
+       * pattern - (optional) filter table entries where their value match the regex pattern
+       */
+      FunctionUtil.checkNumberParam(function, params, 1, 2);
+      String name = params.get(0).toString();
+      String pattern = (params.size() > 1) ? params.get(1).toString() : "";
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      List<LookupEntry> entriesList = lookupTable.getEntryList();
+      if (!pattern.isEmpty()) {
+        entriesList =
+            entriesList.stream()
+                .filter(
+                    entry -> {
+                      assert entry.getValue() != null;
+                      return entry.getValue().matches(pattern);
+                    })
+                .toList();
+      }
+      return entriesList.size();
+
     } else if ("resetTablePicks".equalsIgnoreCase(function)) {
       /*
        * resetTablePicks(tblName) - reset all entries on a table
@@ -510,22 +587,25 @@ public class LookupTableFunction extends AbstractFunction {
   }
 
   /**
-   * Provide more consistent handling of assets. Allow assets to be passed as 32 digit numbers or
-   * "asset://" urls.
+   * Function to convert a LookupEntry into a Json Object
    *
-   * @param assetString String containing either an asset ID or asset URL.
-   * @return MD5Key asset id or null
+   * @param entry The LookupEntry to be converted
+   * @return entryDetails A Json Object representation of the LookupEntry details
+   * @throws ParserException if there were more or less parameters than allowed
    */
-  private MD5Key getAssetFromString(String assetString) {
-    if (assetString.isEmpty()) {
-      return null;
-    }
+  private JsonObject convertLookUpEntryToJson(LookupEntry entry) throws ParserException {
+    JsonObject entryDetails = new JsonObject();
+    entryDetails.addProperty("min", entry.getMin());
+    entryDetails.addProperty("max", entry.getMax());
+    entryDetails.addProperty("value", entry.getValue());
+    entryDetails.addProperty("picked", entry.getPicked());
 
-    if (assetString.toLowerCase().startsWith("asset://")) {
-      String id = assetString.substring(8);
-      return new MD5Key(id);
+    MD5Key imageId = entry.getImageId();
+    if (imageId != null) {
+      entryDetails.addProperty("assetid", "asset://" + imageId.toString());
     } else {
-      return new MD5Key(assetString);
+      entryDetails.addProperty("assetid", "");
     }
+    return entryDetails;
   }
 }

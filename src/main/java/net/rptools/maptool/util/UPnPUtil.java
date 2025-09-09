@@ -14,26 +14,19 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.sbbi.upnp.Discovery;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.ActionResponse;
@@ -41,39 +34,13 @@ import net.sbbi.upnp.messages.UPNPResponseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author Phil Wright */
+/**
+ * @author Phil Wright
+ */
 public class UPnPUtil {
   private static final Logger log = LogManager.getLogger(UPnPUtil.class);
   private static Map<InternetGatewayDevice, NetworkInterface> igds;
   private static List<InternetGatewayDevice> mappings;
-  private static JDialog dialog = null;
-  private static JPanel panel = new JPanel(new BorderLayout());
-  private static Font labelFont = new Font("Dialog", Font.BOLD, 14);
-  private static JLabel label = new JLabel("", SwingConstants.CENTER);
-
-  private static void showMessage(String device, String msg) {
-    if (dialog == null) {
-      dialog = new JDialog(MapTool.getFrame());
-      dialog.setContentPane(panel);
-      panel.add(label, BorderLayout.CENTER);
-      label.setFont(labelFont);
-    }
-    if (device == null) {
-      dialog.setVisible(false);
-    } else {
-      dialog.setTitle("Scanning device " + device);
-      label.setText(msg);
-
-      Dimension d = label.getMinimumSize();
-      d.width += 50;
-      d.height += 50;
-      label.setPreferredSize(d);
-
-      dialog.pack();
-      SwingUtil.centerOver(dialog, MapTool.getFrame());
-      dialog.setVisible(true);
-    }
-  }
 
   public static boolean findIGDs() {
     igds = new HashMap<InternetGatewayDevice, NetworkInterface>();
@@ -82,25 +49,42 @@ public class UPnPUtil {
       while (e.hasMoreElements()) {
         NetworkInterface ni = e.nextElement();
         try {
-          if (ni.isUp() && !ni.isLoopback() && !ni.isVirtual()) {
+          var addresses = Collections.list(ni.getInetAddresses());
+          if (addresses.isEmpty()) {
+            log.info("UPnP:  Rejecting interface '{}' as it has no addresses", ni.getDisplayName());
+          } else if (ni.isLoopback()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is a loopback",
+                ni.getDisplayName(),
+                addresses);
+          } else if (ni.isVirtual()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is virtual",
+                ni.getDisplayName(),
+                addresses);
+          } else if (!ni.isUp()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is not up",
+                ni.getDisplayName(),
+                addresses);
+          } else {
             int found = 0;
             try {
-              if (log.isInfoEnabled()) log.info("UPnP:  Trying interface " + ni.getDisplayName());
+              log.info(
+                  "UPnP:  Looking for gateway devices on interface '{}' [{}]",
+                  ni.getDisplayName(),
+                  addresses);
               InternetGatewayDevice[] thisNI;
-              showMessage(
-                  ni.getDisplayName(), "Looking for gateway devices on " + ni.getDisplayName());
               thisNI =
                   InternetGatewayDevice.getDevices(
-                      AppPreferences.getUpnpDiscoveryTimeout(),
+                      AppPreferences.upnpDiscoveryTimeout.get(),
                       Discovery.DEFAULT_TTL,
                       Discovery.DEFAULT_MX,
                       ni);
-              showMessage(null, null);
               if (thisNI != null) {
                 for (InternetGatewayDevice igd : thisNI) {
                   found++;
-                  if (log.isInfoEnabled())
-                    log.info("UPnP:  Found IGD: " + igd.getIGDRootDevice().getModelName());
+                  log.info("UPnP:  Found IGD: {}", igd.getIGDRootDevice().getModelName());
                   if (igds.put(igd, ni) != null) {
                     // There was a previous mapping for this IGD! It's unlikely to have two NICs on
                     // the
@@ -108,20 +92,16 @@ public class UPnPUtil {
                     // wireless connection using the same router as the gateway. For our purposes it
                     // doesn't really matter which one we use, but in the future we should give the
                     // user a choice.
-                    // FIXME We SHOULD be using the "networking binding order" (Windows)
                     // or "network service order" on OSX.
-                    if (log.isInfoEnabled())
-                      log.info("UPnP:  This was not the first time this IGD was found!");
+                    log.info("UPnP:  This was not the first time this IGD was found!");
                   }
                 }
               }
             } catch (IOException ex) {
-              showMessage(null, null);
               // some IO Exception occurred during communication with device
               log.warn("While searching for internet gateway devices", ex);
             }
-            if (log.isInfoEnabled())
-              log.info("Found " + found + " IGDs on interface " + ni.getDisplayName());
+            log.info("Found {} IGDs on interface {}", found, ni.getDisplayName());
           }
         } catch (SocketException se) {
           continue;
@@ -158,8 +138,7 @@ public class UPnPUtil {
             for (InterfaceAddress ifAddr : ni.getInterfaceAddresses()) {
               if (ifAddr.getAddress() instanceof Inet4Address) {
                 localHostIP = ifAddr.getAddress().getHostAddress();
-                if (log.isInfoEnabled())
-                  log.info("IP address " + localHostIP + " on interface " + ni.getDisplayName());
+                log.info("IP address {} on interface {}", localHostIP, ni.getDisplayName());
               }
             }
             break;
@@ -167,14 +146,8 @@ public class UPnPUtil {
         boolean mapped = gd.addPortMapping("MapTool", null, port, port, localHostIP, 0, "TCP");
         if (mapped) {
           mappings.add(gd);
-          if (log.isInfoEnabled())
-            log.info(
-                "UPnP: Port "
-                    + port
-                    + " mapped on "
-                    + ni.getDisplayName()
-                    + " at address "
-                    + localHostIP);
+          log.info(
+              "UPnP: Port {} mapped on {} at address {}", port, ni.getDisplayName(), localHostIP);
         }
       } catch (UPNPResponseException respEx) {
         // oops the IGD did not like something !!
@@ -217,12 +190,10 @@ public class UPnPUtil {
           boolean unmapped = gd.deletePortMapping(null, port, "TCP");
           if (unmapped) {
             count++;
-            if (log.isInfoEnabled())
-              log.info("UPnP: Port unmapped from " + entry.getValue().getDisplayName());
+            log.info("UPnP: Port unmapped from {}", entry.getValue().getDisplayName());
             iter.remove();
           } else {
-            if (log.isInfoEnabled())
-              log.info("UPnP: Failed to unmap port from " + entry.getValue().getDisplayName());
+            log.info("UPnP: Failed to unmap port from {}", entry.getValue().getDisplayName());
           }
         }
       } catch (IOException e) {

@@ -15,18 +15,25 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonObject;
+import com.jidesoft.utils.Base64;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.AssetResolver;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.parser.Parser;
@@ -38,8 +45,6 @@ public class TokenImage extends AbstractFunction {
 
   /** Singleton instance. */
   private static final TokenImage instance = new TokenImage();
-
-  private static final Pattern assetRE = Pattern.compile("asset://([^-]+)");
 
   enum imageType {
     TOKEN_IMAGE(0),
@@ -60,6 +65,9 @@ public class TokenImage extends AbstractFunction {
   public static final String SET_IMAGE = "setImage";
   public static final String SET_PORTRAIT = "setTokenPortrait";
   public static final String SET_HANDOUT = "setTokenHandout";
+  public static final String FILE_HEADER_WEBP = "RIFF";
+  public static final String FILE_HEADER_JPG = "ÿØÿà";
+  public static final String FILE_HEADER_PNG = "‰PNG";
 
   private TokenImage() {
     super(
@@ -74,7 +82,8 @@ public class TokenImage extends AbstractFunction {
         "getImage",
         "setTokenOpacity",
         "getAssetProperties",
-        "getTokenOpacity");
+        "getTokenOpacity",
+        "createAsset");
   }
 
   /**
@@ -93,21 +102,23 @@ public class TokenImage extends AbstractFunction {
     Token token;
 
     if (functionName.equalsIgnoreCase("setTokenOpacity")) {
-      if (!MapTool.getParser().isMacroTrusted())
+      if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+      }
 
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String strOpacity = args.get(0).toString();
       FunctionUtil.paramAsFloat(functionName, args, 0, true);
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setTokenOpacity, strOpacity);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setOpacity, strOpacity);
       return token.getTokenOpacity();
     }
 
     if (functionName.equalsIgnoreCase("getTokenOpacity")) {
-      if (!MapTool.getParser().isMacroTrusted())
+      if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+      }
 
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
@@ -174,6 +185,56 @@ public class TokenImage extends AbstractFunction {
       }
     }
 
+    if (functionName.equalsIgnoreCase("createAsset")) {
+      FunctionUtil.checkNumberParam(functionName, args, 2, 2);
+      String imageName = args.get(0).toString();
+      String imageString = args.get(1).toString();
+      if (imageName.isEmpty() || imageString.isEmpty()) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
+      } else if (imageString.length() > 8) {
+        Asset asset;
+        URI uri;
+        try {
+          uri = new URI(imageString);
+        } catch (URISyntaxException e) {
+          uri = null;
+        }
+        if (uri != null && isValidAssetScheme(uri) && isValidAssetExtension(uri)) {
+          try {
+            URL url = uri.toURL();
+            BufferedImage imageRAW = ImageIO.read(url);
+            asset = Asset.createImageAsset(imageName, imageRAW);
+          } catch (MalformedURLException | IllegalArgumentException e) {
+            throw new ParserException(
+                I18N.getText("macro.function.input.illegalArgumentType", imageString));
+          } catch (IOException e1) {
+            throw new ParserException(I18N.getText("macro.function.html5.invalidURI", imageString));
+          }
+        } else {
+          byte[] imageBytes = Base64.decode(imageString);
+          String imageCheck;
+          try {
+            imageCheck = new String(imageBytes, 0, 4);
+          } catch (Exception e) {
+            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          }
+          if (imageCheck.equals(FILE_HEADER_WEBP)
+              || imageCheck.equals(FILE_HEADER_JPG)
+              || imageCheck.equals(FILE_HEADER_PNG)) {
+            asset = Asset.createImageAsset(imageName, imageBytes);
+          } else {
+            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          }
+        }
+        AssetManager.putAsset(asset);
+        return "asset://" + asset.getMD5Key().toString();
+      } else {
+        throw new ParserException(
+            I18N.getText("macro.function.general.wrongParamType", functionName));
+      }
+    }
+
     /* getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
     int indexSize = -1; // by default, no size added to asset id
     if (functionName.equalsIgnoreCase("getImage")) {
@@ -182,7 +243,9 @@ public class TokenImage extends AbstractFunction {
       token = findImageToken(args.get(0).toString(), "getImage");
 
       // Lee: people want a blank instead of an error
-      if (token == null) return "";
+      if (token == null) {
+        return "";
+      }
 
       if (args.size() > 1) {
         indexSize = 1;
@@ -246,11 +309,6 @@ public class TokenImage extends AbstractFunction {
     return assetId.toString();
   }
 
-  private String typeOf(Object ob) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   /**
    * Get the MD5Key corresponding to an asset.
    *
@@ -260,12 +318,8 @@ public class TokenImage extends AbstractFunction {
    * @throws ParserException if assetName not found or assetName doesn't
    */
   public static MD5Key getMD5Key(String assetName, String functionName) throws ParserException {
-    Matcher m = assetRE.matcher(assetName);
-
-    String assetId;
-    if (m.matches()) {
-      assetId = m.group(1);
-    } else if (assetName.toLowerCase().startsWith("image:")) {
+    String assetId = null;
+    if (assetName.toLowerCase().startsWith("image:")) {
       Token imageToken = findImageToken(assetName, functionName);
       if (imageToken == null) {
         throw new ParserException(
@@ -273,10 +327,17 @@ public class TokenImage extends AbstractFunction {
       }
       assetId = imageToken.getImageAssetId().toString();
     } else {
+      var assetKey = new AssetResolver().getAssetKey(assetName);
+      if (assetKey.isPresent()) {
+        assetId = assetKey.get().toString();
+      }
+    }
+    if (assetId == null) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentTypeInvalid", functionName, 1, assetName));
+    } else {
+      return new MD5Key(assetId);
     }
-    return new MD5Key(assetId);
   }
 
   private static void setImage(Token token, String assetName) throws ParserException {
@@ -306,14 +367,9 @@ public class TokenImage extends AbstractFunction {
           // If we are not the GM and the token is not visible to players then we don't
           // let them get functions from it.
           if (!MapTool.getPlayer().isGM() && !token.isVisible()) {
-            // Lee: as requested, handling this as "" instead of an error
-            // throw new ParserException(I18N.getText("macro.function.general.unknownToken",
-            // functionName, name));
             return null;
           }
           if (imageToken != null) {
-            // Lee: returning first found instead.
-            // throw new ParserException("Duplicate " + name + " tokens");
             return imageToken;
           }
           imageToken = token;
@@ -324,7 +380,33 @@ public class TokenImage extends AbstractFunction {
 
     // Lee: for the final "" return
     return null;
-    // throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName,
-    // name));
+  }
+
+  /**
+   * Checks to see if the URI scheme is supportes for the createAsset macro function.
+   *
+   * @param uri The URI to check.
+   * @return {@code true} if the scheme is valid.
+   */
+  private boolean isValidAssetScheme(URI uri) {
+    return uri.getScheme().equalsIgnoreCase("http")
+        || uri.getScheme().equalsIgnoreCase("https")
+        || uri.getScheme().equalsIgnoreCase("lib");
+  }
+
+  /**
+   * Checks to see if the URI extension is supported for the createAsset macro function.
+   *
+   * @param uri The URI to check.
+   * @return {@code true} if the extension is valid.
+   */
+  private boolean isValidAssetExtension(URI uri) {
+    String[] validExtensions = {".jpg", ".jpeg", ".png", ".webp"};
+    for (String ext : validExtensions) {
+      if (uri.getPath().endsWith(ext)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

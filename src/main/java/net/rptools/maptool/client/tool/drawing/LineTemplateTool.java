@@ -25,7 +25,7 @@ import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.Tool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
@@ -36,8 +36,6 @@ import net.rptools.maptool.model.drawing.Pen;
  * Draw the effected area of a spell area type of line.
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
  */
 public class LineTemplateTool extends RadiusTemplateTool implements PropertyChangeListener {
 
@@ -63,19 +61,25 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    * Overridden RadiusTemplateTool Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.linetemplate.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.linetemplate.instructions";
   }
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate()
+   */
   @Override
   protected AbstractTemplate createBaseTemplate() {
     return new LineTemplate();
@@ -97,8 +101,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see
-   *     net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer,
+   * @see net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(ZoneRenderer,
    *     java.awt.Graphics2D)
    */
   @Override
@@ -111,7 +114,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
       g.setTransform(newTransform);
       ZonePoint vertex = template.getVertex();
       ZonePoint pathVertex = ((LineTemplate) template).getPathVertex();
-      template.draw(g, pen);
+      template.draw(renderer.getZone(), g, pen);
       Paint paint = pen.getPaint() != null ? pen.getPaint().getPaint() : null;
       paintCursor(g, paint, pen.getThickness(), vertex);
       if (pathVertex != null) {
@@ -250,7 +253,9 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    * PropertyChangeListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
+  /**
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
   public void propertyChange(PropertyChangeEvent aEvt) {
     ((LineTemplate) template).setDoubleWide((Boolean) aEvt.getNewValue());
   }

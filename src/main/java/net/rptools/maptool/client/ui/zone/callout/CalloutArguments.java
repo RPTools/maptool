@@ -21,12 +21,16 @@ import java.util.List;
 public class CalloutArguments {
   /** The color used to render the text. */
   private final Color textColor;
+
   /* The color used to render the background. */
   private final Color backgroundColor;
+
   /** The color used to render the outline. */
   private final Color outlineColor;
+
   /** The anchor location of the callout. */
   private final CalloutPopupLocation popupLocation;
+
   /** The text to be displayed in the callout. */
   private final List<String> text;
 

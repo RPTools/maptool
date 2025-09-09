@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
-import java.awt.AlphaComposite;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Transparency;
@@ -77,11 +76,19 @@ public class BufferedImagePool {
     this.checkedOut.clear();
   }
 
+  public int getWidth() {
+    return this.width;
+  }
+
   public void setWidth(int width) {
     if (width != this.width) {
       this.width = width;
       this.clear();
     }
+  }
+
+  public int getHeight() {
+    return this.height;
   }
 
   public void setHeight(int height) {
@@ -117,11 +124,6 @@ public class BufferedImagePool {
     // We've got an existing instance. We'll need to make sure it's cleared before yielding it.
     final var instance = available.removeLast();
     checkedOut.add(instance);
-
-    final var g = instance.createGraphics();
-    g.setComposite(AlphaComposite.Clear);
-    g.fillRect(0, 0, instance.getWidth(), instance.getHeight());
-    g.dispose();
 
     return new Handle(instance);
   }

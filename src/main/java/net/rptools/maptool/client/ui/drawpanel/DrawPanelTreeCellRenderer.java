@@ -14,23 +14,13 @@
  */
 package net.rptools.maptool.client.ui.drawpanel;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import javax.swing.Icon;
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
+import java.awt.*;
+import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.drawing.AbstractDrawing;
-import net.rptools.maptool.model.drawing.AbstractTemplate;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawablesGroup;
-import net.rptools.maptool.model.drawing.DrawnElement;
-import net.rptools.maptool.model.drawing.LineSegment;
-import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.drawing.ShapeDrawable;
+import net.rptools.maptool.model.drawing.*;
 
 public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 
@@ -51,37 +41,32 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 
     String text = "";
     this.row = row;
-    if (value instanceof DrawnElement) {
-      String key = "panel.DrawExplorer.Unknown.Shape";
-      DrawnElement de = (DrawnElement) value;
+    if (value instanceof DrawnElement de) {
       text = de.getDrawable().toString();
       if (de.getDrawable() instanceof DrawablesGroup) {
         text = I18N.getString("panel.DrawExplorer.group");
-      } else if (de.getDrawable() instanceof ShapeDrawable) {
-        ShapeDrawable sd = (ShapeDrawable) de.getDrawable();
-        key =
-            String.format(
-                "panel.DrawExplorer.%s.%s",
-                sd.getClass().getSimpleName(), sd.getShape().getClass().getSimpleName());
+        setToolTipText(null);
+      } else if (de.getDrawable() instanceof ShapeDrawable sd) {
+        var key = String.format("panel.DrawExplorer.ShapeDrawable.%s", sd.getShapeTypeName());
         text = I18N.getText(key, sd.getBounds().width, sd.getBounds().height);
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
-      } else if (de.getDrawable() instanceof LineSegment) {
-        LineSegment ls = (LineSegment) de.getDrawable();
-        key = String.format("panel.DrawExplorer.%s.Line", ls.getClass().getSimpleName());
+        setToolTipText(null);
+      } else if (de.getDrawable() instanceof LineSegment ls) {
+        var key = "panel.DrawExplorer.LineSegment.Line";
         text = I18N.getText(key, ls.getPoints().size(), de.getPen().getThickness());
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
-      } else if (de.getDrawable() instanceof AbstractTemplate) {
-        AbstractTemplate at = (AbstractTemplate) de.getDrawable();
-        key = String.format("panel.DrawExplorer.Template.%s", at.getClass().getSimpleName());
+        setToolTipText(null);
+      } else if (de.getDrawable() instanceof AbstractTemplate at) {
+        var key = String.format("panel.DrawExplorer.Template.%s", at.getClass().getSimpleName());
         text = I18N.getText(key, at.getRadius());
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
+        String keyTooltip = String.format("%s.tooltip", key);
+        setToolTipText(I18N.getText(keyTooltip, at.getRadius()));
       }
       text = addText(de.getPen(), text, de.getDrawable());
     } else if (value instanceof DrawPanelTreeModel.View) {
       DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
       text = view.getLayer().toString();
-    } else {
-      // setLeafIcon(null);
     }
 
     super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);
@@ -110,13 +95,27 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 
   private Icon setDrawPanelIcon(String key, boolean eraser) {
     switch (key) {
+      case "panel.DrawExplorer.ShapeDrawable.Arc":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ARC_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.CubicCurve":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_CUBIC_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.Line":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_LINE2D_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.Path":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_PATH_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.QuadCurve":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_QUAD_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.Unknown":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_UNKNOWN_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.RoundRectangle":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ROUND_RECT);
       case "panel.DrawExplorer.ShapeDrawable.Area":
         if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_AREA_ERASE);
         else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_AREA_DRAW);
       case "panel.DrawExplorer.ShapeDrawable.Polygon":
         if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_POLYGON_ERASE);
         else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_POLYGON_DRAW);
-      case "panel.DrawExplorer.ShapeDrawable.Float":
+      case "panel.DrawExplorer.ShapeDrawable.Oval":
         if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ELLIPSE_ERASE);
         else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ELLIPSE_DRAW);
       case "panel.DrawExplorer.ShapeDrawable.Rectangle":
@@ -142,7 +141,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       case "panel.DrawExplorer.Template.WallTemplate":
         return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_WALL);
     }
-    return null;
+    return RessourceManager.getSmallIcon(Icons.DRAWPANEL_UNKNOWN_DRAW);
   }
 
   @Override

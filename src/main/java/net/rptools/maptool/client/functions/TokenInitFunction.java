@@ -42,7 +42,9 @@ public class TokenInitFunction extends AbstractFunction {
   /** singleton instance of this function */
   private static final TokenInitFunction singletonInstance = new TokenInitFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static TokenInitFunction getInstance() {
     return singletonInstance;
   }

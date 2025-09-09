@@ -23,20 +23,11 @@ import java.math.BigDecimal;
 /** Class used to convert between json and MT Script types. */
 class JsonMTSTypeConversion {
 
-  /** parser used to parse strings into {@link JsonElement} */
-  private final JsonParser parser;
-
   /** An empty <code>String</code> as a {@link JsonPrimitive}. */
   public static final JsonPrimitive EMPTY_STRING_ELEMENT = new JsonPrimitive("");
 
-  /**
-   * Creates a new <code>JsonMTSTypeConversion</code> object.
-   *
-   * @param parser The json parser which will be used to convert a string into json.
-   */
-  JsonMTSTypeConversion(JsonParser parser) {
-    this.parser = parser;
-  }
+  /** Creates a new <code>JsonMTSTypeConversion</code> object. */
+  JsonMTSTypeConversion() {}
 
   /**
    * Returns a valid MTScript type for the given object.

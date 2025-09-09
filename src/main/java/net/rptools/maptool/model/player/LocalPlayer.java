@@ -17,8 +17,9 @@ package net.rptools.maptool.model.player;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.util.cipher.CipherUtil;
 
 /** Represents the local player. Its methods can depend on AppState and other local properties. */
 public class LocalPlayer extends Player {
@@ -26,6 +27,19 @@ public class LocalPlayer extends Player {
   private final String plainTextPassword;
   private CipherUtil.Key password;
 
+  // Constructor for local only local player with maximum irrevocable permission
+  public LocalPlayer() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    this(AppPreferences.defaultUserName.get(), Role.GM, "");
+  }
+
+  // Constructor for connecting to a server, real role is set after handshake.
+  public LocalPlayer(String name, String plainTextPassword)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    this(name, Role.PLAYER, plainTextPassword);
+  }
+
+  // Constructor for your local player when starting a server,
+  // all parameters are provided.
   public LocalPlayer(String name, Role role, String plainTextPassword)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     super(name, role, null); // Superclass takes care of plainTextPassword info
@@ -33,7 +47,9 @@ public class LocalPlayer extends Player {
     setPasswordSalt(CipherUtil.createSalt());
   }
 
-  /** @return the effective role of the local player, taking into account Show As Player. */
+  /**
+   * @return the effective role of the local player, taking into account Show As Player.
+   */
   public Role getEffectiveRole() {
     if (isGM() && AppState.isShowAsPlayer()) {
       return Role.PLAYER;
@@ -55,15 +71,6 @@ public class LocalPlayer extends Player {
 
   public CipherUtil.Key getPassword() {
     return password;
-  }
-
-  public String getPlainTextPassword() {
-    return plainTextPassword;
-  }
-
-  /** @return whether the player is a GM using GM view. */
-  public boolean isEffectiveGM() {
-    return isGM() && !AppState.isShowAsPlayer();
   }
 
   @Override

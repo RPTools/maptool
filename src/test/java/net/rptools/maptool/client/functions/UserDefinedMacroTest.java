@@ -17,8 +17,10 @@ package net.rptools.maptool.client.functions;
 import static org.junit.jupiter.api.Assertions.*;
 
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.parser.ParserException;
 import org.junit.jupiter.api.Test;
 
@@ -38,10 +40,11 @@ public class UserDefinedMacroTest {
 
     // setup evaluation, trusted, on token
     MapToolVariableResolver resolver = new MapToolVariableResolver(token);
-    MapTool.getParser().enterContext(new MapToolMacroContext("test", "test", true));
+    var loc = MacroLocationFactory.getInstance().createChatLocation();
+    MapTool.getParser().enterContext(new MapToolMacroContext("test", loc, true));
 
     // define myfunction
-    MapToolExpressionParser parser = new MapToolExpressionParser();
+    MapToolExpressionParser parser = new ExpressionParserFactory().createMT();
     parser.evaluate("defineFunction('myfunction', 'mymacro@TOKEN')", resolver);
 
     // evaluate myfunction that should call mymacro on token

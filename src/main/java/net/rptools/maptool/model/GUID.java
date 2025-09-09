@@ -17,8 +17,8 @@ package net.rptools.maptool.model;
 import java.io.Serializable;
 import java.util.HexFormat;
 import java.util.UUID;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
 
 /** Global unique identificator object. */
 public class GUID implements Serializable, Comparable<GUID> {
@@ -43,26 +43,22 @@ public class GUID implements Serializable, Comparable<GUID> {
   }
 
   /**
-   * Creates a new GUID based on the specified GUID value.
-   *
-   * @param baGUID the new GUID
-   * @throws InvalidGUIDException if the GUID is invalid
-   */
-  public GUID(byte[] baGUID) throws InvalidGUIDException {
-    this.baGUID = baGUID;
-    validateGUID();
-  }
-
-  /**
    * Creates a new GUID based on the specified hexadecimal-code string.
    *
    * @param strGUID the guid as a hexadecimal-code string
    * @throws InvalidGUIDException if the GUID is invalid
    */
   public GUID(String strGUID) {
-    if (strGUID == null) throw new InvalidGUIDException("GUID is null");
+    if (strGUID == null) {
+      throw new InvalidGUIDException("GUID is null");
+    }
 
-    this.baGUID = HexFormat.of().parseHex(strGUID);
+    try {
+      this.baGUID = HexFormat.of().parseHex(strGUID);
+    } catch (Exception e) {
+      throw new InvalidGUIDException("Invalid format for GUID");
+    }
+
     validateGUID();
   }
 
@@ -75,17 +71,6 @@ public class GUID implements Serializable, Comparable<GUID> {
     if (baGUID == null) throw new InvalidGUIDException("GUID is null");
     if (baGUID.length != GUID_LENGTH)
       throw new InvalidGUIDException("GUID length is invalid: " + baGUID.length);
-  }
-
-  /**
-   * Returns the GUID representation of the {@link byte} array argument.
-   *
-   * @param bits the {@link byte} array of the GUID
-   * @return a new GUID instance
-   */
-  public static GUID valueOf(byte[] bits) {
-    if (bits == null) return null;
-    return new GUID(bits);
   }
 
   /**
@@ -181,14 +166,7 @@ public class GUID implements Serializable, Comparable<GUID> {
     return arg.length() != GUID.GUID_LENGTH * 2;
   }
 
-  public static void main(String[] args) {
-    for (int i = 0; i < 10; i++) {
-      GUID guid = new GUID();
-      System.out.println("insert into sys_guids values ('" + guid.toString() + "');");
-    }
-  }
-
-  public int compareTo(@NotNull GUID o) {
+  public int compareTo(@Nonnull GUID o) {
     if (o != this) {
       for (int i = 0; i < GUID_LENGTH; i++) {
         if (this.baGUID[i] != o.baGUID[i]) return this.baGUID[i] - o.baGUID[i];

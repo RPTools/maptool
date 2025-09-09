@@ -15,7 +15,7 @@
 package net.rptools.maptool.model;
 
 import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 
 /**
  * This class represents a location based on the grid coordinates of a zone.
@@ -26,7 +26,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
  *
  * @author trevor
  */
-public class CellPoint extends AbstractPoint {
+public final class CellPoint extends AbstractPoint {
 
   public double distanceTraveled; // Only populated by AStarWalker classes to be used upstream
   public double
@@ -41,6 +41,10 @@ public class CellPoint extends AbstractPoint {
     super(x, y);
     this.distanceTraveled = distanceTraveled;
     this.distanceTraveledWithoutTerrain = distanceTraveledWithoutTerrain;
+  }
+
+  public CellPoint(CellPoint other) {
+    this(other.x, other.y);
   }
 
   @Override
@@ -76,25 +80,6 @@ public class CellPoint extends AbstractPoint {
     int sy = renderer.getViewOffsetY() + (int) (zp.y * scale);
 
     return new ScreenPoint(sx, sy);
-  }
-
-  public ZonePoint convertToZonePoint(Grid grid) {
-    return grid.convert(this);
-  }
-
-  public ZonePoint offsetZonePoint(Grid grid, double offsetX, double offsetY) {
-    ZonePoint zp = convertToZonePoint(grid);
-    offsetX += 1;
-    offsetY += 1;
-
-    zp.x = (int) (zp.x + (grid.getCellWidth() / 2) * offsetX);
-    zp.y = (int) (zp.y + (grid.getCellWidth() / 2) * offsetY);
-
-    return zp;
-  }
-
-  public ZonePoint midZonePoint(Grid grid, CellPoint other) {
-    return this.offsetZonePoint(grid, other.x - this.x, other.y - this.y);
   }
 
   /**

@@ -57,16 +57,15 @@ import java.util.stream.Collectors;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil.Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.util.cipher.CipherUtil;
-import net.rptools.maptool.util.cipher.CipherUtil.Key;
-import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class PasswordFilePlayerDatabase
-    implements PlayerDatabase, PersistedPlayerDatabase, PlayerDBPropertyChange {
+    implements ServerSidePlayerDatabase, PersistedPlayerDatabase {
 
   private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
   private static final String PUBLIC_KEY_DIR = "keys";
@@ -89,36 +88,23 @@ public final class PasswordFilePlayerDatabase
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
-  public PasswordFilePlayerDatabase(File passwordFile)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-    this(passwordFile, null);
-  }
-
-  PasswordFilePlayerDatabase(File passwordFile, File additionalUsers)
+  PasswordFilePlayerDatabase(
+      File passwordFile, File additionalUsers, CipherUtil.Key serverPublicPrivateKey)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     Objects.requireNonNull(passwordFile);
     this.passwordFile = passwordFile;
     this.backupPasswordFile = new File(passwordFile + ".backup");
     this.additionalUsers = additionalUsers;
-    try {
-      this.serverPublicPrivateKey = new PublicPrivateKeyStore().getKeys().get();
-    } catch (InterruptedException | ExecutionException e) {
-      if (e.getCause() instanceof IOException) {
-        throw (IOException) e.getCause();
-      }
-      if (e.getCause() instanceof NoSuchAlgorithmException) {
-        throw (NoSuchAlgorithmException) e.getCause();
-      } else if (e.getCause() instanceof InvalidKeySpecException) {
-        throw (InvalidKeySpecException) e.getCause();
-      } else {
-        throw new IOException(e.getCause());
-      }
-    }
+    this.serverPublicPrivateKey = serverPublicPrivateKey;
   }
 
   public void readPasswordFile()
-      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException,
-          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws PasswordDatabaseException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoSuchPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
 
     try {
       passwordFileLock.lock();
@@ -137,8 +123,12 @@ public final class PasswordFilePlayerDatabase
   }
 
   public void initialize()
-      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException,
-          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws PasswordDatabaseException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoSuchPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     transientPlayerDetails.clear();
     readPasswordFile();
     savedDetails.putAll(playerDetails);
@@ -147,8 +137,12 @@ public final class PasswordFilePlayerDatabase
   }
 
   private Map<String, PlayerDetails> readPasswordFile(File file)
-      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException,
-          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws PasswordDatabaseException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoSuchPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
 
     try {
       passwordFileLock.lock();
@@ -438,8 +432,11 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void addPlayerSharedPassword(String name, Role role, String password)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException {
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          NoSuchPaddingException,
+          InvalidKeyException {
     if (playerExists(name)) {
       throw new PasswordDatabaseException(I18N.getText("Password.playerExists", name));
     }
@@ -448,8 +445,12 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void addPlayerAsymmetricKey(String name, Role role, Set<String> publicKeyStrings)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          NoSuchPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     if (playerExists(name)) {
       throw new PasswordDatabaseException(I18N.getText("Password.playerExists", name));
     }
@@ -458,8 +459,11 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void setSharedPassword(String name, String password)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException {
 
     var pd = getPlayerDetails(name);
     pd.publicKeyDetails().forEach(pk -> removedPubKeyFiles.add(pk.filename()));
@@ -520,8 +524,12 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void setAsymmetricKeys(String name, Set<String> keys)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
 
     var pd = getPlayerDetails(name);
 
@@ -535,8 +543,12 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void addAsymmetricKeys(String name, Set<String> keys)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     if (!playerExists(name)) {
       throw new PasswordDatabaseException(I18N.getText("msg.error.playerNotInDatabase", name));
     }
@@ -556,8 +568,11 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void commitChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException {
     if (savedDetails.size() > 0) {
       removeOldPublicKeys();
       savedDetails.clear();
@@ -599,8 +614,11 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void rollbackChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException {
     if (savedDetails.size() > 0) {
       playerDetails.clear();
       playerDetails.putAll(savedDetails);
@@ -689,12 +707,29 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void playerSignedIn(Player player) {
+    var alreadyExists = playerExists(player.getName());
     loggedInPlayers.playerSignedIn(player);
+
+    if (!alreadyExists) {
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED, null, player.getName());
+    } else {
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, player.getName());
+    }
   }
 
   @Override
   public void playerSignedOut(Player player) {
     loggedInPlayers.playerSignedOut(player);
+
+    if (playerExists(player.getName())) {
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, player.getName());
+    } else {
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVED, player, null);
+    }
   }
 
   @Override
@@ -703,7 +738,7 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
-  public Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
+  public Set<Player> getAllPlayers() {
     Set<Player> players = new HashSet<>(getOnlinePlayers());
 
     players.addAll(
@@ -715,13 +750,8 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
-  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+  public Set<Player> getOnlinePlayers() {
     return new HashSet<>(loggedInPlayers.getPlayers());
-  }
-
-  @Override
-  public boolean recordsOnlyConnectedPlayers() {
-    return false;
   }
 
   /**
@@ -743,8 +773,11 @@ public final class PasswordFilePlayerDatabase
    */
   private PlayerDetails putUncommittedPlayer(
       String name, Role role, String password, String blockedReason, boolean persisted)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException {
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          NoSuchPaddingException,
+          InvalidKeyException {
     return putUncommittedPlayerHashPassword(
         name, role, password, Set.of(), blockedReason, persisted);
   }
@@ -768,11 +801,16 @@ public final class PasswordFilePlayerDatabase
    */
   private PlayerDetails putUncommittedPlayer(
       String name, Role role, Set<String> publicKeyStrings, String blockedReason, boolean persisted)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          NoSuchPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     return putUncommittedPlayer(
         name, role, null, createPublicKeyDetails(publicKeyStrings, name), blockedReason, persisted);
   }
+
   /**
    * Adds a player to the database with the specified password or public keys. The {@link
    * #commitChanges} method * must be called to commit these * changes to persistent storage.
@@ -839,8 +877,11 @@ public final class PasswordFilePlayerDatabase
       Set<PublicKeyDetails> publicKeyDetails,
       String blockedReason,
       boolean persisted)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException {
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          NoSuchPaddingException,
+          InvalidKeyException {
 
     return putUncommittedPlayer(
         name,
@@ -865,8 +906,11 @@ public final class PasswordFilePlayerDatabase
    */
   private Set<PublicKeyDetails> createPublicKeyDetails(
       Set<String> publicKeyStrings, String playerName)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     Set<PublicKeyDetails> pkDetails = new HashSet<>();
 
     String pkFilename = derivePublicKeyFilename(playerName);
@@ -911,8 +955,11 @@ public final class PasswordFilePlayerDatabase
    * @throws IllegalStateException If there is an error hashing the password.
    */
   public void addTemporaryPlayer(String name, Role role, String password)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException {
     putUncommittedPlayerHashPassword(name, role, password, Set.of(), "", false);
   }
 

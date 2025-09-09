@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Model for arranging assets in a hierarchical way */
 public class AssetGroup {
+  private static final Logger log = LogManager.getLogger(AssetGroup.class);
   private final String name;
   private final File location;
 
@@ -219,8 +222,7 @@ public class AssetGroup {
               assetTSMap.put(file, new AssetTS(asset, file.lastModified()));
               assetList.add(asset);
             } catch (IOException ioe) {
-              // TODO: Handle this better
-              ioe.printStackTrace();
+              log.error("Error while loading asset", ioe);
             }
           }
         }

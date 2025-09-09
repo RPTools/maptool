@@ -27,12 +27,12 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.swing.ImageBorder;
-import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.zones.FogChanged;
@@ -79,19 +79,15 @@ public class ZoneMiniMapPanel extends JPanel {
 
       backBuffer = new BufferedImage(mySize.width, mySize.height, Transparency.OPAQUE);
 
-      // TODO: This is a naive solution. In the future, actually render the zone
       BufferedImage img = renderer.getMiniImage(SIZE_WIDTH);
       if (img == null || img == ImageManager.TRANSFERING_IMAGE) {
         img = ImageManager.TRANSFERING_IMAGE;
-
-        // Let's wake up when the image arrives
-        // ImageManager.addObservers(renderer.getZone().getBackgroundAssetId(), this);
       }
 
       ImageBorder border = AppStyle.miniMapBorder;
 
       Dimension size = new Dimension(img.getWidth(), img.getHeight());
-      SwingUtil.constrainTo(
+      AwtUtil.constrainTo(
           size,
           mySize.width - border.getLeftMargin() - border.getRightMargin(),
           mySize.height - border.getTopMargin() - border.getBottomMargin());
@@ -134,15 +130,12 @@ public class ZoneMiniMapPanel extends JPanel {
     BufferedImage img = renderer.getMiniImage(SIZE_WIDTH);
     if (img == null || img == ImageManager.TRANSFERING_IMAGE) {
       img = ImageManager.TRANSFERING_IMAGE;
-
-      // Let's wake up when the image arrives
-      // ImageManager.addObservers(renderer.getZone().getBackgroundAssetId(), this);
     }
 
     ImageBorder border = AppStyle.miniMapBorder;
 
     Dimension size = new Dimension(img.getWidth(), img.getHeight());
-    SwingUtil.constrainTo(size, SIZE_WIDTH, SIZE_HEIGHT);
+    AwtUtil.constrainTo(size, SIZE_WIDTH, SIZE_HEIGHT);
     size.width += border.getLeftMargin() + border.getRightMargin();
     size.height += border.getTopMargin() + border.getBottomMargin();
 
@@ -165,7 +158,6 @@ public class ZoneMiniMapPanel extends JPanel {
     flush();
     resize();
 
-    // getParent().doLayout();
     repaint();
   }
 
@@ -196,20 +188,6 @@ public class ZoneMiniMapPanel extends JPanel {
   // MOUSE HANDLER
   private static class MouseHandler extends MouseAdapter {
     @Override
-    public void mouseClicked(MouseEvent e) {
-
-      if (SwingUtilities.isLeftMouseButton(e)) {
-
-        // Minimap interaction
-        // TODO: Make this work for unbounded
-        // int miniX = e.getX() - bounds.x;
-        // int miniY = e.getY() - bounds.y;
-        //
-        // int mapX = (int)(renderer.getZone().getWidth() * (miniX / (double)bounds.width));
-        // int mapY = (int)(renderer.getZone().getHeight() * (miniY / (double)bounds.height));
-        //
-        // renderer.centerOn(new ZonePoint(mapX, mapY));
-      }
-    }
+    public void mouseClicked(MouseEvent e) {}
   }
 }

@@ -22,6 +22,8 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
@@ -79,7 +81,7 @@ public class InitiativeList implements Serializable {
   private boolean fullUpdate;
 
   /** Hide all of the NPC's from the players. */
-  private boolean hideNPC = AppPreferences.getInitHideNpcs();
+  private boolean hideNPC = AppPreferences.initiativePanelHidesNpcs.get();
 
   /*---------------------------------------------------------------------------------------------
    * Class Variables
@@ -115,6 +117,7 @@ public class InitiativeList implements Serializable {
    *-------------------------------------------------------------------------------------------*/
 
   private InitiativeList() {}
+
   /**
    * Create an initiative list for a zone.
    *
@@ -263,12 +266,16 @@ public class InitiativeList implements Serializable {
     return currentIndex < 0 ? null : getTokenInitiative(currentIndex);
   }
 
-  /** @return Getter for current */
+  /**
+   * @return Getter for current
+   */
   public int getCurrent() {
     return current;
   }
 
-  /** @param aCurrent Setter for the current to set */
+  /**
+   * @param aCurrent Setter for the current to set
+   */
   public void setCurrent(int aCurrent) {
     if (current == aCurrent) return;
     startUnitOfWork();
@@ -329,12 +336,16 @@ public class InitiativeList implements Serializable {
     finishUnitOfWork();
   }
 
-  /** @return Getter for round */
+  /**
+   * @return Getter for round
+   */
   public int getRound() {
     return round;
   }
 
-  /** @param aRound Setter for the round to set */
+  /**
+   * @param aRound Setter for the round to set
+   */
   public void setRound(int aRound) {
     if (round == aRound) return;
     startUnitOfWork();
@@ -467,71 +478,46 @@ public class InitiativeList implements Serializable {
 
   /**
    * Sort the tokens by their initiative state according to the default, descending order. See
-   * {@link #sort(boolean)} for more details on handling of strings and nulls.
+   * {@link #sort(boolean)} for more details.
+   *
+   * @see TokenInitiativeDescComparator
    */
   public void sort() {
     this.sort(false);
   }
 
   /**
-   * Sort the tokens by their initiative state, in either ascending or descending order. If the
-   * initiative state string can be converted into a {@link Double} that is done first. All values
-   * converted to {@link Double}s are always considered bigger than the {@link String} values. The
-   * {@link String} values are considered bigger than any <code>null</code> values.
+   * Sort the tokens by their initiative state using a {@link Comparator}
+   *
+   * @param ascendingOrder
+   * @see TokenInitiativeDescComparator
    */
   public void sort(boolean ascendingOrder) {
     startUnitOfWork();
-    final int DIRECTION = ascendingOrder ? -1 : 1;
     TokenInitiative currentInitiative =
         getTokenInitiative(getCurrent()); // Save the currently selected initiative
-    tokens.sort(
-        (o1, o2) -> {
 
-          // Get a number, string, or null for first parameter
-          Object one = null;
-          if (o1.state != null) {
-            one = o1.state;
-            try {
-              one = Double.valueOf(o1.state);
-            } catch (NumberFormatException e) {
-              // Not a number so ignore
-            } // endtry
-          } // endif
+    Collections.sort(tokens, new TokenInitiativeDescComparator());
+    if (ascendingOrder) {
+      Collections.reverse(tokens);
+    }
 
-          // Repeat for second param
-          Object two = null;
-          if (o2.state != null) {
-            two = o2.state;
-            try {
-              two = Double.valueOf(o2.state);
-            } catch (NumberFormatException e) {
-              // Not a number so ignore
-            } // endtry
-          } // endif
-
-          // Do the comparison
-          if (Objects.equals(one, two)) return 0;
-          if (one == null) return 1 * DIRECTION; // Null is always the smallest value
-          if (two == null) return -1 * DIRECTION;
-          if (one instanceof Double & two instanceof Double)
-            return ((Double) two).compareTo((Double) one) * DIRECTION;
-          if (one instanceof String & two instanceof String)
-            return ((String) two).compareTo((String) one) * DIRECTION;
-          if (one instanceof Double) return -1 * DIRECTION; // Integers are bigger than strings
-          return 1 * DIRECTION;
-        });
     getPCS().firePropertyChange(TOKENS_PROP, null, tokens);
     setCurrent(indexOf(currentInitiative)); // Restore current initiative
     finishUnitOfWork();
   }
 
-  /** @return Getter for zone */
+  /**
+   * @return Getter for zone
+   */
   public Zone getZone() {
     if (zone == null && zoneId != null) zone = MapTool.getCampaign().getZone(zoneId);
     return zone;
   }
 
-  /** @return Getter for pcs */
+  /**
+   * @return Getter for pcs
+   */
   private PropertyChangeSupport getPCS() {
     if (pcs == null) pcs = new PropertyChangeSupport(this);
     return pcs;
@@ -598,7 +584,9 @@ public class InitiativeList implements Serializable {
         .updateTokenInitiative(zoneId, ti.getId(), ti.isHolding(), ti.getState(), indexOf(ti));
   }
 
-  /** @param aZone Setter for the zone */
+  /**
+   * @param aZone Setter for the zone
+   */
   public void setZone(Zone aZone) {
     zone = aZone;
     if (aZone != null) {
@@ -608,12 +596,16 @@ public class InitiativeList implements Serializable {
     } // endif
   }
 
-  /** @return Getter for hideNPC */
+  /**
+   * @return Getter for hideNPC
+   */
   public boolean isHideNPC() {
     return hideNPC;
   }
 
-  /** @param hide Setter for hideNPC */
+  /**
+   * @param hide Setter for hideNPC
+   */
   public void setHideNPC(boolean hide) {
     if (hide == hideNPC) return;
     startUnitOfWork();
@@ -623,7 +615,9 @@ public class InitiativeList implements Serializable {
     finishUnitOfWork();
   }
 
-  /** @return Getter for tokens */
+  /**
+   * @return Getter for tokens
+   */
   public List<TokenInitiative> getTokens() {
     return Collections.unmodifiableList(tokens);
   }
@@ -688,6 +682,7 @@ public class InitiativeList implements Serializable {
       return false; // if we completely fail we should never prevent the change of initiative.
     }
   }
+
   /**
    * Handle the {@value #ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK} macro event, if any handlers
    * are present. Passes in some relevant info to each qualifying lib:token macro identified.
@@ -854,22 +849,30 @@ public class InitiativeList implements Serializable {
      * Instance Methods
      *-------------------------------------------------------------------------------------------*/
 
-    /** @return Getter for token */
+    /**
+     * @return Getter for token
+     */
     public Token getToken() {
       return getZone().getToken(id);
     }
 
-    /** @return Getter for id */
+    /**
+     * @return Getter for id
+     */
     public GUID getId() {
       return id;
     }
 
-    /** @param id Setter for the id to set */
+    /**
+     * @param id Setter for the id to set
+     */
     public void setId(GUID id) {
       this.id = id;
     }
 
-    /** @return Getter for holding */
+    /**
+     * @return Getter for holding
+     */
     public boolean isHolding() {
       return holding;
     }
@@ -888,7 +891,9 @@ public class InitiativeList implements Serializable {
       finishUnitOfWork(this);
     }
 
-    /** @return Getter for state */
+    /**
+     * @return Getter for state
+     */
     public String getState() {
       return state;
     }
@@ -907,7 +912,9 @@ public class InitiativeList implements Serializable {
       finishUnitOfWork(this);
     }
 
-    /** @return Getter for displayIcon */
+    /**
+     * @return Getter for displayIcon
+     */
     public Icon getDisplayIcon() {
       return displayIcon;
     }
@@ -965,6 +972,102 @@ public class InitiativeList implements Serializable {
         dto.setState(StringValue.of(state));
       }
       return dto.build();
+    }
+  }
+
+  /*---------------------------------------------------------------------------------------------
+   * TokenInitiativeComparator Inner Class
+   *-------------------------------------------------------------------------------------------*/
+
+  /**
+   * Comparator in a helper class to control the ordering of the TokenInitiative list.
+   *
+   * <p>Uses regex {@link Pattern} and {@link Matcher} to try and extract a leading number (to
+   * convert to a {@link Double}) and/or a trailing string from the token's initiative state. Then
+   * it compares in descending fashion by:
+   *
+   * <ol>
+   *   <li>{@link Double}s are always considered bigger than the {@link String} values.
+   *   <li>{@link String} values are considered bigger than any <code>null</code> values.
+   *   <li>if all else is the same, finally compare by token name and then by token ID to get a
+   *       deterministic order to prevent flip-flopping on repeated sorts and/or tokens not changing
+   *       order when sort order is reversed.
+   * </ol>
+   *
+   * @see TokenInitiative
+   */
+  public class TokenInitiativeDescComparator implements Comparator<TokenInitiative> {
+    @Override
+    public int compare(TokenInitiative o1, TokenInitiative o2) {
+      Pattern p = Pattern.compile("^(-?\\d+\\.?\\d*)?(.*)");
+
+      // Get a number and/or string, or a null for first parameter
+      Object one = o1.getState();
+      Double oneDouble = null;
+      String oneString = null;
+      try {
+        Matcher m1 = p.matcher(o1.state);
+        if (m1.matches()) {
+          oneString = m1.group(2).trim();
+          oneDouble = Double.valueOf(m1.group(1));
+        }
+      } catch (NumberFormatException | NullPointerException e) {
+        // either null or could not convert to a Double
+      }
+
+      // Repeat for second param
+      Object two = o2.getState();
+      Double twoDouble = null;
+      String twoString = null;
+      try {
+        Matcher m2 = p.matcher(o2.state);
+        if (m2.matches()) {
+          twoString = m2.group(2).trim();
+          twoDouble = Double.valueOf(m2.group(1));
+        }
+      } catch (NumberFormatException | NullPointerException e) {
+        // either null or could not convert to a Double
+      }
+
+      int comparison = 0;
+      if (Objects.equals(one, two)) {
+        comparison = 0;
+      } else if (one == null) {
+        comparison = 1; // nulls come last
+      } else if (two == null) {
+        comparison = -1;
+      } else if (!Objects.equals(twoDouble, oneDouble)) {
+        // Numbers are different
+        if (oneDouble == null) {
+          comparison = 1;
+        } else if (twoDouble == null) {
+          comparison = -1;
+        } else {
+          comparison = twoDouble.compareTo(oneDouble);
+        }
+      } else {
+        // Numbers are the same, so sort by strings
+        if (oneString == null) {
+          comparison = 1;
+        } else if (twoString == null) {
+          comparison = -1;
+        } else {
+          comparison = twoString.compareToIgnoreCase(oneString);
+          if (comparison == 0) {
+            comparison = twoString.compareTo(oneString);
+          }
+        }
+      }
+
+      // If still tied, compare the names and then the GUID to get a deterministic sort order.
+      if (comparison == 0) {
+        comparison = o1.getToken().getName().compareTo(o2.getToken().getName());
+        if (comparison == 0) {
+          comparison = o1.getToken().getId().compareTo(o2.getToken().getId());
+        }
+      }
+
+      return comparison;
     }
   }
 }

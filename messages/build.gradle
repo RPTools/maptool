@@ -1,0 +1,37 @@
+buildscript {
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
+    }
+}
+
+
+plugins {
+    id "base"
+    id "java-library"
+
+    alias(libs.plugins.protobuf)
+}
+
+apply from: rootProject.file('buildSrc/shared.gradle')
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    // Must be `api` so all consumers can access protobuf types.
+    api(libs.protobuf.java)
+}
+
+
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get()
+    }
+}
+
+// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
+sourceSets {
+    main {
+        java {
+            srcDirs layout.buildDirectory.dir('generated/sources/proto/main/java')
+        }
+    }
+}

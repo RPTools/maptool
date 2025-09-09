@@ -82,7 +82,9 @@ public class InitiativeTransferable implements Transferable {
    * Transferable Method Implementations
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor) */
+  /**
+   * @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor)
+   */
   public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
     if (INIT_TOKEN_FLAVOR.equals(flavor)) {
       return this;
@@ -92,7 +94,9 @@ public class InitiativeTransferable implements Transferable {
     throw new UnsupportedFlavorException(flavor);
   }
 
-  /** @see java.awt.datatransfer.Transferable#getTransferDataFlavors() */
+  /**
+   * @see java.awt.datatransfer.Transferable#getTransferDataFlavors()
+   */
   public DataFlavor[] getTransferDataFlavors() {
     return new DataFlavor[] {INIT_TOKEN_FLAVOR};
   }
@@ -108,12 +112,16 @@ public class InitiativeTransferable implements Transferable {
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @return Getter for id */
+  /**
+   * @return Getter for id
+   */
   public GUID getId() {
     return id;
   }
 
-  /** @return Getter for initiative */
+  /**
+   * @return Getter for initiative
+   */
   public int getInititiave() {
     return inititiave;
   }

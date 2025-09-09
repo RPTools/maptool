@@ -1043,9 +1043,17 @@
               <id>9227abff10c5f5300f07e713ccccbfc4</id>
             </imageId>
           </net.rptools.maptool.model.LookupTable_-LookupEntry>
+          <net.rptools.maptool.model.LookupTable_-LookupEntry>
+              <min>54</min>
+              <max>54</max>
+              <value></value>
+              <imageId>
+                <id>d9babe6a911b8409c85a7f7bd2360f43</id>
+              </imageId>
+            </net.rptools.maptool.model.LookupTable_-LookupEntry>
         </entryList>
         <name>Standard w/ Joker</name>
-        <defaultRoll>d53</defaultRoll>
+        <defaultRoll>d54</defaultRoll>
         <tableImage>
           <id>8d7950b9f17a21bd7ff1ea36badd11e8</id>
         </tableImage>

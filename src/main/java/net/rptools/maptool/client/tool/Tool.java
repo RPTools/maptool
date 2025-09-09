@@ -35,7 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
 
@@ -138,7 +138,6 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
     ActionMap actionMap = new ActionMap();
     for (var keyAction : keyActionMap.entrySet()) {
       actionMap.put(keyAction.getKey().toString(), keyAction.getValue());
-      // System.out.println(keyAction.getKey().toString() + ": " + keyAction.getValue().toString());
     }
     return actionMap;
   }
@@ -187,7 +186,9 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
 
     private static final long serialVersionUID = -514197544905143826L;
 
-    /** @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent) */
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
     public void actionPerformed(ActionEvent e) {
       // This should probably go somewhere else like MapToolFrame...
       // but it was just too easy to plop down here to resist =)

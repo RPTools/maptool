@@ -39,12 +39,14 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author crash */
+/**
+ * @author crash
+ */
 @SuppressWarnings("serial")
 public class UpdateRepoDialog extends JDialog {
   private static final Logger log = LogManager.getLogger(FTPClient.class);
   private static final AbeillePanel form =
-      new AbeillePanel(new UpdateRepoDialogView().$$$getRootComponent$$$());
+      new AbeillePanel(new UpdateRepoDialogView().getRootComponent());
 
   private int status = -1;
   private CheckBoxListWithSelectable list;
@@ -76,10 +78,9 @@ public class UpdateRepoDialog extends JDialog {
               URL url = null;
               try {
                 url = new URL(o.toString());
-                // System.out.println("URL object contains: " + url);
                 hostname.setText(url.getHost());
               } catch (MalformedURLException e1) {
-                e1.printStackTrace();
+                log.error("Error while parsing URL", e1);
               }
             }
           }
@@ -172,8 +173,6 @@ public class UpdateRepoDialog extends JDialog {
     Object[] objects = list.getSelectedObjects();
     List<String> repoList = new ArrayList<String>(objects.length);
     for (Object s : objects) {
-      // System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " +
-      // s.getClass().getCanonicalName());
       repoList.add(s.toString());
     }
     return repoList;

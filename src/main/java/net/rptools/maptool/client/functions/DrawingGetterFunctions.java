@@ -61,7 +61,7 @@ public class DrawingGetterFunctions extends DrawingFunctions {
     FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
     String mapName = parameters.get(0).toString();
     String id = parameters.get(1).toString();
-    Zone map = getNamedMap(functionName, mapName).getZone();
+    Zone map = FunctionUtil.getZoneRenderer(functionName, mapName).getZone();
     GUID guid = getGUID(functionName, id);
     if ("getDrawingLayer".equalsIgnoreCase(functionName)) {
       return getDrawable(functionName, map, guid).getLayer().name();

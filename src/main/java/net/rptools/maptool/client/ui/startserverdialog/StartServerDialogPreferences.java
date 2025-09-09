@@ -182,7 +182,7 @@ public class StartServerDialogPreferences {
     // to the user to configure before the start server dialog. So if it has not been
     // specified we default to the users preferences.
     return Objects.requireNonNullElseGet(
-        useToolTipsForUnformattedRolls, AppPreferences::getUseToolTipForInlineRoll);
+        useToolTipsForUnformattedRolls, AppPreferences.useToolTipForInlineRoll::get);
   }
 
   public void setUseToolTipsForUnformattedRolls(boolean flag) {

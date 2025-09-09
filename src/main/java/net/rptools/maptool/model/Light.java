@@ -23,10 +23,11 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.server.proto.LightDto;
 import net.rptools.maptool.server.proto.ShapeTypeDto;
 
-public class Light implements Serializable {
+public final class Light implements Serializable {
   private final @Nonnull ShapeType shape;
   private final double facingOffset;
   private final double radius;
+  private final double width;
   private final double arcAngle;
   private final @Nullable DrawablePaint paint;
   private final int lumens;
@@ -37,6 +38,7 @@ public class Light implements Serializable {
       @Nonnull ShapeType shape,
       double facingOffset,
       double radius,
+      double width,
       double arcAngle,
       @Nullable DrawablePaint paint,
       int lumens,
@@ -45,6 +47,7 @@ public class Light implements Serializable {
     this.shape = shape;
     this.facingOffset = facingOffset;
     this.radius = radius;
+    this.width = width;
     this.arcAngle = (arcAngle == 0) ? 90 : arcAngle;
     this.paint = paint;
     this.lumens = lumens;
@@ -61,6 +64,7 @@ public class Light implements Serializable {
         shape == null ? ShapeType.CIRCLE : shape,
         facingOffset,
         radius,
+        width,
         arcAngle,
         paint,
         lumens == 0 ? 100 : lumens,
@@ -84,6 +88,10 @@ public class Light implements Serializable {
     return radius;
   }
 
+  public double getWidth() {
+    return width;
+  }
+
   public double getArcAngle() {
     return arcAngle;
   }
@@ -92,10 +100,26 @@ public class Light implements Serializable {
     return shape;
   }
 
-  public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, boolean scaleWithToken) {
+  public @Nonnull Area getArea(
+      @Nonnull Token token, @Nonnull Zone zone, double multiplier, boolean scaleWithToken) {
+    var radius = getRadius();
+    // Darkness does not get magnified.
+    if (lumens >= 0) {
+      radius *= multiplier;
+    }
     return zone.getGrid()
         .getShapedArea(
-            getShape(), token, getRadius(), getArcAngle(), (int) getFacingOffset(), scaleWithToken);
+            getShape(),
+            token,
+            radius,
+            getWidth(),
+            getArcAngle(),
+            (int) getFacingOffset(),
+            scaleWithToken);
+  }
+
+  public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, boolean scaleWithToken) {
+    return getArea(token, zone, 1.0, scaleWithToken);
   }
 
   public boolean isGM() {
@@ -111,6 +135,7 @@ public class Light implements Serializable {
         ShapeType.valueOf(dto.getShape().name()),
         dto.getFacingOffset(),
         dto.getRadius(),
+        dto.getWidth(),
         dto.getArcAngle(),
         dto.hasPaint() ? DrawablePaint.fromDto(dto.getPaint()) : null,
         dto.getLumens(),
@@ -125,6 +150,7 @@ public class Light implements Serializable {
     }
     dto.setFacingOffset(facingOffset);
     dto.setRadius(radius);
+    dto.setWidth(width);
     dto.setArcAngle(arcAngle);
     dto.setShape(ShapeTypeDto.valueOf(shape.name()));
     dto.setIsGm(isGM);

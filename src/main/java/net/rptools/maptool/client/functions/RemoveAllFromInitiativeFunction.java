@@ -47,12 +47,16 @@ public class RemoveAllFromInitiativeFunction extends AbstractFunction {
   private static final RemoveAllFromInitiativeFunction instance =
       new RemoveAllFromInitiativeFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static RemoveAllFromInitiativeFunction getInstance() {
     return instance;
   }
 
-  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
+  /**
+   * @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List)
+   */
   @Override
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)

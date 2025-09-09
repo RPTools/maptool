@@ -41,7 +41,7 @@ public class PreviewPanelFileChooser extends JFileChooser {
       new ThumbnailManager(AppUtil.getAppHome("previewPanelThumbs"), new Dimension(150, 150));
 
   public PreviewPanelFileChooser() {
-    this.setCurrentDirectory(AppPreferences.getLoadDir());
+    this.setCurrentDirectory(AppPreferences.loadDirectory.get());
     this.setAccessory(getPreviewWrapperPanel());
     this.addPropertyChangeListener(
         PreviewPanelFileChooser.SELECTED_FILE_CHANGED_PROPERTY, new FileSystemSelectionHandler());
@@ -54,7 +54,8 @@ public class PreviewPanelFileChooser extends JFileChooser {
 
       if (previewFile != null && !previewFile.isDirectory()) {
         try {
-          Image img = thumbnailManager.getThumbnail(previewFile);
+          Image img =
+              thumbnailManager.getThumbnail(previewFile, AppPreferences.renderQuality.get());
           getPreviewPanel().setImage(img);
         } catch (IOException ioe) {
           getPreviewPanel().setImage(null);

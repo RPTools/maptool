@@ -15,29 +15,38 @@
 package net.rptools.maptool.client.functions.json;
 
 import com.google.gson.*;
+import com.google.gson.stream.JsonWriter;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import net.rptools.common.expression.ExpressionParser;
-import net.rptools.common.expression.Result;
+import net.rptools.dicelib.expression.ExpressionParser;
+import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.EvalMacroFunctions;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Class used to implement Json related functions in MT script. */
 public class JSONMacroFunctions extends AbstractFunction {
+
+  private static final Logger log = LogManager.getLogger(JSONMacroFunctions.class);
 
   /** Object used to convert between json and MTS primitive types. */
   private final JsonMTSTypeConversion typeConversion;
@@ -74,11 +83,15 @@ public class JSONMacroFunctions extends AbstractFunction {
   private static final JSONMacroFunctions instance = new JSONMacroFunctions();
 
   /** Configuration object for JSONPath. */
-  private static final Configuration jaywayConfig =
-      Configuration.builder().jsonProvider(new GsonJsonProvider()).build();
+  private static final Configuration jaywayConfig;
 
-  /** The parser used to parse Json strings into an internal representation. */
-  private static final JsonParser jsonParser = new JsonParser();
+  static {
+    jaywayConfig =
+        Configuration.builder()
+            .jsonProvider(new GsonJsonProvider())
+            .mappingProvider(new GsonMappingProvider())
+            .build();
+  }
 
   /** Creates a new <code>JSONMacroFunctions</code> object. */
   private JSONMacroFunctions() {
@@ -123,7 +136,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         "json.rolls",
         "json.objrolls");
 
-    typeConversion = new JsonMTSTypeConversion(jsonParser);
+    typeConversion = new JsonMTSTypeConversion();
     jsonArrayFunctions = new JsonArrayFunctions(typeConversion);
     jsonObjectFunctions = new JsonObjectFunctions(typeConversion);
   }
@@ -541,7 +554,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
   private JsonObject jsonObjRolls(JsonArray names, JsonArray stats, JsonArray rolls)
       throws ParserException {
-    ExpressionParser parser = new ExpressionParser();
+    ExpressionParser parser = new ExpressionParserFactory().create();
 
     if (stats.size() != rolls.size()) {
       throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
@@ -596,7 +609,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   private JsonArray jsonRolls(String rollString, int outerDim, int innerDim)
       throws ParserException {
-    ExpressionParser parser = new ExpressionParser();
+    ExpressionParser parser = new ExpressionParserFactory().create();
 
     if (innerDim == 1) {
       return jsonRolls(rollString, outerDim, parser);
@@ -627,6 +640,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
     return arrays;
   }
+
   /**
    * Returns the parameter list as a list of {@link JsonArray}s. If the parameter is not a json
    * object/array and is an empty string it will result in a 0 sized JsonArray, otherwise the value
@@ -646,6 +660,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
     return arrays;
   }
+
   /**
    * Returns the parameter list as a list of {@link JsonObject}s.
    *
@@ -770,13 +785,17 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return The json as a formatted string.
    */
   public String jsonIndent(JsonElement json, int indent) {
+    final Gson gsonPrettyPrinting =
+        new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create();
 
-    // This is a bit ugly but the GSON library offers no way to specify indentation.
-    if (json.isJsonArray()) {
-      return JSONArray.fromObject(json.toString()).toString(indent);
-    } else if (json.isJsonObject()) {
-      return JSONObject.fromObject(json.toString()).toString(indent);
-    } else {
+    try (final Writer writer = new StringWriter()) {
+      final JsonWriter jWriter = gsonPrettyPrinting.newJsonWriter(writer);
+      jWriter.setIndent(" ".repeat(indent));
+      gsonPrettyPrinting.toJson(json, jWriter);
+      return writer.toString();
+    } catch (final IOException e) {
+      // This case should not happen, it's just an artifact of working with writers.
+      log.error("Unexpected error while formatting JSON", e);
       return json.toString();
     }
   }
@@ -866,7 +885,12 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return The resulting json data.
    */
   private JsonElement jsonPathDelete(JsonElement json, String path) {
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).delete(path).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).delete(path).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**
@@ -881,7 +905,12 @@ public class JSONMacroFunctions extends AbstractFunction {
   private JsonElement jsonPathPut(JsonElement json, String path, String key, Object info) {
     Object value = asJsonElement(info);
 
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**
@@ -895,7 +924,12 @@ public class JSONMacroFunctions extends AbstractFunction {
   private JsonElement jsonPathSet(JsonElement json, String path, Object info) {
     Object value = asJsonElement(info);
 
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**
@@ -943,6 +977,7 @@ public class JSONMacroFunctions extends AbstractFunction {
   public JsonObjectFunctions getJsonObjectFunctions() {
     return jsonObjectFunctions;
   }
+
   /**
    * This method returns the object passed in as the appropriate json type.
    *

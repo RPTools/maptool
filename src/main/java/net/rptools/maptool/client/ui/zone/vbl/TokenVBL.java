@@ -20,19 +20,18 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.TokenUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.awt.ShapeReader;
@@ -177,146 +176,46 @@ public class TokenVBL {
     return simplifiedArea;
   }
 
-  /**
-   * This is a convenience method to send the topology Area to be rendered to the server
-   *
-   * @param renderer Reference to the ZoneRenderer
-   * @param area A valid Area containing topology polygons
-   * @param erase Set to true to erase the topology, otherwise draw it
-   * @param topologyType Determines which topology (Wall VBL, Hill VBL, Pit VBL, MBL) to modify.
-   */
-  public static void renderTopology(
-      ZoneRenderer renderer, Area area, boolean erase, Zone.TopologyType topologyType) {
-    if (erase) {
-      renderer.getZone().removeTopology(area, topologyType);
-      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area, topologyType);
-    } else {
-      renderer.getZone().addTopology(area, topologyType);
-      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area, topologyType);
-    }
-
-    MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
-    renderer.repaint();
-  }
-
-  public static Area getMapTopology_transformed(
-      ZoneRenderer renderer, Token token, Zone.TopologyType topologyType) {
-    Rectangle footprintBounds = token.getBounds(renderer.getZone());
-    Area newTokenTopology = new Area(footprintBounds);
-    Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
-    SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
-    AffineTransform atArea = new AffineTransform();
-
-    double tx, ty, sx, sy;
-
-    // Prepare to reverse all the current token transformations so we can store a
-    // raw untransformed version on the Token
-    if (token.isSnapToScale()) {
-      tx =
-          -newTokenTopology.getBounds().getX()
-              - (int) ((footprintBounds.getWidth() - imgSize.getWidth()) / 2);
-      ty =
-          -newTokenTopology.getBounds().getY()
-              - (int) ((footprintBounds.getHeight() - imgSize.getHeight()) / 2);
-      sx = 1 / (imgSize.getWidth() / token.getWidth());
-      sy = 1 / (imgSize.getHeight() / token.getHeight());
-
-    } else {
-      tx = -newTokenTopology.getBounds().getX();
-      ty = -newTokenTopology.getBounds().getY();
-      sx = 1 / token.getScaleX();
-      sy = 1 / token.getScaleY();
-    }
-
-    atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
-
-    Area mapArea = renderer.getZone().getTopology(topologyType);
-
-    if (token.getShape() == Token.TokenShape.TOP_DOWN
-        && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
-      // Get the center of the token bounds
-      double rx = newTokenTopology.getBounds2D().getCenterX();
-      double ry = newTokenTopology.getBounds2D().getCenterY();
-
-      // Rotate the area to match the token facing
-      AffineTransform captureArea =
-          AffineTransform.getRotateInstance(Math.toRadians(token.getFacingInDegrees()), rx, ry);
-      newTokenTopology = new Area(captureArea.createTransformedShape(newTokenTopology));
-
-      // Capture the topology via intersection
-      newTokenTopology.intersect(mapArea);
-
-      // Rotate the area back to prep to store on Token
-      captureArea =
-          AffineTransform.getRotateInstance(-Math.toRadians(token.getFacingInDegrees()), rx, ry);
-      newTokenTopology = new Area(captureArea.createTransformedShape(newTokenTopology));
-    } else {
-      // Token will not be rotated so lets just capture the topology
-      newTokenTopology.intersect(mapArea);
-    }
-
-    // Translate the capture to zero out the x,y to store on the Token
-    atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
-    newTokenTopology = new Area(atArea.createTransformedShape(newTokenTopology));
-
-    // Lets account for flipped images...
-    atArea = new AffineTransform();
-    if (token.isFlippedX()) {
-      atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
-      atArea.concatenate(AffineTransform.getTranslateInstance(-token.getWidth(), 0));
-    }
-
-    if (token.isFlippedY()) {
-      atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
-      atArea.concatenate(AffineTransform.getTranslateInstance(0, -token.getHeight()));
-    }
-
-    // Do any final transformations for flipped images
-    newTokenTopology = new Area(atArea.createTransformedShape(newTokenTopology));
-
-    return newTokenTopology;
-  }
-
   public static Area getTopology_underToken(
-      ZoneRenderer renderer, Token token, Zone.TopologyType topologyType) {
-    Rectangle footprintBounds = token.getBounds(renderer.getZone());
-    Area newTokenTopology = new Area(footprintBounds);
-    Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
-    SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
-    AffineTransform atArea = new AffineTransform();
+      Zone zone, Token token, Zone.TopologyType topologyType) {
+    Area topologyOnMap = zone.getMaskTopology(topologyType);
+    Rectangle footprintBounds = token.getImageBounds(zone);
 
-    double sx, sy;
-    Area topologyOnMap = renderer.getZone().getTopology(topologyType);
-
-    if (token.isSnapToScale()) {
-      sx = 1 / (imgSize.getWidth() / token.getWidth());
-      sy = 1 / (imgSize.getHeight() / token.getHeight());
-
-    } else {
-      sx = 1 / token.getScaleX();
-      sy = 1 / token.getScaleY();
-    }
-    atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
-
-    if (token.getShape() == Token.TokenShape.TOP_DOWN
-        && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
+    final AffineTransform captureArea = new AffineTransform();
+    final Area topologyUnderToken;
+    if (token.getShape() == Token.TokenShape.TOP_DOWN && token.getFacingInDegrees() != 0) {
       // Get the center of the token bounds
-      double rx = newTokenTopology.getBounds2D().getCenterX();
-      double ry = newTokenTopology.getBounds2D().getCenterY();
+      double rx = footprintBounds.getCenterX() - token.getAnchor().x;
+      double ry = footprintBounds.getCenterY() - token.getAnchor().y;
 
       // Rotate the area to match the token facing
-      AffineTransform captureArea =
-          AffineTransform.getRotateInstance(Math.toRadians(token.getFacingInDegrees()), rx, ry);
-      newTokenTopology = new Area(captureArea.createTransformedShape(newTokenTopology));
-
-      // Capture the topology via intersection
-      newTokenTopology.intersect(topologyOnMap);
+      captureArea.rotate(Math.toRadians(token.getFacingInDegrees()), rx, ry);
+      topologyUnderToken = new Area(captureArea.createTransformedShape(footprintBounds));
     } else {
-      // Token will not be rotated so lets just capture the topology
-      newTokenTopology.intersect(topologyOnMap);
+      topologyUnderToken = new Area(footprintBounds);
     }
 
-    return newTokenTopology;
+    // Capture the topology via intersection
+    topologyUnderToken.intersect(topologyOnMap);
+    return topologyUnderToken;
+  }
+
+  public static Area transformTopology_toToken(Zone zone, Token token, Area topologyUnderToken) {
+    Rectangle footprintBounds = token.getFootprintBounds(zone);
+
+    // Reverse all token transformations so we can store a raw untransformed version on the Token.
+    var transform =
+        TokenUtil.getRenderTransform(
+            zone, token, new Dimension(token.getWidth(), token.getHeight()), footprintBounds);
+    try {
+      transform.invert();
+    } catch (NoninvertibleTransformException e) {
+      // This shouldn't be possible unless something else is broken with the token.
+      log.error("Failed to invert token transform", e);
+      return new Area();
+    }
+
+    return new Area(transform.createTransformedShape(topologyUnderToken));
   }
 
   /**

@@ -54,6 +54,7 @@ public class MessagePanelImageView extends View {
 
   /** Property name for pending image icon */
   private static final String PENDING_IMAGE = "html.pendingImage";
+
   /** Property name for missing image icon */
   private static final String MISSING_IMAGE = "html.missingImage";
 
@@ -79,6 +80,7 @@ public class MessagePanelImageView extends View {
 
   private int width;
   private int height;
+
   /**
    * Bitmask containing some of the above bitmask values. Because the image loading notification can
    * happen on another thread access to this is synchronized (at least for modifying it).
@@ -96,15 +98,18 @@ public class MessagePanelImageView extends View {
   private short rightInset;
   private short topInset;
   private short bottomInset;
+
   /**
    * We don't directly implement ImageObserver, instead we use an instance that calls back to us.
    */
   private final ImageObserver imageObserver;
+
   /**
    * Used for alt text. Will be non-null if the image couldn't be found, and there is valid alt
    * text.
    */
   private View altView;
+
   /** Alignment along the vertical (Y) axis. */
   private float vAlign;
 
@@ -130,7 +135,9 @@ public class MessagePanelImageView extends View {
     return (String) getElement().getAttributes().getAttribute(HTML.Attribute.ALT);
   }
 
-  /** @return a URL for the image source, or null if it could not be determined. */
+  /**
+   * @return a URL for the image source, or null if it could not be determined.
+   */
   public URL getImageURL() {
     String src = (String) getElement().getAttributes().getAttribute(HTML.Attribute.SRC);
     if (src == null) {
@@ -145,17 +152,23 @@ public class MessagePanelImageView extends View {
     }
   }
 
-  /** @return the icon to use if the image couldn't be found. */
+  /**
+   * @return the icon to use if the image couldn't be found.
+   */
   public Icon getNoImageIcon() {
     return (Icon) UIManager.getLookAndFeelDefaults().get(MISSING_IMAGE);
   }
 
-  /** @return the icon to use while in the process of loading the image. */
+  /**
+   * @return the icon to use while in the process of loading the image.
+   */
   public Icon getLoadingImageIcon() {
     return (Icon) UIManager.getLookAndFeelDefaults().get(PENDING_IMAGE);
   }
 
-  /** @return the image to render. */
+  /**
+   * @return the image to render.
+   */
   public Image getImage() {
     sync();
     return imageCache.get(getImageURL(), imageObserver);
@@ -179,7 +192,9 @@ public class MessagePanelImageView extends View {
     }
   }
 
-  /** @return true if the image should be loaded when first asked for. */
+  /**
+   * @return true if the image should be loaded when first asked for.
+   */
   public boolean getLoadsSynchronously() {
     return ((state & SYNC_LOAD_FLAG) != 0);
   }

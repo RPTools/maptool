@@ -18,7 +18,7 @@ import java.util.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import org.graalvm.polyglot.HostAccess;
@@ -31,22 +31,22 @@ public class JSAPIClientInfo implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public boolean faceEdge() {
-    return AppPreferences.getFaceEdge();
+    return AppPreferences.faceEdge.get();
   }
 
   @HostAccess.Export
   public boolean faceVertex() {
-    return AppPreferences.getFaceVertex();
+    return AppPreferences.faceVertex.get();
   }
 
   @HostAccess.Export
   public int portraitSize() {
-    return AppPreferences.getPortraitSize();
+    return AppPreferences.portraitSize.get();
   }
 
   @HostAccess.Export
   public boolean showStatSheet() {
-    return AppPreferences.getShowStatSheet();
+    return AppPreferences.showStatSheet.get();
   }
 
   @HostAccess.Export
@@ -74,7 +74,7 @@ public class JSAPIClientInfo implements MapToolJSAPIInterface {
     Map<String, Object> libInfo = new HashMap<>();
     for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
       Zone zone = zr.getZone();
-      for (Token token : zone.getTokens()) {
+      for (Token token : zone.getAllTokens()) {
         if (token.getName().toLowerCase().startsWith("lib:")) {
           if (token.getProperty("libversion") != null) {
             libInfo.put(token.getName(), token.getProperty("libversion").toString());

@@ -24,23 +24,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
-import net.rptools.maptool.client.AppActions;
+import net.rptools.lib.OsDetection;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppSetup;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MRUCampaignManager;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class AppMenuBar extends JMenuBar {
+  private static final Logger log = LogManager.getLogger(AppMenuBar.class);
+
   /** The manager of the Most Recently Used campaigns. */
   private static MRUCampaignManager mruManager;
 
@@ -99,7 +98,7 @@ public class AppMenuBar extends JMenuBar {
     fileMenu.add(new JMenuItem(AppActions.SHOW_CONNECTION_INFO));
     fileMenu.addSeparator();
     fileMenu.add(createRecentCampaignMenu());
-    if (!AppUtil.MAC_OS_X) {
+    if (!OsDetection.MAC_OS_X) {
       fileMenu.addSeparator();
       fileMenu.add(new JMenuItem(AppActions.EXIT));
     }
@@ -114,9 +113,7 @@ public class AppMenuBar extends JMenuBar {
 
     menu.addSeparator();
 
-    menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_AS));
     menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_REPO));
-    // menu.add(new JMenuItem(AppActions.UPDATE_CAMPAIGN_REPO));
 
     return menu;
   }
@@ -131,10 +128,11 @@ public class AppMenuBar extends JMenuBar {
     menu.add(new JMenuItem(AppActions.IMPORT_DUNGEON_DRAFT_MAP));
     menu.addSeparator();
 
+    menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_LANDING_MAP, menu));
+
     // MAP TOGGLES
     // Lee: modifying due to the waypoint exposure toggle's dependency to this.
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_CURRENT_ZONE_VISIBILITY, menu));
-    // menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_FOG, menu));
 
     RPCheckBoxMenuItem fowToggleMenuItem = new RPCheckBoxMenuItem(AppActions.TOGGLE_FOG, menu);
     final RPCheckBoxMenuItem fowRevealToggleMenuItem =
@@ -207,8 +205,6 @@ public class AppMenuBar extends JMenuBar {
     JMenu menu = I18N.createMenu("menu.edit");
     menu.add(new JMenuItem(AppActions.UNDO_PER_MAP));
     menu.add(new JMenuItem(AppActions.REDO_PER_MAP));
-    // menu.add(new JMenuItem(AppActions.UNDO_DRAWING));
-    // menu.add(new JMenuItem(AppActions.REDO_DRAWING));
     menu.add(new JMenuItem(AppActions.CLEAR_DRAWING));
 
     menu.addSeparator();
@@ -220,7 +216,7 @@ public class AppMenuBar extends JMenuBar {
     menu.addSeparator();
 
     menu.add(new JMenuItem(AppActions.CAMPAIGN_PROPERTIES));
-    if (!AppUtil.MAC_OS_X) menu.add(new JMenuItem(AppActions.SHOW_PREFERENCES));
+    if (!OsDetection.MAC_OS_X) menu.add(new JMenuItem(AppActions.SHOW_PREFERENCES));
 
     return menu;
   }
@@ -246,13 +242,9 @@ public class AppMenuBar extends JMenuBar {
     item.setSelected(AppState.isShowLightSources());
     menu.add(item);
 
-    // menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ZONE_SELECTOR));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_GRID, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_COORDINATES, menu));
-    // LATER: This needs to be genericized, but it seems to constant, and so
-    // short, that I
-    // didn't feel compelled to do that in this impl
-    JMenu gridSizeMenu = I18N.createMenu("action.gridSize");
+    JMenu gridSizeMenu = I18N.createMenu("action.gridLineWight");
     JCheckBoxMenuItem gridSize1 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(1), menu);
     JCheckBoxMenuItem gridSize2 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(2), menu);
     JCheckBoxMenuItem gridSize3 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(3), menu);
@@ -304,7 +296,7 @@ public class AppMenuBar extends JMenuBar {
       try {
         AppSetup.installDefaultTokens();
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        log.error("Error while install default assets", ioe);
         menu.add(new JMenuItem(I18N.getText("msg.error.loadingQuickMaps")));
         return menu;
       }
@@ -319,8 +311,6 @@ public class AppMenuBar extends JMenuBar {
                 new AppActions.QuickMapAction(FileUtil.getNameWithoutExtension(file), file)));
       }
     }
-    // basicQuickMap.putValue(Action.ACCELERATOR_KEY,
-    // KeyStroke.getKeyStroke("ctrl shift N"));
 
     return menu;
   }
@@ -386,18 +376,21 @@ public class AppMenuBar extends JMenuBar {
       for (String key : helpArray) {
         OpenUrlAction temp = new AppActions.OpenUrlAction(key);
         switch (key) {
-          case "action.helpurl.01" -> temp.putValue(
-              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_DOCUMENTATION));
-          case "action.helpurl.02" -> temp.putValue(
-              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_TUTORIALS));
-          case "action.helpurl.03" -> temp.putValue(
-              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FORUMS));
-          case "action.helpurl.04" -> temp.putValue(
-              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_NETWORK_SETUP));
-          case "action.helpurl.05" -> temp.putValue(
-              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SCRIPTING));
-          case "action.helpurl.06" -> temp.putValue(
-              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FRAMEWORKS));
+          case "action.helpurl.01" ->
+              temp.putValue(
+                  Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_DOCUMENTATION));
+          case "action.helpurl.02" ->
+              temp.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_TUTORIALS));
+          case "action.helpurl.03" ->
+              temp.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FORUMS));
+          case "action.helpurl.04" ->
+              temp.putValue(
+                  Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_NETWORK_SETUP));
+          case "action.helpurl.05" ->
+              temp.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SCRIPTING));
+          case "action.helpurl.06" ->
+              temp.putValue(
+                  Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FRAMEWORKS));
         }
         menu.add(new JMenuItem(temp));
       }
@@ -405,7 +398,7 @@ public class AppMenuBar extends JMenuBar {
     }
     menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
 
-    if (!AppUtil.MAC_OS_X) {
+    if (!OsDetection.MAC_OS_X) {
       menu.addSeparator();
       menu.add(new JMenuItem(AppActions.SHOW_ABOUT));
     }
@@ -421,7 +414,9 @@ public class AppMenuBar extends JMenuBar {
     return menu;
   }
 
-  /** @return an overlay menu. */
+  /**
+   * @return an overlay menu.
+   */
   protected JMenu createOverlayMenu() {
     overlayMenu = I18N.createMenu("menu.overlay");
     overlayMenu.setEnabled(false); // empty by default
@@ -437,9 +432,26 @@ public class AppMenuBar extends JMenuBar {
     JCheckBoxMenuItem menuItem =
         new RPCheckBoxMenuItem(new AppActions.ToggleOverlayAction(overlayManager), overlayMenu);
     menuItem.setText(overlayManager.getName());
+    if (overlayManager.getLocked() && !MapTool.getPlayer().isGM()) {
+      menuItem.setEnabled(false);
+    }
     overlayMenu.add(menuItem);
     overlayMenu.setEnabled(true);
     overlayItems.put(overlayManager.getName(), menuItem);
+  }
+
+  /**
+   * Enables or disables an overlay menu item based on whether the overlay is locked.
+   *
+   * @param overlayManager The overlay being updated.
+   */
+  public static void updateOverlayMenuLocked(HTMLOverlayManager overlayManager) {
+    // Never lock out a GM.
+    boolean enabled = MapTool.getPlayer().isGM() ? true : !overlayManager.getLocked();
+    JCheckBoxMenuItem menuItem = overlayItems.get(overlayManager.getName());
+    if (menuItem != null) {
+      menuItem.setEnabled(enabled);
+    }
   }
 
   /**

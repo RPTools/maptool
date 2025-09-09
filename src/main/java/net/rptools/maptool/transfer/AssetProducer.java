@@ -44,7 +44,9 @@ public class AssetProducer {
     length = assetFile.length();
   }
 
-  /** @return the header needed to create the corresponding AssetConsumer */
+  /**
+   * @return the header needed to create the corresponding AssetConsumer
+   */
   public AssetHeader getHeader() {
     return new AssetHeader(id, name, assetFile.length());
   }

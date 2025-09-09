@@ -15,33 +15,24 @@
 package net.rptools.maptool.client.swing;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.Box;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.AppStatePersisted;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 
 public class TopologyModeSelectionPanel extends JToolBar {
-  /** The instance. Used to update the button when the ZoneRenderer is changed. */
-  private static TopologyModeSelectionPanel instance;
-
-  public static TopologyModeSelectionPanel getInstance() {
-    return instance;
-  }
-
   private final Map<Zone.TopologyType, JToggleButton> modeButtons;
 
   public TopologyModeSelectionPanel() {
-    instance = this;
-
     setFloatable(false);
     setRollover(true);
     setBorder(null);
@@ -49,7 +40,7 @@ public class TopologyModeSelectionPanel extends JToolBar {
 
     modeButtons = new EnumMap<>(Zone.TopologyType.class);
 
-    var initiallySelectedTypes = AppPreferences.getTopologyTypes();
+    var initiallySelectedTypes = AppStatePersisted.getTopologyTypes();
     createAndAddModeButton(
         Zone.TopologyType.WALL_VBL,
         Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
@@ -69,6 +60,12 @@ public class TopologyModeSelectionPanel extends JToolBar {
         "tools.topology_mode_selection.pit_vbl.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
+        Zone.TopologyType.COVER_VBL,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_OFF,
+        "tools.topology_mode_selection.cover_vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
         Zone.TopologyType.MBL,
         Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
         Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
@@ -78,12 +75,27 @@ public class TopologyModeSelectionPanel extends JToolBar {
     this.add(Box.createHorizontalStrut(5));
   }
 
+  @Override
+  public void setEnabled(boolean enabled) {
+    super.setEnabled(enabled);
+
+    if (enabled) {
+      for (var button : modeButtons.values()) {
+        button.setEnabled(true);
+      }
+    } else {
+      for (var button : modeButtons.values()) {
+        button.setEnabled(false);
+      }
+    }
+  }
+
   private void createAndAddModeButton(
       Zone.TopologyType type,
       final Icons icon,
       final Icons offIcon,
       String toolTipKey,
-      Zone.TopologyTypeSet initiallySelectedTypes) {
+      Set<Zone.TopologyType> initiallySelectedTypes) {
     final var button = new JToggleButton();
 
     button.setIcon(RessourceManager.getBigIcon(offIcon));
@@ -97,40 +109,21 @@ public class TopologyModeSelectionPanel extends JToolBar {
         new ChangeListener() {
           @Override
           public void stateChanged(ChangeEvent e) {
-            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-            if (zr != null) {
-              var zone = zr.getZone();
-              var mode = zone.getTopologyTypes();
-              if (button.isSelected()) {
-                mode = mode.with(type);
-              } else {
-                mode = mode.without(type);
-              }
-
-              setMode(mode);
-            }
+            // Remember the selection for the next time MT starts.
+            AppStatePersisted.setTopologyTypes(getMode());
           }
         });
   }
 
-  public void setMode(Zone.TopologyTypeSet topologyTypes) {
-    AppPreferences.setTopologyTypes(topologyTypes);
-    if (topologyTypes == null) {
-      topologyTypes = AppPreferences.getTopologyTypes();
-    }
-
+  public Set<Zone.TopologyType> getMode() {
+    var result = EnumSet.noneOf(Zone.TopologyType.class);
     for (final var entry : modeButtons.entrySet()) {
       final var topologyType = entry.getKey();
       final var button = entry.getValue();
-
-      button.setSelected(topologyTypes.contains(topologyType));
+      if (button.isSelected()) {
+        result.add(topologyType);
+      }
     }
-
-    // Since setting selection also triggers change listeners, we need this work even early on.
-    ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-    // Check if there is a map. Fix #1605
-    if (zr != null) {
-      zr.getZone().setTopologyTypes(topologyTypes);
-    }
+    return result;
   }
 }

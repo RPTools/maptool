@@ -177,6 +177,7 @@ public class Illuminator {
 
     /** The union of all darkness areas in this node. */
     public Path2D totalDarknessArea = new Path2D.Double();
+
     // endregion
 
     public IlluminationNode(int lumensStrength) {

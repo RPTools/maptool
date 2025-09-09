@@ -40,11 +40,13 @@ public class DrawableNoise {
 
   /** The number of times the noise pattern fits into the noise image width. */
   private static final double WIDTH_DIVISOR = 12.0;
+
   /** The number of times the noise pattern fits into the noise image height. */
   private static final double HEIGHT_DIVISOR = 9.0;
 
   /** The width of the noise image. */
   private static final int WIDTH = 256 * (int) WIDTH_DIVISOR;
+
   /** The height of the noise image. */
   private static final int HEIGHT = 256 * (int) HEIGHT_DIVISOR;
 

@@ -46,7 +46,7 @@ public class SmileyChatTranslationRuleGroup extends ChatTranslationRuleGroup {
 
   @Override
   public boolean isEnabled() {
-    return AppPreferences.getShowSmilies();
+    return AppPreferences.showSmilies.get();
   }
 
   private void initSmilies() {

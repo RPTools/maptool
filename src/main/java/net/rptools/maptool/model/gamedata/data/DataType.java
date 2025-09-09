@@ -35,8 +35,8 @@ public enum DataType {
       case JSON_ARRAY -> new JsonArrayDataValue(dataValue.getName(), dataValue.asJsonArray());
       case JSON_OBJECT -> new JsonObjectDataValue(dataValue.getName(), dataValue.asJsonObject());
       case ASSET -> new AssetDataValue(dataValue.getName(), dataValue.asAsset());
-      case UNDEFINED -> throw InvalidDataOperation.createInvalidConversion(
-          dataValue.getDataType(), to);
+      case UNDEFINED ->
+          throw InvalidDataOperation.createInvalidConversion(dataValue.getDataType(), to);
     };
   }
 

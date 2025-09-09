@@ -34,7 +34,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -75,22 +75,22 @@ public class InitiativePanel extends JPanel
   private final JList<TokenInitiative> displayList;
 
   /** Flag indicating that token images are shown in the list. */
-  private boolean showTokens = AppPreferences.getInitShowTokens();
+  private boolean showTokens = AppPreferences.initiativePanelShowsTokenImage.get();
 
   /**
    * Flag indicating that token states are shown in the list. Only valid if {@link #showTokens} is
    * <code>true</code>.
    */
-  private boolean showTokenStates = AppPreferences.getInitShowTokenStates();
+  private boolean showTokenStates = AppPreferences.initiativePanelShowsTokenState.get();
 
   /** Flag indicating that initiative state is shown in the list. */
-  private boolean showInitState = AppPreferences.getInitShowInitiative();
+  private boolean showInitState = AppPreferences.initiativePanelShowsInitiative.get();
 
   /**
    * Flag indicating that two lines are used for initiative stated. It is only valid if {@link
    * #showInitState} is <code>true</code>.
    */
-  private boolean initStateSecondLine = AppPreferences.getInitShow2ndLine();
+  private boolean initStateSecondLine = AppPreferences.initiativePanelShowsInitiativeOnLine2.get();
 
   /** The zone data being displayed. */
   private Zone zone;
@@ -111,6 +111,11 @@ public class InitiativePanel extends JPanel
    * The menu item that tells the GM if players can only move their tokens when it is their turn.
    */
   private JCheckBoxMenuItem movementLockMenuItem;
+
+  /**
+   * The menu item for whether to display a confirmation dialog when resetting the round counter.
+   */
+  private JCheckBoxMenuItem warnWhenResettingRoundCounterMenuItem;
 
   /**
    * Flag indicating that the owners of tokens have been granted permission to restricted actions
@@ -153,12 +158,13 @@ public class InitiativePanel extends JPanel
     toolBar.add(new TextlessButton(PREV_ACTION));
     toolBar.add(new TextlessButton(TOGGLE_HOLD_ACTION));
     toolBar.add(new TextlessButton(NEXT_ACTION));
-    toolBar.add(new TextlessButton(RESET_COUNTER_ACTION));
 
     round = new JLabel("", SwingConstants.LEFT);
     toolBar.add(Box.createHorizontalGlue());
     toolBar.add(round);
     toolBar.add(Box.createHorizontalStrut(8));
+
+    toolBar.add(new TextlessButton(RESET_COUNTER_ACTION));
 
     // ensure that the preferred width is enough to show the round counter in fullscreen
     round.setText(I18N.getText("initPanel.round") + "WWW");
@@ -218,6 +224,8 @@ public class InitiativePanel extends JPanel
     I18N.setAction("initPanel.toggleOwnerPermissions", TOGGLE_OWNER_PERMISSIONS_ACTION);
     I18N.setAction("initPanel.toggleMovementLock", TOGGLE_MOVEMENT_LOCK_ACTION);
     I18N.setAction("initPanel.round", RESET_COUNTER_ACTION);
+    I18N.setAction(
+        "initPanel.warnWhenResettingRoundCounter", TOGGLE_WARN_WHEN_RESETTING_COUNTER_ACTION);
     I18N.setAction("initPanel.next", NEXT_ACTION);
     I18N.setAction("initPanel.prev", PREV_ACTION);
     updateView();
@@ -233,6 +241,7 @@ public class InitiativePanel extends JPanel
       getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "none");
     }
   }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
@@ -290,6 +299,11 @@ public class InitiativePanel extends JPanel
       movementLockMenuItem = new JCheckBoxMenuItem(TOGGLE_MOVEMENT_LOCK_ACTION);
       movementLockMenuItem.setSelected(list != null && movementLock);
       popupMenu.add(movementLockMenuItem);
+      warnWhenResettingRoundCounterMenuItem =
+          new JCheckBoxMenuItem(TOGGLE_WARN_WHEN_RESETTING_COUNTER_ACTION);
+      warnWhenResettingRoundCounterMenuItem.setSelected(
+          list != null && AppPreferences.initiativePanelWarnWhenResettingRoundCounter.get());
+      popupMenu.add(warnWhenResettingRoundCounterMenuItem);
       popupMenu.addSeparator();
       popupMenu.add(new JMenuItem(ADD_PCS_ACTION));
       popupMenu.add(new JMenuItem(ADD_ALL_ACTION));
@@ -318,12 +332,16 @@ public class InitiativePanel extends JPanel
     else round.setText("");
   }
 
-  /** @return Getter for list */
+  /**
+   * @return Getter for list
+   */
   public InitiativeList getList() {
     return list;
   }
 
-  /** @param theList Setter for the list to set */
+  /**
+   * @param theList Setter for the list to set
+   */
   public void setList(InitiativeList theList) {
     // Remove the old list
     if (list == theList) return;
@@ -348,22 +366,30 @@ public class InitiativePanel extends JPanel
         });
   }
 
-  /** @return Getter for showTokens */
+  /**
+   * @return Getter for showTokens
+   */
   public boolean isShowTokens() {
     return showTokens;
   }
 
-  /** @return Getter for showTokenStates */
+  /**
+   * @return Getter for showTokenStates
+   */
   public boolean isShowTokenStates() {
     return showTokenStates;
   }
 
-  /** @return Getter for showInitState */
+  /**
+   * @return Getter for showInitState
+   */
   public boolean isShowInitState() {
     return showInitState;
   }
 
-  /** @return Getter for model */
+  /**
+   * @return Getter for model
+   */
   public InitiativeListModel getModel() {
     return model;
   }
@@ -417,23 +443,31 @@ public class InitiativePanel extends JPanel
     return (MapTool.getPlayer() == null || MapTool.getPlayer().isGM());
   }
 
-  /** @return Getter for ownerPermissions */
+  /**
+   * @return Getter for ownerPermissions
+   */
   public boolean isOwnerPermissions() {
     return ownerPermissions;
   }
 
-  /** @param anOwnerPermissions Setter for ownerPermissions */
+  /**
+   * @param anOwnerPermissions Setter for ownerPermissions
+   */
   public void setOwnerPermissions(boolean anOwnerPermissions) {
     ownerPermissions = anOwnerPermissions;
     updateView();
   }
 
-  /** @return Getter for MovementLock */
+  /**
+   * @return Getter for MovementLock
+   */
   public boolean isMovementLock() {
     return movementLock;
   }
 
-  /** @param anMovementLock Setter for MovementLock */
+  /**
+   * @param anMovementLock Setter for MovementLock
+   */
   public void setMovementLock(boolean anMovementLock) {
     movementLock = anMovementLock;
   }
@@ -481,12 +515,16 @@ public class InitiativePanel extends JPanel
     return true;
   }
 
-  /** @return Getter for initStateSecondLine */
+  /**
+   * @return Getter for initStateSecondLine
+   */
   public boolean isInitStateSecondLine() {
     return initStateSecondLine;
   }
 
-  /** @param initStateSecondLine Setter for initStateSecondLine */
+  /**
+   * @param initStateSecondLine Setter for initStateSecondLine
+   */
   public void setInitStateSecondLine(boolean initStateSecondLine) {
     this.initStateSecondLine = initStateSecondLine;
   }
@@ -554,7 +592,9 @@ public class InitiativePanel extends JPanel
    * PropertyChangeListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
+  /**
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
     if (evt.getPropertyName().equals(InitiativeList.ROUND_PROP)) {
@@ -565,7 +605,8 @@ public class InitiativePanel extends JPanel
       String s = I18N.getText("initPanel.displayMessage", t.getName());
       if (InitiativeListModel.isTokenVisible(t, list.isHideNPC())
           && t.getType() != Type.NPC
-          && AppPreferences.isShowInitGainMessage()) MapTool.addMessage(TextMessage.say(null, s));
+          && AppPreferences.showInitiativeGainedMessage.get())
+        MapTool.addMessage(TextMessage.say(null, s));
       displayList.ensureIndexIsVisible(model.getDisplayIndex(list.getCurrent()));
       NEXT_ACTION.setEnabled(
           !isInitPanelButtonsDisabled() && hasOwnerPermission(list.getCurrentToken()));
@@ -645,7 +686,7 @@ public class InitiativePanel extends JPanel
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
-          AppPreferences.setInitShowTokens(showTokens);
+          AppPreferences.initiativePanelShowsTokenImage.set(showTokens);
         }
       };
 
@@ -658,7 +699,7 @@ public class InitiativePanel extends JPanel
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
-          AppPreferences.setInitShowTokenStates(showTokenStates);
+          AppPreferences.initiativePanelShowsTokenState.set(showTokenStates);
         }
       };
 
@@ -671,7 +712,7 @@ public class InitiativePanel extends JPanel
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
-          AppPreferences.setInitShowInitiative(showInitState);
+          AppPreferences.initiativePanelShowsInitiative.set(showInitState);
         }
       };
 
@@ -684,7 +725,7 @@ public class InitiativePanel extends JPanel
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
-          AppPreferences.setInitShow2ndLine(initStateSecondLine);
+          AppPreferences.initiativePanelShowsInitiativeOnLine2.set(initStateSecondLine);
         }
       };
 
@@ -766,7 +807,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          list.insertTokens(list.getZone().getTokens());
+          list.insertTokens(list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer));
         }
       };
 
@@ -776,7 +817,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           List<Token> tokens = new ArrayList<Token>();
-          for (Token token : list.getZone().getTokens()) {
+          for (Token token : list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer)) {
             if (token.getType() == Type.PC) tokens.add(token);
           } // endfor
           list.insertTokens(tokens);
@@ -822,6 +863,16 @@ public class InitiativePanel extends JPanel
         }
       };
 
+  /** Enable/Disable showing a warning dialog when resetting the round counter */
+  public final Action TOGGLE_WARN_WHEN_RESETTING_COUNTER_ACTION =
+      new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          AppPreferences.initiativePanelWarnWhenResettingRoundCounter.set(
+              ((JCheckBoxMenuItem) e.getSource()).isSelected());
+        }
+      };
+
   /** This action will reset the round counter for the initiative panel. */
   public final Action RESET_COUNTER_ACTION =
       new AbstractAction() {
@@ -831,10 +882,24 @@ public class InitiativePanel extends JPanel
             return;
           }
 
-          list.startUnitOfWork();
-          list.setRound(-1);
-          list.setCurrent(-1);
-          list.finishUnitOfWork();
+          boolean reset;
+          if (AppPreferences.initiativePanelWarnWhenResettingRoundCounter.get()) {
+            reset =
+                (JOptionPane.showConfirmDialog(
+                        null,
+                        I18N.getText("initPanel.warnWhenResettingRoundCounter.confirm"),
+                        I18N.getText("msg.title.messageDialogConfirm"),
+                        JOptionPane.YES_NO_OPTION)
+                    == JOptionPane.YES_OPTION);
+          } else {
+            reset = true;
+          }
+          if (reset) {
+            list.startUnitOfWork();
+            list.setRound(-1);
+            list.setCurrent(-1);
+            list.finishUnitOfWork();
+          }
         }
       };
 
@@ -850,7 +915,9 @@ public class InitiativePanel extends JPanel
    */
   private class MouseHandler extends MouseAdapter {
 
-    /** @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent) */
+    /**
+     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
 
@@ -867,14 +934,12 @@ public class InitiativePanel extends JPanel
                 ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
                 if (renderer == null
                     || token == null
-                    || (!token.isToken() && !MapTool.getPlayer().isGM())
+                    || (!token.getLayer().isTokenLayer() && !MapTool.getPlayer().isGM())
                     || !AppUtil.playerOwns(token)) {
                   return;
                 }
 
-                renderer.clearSelectedTokens();
-                renderer.centerOn(token);
-                renderer.updateAfterSelection();
+                renderer.centerOnAndSetSelected(token);
                 renderer.maybeForcePlayersView();
               }
             });
@@ -885,7 +950,6 @@ public class InitiativePanel extends JPanel
           return;
         }
         displayList.setSelectedIndex(model.getDisplayIndex(list.indexOf(ti)));
-        // TODO Can I use hasOwnerPermission(ti.getToken()) here instead?
         if (!hasGMPermission()
             && ti.getToken() != null
             && !ti.getToken().isOwner(MapTool.getPlayer().getName())) return;

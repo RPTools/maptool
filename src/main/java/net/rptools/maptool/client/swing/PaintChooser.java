@@ -31,7 +31,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
 import net.rptools.maptool.language.I18N;
 
-@SuppressWarnings("serial")
 public class PaintChooser extends JPanel {
 
   private final JColorChooser swatchColorChooser;

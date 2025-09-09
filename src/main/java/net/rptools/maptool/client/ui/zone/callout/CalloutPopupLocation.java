@@ -49,8 +49,10 @@ public enum CalloutPopupLocation {
 
   /** The x offset from the top left in multiples of width for this anchor point. */
   private final double widthMultiplier;
+
   /** The y offset from the top left in multiples of height for this anchor point. */
   private final double heightMultiplier;
+
   /** The anchor point that is opposite to this. */
   private CalloutPopupLocation opposite;
 

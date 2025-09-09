@@ -25,8 +25,6 @@ import net.rptools.maptool.util.FunctionUtil;
  * An overlay that may be applied to a token to show state.
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
  */
 public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
 

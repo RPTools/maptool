@@ -25,7 +25,7 @@ import java.awt.image.Raster;
 import java.awt.image.TileObserver;
 import java.awt.image.WritableRaster;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 
 /**
  * This is a read-only implementation of BufferedImage intended to be used with ImageWriters to
@@ -36,7 +36,6 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
  */
 public class ZoneImageGenerator extends BufferedImage {
 
-  // final JComponent largeComponent;
   final ZoneRenderer renderer;
   final PlayerView view;
   final Rectangle origBounds;

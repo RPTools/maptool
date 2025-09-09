@@ -16,7 +16,7 @@ package net.rptools.maptool.client.swing;
 
 import com.jidesoft.dialog.JideOptionPane;
 import io.sentry.Sentry;
-import io.sentry.event.UserBuilder;
+import io.sentry.protocol.User;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
 import java.awt.Insets;
@@ -25,10 +25,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import javax.swing.*;
-import net.rptools.maptool.client.AppUtil;
+import net.rptools.lib.OsDetection;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.MapToolSysInfoProvider;
@@ -37,15 +38,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MapToolEventQueue extends EventQueue {
+
+  /** The Logger for this class. */
   private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
+
+  /** Option pane for displaying messages. */
   private static JideOptionPane optionPane;
+
+  /** Factory Class for creating MacroLocation objects. */
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   @Override
   protected void dispatchEvent(AWTEvent event) {
     try {
       if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
-        if (AppUtil.MAC_OS_X && mwe.isShiftDown()) {
+        if (OsDetection.MAC_OS_X && mwe.isShiftDown()) {
           // issue 1317: ignore ALL horizontal movement on macOS, *even if* the physical Shift is
           // held down.
           return;
@@ -61,7 +70,6 @@ public class MapToolEventQueue extends EventQueue {
       jta.setWrapStyleWord(true);
       jta.setMargin(new Insets(5, 10, 10, 10));
       optionPane.setDetails(jta);
-      // optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
       displayPopup();
       reportToSentryIO(soe);
     } catch (Throwable t) {
@@ -87,7 +95,9 @@ public class MapToolEventQueue extends EventQueue {
     }
   }
 
-  /** @return the JideOptionPane. Initializes it if null. Must be done after Jide is configured. */
+  /**
+   * @return the JideOptionPane. Initializes it if null. Must be done after Jide is configured.
+   */
   private static JideOptionPane getOptionPane() {
     if (optionPane == null) {
       optionPane =
@@ -118,7 +128,8 @@ public class MapToolEventQueue extends EventQueue {
   }
 
   private static void reportToSentryIO(Throwable thrown) {
-    if (Sentry.getStoredClient().getEnvironment().equalsIgnoreCase("development")) {
+    var hub = Sentry.getCurrentHub();
+    if ("development".equalsIgnoreCase(hub.getOptions().getEnvironment())) {
       log.info("Sentry.IO stacktrace logging skipped in development environment.");
       return;
     }
@@ -128,19 +139,12 @@ public class MapToolEventQueue extends EventQueue {
     // current context (until the context is cleared).
 
     // Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
-    // TODO: We could use this to record user actions to get a hint on what user was doing before
-    // exception was
-    // thrown...
-    // Sentry.getContext().recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an
-    // action").build());
-
-    UserBuilder user = new UserBuilder();
+    User user = new User();
     Player player = MapTool.getPlayer();
     if (player != null) {
       user.setUsername(player.getName());
       user.setId(MapTool.getClientId());
-      user.setEmail(
-          player.getName().replaceAll(" ", "_") + "@rptools.net"); // Lets prompt for this?
+      user.setEmail(player.getName().replaceAll(" ", "_") + "@rptools.net");
     } else {
       user.setUsername("Unknown");
       user.setId("Unknown");
@@ -148,29 +152,30 @@ public class MapToolEventQueue extends EventQueue {
     }
 
     // Set the user in the current context.
-    Sentry.getContext().setUser(user.build());
+    Sentry.setUser(user);
 
-    Sentry.getContext().addTag("role", player != null ? player.getRole().name() : null);
+    Sentry.setTag("role", player != null ? player.getRole().name() : null);
     boolean hostingServer = MapTool.isHostingServer();
-    Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
+    Sentry.setTag("hosting", String.valueOf(MapTool.isHostingServer()));
 
-    Sentry.getContext().addExtra("System Info", new MapToolSysInfoProvider().getSysInfoJSON());
+    Sentry.setExtra("System Info", new MapToolSysInfoProvider().getSysInfoJSON().toString());
 
     addGetInfoToSentry("campaign");
 
     if (hostingServer) {
       addGetInfoToSentry("server");
-      Sentry.getContext().addExtra("Server Policy", MapTool.getServerPolicy().toJSON());
+      Sentry.setExtra("Server Policy", MapTool.getServerPolicy().toJSON().toString());
     }
 
     // Send the event!
-    Sentry.capture(thrown);
+    Sentry.captureException(thrown);
   }
 
   private static void addGetInfoToSentry(String command) {
     Object campaign;
     try {
-      MapToolMacroContext sentryContext = new MapToolMacroContext(command, "sentryIOLogging", true);
+      var loc = macroLocationFactory.createSentryIoLoggingLocation();
+      MapToolMacroContext sentryContext = new MapToolMacroContext(command, loc, true);
       MapTool.getParser().enterContext(sentryContext);
       campaign =
           getInfoFunction
@@ -180,6 +185,6 @@ public class MapToolEventQueue extends EventQueue {
     } catch (ParserException e) {
       campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();
     }
-    Sentry.getContext().addExtra("getinfo(\"" + command + "\")", campaign);
+    Sentry.setExtra("getinfo(\"" + command + "\")", campaign.toString());
   }
 }

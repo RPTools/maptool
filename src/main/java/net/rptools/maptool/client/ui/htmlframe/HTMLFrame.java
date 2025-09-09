@@ -127,7 +127,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param scrollReset whether the scrollbar should be reset.
    * @param isHTML5 whether it should use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param val a value that can be returned by getFrameProperties().
-   * @param html the html to display in the frame.
+   * @param htmlContent the html contnent to display in the frame.
    * @return the HTMLFrame that is displayed.
    */
   public static HTMLFrame showFrame(
@@ -140,7 +140,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       boolean scrollReset,
       boolean isHTML5,
       Object val,
-      String html)
+      HTMLContent htmlContent)
       throws ParserException {
     HTMLFrame frame;
 
@@ -171,7 +171,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       // Jamz: why undock frames to center them?
       if (!frame.isDocked()) center(name);
     }
-    frame.updateContents(html, title, tabTitle, temp, scrollReset, isHTML5, val);
+    frame.updateContents(htmlContent, title, tabTitle, temp, scrollReset, isHTML5, val);
     return frame;
   }
 
@@ -277,7 +277,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   /**
    * Update the html content of the frame.
    *
-   * @param html the html content
+   * @param htmlContent the html content
    * @param title the title of the frame
    * @param tabTitle the tabTitle of the frame
    * @param temp whether the frame is temporary
@@ -286,7 +286,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param val the value to put in the frame
    */
   public void updateContents(
-      String html,
+      HTMLContent htmlContent,
       String title,
       String tabTitle,
       boolean temp,
@@ -304,13 +304,13 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     setTabTitle(tabTitle);
     setTemporary(temp);
     setValue(val);
-    panel.updateContents(html, scrollReset);
+    panel.updateContents(htmlContent, scrollReset);
   }
 
   /** Run all callback macros for "onChangeSelection". */
   public static void doSelectedChanged() {
     for (HTMLFrame frame : frames.values()) {
-      if (frame.isVisible()) {
+      if (!frame.isHidden()) {
         HTMLPanelContainer.selectedChanged(frame.macroCallbacks);
       }
     }
@@ -319,7 +319,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   /** Run all callback macros for "onChangeImpersonated". */
   public static void doImpersonatedChanged() {
     for (HTMLFrame frame : frames.values()) {
-      if (frame.isVisible()) {
+      if (!frame.isHidden()) {
         HTMLPanelContainer.impersonatedChanged(frame.macroCallbacks);
       }
     }
@@ -333,7 +333,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   public static void doTokenChanged(Token token) {
     if (token != null) {
       for (HTMLFrame frame : frames.values()) {
-        if (frame.isVisible()) {
+        if (!frame.isHidden()) {
           HTMLPanelContainer.tokenChanged(token, frame.macroCallbacks);
         }
       }
@@ -367,11 +367,15 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
           "autohide", FunctionUtil.getDecimalForBoolean(frame.isAutohide()));
       frameProperties.addProperty("height", frame.getHeight());
       frameProperties.addProperty("width", frame.getWidth());
-      // The x & y are screen coordinates.
-      frameProperties.addProperty("undocked_x", dc.getUndockedBounds().getX());
-      frameProperties.addProperty("undocked_y", dc.getUndockedBounds().getY());
-      frameProperties.addProperty("undocked_h", dc.getUndockedBounds().getHeight());
-      frameProperties.addProperty("undocked_w", dc.getUndockedBounds().getWidth());
+      final var undockedBounds = dc.getUndockedBounds();
+      // A frame docked prior to a Restore Layout will lose its undocked bounds, causing NPE here.
+      if (undockedBounds != null) {
+        // The x & y are screen coordinates.
+        frameProperties.addProperty("undocked_x", undockedBounds.getX());
+        frameProperties.addProperty("undocked_y", undockedBounds.getY());
+        frameProperties.addProperty("undocked_h", undockedBounds.getHeight());
+        frameProperties.addProperty("undocked_w", undockedBounds.getWidth());
+      }
       // Many of the Frame/DockContext attributes shown in the JIDE javadocs don't seem to
       // get updated.  Docked height never changes but docked width does and matches Frame
       // width.  AutoHide Height/Width never change.

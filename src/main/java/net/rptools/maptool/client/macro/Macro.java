@@ -16,7 +16,9 @@ package net.rptools.maptool.client.macro;
 
 import net.rptools.maptool.client.MapToolMacroContext;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public interface Macro {
 
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext);

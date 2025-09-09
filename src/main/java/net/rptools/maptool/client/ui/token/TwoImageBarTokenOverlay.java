@@ -20,8 +20,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
@@ -57,7 +57,9 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     bottomAssetId = theBottomAssetId;
   }
 
-  /** @see AbstractTokenOverlay#clone() */
+  /**
+   * @see AbstractTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new TwoImageBarTokenOverlay(getName(), topAssetId, bottomAssetId);
@@ -87,7 +89,7 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension(images[0].getWidth(), images[0].getHeight());
-    SwingUtil.constrainTo(size, d.width, d.height);
+    AwtUtil.constrainTo(size, d.width, d.height);
 
     // Find the position of the images according to the size and side where they are placed
     int x = 0;
@@ -142,22 +144,30 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @return Getter for bottomAssetId */
+  /**
+   * @return Getter for bottomAssetId
+   */
   public MD5Key getBottomAssetId() {
     return bottomAssetId;
   }
 
-  /** @param bottomAssetId Setter for bottomAssetId */
+  /**
+   * @param bottomAssetId Setter for bottomAssetId
+   */
   public void setBottomAssetId(MD5Key bottomAssetId) {
     this.bottomAssetId = bottomAssetId;
   }
 
-  /** @return Getter for topAssetId */
+  /**
+   * @return Getter for topAssetId
+   */
   public MD5Key getTopAssetId() {
     return topAssetId;
   }
 
-  /** @param topAssetId Setter for topAssetId */
+  /**
+   * @param topAssetId Setter for topAssetId
+   */
   public void setTopAssetId(MD5Key topAssetId) {
     this.topAssetId = topAssetId;
   }

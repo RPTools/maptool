@@ -47,13 +47,13 @@ import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Extension to <code>JTextPane</code> that supports 2 tone text.
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
  */
 public class TwoToneTextPane extends JTextPane {
 
@@ -66,6 +66,8 @@ public class TwoToneTextPane extends JTextPane {
 
   /** Pattern used to parse text strings for a style */
   private static final Pattern TEXT_PATTERN = Pattern.compile("\\$\\{\\s*(\\w*)\\s*\\}");
+
+  private static final Logger log = LogManager.getLogger(TwoToneTextPane.class);
 
   /*---------------------------------------------------------------------------------------------
    * Constructors
@@ -134,9 +136,15 @@ public class TwoToneTextPane extends JTextPane {
    */
   public static String getFontString(Style style) {
     String font = StyleConstants.getFontFamily(style) + "-";
-    if (StyleConstants.isBold(style)) font += "BOLD";
-    if (StyleConstants.isItalic(style)) font += "ITALIC";
-    if (!StyleConstants.isBold(style) && !StyleConstants.isItalic(style)) font += "PLAIN";
+    if (StyleConstants.isBold(style)) {
+      font += "BOLD";
+    }
+    if (StyleConstants.isItalic(style)) {
+      font += "ITALIC";
+    }
+    if (!StyleConstants.isBold(style) && !StyleConstants.isItalic(style)) {
+      font += "PLAIN";
+    }
     font += "-" + StyleConstants.getFontSize(style);
     return font;
   }
@@ -165,13 +173,15 @@ public class TwoToneTextPane extends JTextPane {
 
         // Get the next style
         style = pane.getStyle(match.group(1));
-        if (style == null) throw new IllegalArgumentException("Unknown style: '" + match.group(1));
+        if (style == null) {
+          throw new IllegalArgumentException("Unknown style: '" + match.group(1));
+        }
       } // endwhile
 
       // Add the last of the text
       doc.insertString(doc.getLength(), text.substring(textStart), null);
     } catch (BadLocationException e) {
-      e.printStackTrace();
+      log.error("Unexpected error while parsing", e);
       throw new IllegalStateException(
           "This should not happen since I always use the document to "
               + "determine the location to write. It might be due to synchronization problems though",
@@ -187,15 +197,15 @@ public class TwoToneTextPane extends JTextPane {
    * Editor kit that provides the two tone view factory.
    *
    * @author jgorrell
-   * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
-   *     azhrei_fje $
    */
   class TwoToneStyledEditorKit extends StyledEditorKit {
 
     /** The view factory used by the editor kit */
     private ViewFactory defaultViewFactory = new TwoToneStyledViewFactory();
 
-    /** @see javax.swing.text.StyledEditorKit#getViewFactory() */
+    /**
+     * @see javax.swing.text.StyledEditorKit#getViewFactory()
+     */
     public ViewFactory getViewFactory() {
       return defaultViewFactory;
     }
@@ -209,12 +219,12 @@ public class TwoToneTextPane extends JTextPane {
    * This factory is the default view factory extended to return a view that paints two tone text.
    *
    * @author jgorrell
-   * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
-   *     azhrei_fje $
    */
   class TwoToneStyledViewFactory implements ViewFactory {
 
-    /** @see javax.swing.text.ViewFactory#create(javax.swing.text.Element) */
+    /**
+     * @see javax.swing.text.ViewFactory#create(javax.swing.text.Element)
+     */
     public View create(Element elem) {
       String kind = elem.getName();
       if (kind != null) {
@@ -244,8 +254,6 @@ public class TwoToneTextPane extends JTextPane {
    * Label view that can paint two tone text.
    *
    * @author jgorrell
-   * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
-   *     azhrei_fje $
    */
   public class TwoToneLabelView extends LabelView {
 
@@ -274,8 +282,6 @@ public class TwoToneTextPane extends JTextPane {
    * painting.
    *
    * @author jgorrell
-   * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
-   *     azhrei_fje $
    */
   public static class TwoToneGlyphPainter extends GlyphView.GlyphPainter {
 
@@ -338,7 +344,9 @@ public class TwoToneTextPane extends JTextPane {
       return width;
     }
 
-    /** @see javax.swing.text.GlyphView.GlyphPainter#getHeight(javax.swing.text.GlyphView) */
+    /**
+     * @see javax.swing.text.GlyphView.GlyphPainter#getHeight(javax.swing.text.GlyphView)
+     */
     public float getHeight(GlyphView v) {
       sync(v);
       return metrics.getHeight() + VERTICAL_OFFSET;

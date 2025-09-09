@@ -25,6 +25,7 @@ import java.awt.geom.Rectangle2D;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.language.I18N;
@@ -54,15 +55,20 @@ import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author Joe.Frazier */
+/**
+ * @author Joe.Frazier
+ */
 public class TokenMoveFunctions extends AbstractFunction {
 
   /** macro name to call for the onTokenMove event */
   public static final String ON_TOKEN_MOVE_COMPLETE_CALLBACK = "onTokenMove";
+
   /** macro name to call for the onMultipleTokensMove event */
   public static final String ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK = "onMultipleTokensMove";
+
   /** variable to test for token move denial */
   public static final String ON_TOKEN_MOVE_DENY_VARIABLE = "tokens.denyMove";
+
   /** variable to contain number of tokens moved */
   public static final String ON_TOKEN_MOVE_COUNT_VARIABLE = "tokens.moveCount";
 
@@ -76,7 +82,6 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   public static TokenMoveFunctions getInstance() {
-    // log.setLevel(Level.INFO);
     return instance;
   }
 
@@ -262,7 +267,7 @@ public class TokenMoveFunctions extends AbstractFunction {
                 .getFootprint(grid)
                 .getBounds(grid, grid.convert(new ZonePoint(entry.get("x"), entry.get("y"))));
       } else {
-        originalArea = tokenInContext.getBounds(zone);
+        originalArea = tokenInContext.getImageBounds(zone);
       }
       Rectangle2D oa = originalArea.getBounds2D();
       if (targetArea.contains(oa) || targetArea.intersects(oa)) {
@@ -295,7 +300,7 @@ public class TokenMoveFunctions extends AbstractFunction {
      * if-else sequence...
      */
     Grid grid = zone.getGrid();
-    Rectangle targetArea = target.getBounds(zone);
+    Rectangle targetArea = target.getImageBounds(zone);
 
     if (pathPoints == null) {
       return returnPoints;
@@ -321,7 +326,7 @@ public class TokenMoveFunctions extends AbstractFunction {
       Map<String, Integer> firstPoint = new HashMap<String, Integer>(),
           secondPoint = new HashMap<String, Integer>();
       for (Map<String, Integer> entry : pathPoints) {
-        Rectangle tokenArea = tokenInContext.getBounds(zone);
+        Rectangle tokenArea = tokenInContext.getImageBounds(zone);
         Point currentPoint = new Point(entry.get("x"), entry.get("y"));
         if (ctr > 0) {
           if (targetArea.intersectsLine(new Line2D.Double(previousPoint, currentPoint))
@@ -339,8 +344,6 @@ public class TokenMoveFunctions extends AbstractFunction {
         previousPoint = currentPoint;
         ctr += 1;
       }
-      // Lee: commenting this out
-      // originalArea = tokenInContext.getBounds(zone);
     }
     return returnPoints;
   }
@@ -469,52 +472,40 @@ public class TokenMoveFunctions extends AbstractFunction {
 
   private String getMovement(
       final Token source, boolean returnFractionOnly, boolean useTerrainModifiers) {
-    ZoneWalker walker = null;
-
     WalkerMetric metric =
         MapTool.isPersonalServer()
-            ? AppPreferences.getMovementMetric()
+            ? AppPreferences.movementMetric.get()
             : MapTool.getServerPolicy().getMovementMetric();
 
     ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
     Zone zone = zr.getZone();
     Grid grid = zone.getGrid();
 
-    Path<ZonePoint> gridlessPath;
-    /*
-     * Lee: causes an NPE when used on a newly dropped token. While a true solution would probably be to create a "path" based on the token's coords when it is dropped on the map, the easy out
-     * here would be to just return a "0".
-     *
-     * Final Edit: attempting to create a default path for new drops had undesirable effects. Therefore, let's opt for the easy fix
-     */
-    int x = 0, y = 0;
-
-    try {
-      x = source.getLastPath().getCellPath().get(0).x;
-      y = source.getLastPath().getCellPath().get(0).y;
-    } catch (NullPointerException e) {
+    List<? extends AbstractPoint> cellPath =
+        source.getLastPath() == null ? Collections.emptyList() : source.getLastPath().getCellPath();
+    if (cellPath.isEmpty()) {
       return "0";
     }
 
     if (useTerrainModifiers && !returnFractionOnly) {
-      if (source.getLastPath().getLastWaypoint() instanceof CellPoint) {
-        CellPoint cp = (CellPoint) source.getLastPath().getLastWaypoint();
+      if (cellPath.getLast() instanceof CellPoint cp) {
         double trueDistance = cp.getDistanceTraveled(zone);
-
         return new BigDecimal(trueDistance).stripTrailingZeros().toPlainString();
       }
     }
 
     if (source.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
       if (zone.getGrid().getCapabilities().isPathingSupported()) {
+        var firstPoint = cellPath.getFirst();
         List<CellPoint> cplist = new ArrayList<CellPoint>();
-        walker = grid.createZoneWalker();
-        walker.replaceLastWaypoint(new CellPoint(x, y));
-        for (AbstractPoint point : source.getLastPath().getCellPath()) {
-          CellPoint tokenPoint = new CellPoint(point.x, point.y);
-          // walker.setWaypoints(tokenPoint);
-          walker.replaceLastWaypoint(tokenPoint);
-          cplist.add(tokenPoint);
+
+        try (ZoneWalker walker = grid.createZoneWalker()) {
+          walker.replaceLastWaypoint(new CellPoint(firstPoint.x, firstPoint.y));
+          for (AbstractPoint point : cellPath) {
+            CellPoint tokenPoint = new CellPoint(point.x, point.y);
+            walker.replaceLastWaypoint(tokenPoint);
+            cplist.add(tokenPoint);
+          }
         }
 
         double bar =
@@ -525,25 +516,20 @@ public class TokenMoveFunctions extends AbstractFunction {
         } else {
           return new BigDecimal(bar).stripTrailingZeros().toPlainString();
         }
-
-        // return Integer.toString(walker.getDistance());
       }
     } else {
-      gridlessPath = new Path<ZonePoint>();
-      for (AbstractPoint point : source.getLastPath().getCellPath()) {
-        gridlessPath.addPathCell(new ZonePoint(point.x, point.y));
-      }
       double c = 0;
-      ZonePoint lastPoint = null;
-      for (ZonePoint zp : gridlessPath.getCellPath()) {
+      // Should be a ZonePoint, but the calculation just doesn't care.
+      AbstractPoint lastPoint = null;
+      for (var point : cellPath) {
         if (lastPoint == null) {
-          lastPoint = zp;
+          lastPoint = point;
           continue;
         }
-        int a = lastPoint.x - zp.x;
-        int b = lastPoint.y - zp.y;
+        int a = lastPoint.x - point.x;
+        int b = lastPoint.y - point.y;
         c += Math.hypot(a, b);
-        lastPoint = zp;
+        lastPoint = point;
       }
       c /= zone.getGrid().getSize(); // Number of "cells"
       c *= zone.getUnitsPerCell(); // "actual" distance traveled
@@ -591,7 +577,8 @@ public class TokenMoveFunctions extends AbstractFunction {
       }
     } catch (InterruptedException | ExecutionException e) {
       log.error(
-          I18N.getText("library.error.retrievingEventHandler", ON_TOKEN_MOVE_COMPLETE_CALLBACK),
+          I18N.getText(
+              "library.error.retrievingEventHandler", ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK),
           e.getCause());
     }
     return moveDenied;

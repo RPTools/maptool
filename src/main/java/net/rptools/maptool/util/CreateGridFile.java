@@ -21,7 +21,9 @@ import java.io.File;
 import javax.imageio.ImageIO;
 import net.rptools.lib.image.ImageUtil;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class CreateGridFile {
 
   private static BufferedImage createImage(

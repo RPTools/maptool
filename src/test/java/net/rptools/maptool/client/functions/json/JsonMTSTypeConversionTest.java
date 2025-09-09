@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.Random;
@@ -34,8 +33,7 @@ class JsonMTSTypeConversionTest {
 
   @BeforeEach
   void setup() {
-    JsonParser jsonParser = new JsonParser();
-    typeConversion = new JsonMTSTypeConversion(jsonParser);
+    typeConversion = new JsonMTSTypeConversion();
     random = new Random(System.currentTimeMillis());
   }
 

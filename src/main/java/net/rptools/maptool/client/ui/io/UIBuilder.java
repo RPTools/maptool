@@ -48,7 +48,9 @@ public class UIBuilder extends JDialog {
 
   private static final Logger log = LogManager.getLogger(UIBuilder.class);
 
-  /** @author crash */
+  /**
+   * @author crash
+   */
   public static class TreeModel extends DefaultTreeModel {
     /**
      * @param root the top-level node for the tree
@@ -211,7 +213,7 @@ public class UIBuilder extends JDialog {
   }
 
   private static final AbeillePanel form =
-      new AbeillePanel(new CampaignItemListView().$$$getRootComponent$$$());
+      new AbeillePanel(new CampaignItemListView().getRootComponent());
 
   private final CheckBoxTree tree;
   private final TreeModel dtm;
@@ -223,7 +225,6 @@ public class UIBuilder extends JDialog {
     tree = (CheckBoxTree) form.getTree("mainTree");
     DefaultMutableTreeNode root = new DefaultMutableTreeNode(new MaptoolNode("Root"));
     dtm = new TreeModel(root);
-    // buildTree();
 
     tree.setModel(dtm);
     tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -233,7 +234,6 @@ public class UIBuilder extends JDialog {
     tree.getCheckBoxTreeSelectionModel().addSelectionPath(new TreePath(root.getPath()));
 
     // This is how to turn OFF the checkbox for a particular node
-    // tree.getCheckBoxTreeSelectionModel().removeSelectionPath(new TreePath(root.getPath()));
 
     Dimension size;
     JScrollPane jsp = (JScrollPane) tree.getParent().getParent();

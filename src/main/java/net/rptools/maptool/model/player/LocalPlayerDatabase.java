@@ -15,31 +15,23 @@
 package net.rptools.maptool.model.player;
 
 import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.server.ServerConfig;
-import net.rptools.maptool.util.cipher.CipherUtil;
-import net.rptools.maptool.util.cipher.CipherUtil.Key;
-import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.cipher.PublicPrivateKeyStore;
 
 /** This class provides the implementation for the "database" for the client local player. */
 public class LocalPlayerDatabase implements PlayerDatabase {
 
-  private LocalPlayer localPlayer;
+  private final LocalPlayer localPlayer;
   private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
+  private final PublicPrivateKeyStore keyStore;
 
-  LocalPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
-    localPlayer = new LocalPlayer("None", Role.GM, ServerConfig.getPersonalServerGMPassword());
-  }
-
-  public synchronized void setLocalPlayer(LocalPlayer player) {
+  public LocalPlayerDatabase(LocalPlayer player, PublicPrivateKeyStore keyStore) {
     localPlayer = player;
+    this.keyStore = keyStore;
   }
 
   private synchronized LocalPlayer getLocalPlayer() {
@@ -59,48 +51,6 @@ public class LocalPlayerDatabase implements PlayerDatabase {
     } else {
       return null;
     }
-  }
-
-  @Override
-  public Optional<Key> getPlayerPassword(String playerName) {
-    LocalPlayer player = (LocalPlayer) getPlayer(playerName);
-    if (player != null && player.getName().equals(playerName)) {
-      return Optional.of(player.getPassword());
-    }
-    return Optional.empty();
-  }
-
-  @Override
-  public byte[] getPlayerPasswordSalt(String playerName) {
-    LocalPlayer player = (LocalPlayer) getPlayer(playerName);
-    if (player != null && player.getName().equals(playerName)) {
-      return player.getPassword().salt();
-    }
-    return new byte[0];
-  }
-
-  @Override
-  public Player getPlayerWithRole(String playerName, Role role)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
-    LocalPlayer player = (LocalPlayer) getPlayer(playerName);
-    if (player != null && player.getName().equals(playerName)) {
-      player.setRole(role);
-    } else {
-      player =
-          new LocalPlayer(
-              playerName,
-              role,
-              role == Role.GM
-                  ? ServerConfig.getPersonalServerGMPassword()
-                  : ServerConfig.getPersonalServerPlayerPassword());
-    }
-    setLocalPlayer(player);
-    return player;
-  }
-
-  @Override
-  public Optional<Key> getRolePassword(Role role) {
-    return Optional.empty();
   }
 
   @Override
@@ -129,13 +79,8 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+  public Set<Player> getOnlinePlayers() {
     return new HashSet<>(loggedInPlayers.getPlayers());
-  }
-
-  @Override
-  public boolean recordsOnlyConnectedPlayers() {
-    return true;
   }
 
   @Override
@@ -145,7 +90,7 @@ public class LocalPlayerDatabase implements PlayerDatabase {
 
   @Override
   public CompletableFuture<CipherUtil.Key> getPublicKey(Player player, MD5Key md5key) {
-    return new PublicPrivateKeyStore().getKeys();
+    return keyStore.getKeys();
   }
 
   @Override
@@ -155,9 +100,7 @@ public class LocalPlayerDatabase implements PlayerDatabase {
 
   @Override
   public CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key) {
-    return new PublicPrivateKeyStore()
-        .getKeys()
-        .thenApply(k -> CipherUtil.publicKeyMD5(k.publicKey()).equals(md5key));
+    return keyStore.getKeys().thenApply(k -> CipherUtil.publicKeyMD5(k.publicKey()).equals(md5key));
   }
 
   @Override

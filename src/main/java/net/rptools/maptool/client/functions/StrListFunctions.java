@@ -26,7 +26,7 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 /**

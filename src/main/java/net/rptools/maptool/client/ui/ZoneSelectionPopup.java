@@ -25,7 +25,7 @@ import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 
 public class ZoneSelectionPopup extends JScrollPopupMenu {
@@ -54,7 +54,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
         rendererList.removeIf(renderer -> !renderer.getZone().isVisible());
       }
 
-      if (AppPreferences.getMapSortType().equals(AppPreferences.MapSortType.GMNAME))
+      if (AppPreferences.mapSortType.get().equals(AppPreferences.MapSortType.GMNAME))
         rendererList.sort(
             (o1, o2) -> {
               String name1 = o1.getZone().getName();

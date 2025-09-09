@@ -14,25 +14,26 @@
  */
 package net.rptools.maptool.client.tool;
 
+import java.awt.Point;
 import java.awt.dnd.DragSource;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 import javax.swing.*;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.layerselectiondialog.LayerSelectionDialog;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.ViewMovementKey;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.util.TokenUtil;
 
 /** */
 public abstract class DefaultTool extends Tool
@@ -40,25 +41,25 @@ public abstract class DefaultTool extends Tool
   private static final long serialVersionUID = 3258411729238372921L;
 
   private final LayerSelectionDialog layerSelectionDialog =
-      new LayerSelectionDialog(
-          new Zone.Layer[] {
-            Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-          },
-          this::selectedLayerChanged);
+      new LayerSelectionDialog(Zone.Layer.values(), this::selectedLayerChanged);
 
   private Zone.Layer selectedLayer;
   private boolean isDraggingMap;
-  private int dragStartX;
-  private int dragStartY;
+
+  /**
+   * The origin point for a map drag, or {@code null} if there is no drag possible.
+   *
+   * <p>Will be non-null when a drag is possible (right button pressed). To check whether the drag
+   * is actually happening, use {@link #isDraggingMap()}. This field will be non-{@code null}
+   * whenever {@link #isDraggingMap} is {@code true}, but it is also possible to be non-{@code null}
+   * even if {@link #isDraggingMap} is {@code false}.
+   */
+  private @Nullable Point mapDragStart;
+
   private int dragThreshold = DragSource.getDragThreshold();
 
   protected int mouseX;
   protected int mouseY;
-
-  // This is to manage overflowing of map move events (keep things snappy)
-  private long lastMoveRedraw;
-  private int mapDX, mapDY;
-  private static final int REDRAW_DELAY = 25; // millis
 
   // TBD
   private boolean isTouchScreen = false;
@@ -84,7 +85,8 @@ public abstract class DefaultTool extends Tool
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
     this.renderer = renderer;
-    layerSelectionDialog.updateViewList();
+    selectedLayer = renderer.getActiveLayer();
+    layerSelectionDialog.setSelectedLayer(selectedLayer);
   }
 
   @Override
@@ -93,8 +95,18 @@ public abstract class DefaultTool extends Tool
     super.detachFrom(renderer);
   }
 
-  public boolean isDraggingMap() {
+  protected boolean isDraggingMap() {
     return isDraggingMap;
+  }
+
+  /**
+   * Stop dragging the map.
+   *
+   * <p>Useful if the default behaviour is interfering with a tool.
+   */
+  protected void cancelMapDrag() {
+    mapDragStart = null;
+    isDraggingMap = false;
   }
 
   protected void repaintZone() {
@@ -140,51 +152,6 @@ public abstract class DefaultTool extends Tool
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
         new FlipTokenVerticalActionListener());
-
-    // Disable until the conrete hotkeys are decided.
-    /*
-    actionMap.put(
-         KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK),
-         new AbstractAction() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-             if (layerSelectionDialog.isVisible()) {
-               layerSelectionDialog.setSelectedLayer(Zone.Layer.TOKEN);
-             }
-           }
-         });
-     actionMap.put(
-         KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.CTRL_DOWN_MASK),
-         new AbstractAction() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-             if (layerSelectionDialog.isVisible()) {
-               layerSelectionDialog.setSelectedLayer(Zone.Layer.GM);
-             }
-           }
-         });
-     actionMap.put(
-         KeyStroke.getKeyStroke(KeyEvent.VK_3, InputEvent.CTRL_DOWN_MASK),
-         new AbstractAction() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-             if (layerSelectionDialog.isVisible()) {
-
-               layerSelectionDialog.setSelectedLayer(Zone.Layer.OBJECT);
-             }
-           }
-         });
-     actionMap.put(
-         KeyStroke.getKeyStroke(KeyEvent.VK_4, InputEvent.CTRL_DOWN_MASK),
-         new AbstractAction() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-             if (layerSelectionDialog.isVisible()) {
-               layerSelectionDialog.setSelectedLayer(Zone.Layer.BACKGROUND);
-             }
-           }
-         });
-         */
   }
 
   ////
@@ -192,7 +159,7 @@ public abstract class DefaultTool extends Tool
   @Override
   public void mousePressed(MouseEvent e) {
     // Potential map dragging
-    if (SwingUtilities.isRightMouseButton(e)) {
+    if (SwingUtilities.isRightMouseButton(e) && mapDragStart == null) {
       setDragStart(e.getX(), e.getY());
     }
   }
@@ -204,22 +171,18 @@ public abstract class DefaultTool extends Tool
    * @param y the y coordinate of the drag start
    */
   public void setDragStart(int x, int y) {
-    dragStartX = x;
-    dragStartY = y;
+    mapDragStart = new Point(x, y);
   }
 
   @Override
   public void mouseReleased(MouseEvent e) {
-    if (isDraggingMap && isRightMouseButton(e)) {
-      renderer.maybeForcePlayersView();
-    }
-    // Cleanup
-    isDraggingMap = false;
-  }
+    if (isRightMouseButton(e) && mapDragStart != null) {
+      if (isDraggingMap) {
+        renderer.maybeForcePlayersView();
+      }
 
-  /** @param isDraggingMap whether the user drags the map */
-  void setDraggingMap(boolean isDraggingMap) {
-    this.isDraggingMap = isDraggingMap;
+      cancelMapDrag();
+    }
   }
 
   /*
@@ -281,27 +244,18 @@ public abstract class DefaultTool extends Tool
       MapTool.getFrame().getCoordinateStatusBar().clear();
     }
     // MAP MOVEMENT
-    if (isRightMouseButton(e)) {
-
-      mapDX += mX - dragStartX;
-      mapDY += mY - dragStartY;
+    // Sometimes the mousePressed() event can come after the first mouseDragged() event when the
+    // right button is pressed. So check that we are actually intending to drag the map.
+    if (isRightMouseButton(e) && mapDragStart != null) {
+      var mapDX = mX - mapDragStart.x;
+      var mapDY = mY - mapDragStart.y;
 
       if (mapDX * mapDX + mapDY * mapDY > dragThreshold * dragThreshold) {
         isDraggingMap = true;
       }
 
       setDragStart(mX, mY);
-
-      long now = System.currentTimeMillis();
-      if (now - lastMoveRedraw > REDRAW_DELAY) {
-        // TODO: does it matter to capture the last map move in the series ?
-        // TODO: This should probably be genericized and put into ZoneRenderer to prevent over
-        // zealous repainting
-        renderer.moveViewBy(mapDX, mapDY);
-        mapDX = 0;
-        mapDY = 0;
-        lastMoveRedraw = now;
-      }
+      renderer.moveViewBy(mapDX, mapDY);
     }
   }
 
@@ -332,74 +286,20 @@ public abstract class DefaultTool extends Tool
         if (!AppUtil.playerOwns(token)) {
           continue;
         }
-        Integer facing = token.getFacing();
-        if (facing == null) {
-          facing = -90; // natural alignment
-        }
+
+        int facing = token.getFacing();
         if (SwingUtil.isControlDown(e)) {
-          // Modify on the fly the rotation point
-          if (e.isAltDown()) {
-            int x = token.getX();
-            int y = token.getY();
-            int w = token.getWidth();
-            int h = token.getHeight();
-
-            double xc = x + w / 2;
-            double yc = y + h / 2;
-
-            facing += e.getWheelRotation() > 0 ? 5 : -5;
-            token.setFacing(facing);
-            int a = token.getFacingInDegrees();
-            double r = Math.toRadians(a);
-
-            System.out.println("Angle: " + a);
-            System.out.println("Origin x,y: " + x + ", " + y);
-            System.out.println("Origin bounds: " + token.getBounds(renderer.getZone()));
-            // System.out.println("Anchor x,y: " + token.getAnchor().x + ", " +
-            // token.getAnchor().y);
-
-            // x = (int) ((x + w) - w * Math.cos(r));
-            // y = (int) (y - w * Math.sin(r));
-
-            // double x1 = (x - xc) * Math.cos(r) - (y - yc) * Math.sin(r) + xc;
-            // double y1 = (y - yc) * Math.cos(r) + (x - xc) * Math.sin(r) + yc;
-
-            // x = (int) (x * Math.cos(r) - y * Math.sin(r));
-            // y = (int) (y * Math.cos(r) + x * Math.sin(r));
-
-            AffineTransform at = new AffineTransform();
-            at.translate(x, y);
-            at.rotate(r, x + w, y);
-
-            x = (int) at.getTranslateX();
-            y = (int) at.getTranslateY();
-
-            // token.setX(x);
-            // token.setY(y);
-            // renderer.flush(token);
-            // MapTool.serverCommand().putToken(getZone().getId(), token);
-
-            // token.setX(0);
-            // token.setY(0);
-
-            System.out.println("New x,y: " + x + ", " + y);
-            System.out.println("New bounds: " + token.getBounds(renderer.getZone()).toString());
-
-          } else {
-            facing += e.getWheelRotation() > 0 ? 5 : -5;
-          }
+          facing += e.getWheelRotation() > 0 ? 5 : -5;
         } else {
-          int[] facingArray = getZone().getGrid().getFacingAngles();
-          int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
-
-          facingIndex += e.getWheelRotation() > 0 ? 1 : -1;
-          if (facingIndex < 0) {
-            facingIndex = facingArray.length - 1;
-          }
-          if (facingIndex == facingArray.length) {
-            facingIndex = 0;
-          }
-          facing = facingArray[facingIndex];
+          facing =
+              renderer
+                  .getZone()
+                  .getGrid()
+                  .nextFacing(
+                      facing,
+                      AppPreferences.faceEdge.get(),
+                      AppPreferences.faceVertex.get(),
+                      e.getWheelRotation() <= 0);
         }
 
         token.setFacing(facing);
@@ -413,7 +313,7 @@ public abstract class DefaultTool extends Tool
     // ZOOM
     if (!AppState.isZoomLocked()) {
       boolean direction = e.getWheelRotation() < 0;
-      direction = isKeyDown('z') == direction; // XXX Why check for this?
+      direction = isKeyDown('z') == direction;
       if (direction) {
         renderer.zoomOut(e.getX(), e.getY());
       } else {

@@ -15,9 +15,10 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.*;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicToolBarUI;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -29,7 +30,7 @@ import net.rptools.maptool.client.tool.gridtool.GridTool;
 import net.rptools.maptool.client.tool.texttool.TextTool;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone.TokenSelection;
@@ -48,24 +49,25 @@ public class ToolbarPanel extends JToolBar {
   private final JToggleButton templateButton;
   private final JToggleButton fogButton;
   private final JToggleButton topologyButton;
-  private final Component horizontalSpacer;
+
+  /**
+   * The last component prior to the option panel. This is used to find the index at which to
+   * reinsert the option panel when the fullscreen tools are hidden.
+   */
+  private final Component optionPanelSeparator;
+
   private final JPanel optionPanel;
   private final Toolbox toolbox;
   private final JButton mapselect;
 
   public ToolbarPanel(Toolbox tbox) {
     setRollover(true);
+    setFloatable(false);
+
+    add(Box.createHorizontalStrut(5));
 
     toolbox = tbox;
     optionPanel = new JPanel(new CardLayout());
-
-    final JSeparator vertSplit = new JSeparator(JSeparator.VERTICAL);
-    final Component vertSpacer = Box.createHorizontalStrut(10);
-
-    final JSeparator horizontalSplit = new JSeparator(JSeparator.HORIZONTAL);
-    horizontalSplit.setVisible(false);
-    horizontalSpacer = Box.createVerticalStrut(10);
-    horizontalSpacer.setVisible(false);
 
     pointerGroupButton = createPointerGroupButton();
     add(pointerGroupButton);
@@ -98,10 +100,7 @@ public class ToolbarPanel extends JToolBar {
             I18N.getText("tools.topo.tooltip"));
     add(topologyButton);
 
-    add(vertSplit);
-    add(horizontalSplit);
-    add(vertSpacer);
-    add(horizontalSpacer);
+    optionPanelSeparator = addSeparator(this, 21);
 
     add(optionPanel);
 
@@ -132,9 +131,7 @@ public class ToolbarPanel extends JToolBar {
     add(jslider);
     // End slider
 
-    add(Box.createHorizontalStrut(10));
-    add(new JSeparator(JSeparator.VERTICAL));
-    add(Box.createHorizontalStrut(10));
+    addSeparator(this, 21);
 
     // Jamz: Adding new Token Selection option buttons
     // Default selected button created with reference to set selection true
@@ -165,34 +162,24 @@ public class ToolbarPanel extends JToolBar {
             I18N.getText("tools.token.fow.npc.tooltip"),
             TokenSelection.NPC));
 
-    add(Box.createHorizontalStrut(10));
-    add(new JSeparator(JSeparator.VERTICAL));
-    add(Box.createHorizontalStrut(10));
+    addSeparator(this, 21);
 
     tokenSelectionButtonAll.setSelected(true);
     // Jamz: End panel
 
+    add(createGdxButton(Icons.TOOLBAR_LIBGDX));
+
     // the "Select Map" button
     mapselect = createZoneSelectionButton();
     add(mapselect);
+
+    add(Box.createHorizontalStrut(5));
 
     // Non visible tools
     tbox.createTool(GridTool.class);
     tbox.createTool(BoardTool.class);
     tbox.createTool(FacingTool.class);
     tbox.createTool(StampTool.class);
-
-    addPropertyChangeListener(
-        "orientation",
-        evt -> {
-          int orientation = (Integer) evt.getNewValue();
-
-          horizontalSplit.setVisible(orientation == JToolBar.VERTICAL);
-          horizontalSpacer.setVisible(orientation == JToolBar.VERTICAL);
-
-          vertSplit.setVisible(orientation == JToolBar.HORIZONTAL);
-          vertSpacer.setVisible(orientation == JToolBar.HORIZONTAL);
-        });
   }
 
   public JPanel getOptionPanel() {
@@ -220,7 +207,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   public int getOptionsPanelIndex() {
-    return getComponentIndex(horizontalSpacer) + 1;
+    return getComponentIndex(optionPanelSeparator) + 1;
   }
 
   public JButton getMapselect() {
@@ -277,20 +264,52 @@ public class ToolbarPanel extends JToolBar {
 
   private OptionPanel createDrawPanel() {
     OptionPanel panel = new OptionPanel();
+
+    panel
+        .add(DrawingPointerTool.class)
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_POINTER));
+
     panel
         .add(DeleteDrawingTool.class)
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DELETE));
-    panel.add(FreehandTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_FREEHAND));
-    panel.add(LineTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_LINE));
-    panel.add(RectangleTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_BOX));
-    panel.add(OvalTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_OVAL));
+
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.freehand.instructions", "tool.freehand.tooltip", new PolyLineStrategy(true)))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_FREEHAND));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.line.instructions", "tool.line.tooltip", new PolyLineStrategy(false)))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_LINE));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.rect.instructions", "tool.rect.tooltip", new RectangleStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_BOX));
+    panel
+        .addTool(
+            new DrawingTool<>("tool.oval.instructions", "tool.oval.tooltip", new OvalStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_OVAL));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.rect.instructions", "tool.isorectangle.tooltip", new IsoRectangleStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DIAMOND));
+
+    addSeparator(panel, 11);
+
     panel.add(TextTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_TEXT));
-    panel.add(DiamondTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DIAMOND));
+
     return panel;
   }
 
   private OptionPanel createTemplatePanel() {
     OptionPanel panel = new OptionPanel();
+    panel
+        .add(TemplatePointerTool.class)
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TEMPLATE_POINTER));
     panel
         .add(RadiusTemplateTool.class)
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TEMPLATE_RADIUS));
@@ -338,61 +357,151 @@ public class ToolbarPanel extends JToolBar {
             }
           }
         };
+
     panel
-        .add(RectangleExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.rectexpose.instructions", "tool.rectexpose.tooltip", new RectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_BOX));
     panel
-        .add(OvalExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.ovalexpose.instructions", "tool.ovalexpose.tooltip", new OvalStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_OVAL));
     panel
-        .add(PolygonExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.polyexpose.instructions",
+                "tool.polyexpose.tooltip",
+                new PolyLineStrategy(false)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_POLYGON));
     panel
-        .add(FreehandExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.freehand.instructions", "tool.freehand.tooltip", new PolyLineStrategy(true)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_FREEHAND));
     panel
-        .add(DiamondExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.rectexpose.instructions",
+                "tool.isorectangleexpose.tooltip",
+                new IsoRectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND));
+
     return panel;
   }
 
   private OptionPanel createTopologyPanel() {
     OptionPanel panel = new OptionPanel();
+    final var topologyModeSelectionPanel = new TopologyModeSelectionPanel();
+    topologyModeSelectionPanel.setEnabled(false);
+
     panel
-        .add(RectangleTopologyTool.class)
+        .addTool(new WallTopologyTool())
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_WALL));
+
+    panel
+        .addTool(
+            new TopologyTool<>(
+                "tool.recttopology.instructions",
+                "tool.recttopology.tooltip",
+                true,
+                new RectangleStrategy(),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_BOX));
     panel
-        .add(HollowRectangleTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.recttopology.instructions",
+                "tool.recttopologyhollow.tooltip",
+                false,
+                new RectangleStrategy(),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW));
     panel
-        .add(OvalTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.ovaltopology.instructions",
+                "tool.ovaltopology.tooltip",
+                true,
+                // 10 steps to keep number of topology vertices reasonable.
+                new OvalStrategy(10),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_OVAL));
     panel
-        .add(HollowOvalTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.ovaltopology.instructions",
+                "tool.ovaltopologyhollow.tooltip",
+                false,
+                // 10 steps to keep number of topology vertices reasonable.
+                new OvalStrategy(10),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_OVAL_HOLLOW));
     panel
-        .add(PolygonTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.poly.instructions",
+                "tool.polytopo.tooltip",
+                true,
+                new PolyLineStrategy(false),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_POLYGON));
     panel
-        .add(PolyLineTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.poly.instructions",
+                "tool.polylinetopo.tooltip",
+                false,
+                new PolyLineStrategy(false),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_POLYLINE));
     panel
-        .add(CrossTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.crosstopology.instructions",
+                "tool.crosstopology.tooltip",
+                false,
+                new CrossStrategy(),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_CROSS));
     panel
-        .add(DiamondTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.isorectangletopology.instructions",
+                "tool.isorectangletopology.tooltip",
+                true,
+                new IsoRectangleStrategy(),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND));
     panel
-        .add(HollowDiamondTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.isorectangletopology.instructions",
+                "tool.isorectangletopologyhollow.tooltip",
+                false,
+                new IsoRectangleStrategy(),
+                topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW));
 
-    // Add with space to separate mode button group from shape button group.
-    panel.add(Box.createHorizontalStrut(10));
+    // Add with separator to separate mode button group from shape button group.
+    addSeparator(panel, 11);
 
-    final var topologyModeSelectionPanel = new TopologyModeSelectionPanel();
     panel.add(topologyModeSelectionPanel);
 
     return panel;
+  }
+
+  private static Component addSeparator(JToolBar toolBar, final int size) {
+    final var sep =
+        new JToolBar.Separator() {
+          @Override
+          public Dimension getPreferredSize() {
+            return new Dimension(size, super.getPreferredSize().height);
+          }
+        };
+    toolBar.add(sep);
+    return sep;
   }
 
   private JToggleButton createButton(
@@ -443,6 +552,20 @@ public class ToolbarPanel extends JToolBar {
     return button;
   }
 
+  private JToggleButton createGdxButton(final Icons icon) {
+    final JToggleButton button = new JToggleButton();
+    button.addActionListener(
+        e -> {
+          MapTool.getFrame().switchRenderers();
+        });
+
+    button.setIcon(RessourceManager.getBigIcon(icon));
+    button.setVisible(DeveloperOptions.Toggle.EnableLibGdxRendererToggleButton.get());
+    DeveloperOptions.Toggle.EnableLibGdxRendererToggleButton.onChange(button::setVisible);
+
+    return button;
+  }
+
   private JToggleButton createTokenSelectionButton(
       final Icons icon, final Icons offIcon, String tooltip, TokenSelection tokenSelection) {
     final JToggleButton button = new JToggleButton();
@@ -464,57 +587,48 @@ public class ToolbarPanel extends JToolBar {
     return button;
   }
 
-  /**
-   * Return the current floating status of the ToolbarPanel.
-   *
-   * @return true if floating, false otherwise
-   */
-  private boolean isFloating() {
-    return getUI() instanceof BasicToolBarUI && ((BasicToolBarUI) ui).isFloating();
-  }
-
-  /**
-   * Show or hide the ToolbarPanel, even if it is floating.
-   *
-   * @param visible should the ToolbarPanel be visible or not
-   */
-  @Override
-  public void setVisible(boolean visible) {
-    if (isFloating()) {
-      SwingUtilities.getRoot(this).setVisible(visible);
-    } else {
-      super.setVisible(visible);
+  public void setTokenSelectionGroupEnabled(boolean enabled) {
+    Enumeration<AbstractButton> enumeration = tokenSelectionbuttonGroup.getElements();
+    while (enumeration.hasMoreElements()) {
+      AbstractButton button = enumeration.nextElement();
+      button.setEnabled(enabled);
     }
   }
 
   private class OptionPanel extends JToolBar {
-
-    private Class<? extends Tool> firstTool;
-    private Class<? extends Tool> currentTool;
+    private Tool firstTool;
+    private Tool currentTool;
 
     public OptionPanel() {
       setFloatable(false);
       setRollover(true);
       setBorder(null);
       setBorderPainted(false);
-
-      ToolbarPanel.this.addPropertyChangeListener(
-          "orientation", evt -> setOrientation((Integer) evt.getNewValue()));
     }
 
     public Tool add(Class<? extends Tool> toolClass) {
-      if (firstTool == null) {
-        firstTool = toolClass;
-      }
       final Tool tool = toolbox.createTool(toolClass);
+      setupTool(tool);
+      return tool;
+    }
+
+    public Tool addTool(Tool tool) {
+      toolbox.addTool(tool);
+      setupTool(tool);
+      return tool;
+    }
+
+    private void setupTool(Tool tool) {
+      if (firstTool == null) {
+        firstTool = tool;
+      }
       tool.addActionListener(
           e -> {
             if (tool.isSelected()) {
-              currentTool = tool.getClass();
+              currentTool = tool;
             }
           });
       add(tool);
-      return tool;
     }
 
     protected void activate() {
@@ -535,9 +649,6 @@ public class ToolbarPanel extends JToolBar {
       setRollover(true);
       setBorder(null);
       setBorderPainted(false);
-
-      ToolbarPanel.this.addPropertyChangeListener(
-          "orientation", evt -> setOrientation((Integer) evt.getNewValue()));
     }
 
     public Tool add(Class<? extends Tool> toolClass) {

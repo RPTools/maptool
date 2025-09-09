@@ -14,14 +14,17 @@
  */
 package net.rptools.maptool.client.walker.astar;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -32,15 +35,23 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import net.rptools.lib.GeometryUtil;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.zone.vbl.MovementBlockingTopology;
 import net.rptools.maptool.client.walker.AbstractZoneWalker;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.zones.MaskTopologyChanged;
+import net.rptools.maptool.model.zones.WallTopologyChanged;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.algorithm.ConvexHull;
@@ -50,7 +61,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
-import org.locationtech.jts.operation.valid.IsValidOp;
 
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   private record TerrainModifier(Token.TerrainModifierOperation operation, double value) {}
@@ -60,32 +70,32 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   private static final Logger log = LogManager.getLogger(AbstractAStarWalker.class);
+
   private final GeometryFactory geometryFactory = new GeometryFactory();
-  // private List<GUID> debugLabels;
   protected int crossX = 0;
   protected int crossY = 0;
-  private boolean debugCosts = false; // Manually set this to view H, G & F costs as rendered labels
-  private Area vbl = new Area();
   private Area fowExposedArea = new Area();
   private double cell_cost = zone.getUnitsPerCell();
   private double distance = -1;
-  private PreparedGeometry vblGeometry = null;
+  private final AtomicBoolean invalidatedTopology = new AtomicBoolean(true);
+  private @Nonnull MovementBlockingTopology preparedTopology = new MovementBlockingTopology();
   private PreparedGeometry fowExposedAreaGeometry = null;
-  // private long avgRetrieveTime;
-  // private long avgTestTime;
-  // private long retrievalCount;
-  // private long testCount;
   private TokenFootprint footprint = new TokenFootprint();
   private Map<CellPoint, Map<CellPoint, Boolean>> vblBlockedMovesByGoal = new ConcurrentHashMap<>();
   private Map<CellPoint, Map<CellPoint, Boolean>> fowBlockedMovesByGoal = new ConcurrentHashMap<>();
   private final Map<CellPoint, List<TerrainModifier>> terrainCells = new HashMap<>();
+
+  /**
+   * The IDs of all debugging labels, so we can remove them again later. Only access this on the
+   * Swing thread _or else_.
+   */
+  private static final List<GUID> debugLabels = new ArrayList<>();
 
   public AbstractAStarWalker(Zone zone) {
     super(zone);
 
     // Get tokens on map that may affect movement
     for (Token token : zone.getTokensWithTerrainModifiers()) {
-      // log.info("Token: " + token.getName() + ", " + token.getTerrainModifier());
       Set<CellPoint> cells = token.getOccupiedCells(zone.getGrid());
       for (CellPoint cell : cells) {
         terrainCells
@@ -95,6 +105,34 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
                     token.getTerrainModifierOperation(), token.getTerrainModifier()));
       }
     }
+
+    new MapToolEventBus().getMainEventBus().register(this);
+  }
+
+  @Override
+  public void close() {
+    new MapToolEventBus().getMainEventBus().unregister(this);
+  }
+
+  private void onTopologyChanged() {
+    // This event is not called on the walker thread, so needs synchronization.
+    invalidatedTopology.set(true);
+  }
+
+  @Subscribe
+  private void onTopologyChanged(WallTopologyChanged event) {
+    if (event.zone() != zone) {
+      return;
+    }
+    onTopologyChanged();
+  }
+
+  @Subscribe
+  private void onTopologyChanged(MaskTopologyChanged event) {
+    if (event.zone() != zone) {
+      return;
+    }
+    onTopologyChanged();
   }
 
   /**
@@ -166,9 +204,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     long timeOut = System.currentTimeMillis();
     double estimatedTimeoutNeeded = 10000;
 
-    // if (start.equals(end))
-    // log.info("NO WORK!");
-
     var startNode = new AStarCellPoint(start, !isInteger(start.distanceTraveledWithoutTerrain));
     openList.add(startNode);
     openSet.put(startNode, startNode);
@@ -179,122 +214,55 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Using JTS because AWT Area can only intersect with Area and we want to use simple lines here.
     // Render VBL to Geometry class once and store.
     // Note: zoneRenderer will be null if map is not visible to players.
-    Area newVbl = new Area();
     Area newFowExposedArea = new Area();
-    final var zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    final var zoneRenderer = MapTool.getFrame().getZoneRenderer(zone);
     if (zoneRenderer != null) {
       final var zoneView = zoneRenderer.getZoneView();
 
-      var mbl = zoneView.getTopology(Zone.TopologyType.MBL);
-      if (tokenMbl != null) {
-        mbl = new Area(mbl);
-        mbl.subtract(tokenMbl);
+      if (invalidatedTopology.compareAndSet(true, false)) {
+        // The move cache may no longer accurately reflect the VBL limitations.
+        this.vblBlockedMovesByGoal.clear();
+
+        var topologyTypes =
+            MapTool.getServerPolicy().getVblBlocksMove()
+                ? EnumSet.allOf(Zone.TopologyType.class)
+                : EnumSet.of(Zone.TopologyType.MBL);
+        this.preparedTopology =
+            new MovementBlockingTopology(
+                zone.getWalls(),
+                zone.getMasks(topologyTypes, keyToken == null ? null : keyToken.getId()));
       }
 
-      if (MapTool.getServerPolicy().getVblBlocksMove()) {
-        var wallVbl = zoneView.getTopology(Zone.TopologyType.WALL_VBL);
-        var hillVbl = zoneView.getTopology(Zone.TopologyType.HILL_VBL);
-        var pitVbl = zoneView.getTopology(Zone.TopologyType.PIT_VBL);
-
-        // A token's topology should not be used to block itself!
-        if (tokenWallVbl != null) {
-          wallVbl = new Area(wallVbl);
-          wallVbl.subtract(tokenWallVbl);
-        }
-        if (tokenHillVbl != null) {
-          hillVbl = new Area(hillVbl);
-          hillVbl.subtract(tokenHillVbl);
-        }
-        if (tokenPitVbl != null) {
-          pitVbl = new Area(pitVbl);
-          pitVbl.subtract(tokenPitVbl);
-        }
-
-        newVbl.add(wallVbl);
-        newVbl.add(hillVbl);
-        newVbl.add(pitVbl);
-
-        // Finally, add the Move Blocking Layer!
-        newVbl.add(mbl);
-      } else {
-        newVbl = mbl;
-      }
-
+      var view = zoneRenderer.getPlayerView();
       newFowExposedArea =
-          zoneRenderer.getZone().hasFog()
-              ? zoneView.getExposedArea(zoneRenderer.getPlayerView())
-              : null;
+          zone.hasFog() && !view.isGMView() ? zoneView.getExposedArea(view) : new Area();
     }
 
-    boolean blockedMovesHasChanged = false;
-    if (!newVbl.equals(vbl)) {
-      blockedMovesHasChanged = true;
-      vbl = newVbl;
-
-      // VBL has changed. Let's update the JTS geometry to match.
-      if (vbl.isEmpty()) {
-        this.vblGeometry = null;
-      } else {
-        try {
-          var vblGeometry = GeometryUtil.toJts(vbl);
-
-          // polygons
-          if (!vblGeometry.isValid()) {
-            log.info(
-                "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
-            log.debug("Invalid vblGeometry: " + new IsValidOp(vblGeometry).getValidationError());
-          }
-
-          vblGeometry = vblGeometry.buffer(1); // .buffer always creates valid geometry.
-          this.vblGeometry = PreparedGeometryFactory.prepare(vblGeometry);
-        } catch (Exception e) {
-          log.info("vblGeometry oh oh: ", e);
-        }
-      }
-
-      // log.info("vblGeometry bounds: " + vblGeometry.toString());
-    }
     if (!Objects.equals(newFowExposedArea, fowExposedArea)) {
-      blockedMovesHasChanged = true;
-      fowExposedArea = newFowExposedArea;
+      // The move cache may no longer accurately reflect the FOW limitations.
+      this.fowBlockedMovesByGoal.clear();
 
+      fowExposedArea = newFowExposedArea;
       // FoW has changed. Let's update the JTS geometry to match.
-      if (fowExposedArea == null || fowExposedArea.isEmpty()) {
+      if (fowExposedArea.isEmpty()) {
         this.fowExposedAreaGeometry = null;
       } else {
         try {
-          var fowExposedAreaGeometry = GeometryUtil.toJts(fowExposedArea);
-
-          // polygons
-          if (!fowExposedAreaGeometry.isValid()) {
-            log.info(
-                "FoW Geometry is invalid! May cause issues. Check for self-intersecting polygons.");
-            log.debug(
-                "Invalid FoW Geometry: "
-                    + new IsValidOp(fowExposedAreaGeometry).getValidationError());
-          }
-
-          fowExposedAreaGeometry =
-              fowExposedAreaGeometry.buffer(1); // .buffer always creates valid geometry.
-          this.fowExposedAreaGeometry = PreparedGeometryFactory.prepare(fowExposedAreaGeometry);
+          this.fowExposedAreaGeometry =
+              PreparedGeometryFactory.prepare(GeometryUtil.toJts(fowExposedArea));
         } catch (Exception e) {
           log.info("FoW Geometry oh oh: ", e);
         }
       }
     }
-    if (blockedMovesHasChanged) {
-      // The move cache may no longer accurately reflect the VBL limitations.
-      this.vblBlockedMovesByGoal.clear();
-    }
 
-    // Erase previous debug labels, this actually erases ALL labels! Use only when debugging!
+    // Erase previous debug labels.
     EventQueue.invokeLater(
         () -> {
-          if (!zone.getLabels().isEmpty() && debugCosts) {
-            for (Label label : zone.getLabels()) {
-              zone.removeLabel(label.getId());
-            }
+          for (GUID labelId : debugLabels) {
+            zone.removeLabel(labelId);
           }
+          debugLabels.clear();
         });
 
     // Timeout quicker for GM cause reasons
@@ -302,19 +270,23 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       estimatedTimeoutNeeded = estimatedTimeoutNeeded / 2;
     }
 
-    // log.info("A* Path timeout estimate: " + estimatedTimeoutNeeded);
+    Rectangle2D pathfindingBounds = this.getPathfindingBounds(start, goal);
 
-    Rectangle pathfindingBounds = this.getPathfindingBounds(start, goal);
-
+    log.debug("Starting pathfinding");
+    log.debug("Pathfinding bounds are {}", pathfindingBounds);
     while (!openList.isEmpty()) {
+      log.debug("Open list has {} elements", openList.size());
+
       if (System.currentTimeMillis() > timeOut + estimatedTimeoutNeeded) {
         log.info("Timing out after " + estimatedTimeoutNeeded);
         break;
       }
 
       currentNode = openList.remove();
+      log.debug("Current node is {}", currentNode.position);
       openSet.remove(currentNode);
       if (currentNode.position.equals(goal)) {
+        log.debug("Achieved our goal at {}", goal);
         break;
       }
 
@@ -340,6 +312,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
         openList.add(currentNeighbor);
         openSet.put(currentNeighbor, currentNeighbor);
+        log.debug("Added neighbor to open set: {}", currentNeighbor.position);
       }
 
       closedSet.add(currentNode);
@@ -351,9 +324,15 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         recent path request. Clearing the list effectively finishes this thread gracefully.
       */
       if (Thread.interrupted()) {
-        // log.info("Thread interrupted!");
+        log.debug("Pathfinding cancelled");
         openList.clear();
       }
+    }
+
+    if (currentNode == null) {
+      log.debug("Failed pathfinding");
+    } else {
+      log.debug("Completed pathfinding at {}", goal);
     }
 
     List<CellPoint> returnedCellPointList = new LinkedList<>();
@@ -379,11 +358,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       log.debug("Time to calculate A* path warning: " + timeOut + "ms");
     }
 
-    // if (retrievalCount > 0)
-    // log.info("avgRetrieveTime: " + Math.floor(avgRetrieveTime / retrievalCount)/1000 + " micro");
-    // if (testCount > 0)
-    // log.info("avgTestTime: " + Math.floor(avgTestTime / testCount)/1000 + " micro");
-
     return returnedCellPointList;
   }
 
@@ -405,26 +379,40 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
    * @param goal
    * @return A bounding box suitable for constraining the A* search space.
    */
-  protected Rectangle getPathfindingBounds(CellPoint start, CellPoint goal) {
+  protected Rectangle2D getPathfindingBounds(CellPoint start, CellPoint goal) {
     // Bounding box must contain all VBL/MBL ...
-    Rectangle pathfindingBounds = vbl.getBounds();
+    var vblEnvelope = preparedTopology.getEnvelope();
+
+    Rectangle2D pathfindingBounds =
+        new Rectangle2D.Double(
+            vblEnvelope.getMinX(),
+            vblEnvelope.getMinY(),
+            vblEnvelope.getWidth(),
+            vblEnvelope.getHeight());
+
+    pathfindingBounds = pathfindingBounds.createUnion(fowExposedArea.getBounds());
     // ... and the footprints of all terrain tokens ...
     for (var cellPoint : terrainCells.keySet()) {
-      pathfindingBounds = pathfindingBounds.union(zone.getGrid().getBounds(cellPoint));
+      pathfindingBounds = pathfindingBounds.createUnion(zone.getGrid().getBounds(cellPoint));
     }
     // ... and the original token position ...
-    pathfindingBounds = pathfindingBounds.union(zone.getGrid().getBounds(start));
+    pathfindingBounds = pathfindingBounds.createUnion(zone.getGrid().getBounds(start));
     // ... and the target token position ...
-    pathfindingBounds = pathfindingBounds.union(zone.getGrid().getBounds(goal));
+    pathfindingBounds = pathfindingBounds.createUnion(zone.getGrid().getBounds(goal));
     // ... and have ample room for the token to go anywhere around the outside if necessary.
     var tokenBounds = footprint.getBounds(zone.getGrid());
-    pathfindingBounds.grow(2 * tokenBounds.width, 2 * tokenBounds.height);
+    // Expand by twice the token size to ensure plenty of room.
+    pathfindingBounds.setRect(
+        pathfindingBounds.getMinX() - 2 * tokenBounds.width,
+        pathfindingBounds.getMinY() - 2 * tokenBounds.height,
+        pathfindingBounds.getWidth() + 4 * tokenBounds.width,
+        pathfindingBounds.getHeight() + 4 * tokenBounds.height);
 
     return pathfindingBounds;
   }
 
   protected List<AStarCellPoint> getNeighbors(
-      AStarCellPoint node, Set<AStarCellPoint> closedSet, Rectangle pathfindingBounds) {
+      AStarCellPoint node, Set<AStarCellPoint> closedSet, Rectangle2D pathfindingBounds) {
     List<AStarCellPoint> neighbors = new ArrayList<>();
     int[][] neighborMap = getNeighborMap(node.position.x, node.position.y);
 
@@ -444,11 +432,14 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               node.position.x + neighborArray[0],
               node.position.y + neighborArray[1],
               node.isOddStepOfOneTwoOneMovement ^ invertEvenOddDiagonals);
+      log.debug("Checking neighbor: {}", neighbor.position);
       if (closedSet.contains(neighbor)) {
+        log.debug("Rejected neighbor for being in the closed set: {}", neighbor.position);
         continue;
       }
 
       if (!zone.getGrid().getBounds(node.position).intersects(pathfindingBounds)) {
+        log.debug("Rejected neighbor for being out of bounds: {}", neighbor.position);
         // This position is too far out to possibly be part of the optimal path.
         closedSet.add(neighbor);
         continue;
@@ -462,7 +453,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         if (tokenFootprintIntersectsVBL(neighbor.position)) {
           // The token would overlap VBL if moved to this position, so it is not a valid position.
           closedSet.add(neighbor);
-          blockNode = true;
+          log.debug("Rejected neighbor for being inside MBL: {}", neighbor.position);
           continue;
         }
 
@@ -473,9 +464,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               new CellPoint(cellPoint.x + neighborArray[0], cellPoint.y + neighborArray[1]);
           if (vblBlocksMovement(cellPoint, cellNeighbor)) {
             blockNode = true;
+            log.debug("MBL blocked movement to neighbor: {}", neighbor.position);
             break;
           }
           if (fowBlocksMovement(cellPoint, cellNeighbor)) {
+            log.debug("FOW blocked movement to neighbor to {}", neighbor.position);
             blockNode = true;
             break;
           }
@@ -514,6 +507,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       terrainAdder = terrainAdder / cell_cost;
 
       if (blockNode) {
+        log.debug("Terrain blocked movement to neighbor to {}", neighbor.position);
         continue;
       }
 
@@ -547,6 +541,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         }
       }
 
+      log.debug("Accepted neighbor: {}", neighbor.position);
       neighbors.add(neighbor);
     }
 
@@ -554,10 +549,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   private boolean tokenFootprintIntersectsVBL(CellPoint position) {
-    if (vblGeometry == null) {
-      return false;
-    }
-
     var points =
         footprint.getOccupiedCells(position).stream()
             .map(
@@ -568,24 +559,16 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
             .toArray(Coordinate[]::new);
     Geometry footprintGeometry = new ConvexHull(points, geometryFactory).getConvexHull();
 
-    return vblGeometry.intersects(footprintGeometry);
+    return preparedTopology.intersects(footprintGeometry);
   }
 
   private boolean vblBlocksMovement(CellPoint start, CellPoint goal) {
-    if (vblGeometry == null) {
-      return false;
-    }
-
-    // Stopwatch stopwatch = Stopwatch.createStarted();
     Map<CellPoint, Boolean> blockedMoves =
         vblBlockedMovesByGoal.computeIfAbsent(goal, pos -> new HashMap<>());
     Boolean test = blockedMoves.get(start);
     // if it's null then the test for that direction hasn't been set yet otherwise just return the
     // previous result
     if (test != null) {
-      // log.info("Time to retrieve: " + stopwatch.elapsed(TimeUnit.NANOSECONDS));
-      // avgRetrieveTime += stopwatch.elapsed(TimeUnit.NANOSECONDS);
-      // retrievalCount++;
       return test;
     }
 
@@ -595,14 +578,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     if (goalBounds.isEmpty() || startBounds.isEmpty()) {
       return false;
     }
-
-    // If the goal center point is in vbl, allow to maintain path through vbl (should be GM only?)
-    /*
-    if (vbl.contains(goal.toPoint())) {
-      // Allow GM to move through VBL
-       return !MapTool.getPlayer().isGM();
-    }
-    */
 
     // NEW WAY - use polygon test
     double x1 = startBounds.getCenterX();
@@ -615,14 +590,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     boolean blocksMovement;
     try {
-      blocksMovement = vblGeometry.intersects(centerRay);
+      blocksMovement = preparedTopology.intersects(centerRay);
     } catch (Exception e) {
       log.info("clipped.intersects oh oh: ", e);
       return true;
     }
-
-    // avgTestTime += stopwatch.elapsed(TimeUnit.NANOSECONDS);
-    // testCount++;
 
     blockedMoves.put(start, blocksMovement);
 
@@ -630,24 +602,16 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   private boolean fowBlocksMovement(CellPoint start, CellPoint goal) {
-    if (MapTool.getPlayer().isEffectiveGM()) {
-      return false;
-    }
-
     if (fowExposedAreaGeometry == null) {
       return false;
     }
 
-    // Stopwatch stopwatch = Stopwatch.createStarted();
     Map<CellPoint, Boolean> blockedMoves =
         fowBlockedMovesByGoal.computeIfAbsent(goal, pos -> new HashMap<>());
     Boolean test = blockedMoves.get(start);
     // if it's null then the test for that direction hasn't been set yet otherwise just return the
     // previous result
     if (test != null) {
-      // log.info("Time to retrieve: " + stopwatch.elapsed(TimeUnit.NANOSECONDS));
-      // avgRetrieveTime += stopwatch.elapsed(TimeUnit.NANOSECONDS);
-      // retrievalCount++;
       return test;
     }
 
@@ -675,23 +639,18 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       return true;
     }
 
-    // avgTestTime += stopwatch.elapsed(TimeUnit.NANOSECONDS);
-    // testCount++;
-
     blockedMoves.put(start, blocksMovement);
 
     return blocksMovement;
   }
 
   protected void showDebugInfo(AStarCellPoint node) {
-    if (!log.isDebugEnabled() && !debugCosts) {
+    if (!DeveloperOptions.Toggle.ShowAiDebugging.get()) {
       return;
     }
 
     final int basis = zone.getGrid().getSize() / 10;
     final int xOffset = basis * (node.isOddStepOfOneTwoOneMovement ? 7 : 3);
-
-    // if (debugLabels == null) { debugLabels = new ArrayList<>(); }
 
     Rectangle cellBounds = zone.getGrid().getBounds(node.position);
     DecimalFormat f = new DecimalFormat("##.00");
@@ -730,15 +689,13 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     EventQueue.invokeLater(
         () -> {
+          // Track labels to delete later
+          debugLabels.addAll(
+              List.of(gScore.getId(), hScore.getId(), fScore.getId(), parent.getId()));
           zone.putLabel(gScore);
           zone.putLabel(hScore);
           zone.putLabel(fScore);
           zone.putLabel(parent);
         });
-
-    // Track labels to delete later
-    // debugLabels.add(gScore.getId());
-    // debugLabels.add(hScore.getId());
-    // debugLabels.add(fScore.getId());
   }
 }

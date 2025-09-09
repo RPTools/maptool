@@ -14,7 +14,9 @@
  */
 package net.rptools.maptool.client.swing;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public interface Animatable {
 
   public void animate();

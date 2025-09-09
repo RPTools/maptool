@@ -21,9 +21,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
 
@@ -63,13 +63,11 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       }
 
       // Make a thumbnail of the image
-      // TODO: This could be cached somehow, right now it's quick enough though
       BufferedImage tokenImage = ImageManager.getImage(token.getImageAssetId(), this);
       Dimension dim = new Dimension(tokenImage.getWidth(), tokenImage.getHeight());
-      SwingUtil.constrainTo(dim, height);
+      AwtUtil.constrainTo(dim, height);
 
       Graphics2D g = (Graphics2D) image.getGraphics();
-      // TODO: Center the image
       g.setComposite(
           AlphaComposite.getInstance(AlphaComposite.SRC_OVER, deemphasize ? 0.5F : 1.0F));
       g.drawImage(tokenImage, 0, 0, dim.width, dim.height, this);
@@ -108,6 +106,10 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 
   @Override
   public Icon getLeafIcon() {
-    return new ImageIcon(image);
+    if (image != null) {
+      return new ImageIcon(image);
+    } else {
+      return null;
+    }
   }
 }

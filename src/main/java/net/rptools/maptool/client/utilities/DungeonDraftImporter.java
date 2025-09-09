@@ -20,27 +20,42 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jidesoft.utils.Base64;
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppPreferences.UvttLosImportType;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.mappropertiesdialog.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.uvtt.UvttLineOfSightPromptDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.Light;
+import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.topology.VisibilityType;
+import net.rptools.maptool.model.topology.Wall;
+import net.rptools.maptool.model.topology.WallTopology;
 import org.apache.commons.io.FilenameUtils;
 
 /** Class for importing Dungeondraft Universal VTT export format. */
@@ -66,10 +81,11 @@ public class DungeonDraftImporter {
 
   /** The width to used for VBL for walls. */
   private static final int WALL_VBL_WIDTH = 3;
+
   /** The width to used for VBL for doors. */
   private static final int DOOR_VBL_WIDTH = 1;
-  /** The width to used for VBL for objects. */
-  private static final int OBJECT_VBL_WIDTH = 1;
+
+  private static final double POINT_TOLERANCE = 1e-9;
 
   /** Stroke to use to create VBL path for walls. */
   private static final BasicStroke WALL_VBL_STROKE =
@@ -79,18 +95,22 @@ public class DungeonDraftImporter {
   private static final BasicStroke DOOR_VBL_STROKE =
       new BasicStroke(DOOR_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
-  /** Stroke to use to create VBL path for doors. */
-  private static final BasicStroke OBJECT_VBL_STROKE =
-      new BasicStroke(OBJECT_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-
   /** Width of the Light source icon. */
   private static final int LIGHT_WIDTH = 20;
+
   /** Height of the Light source icon. */
   private static final int LIGHT_HEIGHT = 20;
+
+  /** Contains environmental details (ambient lighting, baked-in lighting) */
+  public static final String VTT_FIELD_ENVIRONMENT = "environment";
 
   /** Asset to use to represent Light sources. */
   private static final Asset lightSourceAsset =
       Asset.createImageAsset("LightSource", RessourceManager.getImage(Images.LIGHT_SOURCE));
+
+  // Reuse the same dialog each time so the last selection is kept.
+  private static final UvttLineOfSightPromptDialog losDialog =
+      new UvttLineOfSightPromptDialog(MapTool.getFrame());
 
   static {
     AssetManager.putAsset(lightSourceAsset);
@@ -113,7 +133,6 @@ public class DungeonDraftImporter {
   public void importVTT() throws IOException {
     JsonObject ddvtt;
     double dd2vtt_format;
-    boolean do_transform = false;
     AffineTransform at = new AffineTransform();
 
     try (InputStreamReader reader = new InputStreamReader(new FileInputStream(dungeonDraftFile))) {
@@ -171,7 +190,22 @@ public class DungeonDraftImporter {
       return;
     }
 
-    /**
+    boolean importLosAsWalls;
+    switch (AppPreferences.uvttLosImportType.get()) {
+      case Walls -> importLosAsWalls = true;
+      case Masks -> importLosAsWalls = false;
+      default -> {
+        losDialog.setVisible(true);
+        var losResult = losDialog.getResult();
+        if (losResult.isEmpty()) {
+          // User canceled on us.
+          return;
+        }
+        importLosAsWalls = losResult.get() == UvttLosImportType.Walls;
+      }
+    }
+
+    /*
      * If the top or left sides of the map get cropped off, all the LOS points will need to be
      * adjusted.
      */
@@ -181,46 +215,83 @@ public class DungeonDraftImporter {
       double origin_y = origin.get("y").getAsDouble() * -1 * pixelsPerCell;
       if (origin_x != 0.0 || origin_y != 0.0) {
         at.translate(origin_x, origin_y);
-        do_transform = true;
         // if the map was not cropped on the grid fix the grid offset.
         zone.getGrid()
             .setOffset((int) (origin_x % pixelsPerCell), (int) (origin_y % pixelsPerCell));
       }
     }
 
-    final boolean finalDo_transform = do_transform;
+    // Walls
+    JsonArray lineOfSight =
+        Objects.requireNonNullElse(ddvtt.getAsJsonArray("line_of_sight"), new JsonArray());
+    // Objects - added with Dungeondraft 1.0.2.1
+    JsonArray objectsLineOfSight =
+        Objects.requireNonNullElse(ddvtt.getAsJsonArray("objects_line_of_sight"), new JsonArray());
+    // Doors, windows, etc.
+    JsonArray portals =
+        Objects.requireNonNullElse(ddvtt.getAsJsonArray("portals"), new JsonArray());
 
-    // Handle Walls
-    JsonArray vbl = ddvtt.getAsJsonArray("line_of_sight");
-    if (vbl != null) {
-      vbl.forEach(
+    if (importLosAsWalls) {
+      var walls = new WallTopology();
+      lineOfSight.forEach(
+          v ->
+              addWalls(
+                  v.getAsJsonArray(),
+                  Wall.Direction.Both,
+                  Wall.DirectionModifier.SameDirection,
+                  pixelsPerCell,
+                  at,
+                  walls));
+      objectsLineOfSight.forEach(
+          v ->
+              addWalls(
+                  v.getAsJsonArray(),
+                  Wall.Direction.Left,
+                  Wall.DirectionModifier.SameDirection,
+                  pixelsPerCell,
+                  at,
+                  walls));
+      portals.forEach(
+          d -> {
+            JsonObject jobj = d.getAsJsonObject();
+            boolean isClosed;
+            if (jobj.has("closed")) {
+              isClosed = jobj.get("closed").getAsBoolean();
+            } else {
+              isClosed = true;
+            }
+
+            JsonArray bounds = jobj.get("bounds").getAsJsonArray();
+            addWalls(
+                bounds,
+                Wall.Direction.Both,
+                isClosed ? Wall.DirectionModifier.SameDirection : Wall.DirectionModifier.Disabled,
+                pixelsPerCell,
+                at,
+                walls);
+          });
+      zone.replaceWalls(walls);
+    } else {
+      lineOfSight.forEach(
           v -> {
             Area vblArea =
                 new Area(
                     WALL_VBL_STROKE.createStrokedShape(
                         getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
-            if (finalDo_transform) vblArea.transform(at);
-            zone.addTopology(vblArea, Zone.TopologyType.WALL_VBL);
-            zone.addTopology(vblArea, Zone.TopologyType.MBL);
+            vblArea.transform(at);
+            zone.updateMaskTopology(vblArea, false, Zone.TopologyType.WALL_VBL);
+            zone.updateMaskTopology(vblArea, false, Zone.TopologyType.MBL);
           });
-    }
 
-    // Handle Objects - added with Dungeondraft 1.0.2.1
-    JsonArray objVBL = ddvtt.getAsJsonArray("objects_line_of_sight");
-    if (objVBL != null) {
-      objVBL.forEach(
+      objectsLineOfSight.forEach(
           v -> {
             Area vblArea = new Area(getVBLPath(v.getAsJsonArray(), pixelsPerCell));
-            if (finalDo_transform) vblArea.transform(at);
-            zone.addTopology(vblArea, Zone.TopologyType.HILL_VBL);
-            zone.addTopology(vblArea, Zone.TopologyType.PIT_VBL);
+            vblArea.transform(at);
+            zone.updateMaskTopology(vblArea, false, Zone.TopologyType.HILL_VBL);
+            zone.updateMaskTopology(vblArea, false, Zone.TopologyType.PIT_VBL);
           });
-    }
 
-    // Handle Doors
-    JsonArray doors = ddvtt.getAsJsonArray("portals");
-    if (doors != null) {
-      doors.forEach(
+      portals.forEach(
           d -> {
             JsonObject jobj = d.getAsJsonObject();
             boolean isClosed;
@@ -235,20 +306,79 @@ public class DungeonDraftImporter {
 
               Area vblArea =
                   new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
-              if (finalDo_transform) vblArea.transform(at);
-              zone.addTopology(vblArea, Zone.TopologyType.WALL_VBL);
-              zone.addTopology(vblArea, Zone.TopologyType.MBL);
+              vblArea.transform(at);
+              zone.updateMaskTopology(vblArea, false, Zone.TopologyType.WALL_VBL);
+              zone.updateMaskTopology(vblArea, false, Zone.TopologyType.MBL);
             }
           });
     }
 
-    JsonArray lights = ddvtt.getAsJsonArray("lights");
-    if (lights != null && lights.size() > 0) {
-      placeLights(zone, lights, pixelsPerCell);
+    boolean bakedLighting = false;
+    if (ddvtt.has(VTT_FIELD_ENVIRONMENT)) {
+      var environment = ddvtt.getAsJsonObject(VTT_FIELD_ENVIRONMENT);
+      var bakedLightingMember = environment.get("baked_lighting");
+      if (bakedLightingMember != null) {
+        bakedLighting = bakedLightingMember.getAsBoolean();
+      }
+    }
+
+    JsonArray lights = Objects.requireNonNullElse(ddvtt.getAsJsonArray("lights"), new JsonArray());
+    if (!lights.isEmpty()) {
+      placeLights(zone, lights, pixelsPerCell, bakedLighting);
     }
 
     // If everything has been successful, we can add the zone to the campaign.
     MapTool.addZone(zone);
+  }
+
+  private Point2D vblPoint(JsonObject pointJson, double pixelsPerCell) {
+    return new Point2D.Double(
+        pointJson.get("x").getAsDouble() * pixelsPerCell,
+        pointJson.get("y").getAsDouble() * pixelsPerCell);
+  }
+
+  private void addWalls(
+      JsonArray vblArray,
+      Wall.Direction lightingDirection,
+      Wall.DirectionModifier lightingModifier,
+      double pixelsPerCell,
+      AffineTransform transform,
+      WallTopology walls) {
+    if (vblArray.size() < 2) {
+      // We don't support lone points.
+      return;
+    }
+
+    var wallData =
+        new Wall.Data(
+            lightingDirection,
+            Wall.MovementDirectionModifier.ForceBoth,
+            Map.of(
+                VisibilityType.Sight, lightingModifier,
+                VisibilityType.Light, lightingModifier,
+                VisibilityType.Aura, lightingModifier));
+
+    var startPoint =
+        transform.transform(vblPoint(vblArray.get(0).getAsJsonObject(), pixelsPerCell), null);
+    walls.string(
+        startPoint,
+        builder -> {
+          var previousPoint = startPoint;
+
+          for (var point : vblArray.asList().subList(1, vblArray.size())) {
+            var currentPoint =
+                transform.transform(vblPoint(point.getAsJsonObject(), pixelsPerCell), null);
+
+            // Dungeondraft has a bad habit of introducing redundant points in generated maps. Let's
+            // filter those out.
+            if (currentPoint.distance(previousPoint) < POINT_TOLERANCE) {
+              continue;
+            }
+
+            builder.push(currentPoint, wallData);
+            previousPoint = currentPoint;
+          }
+        });
   }
 
   /**
@@ -257,12 +387,16 @@ public class DungeonDraftImporter {
    * @param zone The new {@link Zone} that was created.
    * @param lights The {@link JsonArray} containing the lights.
    * @param pixelsPerCell The number of pixels per grid cell on the map.
+   * @param bakedLighting If {@code true}, define and attach unique lights to each light token.
    */
-  private void placeLights(Zone zone, JsonArray lights, double pixelsPerCell) {
+  private void placeLights(
+      Zone zone, JsonArray lights, double pixelsPerCell, boolean bakedLighting) {
     int lightNo = 1;
     boolean ignoredLights = false;
     for (JsonElement ele : lights) {
-      JsonObject position = ele.getAsJsonObject().getAsJsonObject("position");
+      var lightJson = ele.getAsJsonObject();
+
+      JsonObject position = lightJson.getAsJsonObject("position");
       if (position.has("x") && position.has("y")) {
         Token lightToken = new Token("light-" + lightNo, lightSourceAsset.getMD5Key());
         lightToken.setLayer(Layer.OBJECT);
@@ -275,19 +409,44 @@ public class DungeonDraftImporter {
         lightToken.setX((int) (position.get("x").getAsDouble() * pixelsPerCell) - LIGHT_WIDTH / 2);
         lightToken.setY((int) (position.get("y").getAsDouble() * pixelsPerCell) - LIGHT_HEIGHT / 2);
 
-        JsonObject lightValues = new JsonObject();
-        lightValues.addProperty(
-            "range", ele.getAsJsonObject().getAsJsonPrimitive("range").getAsBigDecimal());
-        lightValues.addProperty(
-            "intensity", ele.getAsJsonObject().getAsJsonPrimitive("intensity").getAsBigDecimal());
-        lightValues.addProperty(
-            "color", ele.getAsJsonObject().getAsJsonPrimitive("color").getAsString());
-        lightValues.addProperty(
-            "shadows",
-            ele.getAsJsonObject().getAsJsonPrimitive("shadows").getAsBoolean()
-                ? BigDecimal.ONE
-                : BigDecimal.ZERO);
-        lightToken.setGMNotes(lightValues.toString());
+        // If lighting is baked in, produce a clear light.
+        Color color;
+        if (bakedLighting) {
+          color = null;
+        } else {
+          color =
+              new Color(
+                  Integer.parseUnsignedInt(
+                      lightJson.getAsJsonPrimitive("color").getAsString(), 16));
+        }
+
+        var light =
+            new Light(
+                ShapeType.CIRCLE,
+                0.,
+                // Range is measured in cells.
+                lightJson.getAsJsonPrimitive("range").getAsDouble() * zone.getUnitsPerCell(),
+                0.,
+                0.,
+                color == null ? null : new DrawableColorPaint(color),
+                100,
+                false,
+                false);
+        var lightSource =
+            LightSource.createRegular(
+                "uvtt-imported",
+                new GUID(),
+                LightSource.Type.NORMAL,
+                false,
+                // "shadows" means whether the light respects light blocking.
+                !lightJson.getAsJsonPrimitive("shadows").getAsBoolean(),
+                List.of(light));
+        // Install the light source...
+        lightToken.addUniqueLightSource(lightSource);
+        // ... and activate it immediately.
+        lightToken.addLightSource(lightSource.getId());
+
+        lightToken.setGMNotes(ele.toString());
 
         zone.putToken(lightToken);
         lightNo++;
@@ -312,14 +471,12 @@ public class DungeonDraftImporter {
     boolean first = true;
     Path2D path = new GeneralPath();
     for (JsonElement element : vblArray) {
-      JsonObject point = element.getAsJsonObject();
-      double x = point.get("x").getAsDouble() * pixelsPerCell;
-      double y = point.get("y").getAsDouble() * pixelsPerCell;
+      Point2D point = vblPoint(element.getAsJsonObject(), pixelsPerCell);
       if (first) {
-        path.moveTo(x, y);
+        path.moveTo(point.getX(), point.getY());
         first = false;
       } else {
-        path.lineTo(x, y);
+        path.lineTo(point.getX(), point.getY());
       }
     }
 

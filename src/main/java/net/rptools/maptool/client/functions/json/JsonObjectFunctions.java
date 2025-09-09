@@ -20,6 +20,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -48,7 +49,7 @@ public class JsonObjectFunctions {
    * @return a {@link JsonObject} convert4d from the string properties.
    */
   public JsonObject fromStrProp(String prop, String delim) {
-    String[] propsArray = prop.split(delim);
+    String[] propsArray = StringUtil.split(prop, delim);
     JsonObject jsonObject = new JsonObject();
 
     for (String s : propsArray) {

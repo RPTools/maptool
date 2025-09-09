@@ -16,6 +16,8 @@ package net.rptools.maptool.client;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 public class LaunchInstructions {
@@ -27,6 +29,10 @@ public class LaunchInstructions {
   static {
     // This will inject additional data tags in log4j2 which will be picked up by Sentry.io
     System.setProperty("log4j2.isThreadContextMapInheritable", "true");
+    // This sets up log4j to capture logging from Java logging manager
+    if (System.getProperty("java.util.logging.manager") == null) {
+      System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+    }
     ThreadContext.put("OS", System.getProperty("os.name"));
   }
 
@@ -50,8 +56,15 @@ public class LaunchInstructions {
 
       MapTool.main(args);
 
-      AppUpdate.gitHubReleases();
-    } catch (Exception e) {
+      if (!MapTool.isDevelopment()) {
+        AppUpdate.gitHubReleases();
+      }
+    } catch (Throwable e) {
+      // IMPORTANT: don't move this logger init to class-level because we need AppUtil.initLogging()
+      // to run before any loggers are initialized. Yes, it's brittle, but c'est la vie.
+      Logger log = LogManager.getLogger(LaunchInstructions.class);
+
+      log.error("Unhandled error during startup", e);
       // Shows a proper error message if MapTool can't initialize. Fix #1678.
       JOptionPane.showMessageDialog(new JFrame(), e.getMessage());
       System.exit(1);

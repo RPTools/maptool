@@ -42,12 +42,16 @@ public class TokenRemoveFromInitiativeFunction extends AbstractFunction {
   private static final TokenRemoveFromInitiativeFunction instance =
       new TokenRemoveFromInitiativeFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static TokenRemoveFromInitiativeFunction getInstance() {
     return instance;
   }
 
-  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
+  /**
+   * @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List)
+   */
   @Override
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)

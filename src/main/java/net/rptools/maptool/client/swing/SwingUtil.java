@@ -14,21 +14,10 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.awt.Transparency;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -128,43 +117,51 @@ public class SwingUtil {
    * @param outerWindow window to be centered over
    */
   public static void centerOver(Window innerWindow, Window outerWindow) {
+    // how big can it be?
+    // screen area minus OS bits like taskbars
+    GraphicsConfiguration gc = outerWindow.getGraphicsConfiguration();
+    Insets insets = outerWindow.getToolkit().getScreenInsets(gc);
+    Rectangle usableScreenArea = gc.getDevice().getDefaultConfiguration().getBounds();
+    usableScreenArea =
+        new Rectangle(
+            usableScreenArea.x + insets.left,
+            usableScreenArea.y + insets.top,
+            usableScreenArea.width - insets.left - insets.right,
+            usableScreenArea.height - insets.top - insets.bottom);
+
+    Dimension maxSize = usableScreenArea.getSize();
+
+    // what sizes are involved?
     Dimension innerSize = innerWindow.getSize();
     Dimension outerSize = outerWindow.getSize();
 
+    // make sure it fits
+    if (maxSize.width < innerSize.width || maxSize.height < innerSize.height) {
+      innerSize.setSize(
+          Math.min(maxSize.width, innerSize.width), Math.min(maxSize.height, innerSize.height));
+      innerWindow.setPreferredSize(innerSize);
+      innerWindow.setMaximumSize(innerSize);
+      innerWindow.revalidate();
+    }
+    // centre it
     int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width) / 2;
     int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
 
+    // just to make sure it doesn't cover UI elements, i.e. encroach on Screen Insets
+    // Left-hand side
+    x = (int) Math.max(x, usableScreenArea.getMinX());
+    // top side
+    y = (int) Math.max(y, usableScreenArea.getMinY());
+    // Right-hand side
+    if (x + innerSize.width > usableScreenArea.getMaxX()) {
+      x = (int) (usableScreenArea.getMaxX() - innerSize.width);
+    }
+    // Bottom
+    if (y + innerSize.height > usableScreenArea.getMaxY()) {
+      y = (int) (usableScreenArea.getMaxY() - innerSize.height);
+    }
     // Jamz: For multiple monitor's, x & y can be negative values...
-    // innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
     innerWindow.setLocation(x, y);
-  }
-
-  public static void constrainTo(Dimension dim, int size) {
-    boolean widthBigger = dim.width > dim.height;
-
-    if (widthBigger) {
-      dim.height = (int) ((dim.height / (double) dim.width) * size);
-      dim.width = size;
-    } else {
-      dim.width = (int) ((dim.width / (double) dim.height) * size);
-      dim.height = size;
-    }
-  }
-
-  public static void constrainTo(Dimension dim, int width, int height) {
-    boolean widthBigger = dim.width > dim.height;
-
-    constrainTo(dim, widthBigger ? width : height);
-
-    if ((widthBigger && dim.height > height) || (!widthBigger && dim.width > width)) {
-      int size =
-          (int)
-              Math.round(
-                  widthBigger
-                      ? (height / (double) dim.height) * width
-                      : (width / (double) dim.width) * dim.height);
-      constrainTo(dim, size);
-    }
   }
 
   /**
@@ -268,7 +265,6 @@ public class SwingUtil {
     int x = flipHorizontal ? view.width - (rect.x + rect.width) : rect.x;
     int y = flipVertical ? view.height - (rect.y + rect.height) : rect.y;
 
-    // System.out.println(rect + " - " + new Rectangle(x, y, rect.width, rect.height));
     return new Rectangle(x, y, rect.width, rect.height);
   }
 
@@ -372,5 +368,40 @@ public class SwingUtil {
           }
         });
     return button;
+  }
+
+  /**
+   * Returns the first text input field for a JFileChooser. Which is usually the only field in a
+   * chooser.
+   *
+   * @param cont JFileChooser
+   * @return JTextField
+   */
+  public static JTextField getFileChooserFilenameTextField(Container cont) {
+    List<JTextField> fields = getTextFields(cont, new ArrayList<>());
+    if (!fields.isEmpty()) {
+      return fields.getFirst();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Recursively search a container for JTextFields. Useful for extracting text fields from
+   * components like JFileChooser where it is not readily available.
+   *
+   * @param cont Container
+   * @param returnList List<JTextField
+   * @return List of JTextField
+   */
+  public static List<JTextField> getTextFields(Container cont, List<JTextField> returnList) {
+    for (Component c : cont.getComponents()) {
+      if (c instanceof JTextField) {
+        returnList.add((JTextField) c);
+      } else if (c instanceof Container) {
+        returnList.addAll(getTextFields(((Container) c), returnList));
+      }
+    }
+    return returnList;
   }
 }

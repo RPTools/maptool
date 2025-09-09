@@ -40,6 +40,8 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.server.proto.HeroLabDataDto;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Jamz
@@ -70,6 +72,8 @@ public class HeroLabData {
 
   private final Map<String, MD5Key> heroImageAssets = new HashMap<>();
 
+  private static final Logger log = LogManager.getLogger(HeroLabData.class);
+
   private static interface DefaultAssetKey {
     final String PORTRAIT_KEY = "0";
     final String TOKEN_KEY = "1";
@@ -98,14 +102,16 @@ public class HeroLabData {
           Asset.createImageAsset(
               "DEFAULT_HERO_LAB_PORTRAIT", RessourceManager.getImage(Images.HEROLABS_PORTRAIT));
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while loading default HeroLab assets", e);
     }
 
-    if (!AssetManager.hasAsset(DEFAULT_HERO_LAB_TOKEN_ASSET))
+    if (!AssetManager.hasAsset(DEFAULT_HERO_LAB_TOKEN_ASSET)) {
       AssetManager.putAsset(DEFAULT_HERO_LAB_TOKEN_ASSET);
+    }
 
-    if (!AssetManager.hasAsset(DEFAULT_HERO_LAB_PORTRAIT_ASSET))
+    if (!AssetManager.hasAsset(DEFAULT_HERO_LAB_PORTRAIT_ASSET)) {
       AssetManager.putAsset(DEFAULT_HERO_LAB_PORTRAIT_ASSET);
+    }
 
     heroImageAssets.put(DefaultAssetKey.TOKEN_KEY, DEFAULT_HERO_LAB_TOKEN_ASSET.getMD5Key());
     heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getMD5Key());
@@ -124,13 +130,13 @@ public class HeroLabData {
    *     text or attribute nodes.
    */
   public String parseXML(String xPathExpression, String delim) {
-    if (xPathExpression.isEmpty()) throw new IllegalArgumentException("Empty XPath expression");
+    if (xPathExpression.isEmpty()) {
+      throw new IllegalArgumentException("Empty XPath expression");
+    }
 
     String results;
     XML xmlObj = new XMLDocument(getStatBlock_xml());
     results = String.join(delim, xmlObj.xpath(xPathExpression));
-
-    // System.out.println("HeroLabData parseXML(" + xPathExpression + ") :: '" + results + "'");
 
     return results;
   }
@@ -145,7 +151,9 @@ public class HeroLabData {
    *     text or attribute nodes.
    */
   public JsonArray parseXmlToJson(String xPathExpression) {
-    if (xPathExpression.isEmpty()) throw new IllegalArgumentException("Empty XPath expression");
+    if (xPathExpression.isEmpty()) {
+      throw new IllegalArgumentException("Empty XPath expression");
+    }
 
     JsonArray results = new JsonArray();
     XML xmlObj = new XMLDocument(getStatBlock_xml());
@@ -156,15 +164,6 @@ public class HeroLabData {
     return results;
   }
 
-  /*
-   * Other xpath tests... String xml = heroData.getStatBlock_xml();
-   *
-   * XPathFactory xpathFactory = XPathFactory.newInstance(); XPath xpath = xpathFactory.newXPath();
-   *
-   * InputSource source = new InputSource(new StringReader(xml)); String results = ""; try { results = xpath.evaluate(searchText, source); } catch (XPathExpressionException e1) { // TODO
-   * Auto-generated catch block e1.printStackTrace(); } System.out.println(searchText); System.out.println(results);
-   */
-
   public boolean refresh() {
     return lastModified != getPortfolioLastModified();
   }
@@ -173,22 +172,23 @@ public class HeroLabData {
   public Map<String, HashMap<String, String>> getStatBlocks() {
     Map<String, HashMap<String, String>> statBlocks = new HashMap<>();
 
-    if (heroLabStatblockAssetID == null) return statBlocks;
+    if (heroLabStatblockAssetID == null) {
+      return statBlocks;
+    }
 
     Asset statBlockAsset = AssetManager.getAsset(heroLabStatblockAssetID);
     if (statBlockAsset == null) {
-      System.out.println("Requesting asset from the server...");
+      log.debug("Requesting asset from the server...");
       statBlockAsset = AssetManager.requestAssetFromServer(heroLabStatblockAssetID);
       int maxWait = 100;
       while (!AssetManager.hasAsset(heroLabStatblockAssetID) && maxWait-- > 0) {
         try {
           Thread.sleep(100);
         } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          // Do nothing
         }
 
-        System.out.println("Waiting on asset from server... " + maxWait);
+        log.debug("Waiting on asset from server... {}", maxWait);
       }
 
       statBlockAsset = AssetManager.getAsset(heroLabStatblockAssetID);
@@ -201,8 +201,8 @@ public class HeroLabData {
       byteIn.close();
       in.close();
     } catch (ClassNotFoundException | IOException e) {
-      System.out.println("ERROR: Attempting to read Asset ID: " + heroLabStatblockAssetID);
-      e.printStackTrace();
+      log.error("ERROR: Attempting to read Asset ID: {}", heroLabStatblockAssetID);
+      log.error(e.getStackTrace());
     }
 
     return statBlocks;
@@ -211,7 +211,9 @@ public class HeroLabData {
   public void setStatBlocks(Map<String, Map<String, String>> statBlocks) {
     // Jamz: Since statblocks do not change or accessed often, moved object data to an Asset
     // as heroLabData could be pretty large with XML data causing lag on token transfers
-    if (heroLabStatblockAssetID != null) AssetManager.removeAsset(heroLabStatblockAssetID);
+    if (heroLabStatblockAssetID != null) {
+      AssetManager.removeAsset(heroLabStatblockAssetID);
+    }
 
     // Convert Map to byte array
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -230,7 +232,7 @@ public class HeroLabData {
         byteOut.close();
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error(e.getStackTrace());
     }
   }
 
@@ -239,18 +241,29 @@ public class HeroLabData {
   }
 
   public String getStatBlock_data(String type) {
-    if (getStatBlocks() == null) return "";
+    if (getStatBlocks() == null) {
+      return "";
+    }
 
-    if (type.equalsIgnoreCase(StatBlockType.HTML)) type = StatBlockType.HTML;
-    else if (type.equalsIgnoreCase(StatBlockType.XML)) type = StatBlockType.XML;
-    else type = StatBlockType.TEXT;
+    if (type.equalsIgnoreCase(StatBlockType.HTML)) {
+      type = StatBlockType.HTML;
+    } else if (type.equalsIgnoreCase(StatBlockType.XML)) {
+      type = StatBlockType.XML;
+    } else {
+      type = StatBlockType.TEXT;
+    }
 
-    if (getStatBlocks().get(type) == null) return "";
+    if (getStatBlocks().get(type) == null) {
+      return "";
+    }
 
     String statBlock = getStatBlocks().get(type).get(StatBlockKey.DATA);
 
-    if (statBlock == null) return "";
-    else return statBlock;
+    if (statBlock == null) {
+      return "";
+    } else {
+      return statBlock;
+    }
   }
 
   public String getStatBlock_text() {
@@ -268,20 +281,25 @@ public class HeroLabData {
   public boolean isDirty() {
     boolean hasChanged = refresh();
 
-    if (hasChanged) isDirty = true;
+    if (hasChanged) {
+      isDirty = true;
+    }
 
     return isDirty;
   }
 
   public void setDirty(boolean isDirty) {
-    if (!isDirty) lastModified = getPortfolioLastModified();
-    // lastModified = portfolioWatcher.getLastModified();
+    if (!isDirty) {
+      lastModified = getPortfolioLastModified();
+    }
 
     this.isDirty = isDirty;
   }
 
   public String getPortfolioPath() {
-    if (portfolioPath == null) setPortfolioPath("");
+    if (portfolioPath == null) {
+      setPortfolioPath("");
+    }
 
     return portfolioPath;
   }
@@ -291,13 +309,16 @@ public class HeroLabData {
   }
 
   public File getPortfolioFile() {
-    String fileSyncPath = AppPreferences.getFileSyncPath();
+    String fileSyncPath = AppPreferences.fileSyncPath.get();
 
     if (portfolioPath == null || portfolioPath.isEmpty() || fileSyncPath.isEmpty()) {
       return portfolioFile;
     } else {
-      if (portfolioPath.startsWith(fileSyncPath)) return new File(portfolioPath);
-      else return new File(fileSyncPath, portfolioPath);
+      if (portfolioPath.startsWith(fileSyncPath)) {
+        return new File(portfolioPath);
+      } else {
+        return new File(fileSyncPath, portfolioPath);
+      }
     }
   }
 
@@ -305,19 +326,17 @@ public class HeroLabData {
     this.portfolioFile = portfolioFile;
     lastModified = getPortfolioLastModified();
 
-    if (!AppPreferences.getFileSyncPath().isEmpty()) {
+    if (!AppPreferences.fileSyncPath.get().isEmpty()) {
       try {
         portfolioPath =
-            Paths.get(AppPreferences.getFileSyncPath())
+            Paths.get(AppPreferences.fileSyncPath.get())
                 .relativize(portfolioFile.toPath())
                 .toString();
       } catch (IllegalArgumentException e) {
-        System.out.println(
-            "Unable to relativize paths for: ["
-                + portfolioFile
-                + "] ["
-                + AppPreferences.getFileSyncPath()
-                + "]");
+        log.error(
+            "Unable to relativize paths for: [{}] [{}]",
+            portfolioFile,
+            AppPreferences.fileSyncPath.get());
         portfolioPath = "";
       }
     } else {
@@ -326,14 +345,19 @@ public class HeroLabData {
   }
 
   private long getPortfolioLastModified() {
-    if (getPortfolioFile() != null) return getPortfolioFile().lastModified();
-    else return 0L;
+    if (getPortfolioFile() != null) {
+      return getPortfolioFile().lastModified();
+    }
+
+    return 0L;
   }
 
   public String getLastModifiedDateString() {
-    if (lastModified != getPortfolioLastModified())
+    if (lastModified != getPortfolioLastModified()) {
       return "<html><i>" + new Date(lastModified).toString() + "</i></html>";
-    else return new Date(lastModified).toString();
+    }
+
+    return new Date(lastModified).toString();
   }
 
   public String getName() {
@@ -409,8 +433,9 @@ public class HeroLabData {
   }
 
   public MD5Key getTokenImage() {
-    if (!heroImageAssets.containsKey(DefaultAssetKey.TOKEN_KEY))
+    if (!heroImageAssets.containsKey(DefaultAssetKey.TOKEN_KEY)) {
       heroImageAssets.put(DefaultAssetKey.TOKEN_KEY, DEFAULT_HERO_LAB_TOKEN_ASSET.getMD5Key());
+    }
 
     return heroImageAssets.get(DefaultAssetKey.TOKEN_KEY);
   }
@@ -420,9 +445,10 @@ public class HeroLabData {
   }
 
   public MD5Key getPortraitImage() {
-    if (!heroImageAssets.containsKey(DefaultAssetKey.PORTRAIT_KEY))
+    if (!heroImageAssets.containsKey(DefaultAssetKey.PORTRAIT_KEY)) {
       heroImageAssets.put(
           DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getMD5Key());
+    }
 
     return heroImageAssets.get(DefaultAssetKey.PORTRAIT_KEY);
   }
@@ -450,9 +476,13 @@ public class HeroLabData {
   public Collection<MD5Key> getAllAssetIDs() {
     HashMap<String, MD5Key> allAssetIDs = new HashMap<>();
 
-    if (heroImageAssets != null) allAssetIDs.putAll(heroImageAssets);
+    if (heroImageAssets != null) {
+      allAssetIDs.putAll(heroImageAssets);
+    }
 
-    if (heroLabStatblockAssetID != null) allAssetIDs.put("statBlocks", heroLabStatblockAssetID);
+    if (heroLabStatblockAssetID != null) {
+      allAssetIDs.put("statBlocks", heroLabStatblockAssetID);
+    }
 
     return allAssetIDs.values();
   }
@@ -460,7 +490,9 @@ public class HeroLabData {
   public List<String> getAllImageAssetsURLs() {
     List<String> assetSet = new ArrayList<String>();
 
-    for (MD5Key assetKey : heroImageAssets.values()) assetSet.add("asset://" + assetKey.toString());
+    for (MD5Key assetKey : heroImageAssets.values()) {
+      assetSet.add("asset://" + assetKey.toString());
+    }
 
     return assetSet;
   }
@@ -474,7 +506,7 @@ public class HeroLabData {
     try {
       ImageIO.write(image, "png", baos);
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error(e.getStackTrace());
     }
 
     Asset imageAsset = Asset.createImageAsset(imageName, baos.toByteArray());
@@ -550,6 +582,11 @@ public class HeroLabData {
     if (dto.hasPortfolioPath()) {
       data.portfolioPath = dto.getPortfolioPath().getValue();
     }
+
+    if (dto.hasPortfolioFile()) {
+      data.portfolioFile = new File(dto.getPortfolioFile().getValue());
+    }
+
     dto.getHeroImageAssetsMap()
         .forEach((key, value) -> data.heroImageAssets.put(key, new MD5Key(value)));
     return data;
@@ -586,7 +623,15 @@ public class HeroLabData {
     if (portfolioPath != null) {
       dto.setPortfolioPath(StringValue.of(portfolioPath));
     }
-    heroImageAssets.forEach((key, value) -> dto.putHeroImageAssets(key, value.toString()));
+
+    if (portfolioFile != null) {
+      dto.setPortfolioFile(StringValue.of(portfolioFile.toString()));
+    }
+
+    if (heroImageAssets != null) {
+      heroImageAssets.forEach((key, value) -> dto.putHeroImageAssets(key, value.toString()));
+    }
+
     return dto.build();
   }
 }

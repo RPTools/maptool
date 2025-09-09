@@ -32,6 +32,7 @@ public class MaptoolNode {
    * <b>equals()</b> method does more than just compare the two <code>String</code>s.
    */
   private String name;
+
   /**
    * A <code>null</code> <b>object</b> field is indicative of an entry in the tree that doesn't have
    * a corresponding MapTool object to go with it. This should only be the case for "folder nodes".

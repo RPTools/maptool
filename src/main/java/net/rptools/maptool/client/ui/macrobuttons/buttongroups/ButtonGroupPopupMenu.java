@@ -29,9 +29,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
+import net.rptools.maptool.client.ui.macrobuttons.dialog.MacroEditorDialog;
 import net.rptools.maptool.client.ui.macrobuttons.panels.CampaignPanel;
 import net.rptools.maptool.client.ui.macrobuttons.panels.GlobalPanel;
 import net.rptools.maptool.client.ui.macrobuttons.panels.GmPanel;
@@ -40,7 +42,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
-import org.eclipse.jetty.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("serial")
 public class ButtonGroupPopupMenu extends JPopupMenu {
@@ -131,14 +133,17 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
     }
 
     public void actionPerformed(ActionEvent event) {
+      MacroButtonProperties mbp = null;
       if (panelClass.equals("GlobalPanel")) {
-        new MacroButtonProperties(panelClass, MacroButtonPrefs.getNextIndex(), macroGroup);
+        mbp = new MacroButtonProperties(panelClass, MacroButtonPrefs.getNextIndex(), macroGroup);
       } else if (panelClass.equals("CampaignPanel")) {
-        new MacroButtonProperties(
-            panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), macroGroup);
+        mbp =
+            new MacroButtonProperties(
+                panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), macroGroup);
       } else if (panelClass.equals("GmPanel")) {
-        new MacroButtonProperties(
-            panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), macroGroup);
+        mbp =
+            new MacroButtonProperties(
+                panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), macroGroup);
       } else if (panelClass.equals("SelectionPanel")) {
         if (areaGroup != null) {
           if (areaGroup
@@ -150,12 +155,15 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
             }
           } else if (tokenId != null) {
             Token token = getToken();
-            new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
+            mbp = new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
           }
         }
       } else if (tokenId != null) {
         Token token = getToken();
-        new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
+        mbp = new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
+      }
+      if (mbp != null && AppPreferences.openEditorForNewMacro.get()) {
+        MacroEditorDialog.createMacroButtonDialog().show(mbp);
       }
     }
   }
@@ -278,7 +286,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       }
                       if (alreadyExists) {
                         String tokenName = token.getName();
-                        if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                        if (MapTool.getPlayer().isGM() && !StringUtils.isEmpty(token.getGMName())) {
                           tokenName = tokenName + "(" + token.getGMName() + ")";
                         }
                         alreadyExists =
@@ -301,7 +309,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                   }
                   if (alreadyExists) {
                     String tokenName = token.getName();
-                    if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                    if (MapTool.getPlayer().isGM() && !StringUtils.isEmpty(token.getGMName())) {
                       tokenName += "(" + token.getGMName() + ")";
                     }
                     alreadyExists =
@@ -314,7 +322,6 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                 }
               }
             } catch (IOException ioe) {
-              ioe.printStackTrace();
               MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });
@@ -358,7 +365,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
               List<MacroButtonProperties> toAdd = new ArrayList<>(newButtonProps.size());
               int nextIndex = token.getMacroNextIndex();
               String tokenName = token.getName();
-              if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+              if (MapTool.getPlayer().isGM() && !StringUtils.isEmpty(token.getGMName())) {
                 tokenName = tokenName + "(" + token.getGMName() + ")";
               }
               for (MacroButtonProperties nextProps : newButtonProps) {
@@ -497,8 +504,18 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
 
       JFileChooser chooser = MapTool.getFrame().getSaveMacroSetFileChooser();
 
-      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-        return;
+      boolean tryAgain = true;
+      while (tryAgain) {
+        if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+          return;
+        }
+        var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+        var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+        if (saveDir.startsWith(installDir)) {
+          MapTool.showWarning("msg.warning.saveMacrosToInstallDir");
+        } else {
+          tryAgain = false;
+        }
       }
 
       final File selectedFile = chooser.getSelectedFile();
@@ -612,7 +629,6 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                     buttonsInGroup(token.getMacroList(true), macroGroup), selectedFile);
               }
             } catch (IOException ioe) {
-              ioe.printStackTrace();
               MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });
@@ -632,8 +648,18 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
 
       JFileChooser chooser = MapTool.getFrame().getSaveMacroSetFileChooser();
 
-      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-        return;
+      boolean tryAgain = true;
+      while (tryAgain) {
+        if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+          return;
+        }
+        var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+        var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+        if (saveDir.startsWith(installDir)) {
+          MapTool.showWarning("msg.warning.saveMacrosToInstallDir");
+        } else {
+          tryAgain = false;
+        }
       }
 
       final File selectedFile = chooser.getSelectedFile();
@@ -737,7 +763,6 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                 PersistenceUtil.saveMacroSet(token.getMacroList(true), selectedFile);
               }
             } catch (IOException ioe) {
-              ioe.printStackTrace();
               MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });

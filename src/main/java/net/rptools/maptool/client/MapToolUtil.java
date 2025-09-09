@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.utilities.RandomSuffixFactory;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -32,7 +33,6 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.util.StringUtil;
 
 public class MapToolUtil {
   private static final Random RAND = new SecureRandom();
@@ -132,12 +132,12 @@ public class MapToolUtil {
    * @return the new token's algorithmically generated name
    */
   public static String nextTokenId(Zone zone, Token token, boolean force) {
-    boolean isToken = token.isToken();
+    boolean isToken = token.getLayer().isTokenLayer();
     String baseName = token.getName();
     String newName;
     Integer newNum = null;
 
-    if (isToken && AppPreferences.getNewTokenNaming().equals(Token.NAME_USE_CREATURE)) {
+    if (isToken && AppPreferences.newTokenNaming.get().equals(Token.NAME_USE_CREATURE)) {
       newName = I18N.getString("Token.name.creature");
     } else if (!force) {
       return baseName;
@@ -162,9 +162,12 @@ public class MapToolUtil {
         newName = baseName;
       }
     }
-    boolean random = (isToken && AppPreferences.getDuplicateTokenNumber().equals(Token.NUM_RANDOM));
-    boolean addNumToGM = !AppPreferences.getTokenNumberDisplay().equals(Token.NUM_ON_NAME);
-    boolean addNumToName = !AppPreferences.getTokenNumberDisplay().equals(Token.NUM_ON_GM);
+    boolean random =
+        (isToken && AppPreferences.duplicateTokenNumber.get().equals(Token.NUM_RANDOM));
+
+    var tokenNumberDisplay = AppPreferences.tokenNumberDisplay.get();
+    boolean addNumToGM = !tokenNumberDisplay.equals(Token.NUM_ON_NAME);
+    boolean addNumToName = !tokenNumberDisplay.equals(Token.NUM_ON_GM);
 
     /*
      * If the token already has a number suffix, if the preferences indicate that token numbering should be random and this token is on the Token layer, or if the token already exists somewhere on
@@ -205,10 +208,6 @@ public class MapToolUtil {
       result = zone.getTokenByGMName(Integer.toString(newNum)) != null;
     }
     return result;
-  }
-
-  public static boolean isDebugEnabled() {
-    return System.getProperty("MAPTOOL_DEV") != null;
   }
 
   public static boolean isValidColor(String name) {

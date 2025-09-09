@@ -16,8 +16,8 @@
    <selection fg="default" bg="default"/>
    <currentLineHighlight color="e8f2fe" fade="false"/>
    <marginLine fg="b0b4b9"/>
-   <markAllHighlight color="6b8189"/> <!-- TODO: Fix me -->
-   <markOccurrencesHighlight color="d4d4d4" border="false"/> <!-- TODO: Fix me -->
+   <markAllHighlight color="6b8189"/>
+   <markOccurrencesHighlight color="d4d4d4" border="false"/>
    <matchedBracket fg="DBE0CC" highlightBoth="false" animate="false"/>
    <hyperlinks fg="0000ff"/>
    <secondaryLanguages>

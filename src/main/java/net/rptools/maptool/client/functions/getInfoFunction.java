@@ -26,24 +26,30 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
 import javax.swing.*;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.token.*;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
+import net.rptools.maptool.model.CategorizedLights;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
+import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.MapToolSysInfoProvider;
@@ -73,6 +79,7 @@ public class getInfoFunction extends AbstractFunction {
   protected void resetSysInfoProvider() {
     sysInfoProvider = new MapToolSysInfoProvider();
   }
+
   // endregion
 
   /**
@@ -102,10 +109,28 @@ public class getInfoFunction extends AbstractFunction {
       return getThemeInfo();
     } else if (infoType.equalsIgnoreCase("debug")) {
       return getDebugInfo();
+    } else if (infoType.equalsIgnoreCase("functions")) {
+      return getFunctionLists();
     } else {
       throw new ParserException(
           I18N.getText("macro.function.getInfo.invalidArg", param.get(0).toString()));
     }
+  }
+
+  private JsonObject getFunctionLists() {
+    UserDefinedMacroFunctions UDF = UserDefinedMacroFunctions.getInstance();
+    JsonObject udfList = new JsonObject();
+    for (String name : UDF.getAliases()) {
+      udfList.addProperty(name, UDF.getFunctionLocation(name));
+    }
+    JsonArray fList = new JsonArray();
+    MapToolExpressionParser.getMacroFunctions()
+        .forEach(function -> Arrays.stream(function.getAliases()).forEach(fList::add));
+
+    JsonObject fInfo = new JsonObject();
+    fInfo.add("functions", fList);
+    fInfo.add("user defined functions", udfList);
+    return fInfo;
   }
 
   /**
@@ -123,7 +148,7 @@ public class getInfoFunction extends AbstractFunction {
     }
 
     minfo.addProperty("name", zone.getName());
-    minfo.addProperty("display name", zone.getPlayerAlias());
+    minfo.addProperty("display name", zone.getDisplayName());
     minfo.addProperty("image x scale", zone.getImageScaleX());
     minfo.addProperty("image y scale", zone.getImageScaleY());
     minfo.addProperty("player visible", zone.isVisible() ? 1 : 0);
@@ -139,11 +164,12 @@ public class getInfoFunction extends AbstractFunction {
     String visionType = zone.getVisionType().name();
     minfo.addProperty("vision type", visionType);
     minfo.addProperty("vision distance", zone.getTokenVisionDistance());
+    minfo.addProperty("lighting style", zone.getLightingStyle().name());
+    minfo.addProperty("has fog", zone.hasFog());
+    minfo.addProperty("ai rounding", zone.getAStarRounding().name());
 
     JsonObject ginfo = new JsonObject();
-
     Grid grid = zone.getGrid();
-
     ginfo.addProperty("type", GridFactory.getGridType(grid));
     ginfo.addProperty("color", String.format("%h", zone.getGridColor()));
     ginfo.addProperty("units per cell", zone.getUnitsPerCell());
@@ -155,8 +181,33 @@ public class getInfoFunction extends AbstractFunction {
     ginfo.addProperty("x offset", zone.getGrid().getOffsetX());
     ginfo.addProperty("y offset", zone.getGrid().getOffsetY());
     ginfo.addProperty("second dimension", grid.getSecondDimension());
-
     minfo.add("grid", ginfo);
+
+    {
+      final var backgroundPaint = zone.getBackgroundPaint();
+      String background = null;
+      if (backgroundPaint instanceof DrawableColorPaint dcp) {
+        background = String.format("#%h", dcp.getColor());
+      } else if (backgroundPaint instanceof DrawableTexturePaint dtp) {
+        background = "asset://" + dtp.getAssetId().toString();
+      }
+      minfo.addProperty("background paint", background);
+    }
+    {
+      final var fogPaint = zone.getFogPaint();
+      String fog = null;
+      if (fogPaint instanceof DrawableColorPaint dcp) {
+        fog = String.format("#%h", dcp.getColor());
+      } else if (fogPaint instanceof DrawableTexturePaint dtp) {
+        fog = "asset://" + dtp.getAssetId().toString();
+      }
+      minfo.addProperty("fog paint", fog);
+    }
+    {
+      final var mapAsset = zone.getMapAssetId();
+      minfo.addProperty("map asset", mapAsset == null ? null : "asset://" + mapAsset.toString());
+    }
+
     return minfo;
   }
 
@@ -168,17 +219,19 @@ public class getInfoFunction extends AbstractFunction {
   private JsonObject getClientInfo() {
     JsonObject cinfo = new JsonObject();
 
-    cinfo.addProperty("face edge", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceEdge()));
     cinfo.addProperty(
-        "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceVertex()));
-    cinfo.addProperty("portrait size", AppPreferences.getPortraitSize());
-    cinfo.addProperty("show portrait", AppPreferences.getShowPortrait());
-    cinfo.addProperty("show stat sheet", AppPreferences.getShowStatSheet());
-    cinfo.addProperty("file sync directory", AppPreferences.getFileSyncPath());
-    cinfo.addProperty("show avatar in chat", AppPreferences.getShowAvatarInChat());
+        "face edge", FunctionUtil.getDecimalForBoolean(AppPreferences.faceEdge.get()));
     cinfo.addProperty(
-        "suppress tooltips for macroLinks", AppPreferences.getSuppressToolTipsForMacroLinks());
-    cinfo.addProperty("use tooltips for inline rolls", AppPreferences.getUseToolTipForInlineRoll());
+        "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.faceVertex.get()));
+    cinfo.addProperty("portrait size", AppPreferences.portraitSize.get());
+    cinfo.addProperty("show portrait", AppPreferences.showPortrait.get());
+    cinfo.addProperty("show stat sheet", AppPreferences.showStatSheet.get());
+    cinfo.addProperty("file sync directory", AppPreferences.fileSyncPath.get());
+    cinfo.addProperty("show avatar in chat", AppPreferences.showAvatarInChat.get());
+    cinfo.addProperty(
+        "suppress tooltips for macroLinks", AppPreferences.suppressToolTipsForMacroLinks.get());
+    cinfo.addProperty(
+        "use tooltips for inline rolls", AppPreferences.useToolTipForInlineRoll.get());
     cinfo.addProperty("version", MapTool.getVersion());
     cinfo.addProperty(
         "isFullScreen", FunctionUtil.getDecimalForBoolean(MapTool.getFrame().isFullScreen()));
@@ -209,7 +262,9 @@ public class getInfoFunction extends AbstractFunction {
     ConcurrentSkipListSet<HTMLOverlayManager> registeredOverlays =
         MapTool.getFrame().getOverlayPanel().getOverlays();
     for (HTMLOverlayManager o : registeredOverlays) {
-      overlays.add(o.getName(), o.getProperties());
+      if (!o.getName().startsWith(AppConstants.INTERNAL_FRAME_PREFIX)) {
+        overlays.add(o.getName(), o.getProperties());
+      }
     }
     cinfo.add("overlays", overlays);
 
@@ -245,7 +300,7 @@ public class getInfoFunction extends AbstractFunction {
     JsonObject libInfo = new JsonObject();
     for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
       Zone zone = zr.getZone();
-      for (Token token : zone.getTokens()) {
+      for (Token token : zone.getAllTokens()) {
         if (token.getName().toLowerCase().startsWith(prefix)) {
           if (token.getProperty(versionProperty) != null) {
             libInfo.addProperty(token.getName(), token.getProperty(versionProperty).toString());
@@ -307,10 +362,13 @@ public class getInfoFunction extends AbstractFunction {
         "initiative owner permissions",
         FunctionUtil.getDecimalForBoolean(cp.isInitiativeOwnerPermissions()));
 
+    JsonArray zoneIds = new JsonArray();
     JsonObject zinfo = new JsonObject();
     for (Zone z : c.getZones()) {
+      zoneIds.add(z.getId().toString());
       zinfo.addProperty(z.getName(), z.getId().toString());
     }
+    cinfo.add("zoneIDs", zoneIds);
     cinfo.add("zones", zinfo);
 
     JsonArray tinfo = new JsonArray();
@@ -319,19 +377,20 @@ public class getInfoFunction extends AbstractFunction {
     }
     cinfo.add("tables", tinfo);
 
+    JsonArray ttinfo = new JsonArray();
+    c.getTokenTypes().forEach(ttinfo::add);
+    cinfo.add("token types", ttinfo);
+
     JsonObject llinfo = new JsonObject();
-    for (String ltype : c.getLightSourcesMap().keySet()) {
+    for (CategorizedLights.Category category : c.getLightSources().getCategories()) {
       JsonArray ltinfo = new JsonArray();
-      for (LightSource ls : c.getLightSourceMap(ltype).values()) {
+      for (LightSource ls : category.lights()) {
         JsonObject linfo = new JsonObject();
         linfo.addProperty("name", ls.getName());
         linfo.addProperty("max range", ls.getMaxRange());
-        linfo.addProperty("type", ls.getType().toString());
+        linfo.addProperty("type", ls.getType().name());
         linfo.addProperty("scale", ls.isScaleWithToken());
-        // List<Light> lights = new ArrayList<Light>();
-        // for (Light light : ls.getLightList()) {
-        // lights.add(light);
-        // }
+        linfo.addProperty("ignores-vbl", ls.isIgnoresVBL());
         JsonArray lightList = new JsonArray();
         for (Light light : ls.getLightList()) {
           lightList.add(gson.toJsonTree(light));
@@ -339,7 +398,7 @@ public class getInfoFunction extends AbstractFunction {
         linfo.add("light segments", lightList);
         ltinfo.add(linfo);
       }
-      llinfo.add(ltype, ltinfo);
+      llinfo.add(category.name(), ltinfo);
     }
     cinfo.add("light sources", llinfo);
 
@@ -386,13 +445,30 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.add("remote repository", remoteRepos);
 
     JsonObject sightInfo = new JsonObject();
-    for (SightType sightType : c.getSightTypeMap().values()) {
+    for (SightType sightType : c.getSightTypes()) {
       JsonObject si = new JsonObject();
-      si.addProperty("arc", sightType.getArc());
-      si.addProperty("distance", sightType.getArc());
+      if (sightType.getShape() == ShapeType.BEAM) {
+        si.addProperty("width", sightType.getWidth());
+        si.addProperty("offset", sightType.getOffset());
+      }
+      if (sightType.getShape() == ShapeType.CONE) {
+        si.addProperty("arc", sightType.getArc());
+        si.addProperty("offset", sightType.getOffset());
+      }
+      si.addProperty("distance", sightType.getDistance());
       si.addProperty("multiplier", sightType.getMultiplier());
-      si.addProperty("shape", sightType.getShape().toString());
-      si.addProperty("type", sightType.getOffset());
+      si.addProperty("shape", sightType.getShape().name());
+      si.addProperty("scale", sightType.isScaleWithToken());
+
+      JsonArray lightList = null;
+      if (sightType.getPersonalLightSource() != null) {
+        lightList = new JsonArray();
+        for (Light light : sightType.getPersonalLightSource().getLightList()) {
+          lightList.add(gson.toJsonTree(light));
+        }
+      }
+      si.add("personal lights", lightList);
+
       sightInfo.add(sightType.getName(), si);
     }
     cinfo.add("sight", sightInfo);
@@ -444,6 +520,7 @@ public class getInfoFunction extends AbstractFunction {
     }
     return theme;
   }
+
   /**
    * Retrieves debug information
    *

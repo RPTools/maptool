@@ -42,15 +42,14 @@ class JsonArrayFunctionsTest {
 
   @BeforeEach
   void setup() {
-    JsonParser jsonParser = new JsonParser();
-    JsonMTSTypeConversion typeConversion = new JsonMTSTypeConversion(jsonParser);
+    JsonMTSTypeConversion typeConversion = new JsonMTSTypeConversion();
     random = new Random(System.currentTimeMillis());
 
     jsonArrayFunctions = new JsonArrayFunctions(typeConversion);
 
-    jsonArray1 = jsonParser.parse(jsonArrString1).getAsJsonArray();
-    jsonArray2 = jsonParser.parse(jsonArrString2).getAsJsonArray();
-    jsonArray3 = jsonParser.parse(jsonArrString3).getAsJsonArray();
+    jsonArray1 = JsonParser.parseString(jsonArrString1).getAsJsonArray();
+    jsonArray2 = JsonParser.parseString(jsonArrString2).getAsJsonArray();
+    jsonArray3 = JsonParser.parseString(jsonArrString3).getAsJsonArray();
 
     jsonEmpty = new JsonArray();
   }

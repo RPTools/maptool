@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.functions;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -22,15 +21,17 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -65,6 +66,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         "getTokenY",
         "getTokenDrawOrder",
         "getTokenMap",
+        "getTokenMapIDs",
         "getDistance",
         "moveToken",
         "goto",
@@ -74,7 +76,9 @@ public class TokenLocationFunctions extends AbstractFunction {
         "moveTokenFromMap");
   }
 
-  /** @return instance of TokenLocationFunctions. */
+  /**
+   * @return instance of TokenLocationFunctions.
+   */
   public static TokenLocationFunctions getInstance() {
     return instance;
   }
@@ -109,10 +113,18 @@ public class TokenLocationFunctions extends AbstractFunction {
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equalsIgnoreCase("getTokenMap")) {
-      FunctionUtil.checkNumberParam("getDistance", parameters, 1, 2);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String identifier = parameters.get(0).toString();
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
-      return getTokenMap(identifier, delim);
+      final var zoneNames = getTokenZones(identifier).map(Zone::getName).toList();
+      return FunctionUtil.delimitedResult(delim, zoneNames);
+    }
+    if (functionName.equalsIgnoreCase("getTokenMapIDs")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      String identifier = parameters.get(0).toString();
+      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
+      final var zoneNames = getTokenZones(identifier).map(Zone::getId).map(GUID::toString).toList();
+      return FunctionUtil.delimitedResult(delim, zoneNames);
     }
     if (functionName.equalsIgnoreCase("getDistance")) {
       FunctionUtil.checkNumberParam("getDistance", parameters, 1, 4);
@@ -164,19 +176,9 @@ public class TokenLocationFunctions extends AbstractFunction {
     } else {
       tokens.add((String) tokenString);
     }
-    Zone zone = null;
-    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-    for (ZoneRenderer zr : zrenderers) {
-      Zone z = zr.getZone();
-      if (z.getName().equalsIgnoreCase(map)) {
-        zone = z;
-        break;
-      }
-    }
-    if (zone == null) {
-      throw new ParserException(
-          I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, map));
-    }
+
+    final var zone = FunctionUtil.getZoneRenderer(functionName, map).getZone();
+
     Zone toZone;
     Zone fromZone;
 
@@ -239,7 +241,7 @@ public class TokenLocationFunctions extends AbstractFunction {
   private TokenLocation getTokenLocation(boolean useDistancePerCell, Token token) {
     TokenLocation loc = new TokenLocation();
     if (useDistancePerCell) {
-      Rectangle tokenBounds = token.getBounds(token.getZoneRenderer().getZone());
+      Rectangle tokenBounds = token.getImageBounds(token.getZoneRenderer().getZone());
       loc.x = tokenBounds.x;
       loc.y = tokenBounds.y;
     } else {
@@ -305,7 +307,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         if (wmetric == null && grid.useMetric())
           wmetric =
               MapTool.isPersonalServer()
-                  ? AppPreferences.getMovementMetric()
+                  ? AppPreferences.movementMetric.get()
                   : MapTool.getServerPolicy().getMovementMetric();
         // explicitly find difference without walkers
         double curDist;
@@ -323,20 +325,22 @@ public class TokenLocationFunctions extends AbstractFunction {
                 ? new AStarSquareEuclideanWalker(zone, wmetric)
                 : grid.createZoneWalker();
 
-        for (CellPoint scell : sourceCells) {
-          for (CellPoint tcell : targetCells) {
-            walker.setWaypoints(scell, tcell);
-            distance = Math.min(distance, walker.getDistance());
+        try (walker) {
+          for (CellPoint scell : sourceCells) {
+            for (CellPoint tcell : targetCells) {
+              walker.setWaypoints(scell, tcell);
+              distance = Math.min(distance, walker.getDistance());
+            }
           }
         }
         if (!units) distance /= zone.getUnitsPerCell();
       }
     } else {
       // take distance between center of the two tokens
-      Rectangle sourceBounds = source.getBounds(zone);
+      Rectangle sourceBounds = source.getImageBounds(zone);
       double sourceCenterX = sourceBounds.x + sourceBounds.width / 2.0;
       double sourceCenterY = sourceBounds.y + sourceBounds.height / 2.0;
-      Rectangle targetBounds = target.getBounds(zone);
+      Rectangle targetBounds = target.getImageBounds(zone);
       double targetCenterX = targetBounds.x + targetBounds.width / 2.0;
       double targetCenterY = targetBounds.y + targetBounds.height / 2.0;
 
@@ -379,7 +383,6 @@ public class TokenLocationFunctions extends AbstractFunction {
         try {
           WalkerMetric wmetric = WalkerMetric.valueOf(metric);
           walker = new AStarSquareEuclideanWalker(zone, wmetric);
-
         } catch (IllegalArgumentException e) {
           throw new ParserException(
               I18N.getText("macro.function.getDistance.invalidMetric", metric));
@@ -390,9 +393,11 @@ public class TokenLocationFunctions extends AbstractFunction {
 
       // Get the distances from each source to target cell and keep the minimum one
       double distance = Double.MAX_VALUE;
-      for (CellPoint scell : sourceCells) {
-        walker.setWaypoints(scell, targetCell);
-        distance = Math.min(distance, walker.getDistance());
+      try (walker) {
+        for (CellPoint scell : sourceCells) {
+          walker.setWaypoints(scell, targetCell);
+          distance = Math.min(distance, walker.getDistance());
+        }
       }
 
       if (units) {
@@ -413,7 +418,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       }
 
       // get the pixel coords for the center of the token
-      Rectangle sourceBounds = source.getBounds(zone);
+      Rectangle sourceBounds = source.getImageBounds(zone);
       double sourceCenterX = sourceBounds.x + sourceBounds.width / 2.0;
       double sourceCenterY = sourceBounds.y + sourceBounds.height / 2.0;
       double a = (int) (sourceCenterX - targetX);
@@ -447,7 +452,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         }
       }
     } else {
-      Rectangle bounds = token.getBounds(zone);
+      Rectangle bounds = token.getImageBounds(zone);
       for (Point point : points) {
         if (bounds.contains(point)) return true;
       }
@@ -604,32 +609,14 @@ public class TokenLocationFunctions extends AbstractFunction {
   }
 
   /**
-   * Returns a list of maps containing the token.
+   * Returns the zones containing the identified token.
    *
    * @param identifier the identifier of the token.
-   * @param delim the delimiter of the returned list.
-   * @return the list of maps containing the token.
+   * @return all zones containing the token.
    */
-  private Object getTokenMap(String identifier, String delim) {
-    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-    List<String> mapList = new ArrayList<>();
-
-    for (final ZoneRenderer zr : zrenderers) {
-      Zone zone = zr.getZone();
-      Token token = zone.resolveToken(identifier);
-      if (token != null) {
-        mapList.add(zr.getZone().getName());
-      }
-    }
-
-    if ("json".equalsIgnoreCase(delim)) {
-      JsonArray jsonArray = new JsonArray();
-      for (String map : mapList) {
-        jsonArray.add(map);
-      }
-      return jsonArray;
-    } else {
-      return String.join(delim, mapList);
-    }
+  private Stream<Zone> getTokenZones(String identifier) {
+    return MapTool.getFrame().getZoneRenderers().stream()
+        .map(ZoneRenderer::getZone)
+        .filter(zone -> zone.resolveToken(identifier) != null);
   }
 }

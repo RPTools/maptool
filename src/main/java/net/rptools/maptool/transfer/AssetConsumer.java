@@ -56,7 +56,9 @@ public class AssetConsumer {
     }
   }
 
-  /** @return the ID of the incoming asset */
+  /**
+   * @return the ID of the incoming asset
+   */
   public MD5Key getId() {
     return header.getId();
   }

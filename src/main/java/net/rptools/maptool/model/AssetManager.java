@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
@@ -90,7 +91,7 @@ public class AssetManager {
   /** Used to load assets from storage */
   private static AssetLoader assetLoader = new AssetLoader();
 
-  private static ExecutorService assetLoaderThreadPool = Executors.newFixedThreadPool(1);
+  private static ExecutorService assetLoaderThreadPool = ForkJoinPool.commonPool();
   private static ExecutorService assetWriterThreadPool = Executors.newFixedThreadPool(1);
 
   static {
@@ -99,8 +100,7 @@ public class AssetManager {
   }
 
   /**
-   * Brute force clear asset cache... TODO: Create preferences and filter to clear cache
-   * automatically by age of asset
+   * Brute force clear asset cache...
    *
    * @author Jamz
    * @since 1.4.0.1
@@ -111,8 +111,7 @@ public class AssetManager {
         FileUtils.cleanDirectory(cacheDir);
       }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Error while clearing cache", e);
     }
   }
 
@@ -139,18 +138,6 @@ public class AssetManager {
             repo -> MapTool.addLocalMessage(I18N.getText("msg.error.inaccessibleRepo", repo)));
       }
     }
-  }
-
-  /**
-   * Determine if the asset is currently being requested. While an asset is being loaded it will be
-   * marked as requested and this function will return true. Once the asset is done loading this
-   * function will return false and the asset will be available from the cache.
-   *
-   * @param key MD5Key of asset being requested
-   * @return True if asset is currently being requested, false otherwise
-   */
-  public static boolean isAssetRequested(MD5Key key) {
-    return assetLoader.isIdRequested(key);
   }
 
   /**
@@ -301,9 +288,7 @@ public class AssetManager {
 
           // Let's get it from the server
           // As a last resort we request the asset from the server
-          if (!isAssetRequested(id)) {
-            requestAssetFromServer(id, listeners);
-          }
+          requestAssetFromServer(id, listeners);
         });
   }
 
@@ -355,7 +340,7 @@ public class AssetManager {
           putInPersistentCache(asset);
         } catch (IOException ioe) {
           // Log, but continue as if we didn't have a link
-          ioe.printStackTrace();
+          log.error("Error while creating asset from link", ioe);
         }
       }
     }
@@ -626,7 +611,7 @@ public class AssetManager {
 
     } catch (IOException ioe) {
       // Just so we know, but fall through to return null
-      ioe.printStackTrace();
+      log.error("Error while loading local reference file", ioe);
     }
 
     // Guess we don't have one
@@ -637,7 +622,7 @@ public class AssetManager {
    * Store an absolute path to where this asset exists. Perhaps this should be saved in a single
    * data structure that is read/written when it's modified? This would allow the fileFilterText
    * field from the AssetPanel the option of searching through all directories and not just the
-   * current one. FJE
+   * current one.
    *
    * @param image the file to be stored
    * @throws IOException in case of an I/O error
@@ -817,7 +802,7 @@ public class AssetManager {
           rememberLocalImageReference(file);
         }
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        log.error("Error while searching for image", ioe);
       }
     }
     // Done
@@ -850,7 +835,6 @@ public class AssetManager {
       assetLoader.storeIndexFile(repo, index);
     } catch (IOException e) {
       log.error("Couldn't save updated index to local repository cache", e);
-      e.printStackTrace();
     }
     return index;
   }

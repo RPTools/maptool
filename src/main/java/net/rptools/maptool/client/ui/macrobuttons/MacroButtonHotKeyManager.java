@@ -20,7 +20,9 @@ import javax.swing.KeyStroke;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 
-/** @author tylere */
+/**
+ * @author tylere
+ */
 public class MacroButtonHotKeyManager {
 
   // Changing and adding more hotkeys should work smoothly, however hotkeys[0]
@@ -81,6 +83,10 @@ public class MacroButtonHotKeyManager {
       new HashMap<KeyStroke, MacroButton>();
   private MacroButton macroButton;
 
+  public static boolean isHotkeyAssigned(String hotkey) {
+    return buttonsByKeyStroke.containsKey(hotkey);
+  }
+
   public MacroButtonHotKeyManager(MacroButton macroButton) {
     this.macroButton = macroButton;
   }
@@ -119,8 +125,6 @@ public class MacroButtonHotKeyManager {
 
       // keep macrotabbedpane's keystrokes in sync
       if (MapTool.getFrame() != null) {
-        // MapTool.getFrame().getMacroTabbedPane().updateKeyStrokes();
-        // TODO: change this later to use the hub
         MapTool.getFrame().updateKeyStrokes();
       }
     }

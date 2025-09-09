@@ -41,7 +41,7 @@ import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AbstractButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
@@ -82,7 +82,6 @@ public class MacroButton extends JButton implements MouseListener {
     }
     this.properties.setTokenId(this.tokenId);
     this.properties.setSaveLocation(this.panelClass);
-    this.properties.setButton(this);
     // we have to call setColor() and setText() here since properties only hold "dumb" data.
     setColor(properties.getColorKey());
     setText(getButtonText());
@@ -142,13 +141,14 @@ public class MacroButton extends JButton implements MouseListener {
     String formatButtonLabel =
         switch (properties.getFontColorKey()) {
           case "", "default" -> "<p style='" + getMinWidth() + getMaxWidth() + "'>" + buttonLabel;
-          default -> "<p style='color: "
-              + properties.getFontColorAsHtml()
-              + "; "
-              + getMinWidth()
-              + getMaxWidth()
-              + "'>"
-              + buttonLabel;
+          default ->
+              "<p style='color: "
+                  + properties.getFontColorAsHtml()
+                  + "; "
+                  + getMinWidth()
+                  + getMaxWidth()
+                  + "'>"
+                  + buttonLabel;
         };
 
     // if there is no hotkey (HOTKEY[0]) then no need to add hint
@@ -168,7 +168,6 @@ public class MacroButton extends JButton implements MouseListener {
     String newMinWidth = properties.getMinWidth();
     if (newMinWidth != null && !newMinWidth.equals("")) {
       return " width:" + newMinWidth + ";";
-      // return " min-width:"+newMinWidth+";";
     }
     return "";
   }
@@ -239,7 +238,10 @@ public class MacroButton extends JButton implements MouseListener {
     List<Token> selectedTokens =
         MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList();
     if (SwingUtil.isShiftDown(event) || getProperties().getApplyToTokens()) {
-      MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(selectedTokens);
+      MapTool.getFrame()
+          .getCurrentZoneRenderer()
+          .getViewModel()
+          .setHighlightCommonMacros(selectedTokens);
     } else {
       if ("SelectionPanel".equals(getPanelClass())) {
         List<Token> affectedTokens = new ArrayList<Token>();
@@ -258,7 +260,10 @@ public class MacroButton extends JButton implements MouseListener {
         } else if (getProperties().getToken() != null) {
           affectedTokens.add(getProperties().getToken());
         }
-        MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(affectedTokens);
+        MapTool.getFrame()
+            .getCurrentZoneRenderer()
+            .getViewModel()
+            .setHighlightCommonMacros(affectedTokens);
       }
     }
   }
@@ -266,7 +271,10 @@ public class MacroButton extends JButton implements MouseListener {
   public void mouseExited(MouseEvent event) {
     List<Token> affectedTokens = new ArrayList<Token>();
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-      MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(affectedTokens);
+      MapTool.getFrame()
+          .getCurrentZoneRenderer()
+          .getViewModel()
+          .setHighlightCommonMacros(affectedTokens);
     }
   }
 
@@ -298,29 +306,21 @@ public class MacroButton extends JButton implements MouseListener {
 
   private class DSListener implements DragSourceListener {
 
-    public void dragEnter(DragSourceDragEvent event) {
-      // System.out.println("TMB: drag enter");
-      // DragSourceContext context = event.getDragSourceContext();
-      // context.getComponent()
-    }
+    public void dragEnter(DragSourceDragEvent event) {}
 
-    public void dragOver(DragSourceDragEvent event) {
-      // System.out.println("TMB: drag over");
-    }
+    public void dragOver(DragSourceDragEvent event) {}
 
-    public void dropActionChanged(DragSourceDragEvent event) {
-      // System.out.println("TMB: drop action changed");
-    }
+    public void dropActionChanged(DragSourceDragEvent event) {}
 
-    public void dragExit(DragSourceEvent event) {
-      // System.out.println("TMB: drag exit");
-    }
+    public void dragExit(DragSourceEvent event) {}
 
     public void dragDropEnd(DragSourceDropEvent event) {
-      // System.out.println("TMB: drag drop end");
       // js commented out for testing - MapTool.getFrame().updateSelectionPanel();
       List<Token> affectedTokens = new ArrayList<Token>();
-      MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(affectedTokens);
+      MapTool.getFrame()
+          .getCurrentZoneRenderer()
+          .getViewModel()
+          .setHighlightCommonMacros(affectedTokens);
     }
   }
 

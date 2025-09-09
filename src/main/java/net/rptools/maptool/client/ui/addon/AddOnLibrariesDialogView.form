@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.addon.AddOnLibrariesDialogView">
+  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="true" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="10" left="5" bottom="10" right="5"/>
+    <constraints>
+      <xy x="48" y="6" width="1010" height="692"/>
+    </constraints>
+    <properties>
+      <minimumSize width="800" height="400"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <grid id="e3588" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="800" height="-1"/>
+            <preferred-size width="800" height="450"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <tabbedpane id="5b0eb" binding="tabbedPane">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                <minimum-size width="700" height="-1"/>
+                <preferred-size width="800" height="200"/>
+              </grid>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="4dea1" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="library.dialog.library.label"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <splitpane id="2eba3">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                        <preferred-size width="800" height="200"/>
+                      </grid>
+                    </constraints>
+                    <properties>
+                      <orientation value="0"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <scrollpane id="da3a5">
+                        <constraints>
+                          <splitpane position="left"/>
+                        </constraints>
+                        <properties>
+                          <minimumSize width="800" height="100"/>
+                          <name value=""/>
+                          <preferredSize width="800" height="420"/>
+                        </properties>
+                        <border type="none"/>
+                        <children>
+                          <component id="7b8c5" class="javax.swing.JTable" binding="addOnLibraryTable">
+                            <constraints/>
+                            <properties/>
+                          </component>
+                        </children>
+                      </scrollpane>
+                      <grid id="77aa5" layout-manager="GridLayoutManager" row-count="6" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                        <margin top="0" left="0" bottom="0" right="0"/>
+                        <constraints>
+                          <splitpane position="right"/>
+                        </constraints>
+                        <properties>
+                          <minimumSize width="800" height="100"/>
+                          <preferredSize width="800" height="250"/>
+                        </properties>
+                        <border type="none"/>
+                        <children>
+                          <component id="b8733" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <font style="1"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.name"/>
+                            </properties>
+                          </component>
+                          <component id="292d3" class="javax.swing.JLabel" binding="addOnNameLabel">
+                            <constraints>
+                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <minimum-size width="250" height="-1"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                          <component id="b2e58" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <font style="1"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.version"/>
+                            </properties>
+                          </component>
+                          <component id="418a2" class="javax.swing.JLabel" binding="addOnVersionLabel">
+                            <constraints>
+                              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <minimum-size width="200" height="-1"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                          <component id="392d" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="73" height="19"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <font style="1"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.namespace"/>
+                            </properties>
+                          </component>
+                          <component id="220dd" class="javax.swing.JLabel" binding="addOnNamespaceLabel">
+                            <constraints>
+                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <minimum-size width="250" height="-1"/>
+                                <preferred-size width="33" height="19"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                          <component id="c2d9b" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <font style="1"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.website"/>
+                            </properties>
+                          </component>
+                          <component id="fa6c" class="javax.swing.JLabel" binding="addOnShortDescLabel">
+                            <constraints>
+                              <grid row="1" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <minimum-size width="200" height="-1"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                          <component id="eef20" class="javax.swing.JLabel" binding="addOnWebsiteLabel">
+                            <constraints>
+                              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <minimum-size width="250" height="-1"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                          <component id="78dff" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <font style="1"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.license"/>
+                            </properties>
+                          </component>
+                          <scrollpane id="81ba">
+                            <constraints>
+                              <grid row="5" column="0" row-span="1" col-span="7" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                                <preferred-size width="1" height="20"/>
+                              </grid>
+                            </constraints>
+                            <properties/>
+                            <border type="none"/>
+                            <children>
+                              <component id="59122" class="javax.swing.JTextPane" binding="addOnDescriptionTextPane">
+                                <constraints/>
+                                <properties>
+                                  <minimumSize width="1" height="100"/>
+                                </properties>
+                              </component>
+                            </children>
+                          </scrollpane>
+                          <component id="936f6" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="107" height="19"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <font style="1"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.shortDescription"/>
+                            </properties>
+                          </component>
+                          <component id="a4180" class="javax.swing.JLabel" binding="addOnLicenseLabel">
+                            <constraints>
+                              <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <minimum-size width="250" height="-1"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                          <component id="8f32b" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <enabled value="true"/>
+                              <font style="1"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.giturl"/>
+                            </properties>
+                          </component>
+                          <component id="bce02" class="javax.swing.JLabel" binding="addOnGitUrlLabel">
+                            <constraints>
+                              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <minimum-size width="250" height="-1"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                          <component id="a8cf7" class="javax.swing.JButton" binding="viewLicenseFileButton" default-binding="true">
+                            <constraints>
+                              <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.licenseFile"/>
+                            </properties>
+                          </component>
+                          <component id="770c0" class="javax.swing.JButton" binding="viewReadMeFileButton" default-binding="true">
+                            <constraints>
+                              <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.readMeFile"/>
+                            </properties>
+                          </component>
+                          <component id="8a68f" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <font style="1"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.authors"/>
+                            </properties>
+                          </component>
+                          <component id="7e293" class="javax.swing.JLabel" binding="addOnAuthorsLabel">
+                            <constraints>
+                              <grid row="2" column="3" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <minimum-size width="200" height="-1"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                        </children>
+                      </grid>
+                    </children>
+                  </splitpane>
+                </children>
+              </grid>
+              <grid id="78150" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="library.dialog.development.label"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <hspacer id="28b4a">
+                    <constraints>
+                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <vspacer id="61f72">
+                    <constraints>
+                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                  <component id="fde58" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copy.title"/>
+                    </properties>
+                  </component>
+                  <component id="456e5" class="javax.swing.JButton" binding="copyThemeCSS">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copyMTThemeCSS"/>
+                    </properties>
+                  </component>
+                  <component id="35630" class="javax.swing.JButton" binding="copyStatSheetThemeButton" default-binding="true">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copyMTStatSheetTheme"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+            </children>
+          </tabbedpane>
+        </children>
+      </grid>
+      <grid id="9538f" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="e7465" class="javax.swing.JButton" binding="buttonRemove">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="1" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <borderPainted value="true"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.table.remove"/>
+              <verifyInputWhenFocusTarget value="false"/>
+            </properties>
+          </component>
+          <component id="5723f" class="javax.swing.JButton" binding="buttonClose">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.button.close"/>
+            </properties>
+          </component>
+          <component id="f6476" class="javax.swing.JButton" binding="buttonAdd">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="1" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="Add Library"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.button.add"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+  <inspectionSuppressions>
+    <suppress inspection="InvalidPropertyKeyForm" id="4dea1"/>
+  </inspectionSuppressions>
+</form>

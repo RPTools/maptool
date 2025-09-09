@@ -14,100 +14,305 @@
  */
 package net.rptools.maptool.server;
 
-import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.PERSONAL_SERVER;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.simple.DisconnectHandler;
+import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.connection.Connection;
+import net.rptools.clientserver.simple.server.NilServer;
+import net.rptools.clientserver.simple.server.Router;
+import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.ServerObserver;
+import net.rptools.clientserver.simple.server.SocketServer;
+import net.rptools.clientserver.simple.server.WebRTCServer;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
-import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
+import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.player.PlayerDatabase;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
+import net.rptools.maptool.server.proto.PlayerConnectedMsg;
+import net.rptools.maptool.server.proto.PlayerDisconnectedMsg;
+import net.rptools.maptool.server.proto.SetCampaignMsg;
 import net.rptools.maptool.server.proto.UpdateAssetTransferMsg;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
+import net.rptools.maptool.util.NetUtil;
+import net.rptools.maptool.util.UPnPUtil;
+import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class MapToolServer {
+
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
-  private final MapToolServerConnection conn;
-  private final ServerMessageHandler handler;
+  public enum State {
+    New,
+    Started,
+    Stopped
+  }
+
+  @Nonnull private final String serviceIdentifier;
+  @Nonnull private final Server server;
+  private final MessageHandler messageHandler;
+  private final Router router;
   private final ServerConfig config;
-  private final PlayerDatabase playerDatabase;
+  private final ServerSidePlayerDatabase playerDatabase;
+
+  /** Maps connection IDs to their associated player */
+  private final Map<String, Player> playerMap = Collections.synchronizedMap(new HashMap<>());
 
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
-  private final Map<String, ClientConnection> connectionMap =
-      Collections.synchronizedMap(new HashMap<String, ClientConnection>());
   private final AssetProducerThread assetProducerThread;
 
+  private final boolean useUPnP;
+  @Nullable private ServiceAnnouncer announcer;
   private Campaign campaign;
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
+  private final DisconnectHandler onConnectionDisconnected;
+  private final ServerObserver serverObserver;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb)
-      throws IOException {
+  private State currentState;
+
+  public MapToolServer(
+      @Nullable String id,
+      Campaign campaign,
+      @Nullable ServerConfig config,
+      boolean useUPnP,
+      ServerPolicy policy,
+      ServerSidePlayerDatabase playerDb) {
+    this.serviceIdentifier = id;
     this.config = config;
-    this.policy = policy;
-    handler = new ServerMessageHandler(this);
-    playerDatabase = playerDb;
-    conn = new MapToolServerConnection(this, playerDatabase);
-    conn.addMessageHandler(handler);
+    this.useUPnP = useUPnP;
+    this.policy = new ServerPolicy(policy);
+    this.playerDatabase = playerDb;
 
-    campaign = new Campaign();
+    server = ConnectionFactory.getInstance().createServer(this.config);
+    messageHandler = new ServerMessageHandler(this);
+    this.router = new Router();
+
+    // Make sure the server has a different copy than the client.
+    this.campaign = new Campaign(campaign);
 
     assetProducerThread = new AssetProducerThread();
-    assetProducerThread.start();
 
-    // Start a heartbeat if requested
-    if (config.isServerRegistered()) {
-      heartbeatThread = new HeartbeatThread();
-      heartbeatThread.start();
-    }
-  }
+    currentState = State.New;
 
-  public void configureClientConnection(ClientConnection connection) {
-    String id = connection.getId();
-    assetManagerMap.put(id, new AssetTransferManager());
-    connectionMap.put(id, connection);
-  }
-
-  public ClientConnection getClientConnection(String id) {
-    return connectionMap.get(id);
-  }
-
-  public String getConnectionId(String playerId) {
-    return conn.getConnectionId(playerId);
+    this.onConnectionDisconnected = this::releaseClientConnection;
+    this.serverObserver = this::connectionAdded;
   }
 
   /**
-   * Forceably disconnects a client and cleans up references to it
+   * Transition from any state except {@code newState} to {@code newState}.
    *
-   * @param id the connection ID
+   * @param newState The new state to set.
    */
-  public void releaseClientConnection(String id) {
-    ClientConnection connection = getClientConnection(id);
-    if (connection != null) {
-      connection.close();
+  private boolean transitionToState(State newState) {
+    if (currentState == newState) {
+      log.warn(
+          "Failed to transition to state {} because that is already the current state", newState);
+      return false;
+    } else {
+      currentState = newState;
+      return true;
     }
-    assetManagerMap.remove(id);
-    connectionMap.remove(id);
+  }
+
+  /**
+   * Transition from {@code expectedState} to {@code newState}.
+   *
+   * @param expectedState The state to transition from
+   * @param newState The new state to set.
+   */
+  private boolean transitionToState(State expectedState, State newState) {
+    if (currentState != expectedState) {
+      log.warn(
+          "Failed to transition from state {} to state {} because the current state is actually {}",
+          expectedState,
+          newState,
+          currentState);
+      return false;
+    } else {
+      currentState = newState;
+      return true;
+    }
+  }
+
+  public ServerSidePlayerDatabase getPlayerDatabase() {
+    return playerDatabase;
+  }
+
+  public State getState() {
+    return currentState;
+  }
+
+  private String getConnectionId(String playerId) {
+    synchronized (playerMap) {
+      for (Map.Entry<String, Player> entry : playerMap.entrySet()) {
+        if (entry.getValue().getName().equalsIgnoreCase(playerId)) {
+          return entry.getKey();
+        }
+      }
+    }
+    return null;
+  }
+
+  private Player getPlayer(String playerId) {
+    synchronized (playerMap) {
+      for (Player player : playerMap.values()) {
+        if (player.getName().equalsIgnoreCase(playerId)) {
+          return player;
+        }
+      }
+    }
+    return null;
+  }
+
+  public boolean isPersonalServer() {
+    return config == null;
+  }
+
+  public boolean isServerRegistered() {
+    return config == null ? false : config.isServerRegistered();
+  }
+
+  public String getName() {
+    return config == null ? "" : config.getServerName();
+  }
+
+  public int getPort() {
+    return switch (server) {
+      case NilServer s -> -1;
+      case SocketServer s -> s.getPort();
+      case WebRTCServer s -> -1;
+    };
+  }
+
+  /**
+   * Get the ID that this server responds to service announcement requests with.
+   *
+   * @return The identifier or null if it's not being announced.
+   */
+  @Nullable
+  public String getServiceIdentifier() {
+    if (announcer == null) {
+      return null;
+    }
+    return serviceIdentifier;
+  }
+
+  private void connectionAdded(Connection conn) {
+    var handshake =
+        new ServerHandshake(
+            this, conn, playerDatabase, config != null && config.getUseEasyConnect());
+
+    handshake.whenComplete(
+        (player, error) -> {
+          if (error != null) {
+            log.error("Client closing: bad handshake", error);
+            releaseClientConnection(conn);
+          } else {
+            log.debug("About to add new client");
+            addRemoteConnection(conn, player);
+          }
+        });
+    // Make sure the client is allowed
+    handshake.startHandshake();
+  }
+
+  private void installConnection(Connection conn, Player player) {
+    playerMap.put(conn.getId().toUpperCase(), player);
+
+    conn.addMessageHandler(messageHandler);
+    conn.addDisconnectHandler(onConnectionDisconnected);
+
+    // Make sure any stale connections are gone to avoid conflicts, then add the new one.
+    for (var reaped : router.reapClients()) {
+      try {
+        releaseClientConnection(reaped);
+      } catch (Exception e) {
+        // Don't want to raise an error if notification of removing a dead connection failed
+      }
+    }
+    router.addConnection(conn);
+
+    assetManagerMap.put(conn.getId(), new AssetTransferManager());
+
+    synchronized (playerMap) {
+      for (Player remotePlayer : playerMap.values()) {
+        var msg = PlayerConnectedMsg.newBuilder().setPlayer(remotePlayer.toDto());
+        sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
+      }
+    }
+    var msg = PlayerConnectedMsg.newBuilder().setPlayer(player.getTransferablePlayer().toDto());
+    broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
+  }
+
+  public void addLocalConnection(Connection conn, Player localPlayer) {
+    installConnection(conn, localPlayer);
+  }
+
+  private void addRemoteConnection(Connection conn, Player connPlayer) {
+    installConnection(conn, connPlayer);
+
+    var msg2 = SetCampaignMsg.newBuilder().setCampaign(campaign.toDto());
+    sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
+  }
+
+  public void bootPlayer(String playerId) {
+    var connectionId = getConnectionId(playerId);
+    var connection = router.getConnection(connectionId);
+    if (connection == null) {
+      return;
+    }
+
+    releaseClientConnection(connection);
+  }
+
+  /**
+   * Cleans up references to a disconnected client connection.
+   *
+   * @param connection the connection to release
+   */
+  private void releaseClientConnection(Connection connection) {
+    connection.removeDisconnectHandler(onConnectionDisconnected);
+
+    connection.close();
+    router.removeConnection(connection);
+    assetManagerMap.remove(connection.getId());
+
+    // Notify everyone else about the disconnection.
+    var player = playerMap.remove(connection.getId().toUpperCase());
+    if (player != null) {
+      var msg =
+          PlayerDisconnectedMsg.newBuilder().setPlayer(player.getTransferablePlayer().toDto());
+      broadcastMessage(
+          new String[] {connection.getId()},
+          Message.newBuilder().setPlayerDisconnectedMsg(msg).build());
+    }
   }
 
   public void addAssetProducer(String connectionId, AssetProducer producer) {
@@ -115,26 +320,16 @@ public class MapToolServer {
     manager.addProducer(producer);
   }
 
-  public void addObserver(ServerObserver observer) {
-    if (observer != null) {
-      conn.addObserver(observer);
+  public boolean isPlayerConnected(String playerId) {
+    return getPlayer(playerId) != null;
+  }
+
+  public void updatePlayerStatus(String playerName, GUID zoneId, boolean loaded) {
+    var player = getPlayer(playerName);
+    if (player != null) {
+      player.setLoaded(loaded);
+      player.setZoneId(zoneId);
     }
-  }
-
-  public void removeObserver(ServerObserver observer) {
-    conn.removeObserver(observer);
-  }
-
-  public boolean isHostId(String playerId) {
-    return config.getHostPlayerId() != null && config.getHostPlayerId().equals(playerId);
-  }
-
-  public MapToolServerConnection getConnection() {
-    return conn;
-  }
-
-  public boolean isPlayerConnected(String id) {
-    return conn.getPlayer(id) != null;
   }
 
   public void setCampaign(Campaign campaign) {
@@ -150,23 +345,46 @@ public class MapToolServer {
   }
 
   public ServerPolicy getPolicy() {
-    return policy;
+    return new ServerPolicy(policy);
   }
 
   public void updateServerPolicy(ServerPolicy policy) {
-    this.policy = policy;
-  }
-
-  public ServerMessageHandler getMethodHandler() {
-    return handler;
-  }
-
-  public ServerConfig getConfig() {
-    return config;
+    this.policy = new ServerPolicy(policy);
   }
 
   public void stop() {
-    conn.close();
+    if (!transitionToState(State.Stopped)) {
+      return;
+    }
+
+    if (announcer != null) {
+      announcer.stop();
+      announcer = null;
+    }
+
+    // Unregister ourselves
+    if (config != null && config.isServerRegistered()) {
+      try {
+        MapToolRegistry.getInstance().unregisterInstance();
+      } catch (Throwable t) {
+        MapTool.showError("While unregistering server instance", t);
+      }
+    }
+
+    // Close UPnP port mapping if used
+    int port;
+    if (useUPnP && (port = getPort()) != -1) {
+      UPnPUtil.closePort(port);
+    }
+
+    server.close();
+    for (var connection : router.removeAll()) {
+      connection.removeDisconnectHandler(onConnectionDisconnected);
+      connection.close();
+    }
+
+    assetManagerMap.clear();
+
     if (heartbeatThread != null) {
       heartbeatThread.shutdown();
     }
@@ -175,25 +393,110 @@ public class MapToolServer {
     }
   }
 
-  private static final Random random = new Random();
-
   public void start() throws IOException {
-    conn.open();
+    if (!transitionToState(State.New, State.Started)) {
+      return;
+    }
+
+    server.addObserver(serverObserver);
+    try {
+      server.start();
+    } catch (IOException e) {
+      // Make sure we're in a reasonable state before propagating.
+      log.error("Failed to start server", e);
+      transitionToState(State.Stopped);
+      server.removeObserver(serverObserver);
+      throw e;
+    }
+
+    // Use UPnP to open port in router
+    int port = getPort();
+    if (useUPnP && port != -1) {
+      MapTool.getFrame()
+          .showFilledGlassPane(
+              new StaticMessageDialog(I18N.getText("msg.info.server.upnp.discovering")));
+      try {
+        UPnPUtil.openPort(port);
+      } finally {
+        MapTool.getFrame().hideGlassPane();
+      }
+    }
+
+    // Registered ?
+    if (config != null && config.isServerRegistered()) {
+      try {
+        MapToolRegistry.RegisterResponse result =
+            MapToolRegistry.getInstance()
+                .registerInstance(config.getServerName(), port, config.getUseWebRTC());
+        if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
+          MapTool.showError("msg.error.alreadyRegistered");
+        } else {
+          heartbeatThread = new HeartbeatThread(port);
+          heartbeatThread.start();
+        }
+      } catch (Exception e) {
+        MapTool.showError("msg.error.failedCannotRegisterServer", e);
+      }
+    }
+
+    if (serviceIdentifier != null && port != -1) {
+      announcer = new ServiceAnnouncer(serviceIdentifier, port, AppConstants.SERVICE_GROUP);
+      announcer.start();
+    }
+
+    assetProducerThread.start();
+  }
+
+  public void sendMessage(String id, Message message) {
+    log.debug("{} sent to {}: {}", getName(), id, message.getMessageTypeCase());
+    router.sendMessage(id, message.toByteArray());
+  }
+
+  public void sendMessage(String id, Object channel, Message message) {
+    log.debug(
+        "{} sent to {}: {} ({})", getName(), id, message.getMessageTypeCase(), channel.toString());
+    router.sendMessage(id, channel, message.toByteArray());
+  }
+
+  public void broadcastMessage(Message message) {
+    log.debug("{} broadcast: {}", getName(), message.getMessageTypeCase());
+    router.broadcastMessage(message.toByteArray());
+  }
+
+  public void broadcastMessage(String[] exclude, Message message) {
+    log.debug(
+        "{} broadcast: {} except to {}",
+        getName(),
+        message.getMessageTypeCase(),
+        String.join(",", exclude));
+    router.broadcastMessage(exclude, message.toByteArray());
   }
 
   private class HeartbeatThread extends Thread {
+
+    private static final Random random = new Random();
+
+    private final int port;
     private boolean stop = false;
     private static final int HEARTBEAT_DELAY = 10 * 60 * 1000; // 10 minutes
     private static final int HEARTBEAT_FLUX = 20 * 1000; // 20 seconds
 
     private boolean ever_had_an_error = false;
 
+    public HeartbeatThread(int port) {
+      this.port = port;
+    }
+
     @Override
     public void run() {
       int WARNING_TIME = 2; // number of heartbeats before popup warning
       int errors = 0;
-      String IP_addr = ConnectionInfoDialog.getExternalAddress();
-      int port = getConfig().getPort();
+      String IP_addr;
+      try {
+        IP_addr = NetUtil.formatAddress(NetUtil.getInstance().getExternalAddress().get());
+      } catch (ExecutionException | InterruptedException | NullPointerException e) {
+        IP_addr = "Unknown";
+      }
 
       while (!stop) {
         try {
@@ -259,10 +562,11 @@ public class MapToolServer {
     }
   }
 
-  ////
+  /// /
   // CLASSES
   private class AssetProducerThread extends Thread {
-    private boolean stop = false;
+
+    private final AtomicBoolean stop = new AtomicBoolean(false);
 
     public AssetProducerThread() {
       setName("AssetProducerThread");
@@ -270,7 +574,7 @@ public class MapToolServer {
 
     @Override
     public void run() {
-      while (!stop) {
+      while (!stop.get()) {
         Entry<String, AssetTransferManager> entryForException = null;
         try {
           boolean lookForMore = false;
@@ -280,11 +584,10 @@ public class MapToolServer {
             if (chunk != null) {
               lookForMore = true;
               var msg = UpdateAssetTransferMsg.newBuilder().setChunk(chunk);
-              getConnection()
-                  .sendMessage(
-                      entry.getKey(),
-                      MapToolConstants.Channel.IMAGE,
-                      Message.newBuilder().setUpdateAssetTransferMsg(msg).build());
+              sendMessage(
+                  entry.getKey(),
+                  MapToolConstants.Channel.IMAGE,
+                  Message.newBuilder().setUpdateAssetTransferMsg(msg).build());
             }
           }
           if (lookForMore) {
@@ -302,17 +605,7 @@ public class MapToolServer {
     }
 
     public void shutdown() {
-      stop = true;
+      stop.set(true);
     }
-  }
-
-  ////
-  // STANDALONE SERVER
-  public static void main(String[] args) throws IOException {
-    // This starts the server thread.
-    PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
-    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    MapToolServer server =
-        new MapToolServer(new ServerConfig(), new ServerPolicy(), playerDatabase);
   }
 }

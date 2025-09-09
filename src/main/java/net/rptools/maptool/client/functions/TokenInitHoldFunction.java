@@ -41,7 +41,9 @@ public class TokenInitHoldFunction extends AbstractFunction {
   /** singleton instance of this function */
   private static final TokenInitHoldFunction singletonInstance = new TokenInitHoldFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static TokenInitHoldFunction getInstance() {
     return singletonInstance;
   }

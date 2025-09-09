@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.TreeSet;
 import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -34,13 +34,16 @@ public class RessourceManager {
       new HashMap<>() {
         {
           // This icons don't exist in classic.
-          put(Icons.ACTION_EXPORT, "");
-          put(Icons.ACTION_IMPORT, "");
-          put(Icons.PROPERTIES_TABLE_ALPHABETIC, "");
-          put(Icons.PROPERTIES_TABLE_CATEGORIES, "");
-          put(Icons.PROPERTIES_TABLE_COLLAPSE, "");
-          put(Icons.PROPERTIES_TABLE_EXPAND, "");
-          put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, "");
+          put(Icons.ACTION_EXPORT, null);
+          put(Icons.ACTION_IMPORT, null);
+          put(Icons.ACTION_TARGET_ADD, null);
+          put(Icons.ACTION_TARGET_EDIT, null);
+          put(Icons.ACTION_TARGET_REMOVE, null);
+          put(Icons.PROPERTIES_TABLE_ALPHABETIC, null);
+          put(Icons.PROPERTIES_TABLE_CATEGORIES, null);
+          put(Icons.PROPERTIES_TABLE_COLLAPSE, null);
+          put(Icons.PROPERTIES_TABLE_EXPAND, null);
+          put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, null);
 
           put(Icons.ACTION_CANCEL, IMAGE_DIR + "cancel_sm.png");
           put(Icons.ACTION_CLOSE, IMAGE_DIR + "collapse.png");
@@ -83,18 +86,25 @@ public class RessourceManager {
           put(Icons.COLORPICKER_SNAP_OFF, IMAGE_DIR + "freehand.png");
           put(Icons.COLORPICKER_SNAP_ON, IMAGE_DIR + "shape_handles.png");
           put(Icons.DRAWPANEL_AREA_DRAW, IMAGE_DIR + "tool/drawpanel-poly.png");
+          put(Icons.DRAWPANEL_ARC_DRAW, IMAGE_DIR + "tool/drawpanel-arc.png");
+          put(Icons.DRAWPANEL_CUBIC_DRAW, IMAGE_DIR + "tool/drawpanel-cubic.png");
           put(Icons.DRAWPANEL_AREA_ERASE, IMAGE_DIR + "tool/drawpanel-poly-erase.png");
           put(Icons.DRAWPANEL_ELLIPSE_DRAW, IMAGE_DIR + "tool/drawpanel-ellipse.png");
           put(Icons.DRAWPANEL_ELLIPSE_ERASE, IMAGE_DIR + "tool/drawpanel-ellipse-erase.png");
           put(Icons.DRAWPANEL_LINE_DRAW, IMAGE_DIR + "tool/drawpanel-line.png");
+          put(Icons.DRAWPANEL_LINE2D_DRAW, IMAGE_DIR + "tool/drawpanel-line2d.png");
           put(Icons.DRAWPANEL_LINE_ERASE, IMAGE_DIR + "tool/drawpanel-line-erase.png");
+          put(Icons.DRAWPANEL_PATH_DRAW, IMAGE_DIR + "tool/drawpanel-path.png");
           put(Icons.DRAWPANEL_POLYGON_DRAW, IMAGE_DIR + "tool/drawpanel-poly.png");
           put(Icons.DRAWPANEL_POLYGON_ERASE, IMAGE_DIR + "tool/drawpanel-poly-erase.png");
           put(Icons.DRAWPANEL_RECTANGLE_DRAW, IMAGE_DIR + "tool/drawpanel-rectangle.png");
+          put(Icons.DRAWPANEL_ROUND_RECT, IMAGE_DIR + "tool/drawpanel-roundrect.png");
+          put(Icons.DRAWPANEL_QUAD_DRAW, IMAGE_DIR + "tool/drawpanel-quad.png");
           put(Icons.DRAWPANEL_RECTANGLE_ERASE, IMAGE_DIR + "tool/drawpanel-rectangle-erase.png");
           put(Icons.DRAWPANEL_TEMPLATE_BLAST, IMAGE_DIR + "tool/drawpanel-temp-blue-square.png");
           put(Icons.DRAWPANEL_TEMPLATE_BURST, IMAGE_DIR + "tool/drawpanel-temp-blue-burst.png");
           put(Icons.DRAWPANEL_TEMPLATE_CONE, IMAGE_DIR + "tool/drawpanel-temp-blue-cone.png");
+          put(Icons.DRAWPANEL_UNKNOWN_DRAW, IMAGE_DIR + "tool/drawpanel-unknown.png");
           put(
               Icons.DRAWPANEL_TEMPLATE_LINE,
               IMAGE_DIR + "tool/drawpanel-temp-blue-vertex-line.png");
@@ -130,6 +140,8 @@ public class RessourceManager {
           put(Icons.STATUSBAR_ASSET_CACHE, IMAGE_DIR + "asset-status.png");
           put(Icons.STATUSBAR_FREE_SPACE, IMAGE_DIR + "disk-space.png");
           put(Icons.STATUSBAR_IMAGE_CACHE, IMAGE_DIR + "thumbnail-status.png");
+          put(Icons.STATUSBAR_PLAYERS_DONE_LOADING, IMAGE_DIR + "currentIndicator.png");
+          put(Icons.STATUSBAR_PLAYERS_LOADING, IMAGE_DIR + "loading.png");
           put(Icons.STATUSBAR_RECEIVE_OFF, IMAGE_DIR + "activityOff.png");
           put(Icons.STATUSBAR_RECEIVE_ON, IMAGE_DIR + "receiveOn.png");
           put(Icons.STATUSBAR_SERVER_CONNECTED, IMAGE_DIR + "computer_on.png");
@@ -145,6 +157,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_DRAW_OFF, IMAGE_DIR + "tool/draw-blue-off.png");
           put(Icons.TOOLBAR_DRAW_ON, IMAGE_DIR + "tool/draw-blue.png");
           put(Icons.TOOLBAR_DRAW_OVAL, IMAGE_DIR + "tool/draw-blue-circle.png");
+          put(Icons.TOOLBAR_DRAW_POINTER, IMAGE_DIR + "tool/pointer-red.png");
           put(Icons.TOOLBAR_DRAW_TEXT, IMAGE_DIR + "tool/text-blue.png");
           put(Icons.TOOLBAR_FOG_EXPOSE_BOX, IMAGE_DIR + "tool/fog-blue-rect.png");
           put(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, IMAGE_DIR + "tool/fog-blue-diamond.png");
@@ -155,6 +168,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_FOG_ON, IMAGE_DIR + "tool/fog-blue.png");
           put(Icons.TOOLBAR_HIDE_OFF, IMAGE_DIR + "tool/upArrow.png");
           put(Icons.TOOLBAR_HIDE_ON, IMAGE_DIR + "tool/downArrow.png");
+          put(Icons.TOOLBAR_LIBGDX, IMAGE_DIR + "libgdx.png");
           put(Icons.TOOLBAR_POINTERTOOL_AI_OFF, IMAGE_DIR + "tool/ai-blue-off.png");
           put(Icons.TOOLBAR_POINTERTOOL_AI_ON, IMAGE_DIR + "tool/ai-blue-green.png");
           put(Icons.TOOLBAR_POINTERTOOL_MEASURE, IMAGE_DIR + "tool/ruler-blue.png");
@@ -170,6 +184,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TEMPLATE_LINE_CELL, IMAGE_DIR + "tool/temp-blue-cell-line.png");
           put(Icons.TOOLBAR_TEMPLATE_OFF, IMAGE_DIR + "tool/temp-blue-off.png");
           put(Icons.TOOLBAR_TEMPLATE_ON, IMAGE_DIR + "tool/temp-blue.png");
+          put(Icons.TOOLBAR_TEMPLATE_POINTER, IMAGE_DIR + "tool/pointer-red.png");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS, IMAGE_DIR + "tool/temp-blue-vertex-radius.png");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS_CELL, IMAGE_DIR + "tool/temp-blue-cell-radius.png");
           put(Icons.TOOLBAR_TEMPLATE_WALL, IMAGE_DIR + "tool/temp-blue-wall.png");
@@ -181,6 +196,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TOKENSELECTION_NPC_ON, IMAGE_DIR + "tool/select-npc-blue.png");
           put(Icons.TOOLBAR_TOKENSELECTION_PC_OFF, IMAGE_DIR + "tool/select-pc-blue-off.png");
           put(Icons.TOOLBAR_TOKENSELECTION_PC_ON, IMAGE_DIR + "tool/select-pc-blue.png");
+          put(Icons.TOOLBAR_TOPOLOGY_WALL, IMAGE_DIR + "tool/wall-topology.png");
           put(Icons.TOOLBAR_TOPOLOGY_BOX, IMAGE_DIR + "tool/top-blue-rect.png");
           put(Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW, IMAGE_DIR + "tool/top-blue-hrect.png");
           put(Icons.TOOLBAR_TOPOLOGY_CROSS, IMAGE_DIR + "tool/top-blue-cross.png");
@@ -198,6 +214,8 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON, IMAGE_DIR + "tool/mbl-only.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF, IMAGE_DIR + "tool/pit-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON, IMAGE_DIR + "tool/pit-vbl-only.png");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_OFF, IMAGE_DIR + "tool/cover-vbl-only-off.png");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON, IMAGE_DIR + "tool/cover-vbl-only.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF, IMAGE_DIR + "tool/wall-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON, IMAGE_DIR + "tool/wall-vbl-only.png");
           put(Icons.TOOLBAR_VOLUME_OFF, IMAGE_DIR + "audio/mute.png");
@@ -235,9 +253,8 @@ public class RessourceManager {
           put(Images.DECORATION_RPTOK, IMAGE_DIR + "rptokIcon.png");
           put(Images.EMPTY, IMAGE_DIR + "empty.png");
           put(Images.GRID_BORDER_HEX, IMAGE_DIR + "hexBorder.png");
-          put(Images.GRID_BORDER_ISOMETRIC, IMAGE_DIR + "hexBorder.png");
+          put(Images.GRID_BORDER_ISOMETRIC, IMAGE_DIR + "isoBorder.png");
           put(Images.GRID_BORDER_SQUARE, IMAGE_DIR + "whiteBorder.png");
-          put(Images.GRID_BORDER_SQUARE_RED, IMAGE_DIR + "grid-square-red.png");
           put(Images.HEROLABS_PORTRAIT, IMAGE_DIR + "powered_by_hero_lab_small.png");
           put(Images.HEROLABS_TOKEN, IMAGE_DIR + "hero-lab-token.png");
           put(Images.LIGHT_SOURCE, IMAGE_DIR + "lightbulb.png");
@@ -296,10 +313,55 @@ public class RessourceManager {
           put(Icons.ACTION_SELECT_ALL_TOKENS, ROD_ICONS + "misc/Select All Tokens.svg");
           put(Icons.ACTION_SELECT_NO_TOKENS, ROD_ICONS + "misc/Deselect All Tokens.svg");
           put(Icons.ACTION_SETTINGS, ROD_ICONS + "initiative/Initiative Settings.svg");
+          put(Icons.ACTION_TARGET_ADD, ROD_ICONS + "add target.svg");
+          put(Icons.ACTION_TARGET_EDIT, ROD_ICONS + "edit target.svg");
+          put(Icons.ACTION_TARGET_REMOVE, ROD_ICONS + "remove target.svg");
+          put(Icons.ADD_RESSOURCE_LOCAL, ROD_ICONS + "folder.svg");
+          put(Icons.ASSETPANEL_HEROLABS, ROD_ICONS + "hero-lab-icon.svg");
+          put(Icons.ASSETPANEL_HEROLABS_FOLDER, ROD_ICONS + "hero_lab_folder.svg");
           put(Icons.CHAT_HIDE_TYPING_NOTIFICATION, ROD_ICONS + "misc/Hide Typing notification.svg");
           put(Icons.CHAT_SCROLL_LOCK_ON, ROD_ICONS + "misc/Scroll Lock.svg");
           put(Icons.CHAT_SHOW_TYPING_NOTIFICATION, ROD_ICONS + "misc/Show Typing notification.svg");
+          put(Icons.COLORPICKER_CAP_ROUND, ROD_ICONS + "round_cap.svg");
+          put(Icons.COLORPICKER_CAP_SQUARE, ROD_ICONS + "square_cap.svg");
+          put(Icons.COLORPICKER_ERASER, ROD_ICONS + "eraser.svg");
+          put(Icons.COLORPICKER_OPACITY, ROD_ICONS + "contrast_high.svg");
+          put(Icons.COLORPICKER_PENCIL, ROD_ICONS + "pencil.svg");
+          put(Icons.COLORPICKER_PEN_WIDTH, ROD_ICONS + "paintbrush.svg");
+          put(Icons.COLORPICKER_SNAP_OFF, ROD_ICONS + "freehand.svg");
+          put(Icons.COLORPICKER_SNAP_ON, ROD_ICONS + "shape_handles.svg");
           put(Icons.EDIT_TOKEN_COLOR_PICKER, ROD_ICONS + "misc/Colour Selection (eye dropper).svg");
+          put(Icons.DRAWPANEL_AREA_DRAW, ROD_ICONS + "ribbon/Draw Poly Line.svg");
+          put(Icons.DRAWPANEL_AREA_ERASE, ROD_ICONS + "ribbon/Draw Poly Line Erase.svg");
+          put(Icons.DRAWPANEL_ELLIPSE_DRAW, ROD_ICONS + "ribbon/Draw Oval.svg");
+          put(Icons.DRAWPANEL_ELLIPSE_ERASE, ROD_ICONS + "ribbon/Draw Oval Erase.svg");
+          put(Icons.DRAWPANEL_LINE_DRAW, ROD_ICONS + "ribbon/Draw Straight Lines.svg");
+          put(Icons.DRAWPANEL_LINE_ERASE, ROD_ICONS + "ribbon/Draw Straight Lines Erase.svg");
+          put(Icons.DRAWPANEL_POLYGON_DRAW, ROD_ICONS + "ribbon/Draw Polygon.svg");
+          put(Icons.DRAWPANEL_POLYGON_ERASE, ROD_ICONS + "ribbon/Draw Polygon Erase.svg");
+          put(Icons.DRAWPANEL_RECTANGLE_DRAW, ROD_ICONS + "ribbon/Draw Rectangle.svg");
+          put(Icons.DRAWPANEL_RECTANGLE_ERASE, ROD_ICONS + "ribbon/Draw Rectangle Erase.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_BLAST, ROD_ICONS + "ribbon/Blast Template.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_BURST, ROD_ICONS + "ribbon/Burst Template.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_CONE, ROD_ICONS + "ribbon/Cone Template.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_LINE, ROD_ICONS + "ribbon/Line Template.svg");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_LINECELL,
+              ROD_ICONS + "ribbon/Line Template Centered on Grid.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_RADIUS, ROD_ICONS + "ribbon/Radius Template.svg");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_RADIUSCELL,
+              ROD_ICONS + "ribbon/Radius Template Centered on Grid.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_WALL, ROD_ICONS + "ribbon/Wall Line Template.svg");
+          put(Icons.EDIT_TOKEN_HEROLAB, ROD_ICONS + "hero-lab-icon.svg");
+          put(Icons.EDIT_TOKEN_REFRESH_OFF, ROD_ICONS + "refresh_arrows.svg");
+          put(Icons.EDIT_TOKEN_REFRESH_ON, ROD_ICONS + "refresh_arrows.svg");
+          put(Icons.GRID_HEX_HORIZONTAL, ROD_ICONS + "gridHorizontalHex.svg");
+          put(Icons.GRID_HEX_VERTICAL, ROD_ICONS + "gridVerticalHex.svg");
+          put(Icons.GRID_ISOMETRIC, ROD_ICONS + "gridIsometric.svg");
+          put(Icons.GRID_NONE, ROD_ICONS + "cross.svg");
+          put(Icons.GRID_SQUARE, ROD_ICONS + "gridSquare.svg");
+          put(Icons.MAPTOOL, ROD_ICONS + "maptool_icon.svg");
           put(Icons.MENU_DOCUMENTATION, ROD_ICONS + "menu/Documentation.svg");
           put(Icons.MENU_FORUMS, ROD_ICONS + "menu/Forums.svg");
           put(Icons.MENU_FRAMEWORKS, ROD_ICONS + "menu/Frameworks.svg");
@@ -318,6 +380,8 @@ public class RessourceManager {
           put(Icons.STATUSBAR_ASSET_CACHE, ROD_ICONS + "bottom/Assets Cache.svg");
           put(Icons.STATUSBAR_FREE_SPACE, ROD_ICONS + "bottom/Free Space.svg");
           put(Icons.STATUSBAR_IMAGE_CACHE, ROD_ICONS + "bottom/Image Thumbs Cache.svg");
+          put(Icons.STATUSBAR_PLAYERS_DONE_LOADING, ROD_ICONS + "misc/Select All Tokens.svg");
+          put(Icons.STATUSBAR_PLAYERS_LOADING, ROD_ICONS + "bottom/Assets Cache.svg");
           put(Icons.STATUSBAR_RECEIVE_OFF, ROD_ICONS + "bottom/Receive Data - Inactive.svg");
           put(Icons.STATUSBAR_RECEIVE_ON, ROD_ICONS + "bottom/Receive Data - Active.svg");
           put(Icons.STATUSBAR_SERVER_CONNECTED, ROD_ICONS + "bottom/Server Status - Connected.svg");
@@ -331,10 +395,11 @@ public class RessourceManager {
           put(Icons.TOOLBAR_DRAW_DELETE, ROD_ICONS + "ribbon/Delete Drawing.svg");
           put(Icons.TOOLBAR_DRAW_DIAMOND, ROD_ICONS + "ribbon/Draw Diamond_2.svg");
           put(Icons.TOOLBAR_DRAW_FREEHAND, ROD_ICONS + "ribbon/Draw Freehand Lines.svg");
-          put(Icons.TOOLBAR_DRAW_LINE, ROD_ICONS + "ribbon/Draw Straight Lines.svg");
+          put(Icons.TOOLBAR_DRAW_LINE, ROD_ICONS + "ribbon/Draw Straight Lines_2.svg");
           put(Icons.TOOLBAR_DRAW_OFF, ROD_ICONS + "ribbon/Drawing Tools.svg");
           put(Icons.TOOLBAR_DRAW_ON, ROD_ICONS + "ribbon/Drawing Tools.svg");
           put(Icons.TOOLBAR_DRAW_OVAL, ROD_ICONS + "ribbon/Draw Oval_2.svg");
+          put(Icons.TOOLBAR_DRAW_POINTER, ROD_ICONS + "ribbon/Drawing Pointer Tool.svg");
           put(Icons.TOOLBAR_DRAW_TEXT, ROD_ICONS + "ribbon/Add Text Label to Map.svg");
           put(Icons.TOOLBAR_FOG_EXPOSE_BOX, ROD_ICONS + "ribbon/Draw Rectangle.svg");
           put(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, ROD_ICONS + "ribbon/Draw Diamond.svg");
@@ -343,6 +408,8 @@ public class RessourceManager {
           put(Icons.TOOLBAR_FOG_EXPOSE_POLYGON, ROD_ICONS + "ribbon/Draw Polygon.svg");
           put(Icons.TOOLBAR_FOG_OFF, ROD_ICONS + "ribbon/Fog of War Tools.svg");
           put(Icons.TOOLBAR_FOG_ON, ROD_ICONS + "ribbon/Fog of War Tools.svg");
+          put(Icons.TOOLBAR_HIDE_OFF, ROD_ICONS + "upArrow.svg");
+          put(Icons.TOOLBAR_HIDE_ON, ROD_ICONS + "downArrow.svg");
           put(
               Icons.TOOLBAR_POINTERTOOL_AI_OFF,
               ROD_ICONS + "ribbon/Pathing MBL - VBL (AI) - OFF.svg");
@@ -364,6 +431,7 @@ public class RessourceManager {
               ROD_ICONS + "ribbon/Line Template Centered on Grid.svg");
           put(Icons.TOOLBAR_TEMPLATE_OFF, ROD_ICONS + "ribbon/Cone Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_ON, ROD_ICONS + "ribbon/Cone Template.svg");
+          put(Icons.TOOLBAR_TEMPLATE_POINTER, ROD_ICONS + "ribbon/Template Pointer Tool.svg");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS, ROD_ICONS + "ribbon/Radius Template.svg");
           put(
               Icons.TOOLBAR_TEMPLATE_RADIUS_CELL,
@@ -377,6 +445,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TOKENSELECTION_NPC_ON, ROD_ICONS + "ribbon/NPC.svg");
           put(Icons.TOOLBAR_TOKENSELECTION_PC_OFF, ROD_ICONS + "ribbon/PC.svg");
           put(Icons.TOOLBAR_TOKENSELECTION_PC_ON, ROD_ICONS + "ribbon/PC.svg");
+          put(Icons.TOOLBAR_TOPOLOGY_WALL, ROD_ICONS + "ribbon/Wall Topology.svg");
           put(Icons.TOOLBAR_TOPOLOGY_BOX, ROD_ICONS + "ribbon/Draw Rectangle.svg");
           put(Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW, ROD_ICONS + "ribbon/Draw Hollow Rectangle.svg");
           put(Icons.TOOLBAR_TOPOLOGY_CROSS, ROD_ICONS + "ribbon/Draw Cross.svg");
@@ -396,9 +465,12 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON, ROD_ICONS + "ribbon/Draw Pit VBL.svg");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF, ROD_ICONS + "ribbon/Draw Wall VBL.svg");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON, ROD_ICONS + "ribbon/Draw Wall VBL.svg");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_OFF, ROD_ICONS + "ribbon/Draw Cover VBL.svg");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON, ROD_ICONS + "ribbon/Draw Cover VBL.svg");
           put(Icons.TOOLBAR_VOLUME_OFF, ROD_ICONS + "ribbon/Mute - OFF.svg");
           put(Icons.TOOLBAR_VOLUME_ON, ROD_ICONS + "ribbon/Mute - ON.svg");
           put(Icons.TOOLBAR_ZONE, ROD_ICONS + "ribbon/Select Map.svg");
+          put(Icons.TOOLBAR_ZONE_NOT_VISIBLE, ROD_ICONS + "notvisible.svg");
           put(Icons.WINDOW_CAMPAIGN_MACROS, ROD_ICONS + "windows/Campaign Macros.svg");
           put(Icons.WINDOW_CHAT, ROD_ICONS + "windows/Chat.svg");
           put(Icons.WINDOW_CONNECTIONS, ROD_ICONS + "windows/Connections.svg");
@@ -463,7 +535,7 @@ public class RessourceManager {
 
   private static ImageIcon getIcon(Icons icon, int width, int height) {
     var iconPaths = classicIcons;
-    switch (AppPreferences.getIconTheme()) {
+    switch (AppPreferences.iconTheme.get()) {
       case ROD_TAKEHARA -> iconPaths = rodIcons;
     }
 
@@ -479,7 +551,9 @@ public class RessourceManager {
               // big
               var image = ImageUtil.getImage(iconPath);
               if (image.getWidth(null) > width || image.getHeight(null) > height)
-                image = ImageUtil.createCompatibleImage(image, width, height, null);
+                image =
+                    ImageUtil.createCompatibleImage(
+                        image, width, height, AppPreferences.renderQuality.get());
               return new ImageIcon(image);
             }
           } catch (IOException e) {
@@ -505,6 +579,8 @@ public class RessourceManager {
     for (var map : maps) {
       if (map.containsKey(key)) {
         ressourcePath = map.get(key);
+      }
+      if (ressourcePath != null) {
         break;
       }
     }
@@ -523,24 +599,32 @@ public class RessourceManager {
   }
 
   public static void main(String[] args) {
-    checkMissingFiles();
     checkMissingIcons(classicIcons, rodIcons);
-    for (var img : Set.of(images.values())) System.out.println(img);
   }
 
   private static void checkMissingIcons(
       HashMap<Icons, String> classicIcons, HashMap<Icons, String> rodIcons) {
+    var missing = new TreeSet<Icons>();
     for (var key : classicIcons.keySet()) {
-      if (rodIcons.containsKey(key)) continue;
+      if (rodIcons.containsKey(key)) {
+        continue;
+      }
+      missing.add(key);
+    }
 
-      System.out.println(
-          key + " missing from iconset. File for classic icon is :" + classicIcons.get(key));
+    System.out.println("Missing icons:");
+    for (var key : missing) {
+      System.out.println(key + " classic: " + classicIcons.get(key));
     }
   }
 
   public static void checkMissingFiles() {
     String basedir = "C:\\Users\\tkunze\\Source\\maptool\\src\\main\\resources\\";
-    for (String value : Set.copyOf(images.values())) {
+    for (String value : images.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
       var target = Path.of(basedir, IMAGE_DIR, "images", source.getFileName().toString());
 
@@ -548,14 +632,22 @@ public class RessourceManager {
         System.out.println(value + " is missing!");
       }
     }
-    for (String value : Set.copyOf(classicIcons.values())) {
+    for (String value : classicIcons.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
 
       if (Files.notExists(source)) {
         System.out.println(value + " is missing!");
       }
     }
-    for (String value : Set.copyOf(rodIcons.values())) {
+    for (String value : rodIcons.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
 
       if (Files.notExists(source)) {

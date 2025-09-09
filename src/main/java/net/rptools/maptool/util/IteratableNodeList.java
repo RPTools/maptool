@@ -20,7 +20,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -32,7 +32,7 @@ public class IteratableNodeList implements Iterable<Node> {
   }
 
   @Override
-  public @NotNull Iterator<Node> iterator() {
+  public @Nonnull Iterator<Node> iterator() {
     return new Iterator<Node>() {
       private int index = -1;
       private Node lastNode = null;

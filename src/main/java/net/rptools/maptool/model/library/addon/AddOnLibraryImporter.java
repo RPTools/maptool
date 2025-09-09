@@ -33,6 +33,8 @@ import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
+import net.rptools.maptool.model.library.proto.AddOnStatSheetsDto;
+import net.rptools.maptool.model.library.proto.AddonSlashCommandsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
@@ -54,6 +56,15 @@ public class AddOnLibraryImporter {
 
   /** The name of the file with event properties. */
   public static final String EVENT_PROPERTY_FILE = "events.json";
+
+  /** The name of the file with the stat sheets. */
+  public static final String STATS_SHEET_FILE = "stat_sheets.json";
+
+  /** The name of the file with the slash commands. */
+  public static final String SLASH_COMMAND_FILE = "slash_commands.json";
+
+  /** The directory where metadata from the root dir of the zip directory is copied to. */
+  public static final String METADATA_DIR = "metadata/";
 
   /**
    * Returns the {@link FileFilter} for add on library files.
@@ -162,6 +173,30 @@ public class AddOnLibraryImporter {
             .ignoringUnknownFields()
             .merge(new InputStreamReader(zip.getInputStream(eventsZipEntry)), eventPropBuilder);
       }
+
+      // Stat Sheets
+      var statSheetsBuilder = AddOnStatSheetsDto.newBuilder();
+      ZipEntry statSheetEntry = zip.getEntry(STATS_SHEET_FILE);
+      if (statSheetEntry != null) {
+        JsonFormat.parser()
+            .ignoringUnknownFields()
+            .merge(new InputStreamReader(zip.getInputStream(statSheetEntry)), statSheetsBuilder);
+      }
+
+      // Slash commands
+      var slashCommandsBuilder = AddonSlashCommandsDto.newBuilder();
+      ZipEntry slashCommandsEntry = zip.getEntry(SLASH_COMMAND_FILE);
+      if (slashCommandsEntry != null) {
+        JsonFormat.parser()
+            .ignoringUnknownFields()
+            .merge(
+                new InputStreamReader(zip.getInputStream(slashCommandsEntry)),
+                slashCommandsBuilder);
+      }
+
+      // Copy Metadata
+      addMetaData(builder.getNamespace(), zip, pathAssetMap);
+
       var addOnLib = builder.build();
       byte[] data = Files.readAllBytes(file.toPath());
       var asset = Type.MTLIB.getFactory().apply(addOnLib.getNamespace(), data);
@@ -172,7 +207,53 @@ public class AddOnLibraryImporter {
           addOnLib,
           mtsPropBuilder.build(),
           eventPropBuilder.build(),
+          statSheetsBuilder.build(),
+          slashCommandsBuilder.build(),
           pathAssetMap);
+    }
+  }
+
+  public AddOnLibrary importFromClassPath(String path) throws IOException {
+    // Copy the data to temporary file, its a bit hacky, but it works, and we can't create a
+    // ZipFile from anything but a file.
+    if (!path.startsWith("/")) {
+      path = "/" + path;
+    }
+
+    File tempFile = File.createTempFile("mtlib", "tmp");
+    tempFile.deleteOnExit();
+
+    try (var outputStream = Files.newOutputStream(tempFile.toPath())) {
+      try (var inputStream = AddOnLibraryImporter.class.getResourceAsStream(path)) {
+        inputStream.transferTo(outputStream);
+      }
+    }
+
+    return importFromFile(tempFile);
+  }
+
+  /**
+   * Adds the metadata from the root directory of the zip file to the metadata directory.
+   *
+   * @param namespace namespace of the add-on library.
+   * @param zip the zipfile containing the add-on library.
+   * @param pathAssetMap the map of asset paths and asset details.
+   * @throws IOException
+   */
+  private void addMetaData(
+      String namespace, ZipFile zip, Map<String, Pair<MD5Key, Type>> pathAssetMap)
+      throws IOException {
+    var entries = zip.stream().filter(e -> !e.getName().contains("/")).toList();
+    for (var entry : entries) {
+      String path = METADATA_DIR + entry.getName();
+      try (InputStream inputStream = zip.getInputStream(entry)) {
+        byte[] bytes = inputStream.readAllBytes();
+        MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
+        Asset asset =
+            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
+        addAsset(asset);
+        pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
+      }
     }
   }
 

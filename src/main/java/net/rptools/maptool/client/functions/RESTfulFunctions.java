@@ -14,17 +14,18 @@
  */
 package net.rptools.maptool.client.functions;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.Inflater;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -34,11 +35,17 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import okhttp3.Headers;
+import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.BufferedSource;
+import okio.GzipSource;
+import okio.InflaterSource;
+import okio.Okio;
 
 /**
  * RESTful based functions REST.get, REST.post, REST.put, REST.patch, REST.delete
@@ -68,7 +75,7 @@ public class RESTfulFunctions extends AbstractFunction {
     return instance;
   }
 
-  private final OkHttpClient client = new OkHttpClient();
+  private final OkHttpClient client = buildClient();
   private final Gson gson = new Gson();
 
   @Override
@@ -80,7 +87,7 @@ public class RESTfulFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
 
-    if (!AppPreferences.getAllowExternalMacroAccess()) {
+    if (!AppPreferences.allowExternalMacroAccess.get()) {
       throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
     }
 
@@ -218,10 +225,11 @@ public class RESTfulFunctions extends AbstractFunction {
       throws ParserException {
 
     // Execute the call and check the response...
+    JsonObject errjson = new JsonObject();
     try (Response response = client.newCall(request).execute()) {
       if (!response.isSuccessful() && !fullResponse) {
-        throw new ParserException(
-            I18N.getText("macro.function.rest.error.response", functionName, response.code()));
+        errjson.addProperty("error", response.code());
+        return errjson;
       }
 
       if (fullResponse) {
@@ -231,8 +239,75 @@ public class RESTfulFunctions extends AbstractFunction {
       }
 
     } catch (IllegalArgumentException | IOException e) {
-      throw new ParserException(I18N.getText("macro.function.rest.error.unknown", functionName, e));
+      errjson.addProperty("error", e.toString());
+      return errjson;
     }
+  }
+
+  private OkHttpClient buildClient() {
+    return new OkHttpClient.Builder()
+        .addInterceptor(
+            (Interceptor.Chain chain) -> {
+              var oldRequest = chain.request();
+
+              // If the macro has passed its own Accept-Encoding
+              // it's indicating it expects to somehow handle it itself.
+              if (oldRequest.header("Accept-Encoding") != null) {
+                return chain.proceed(oldRequest);
+              }
+
+              // Augment request saying we accept multiple content encodings
+              var newHeaders =
+                  oldRequest
+                      .headers()
+                      .newBuilder()
+                      .add("Accept-Encoding", "deflate")
+                      .add("Accept-Encoding", "gzip")
+                      .build();
+
+              var newRequest = oldRequest.newBuilder().headers(newHeaders).build();
+
+              var oldResponse = chain.proceed(newRequest);
+
+              // Replace the response's request with the original one
+              var responseBuilder = oldResponse.newBuilder().request(oldRequest);
+
+              // We might not have a body to decompress
+              var body = oldResponse.body();
+              if (body != null) {
+                BufferedSource source = body.source();
+                // The body may have been wrapped in an arbitrary encoding sequence
+                // and the server returns them in the order it encoded them
+                // so we wrap them with decoders in reverse order.
+                var encodings = oldResponse.headers().values("Content-Encoding");
+                Collections.reverse(encodings);
+                for (var encoding : encodings) {
+                  if ("deflate".equalsIgnoreCase(encoding)) {
+                    var inflater = new Inflater(true);
+                    source = Okio.buffer(new InflaterSource(source, inflater));
+                  } else if ("gzip".equalsIgnoreCase(encoding)) {
+                    source = Okio.buffer(new GzipSource(source));
+                  }
+                }
+
+                // Strip encoding and length headers as we've already handled them
+                var strippedHeaders =
+                    oldResponse
+                        .headers()
+                        .newBuilder()
+                        .removeAll("Content-Encoding")
+                        .removeAll("Content-Length")
+                        .build();
+                responseBuilder.headers(strippedHeaders);
+                var contentType = MediaType.parse(oldResponse.header("Content-Type"));
+                // Construct a new body with an inferred Content-Length
+                var newBody = ResponseBody.create(contentType, -1L, source);
+                responseBuilder.body(newBody);
+              }
+
+              return responseBuilder.build();
+            })
+        .build();
   }
 
   private Headers buildHeaders(Map<String, List<String>> headerMap) {
@@ -281,7 +356,7 @@ public class RESTfulFunctions extends AbstractFunction {
    * @throws ParserException
    */
   private BigDecimal launchSyrinscape(String baseURL) throws ParserException {
-    if (!AppPreferences.getSyrinscapeActive()) {
+    if (!AppPreferences.syrinscapeActive.get()) {
       return BigDecimal.ZERO;
     }
 

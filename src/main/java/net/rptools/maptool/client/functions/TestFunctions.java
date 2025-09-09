@@ -104,7 +104,7 @@ public class TestFunctions extends AbstractFunction {
         tokens.add(token);
       }
     } else {
-      tokens.addAll(MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokens());
+      tokens.addAll(MapTool.getFrame().getCurrentZoneRenderer().getZone().getAllTokens());
     }
 
     tokens =

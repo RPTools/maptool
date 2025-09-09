@@ -25,7 +25,9 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class ActivityMonitorPanel extends JComponent implements ActivityListener, Animatable {
   private static final int PADDING = 5;
   private static final int ON_DELAY = 100;

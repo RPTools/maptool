@@ -19,12 +19,14 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,30 +34,27 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.SquareGridDto;
 
 public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
   private static final Dimension CELL_OFFSET = new Dimension(0, 0);
-  private static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
-  private static BufferedImage pathHighlightAlt =
-      RessourceManager.getImage(Images.GRID_BORDER_SQUARE_RED);
+  private static final BufferedImage pathHighlight =
+      RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
 
-  private static List<TokenFootprint> footprintList;
-
-  // @formatter:off
   private static final GridCapabilities CAPABILITIES =
       new GridCapabilities() {
         public boolean isPathingSupported() {
@@ -78,27 +77,81 @@ public class SquareGrid extends Grid {
           return true;
         }
       };
-  // @formatter:on
 
-  private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
-  private static int[] FACING_ANGLES;
+  @Override
+  protected List<TokenFootprint> createFootprints() {
+    return List.of(
+        new TokenFootprint(
+            new GUID("7F000101CD65152A010000002A000101"),
+            "Fine",
+            I18N.getString("TokenFootprint.name.fine"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CD65152A020000002A000101"),
+            "Diminutive",
+            I18N.getString("TokenFootprint.name.diminutive"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CE65152A030000002A000100"),
+            "Tiny",
+            I18N.getString("TokenFootprint.name.tiny"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CE65152A040000002A000100"),
+            "Small",
+            I18N.getString("TokenFootprint.name.small"),
+            false,
+            0.75),
+        new TokenFootprint(
+            new GUID("7F000101CF65152A050000002A000101"),
+            "Medium",
+            I18N.getString("TokenFootprint.name.medium"),
+            true,
+            1.0),
+        new TokenFootprint(
+            new GUID("7F000101D065152A060000002A000100"),
+            "Large",
+            I18N.getString("TokenFootprint.name.large"),
+            squareFootprintPoints(2)),
+        new TokenFootprint(
+            new GUID("7F000101D065152A070000002A000100"),
+            "Huge",
+            I18N.getString("TokenFootprint.name.huge"),
+            squareFootprintPoints(3)),
+        new TokenFootprint(
+            new GUID("7F000101D165152A080000002A000101"),
+            "Gargantuan",
+            I18N.getString("TokenFootprint.name.gargantuan"),
+            squareFootprintPoints(4)),
+        new TokenFootprint(
+            new GUID("7F000101E165152A090000002A000101"),
+            "Colossal",
+            I18N.getString("TokenFootprint.name.colossal"),
+            squareFootprintPoints(6)));
+  }
 
-  public SquareGrid() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
+  private static Point[] squareFootprintPoints(int size) {
+    Point[] pa = new Point[size * size - 1];
+
+    int indx = 0;
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        if (y == 0 && x == 0) {
+          continue;
+        }
+        pa[indx] = new Point(x, y);
+        indx++;
+      }
     }
+    return pa;
   }
 
   @Override
   public Point2D.Double getCenterOffset() {
     return new Point2D.Double(getCellWidth() / 2, getCellHeight() / 2);
-  }
-
-  public SquareGrid(boolean faceEdges, boolean faceVertices) {
-    setFacings(faceEdges, faceVertices);
   }
 
   @Override
@@ -114,8 +167,6 @@ public class SquareGrid extends Grid {
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(callback, size, -size));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(callback, -size, 0));
-      // movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(callback,
-      // 0, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(callback, size, 0));
       movementKeys.put(
@@ -151,16 +202,25 @@ public class SquareGrid extends Grid {
   }
 
   @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
-    if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-135, -45, 45, 135};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-90, 0, 90, 180};
-    } else {
-      FACING_ANGLES = new int[] {90};
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
+    if (!faceEdges && !faceVertices) {
+      // Facing not support. Return a default answer.
+      return 90;
     }
+
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = (faceEdges && faceVertices) ? 45 : 90;
+    /* The position of the first standard facing CCW from zero. */
+    int base = (!faceEdges && faceVertices) ? 45 : 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override
@@ -189,9 +249,12 @@ public class SquareGrid extends Grid {
 
       if (x > startX && strX > nextAvailableSpace) {
         g.setColor(Color.black);
-        g.drawString(coord, strX, fm.getHeight());
-        g.setColor(Color.orange);
         g.drawString(coord, strX - 1, fm.getHeight() - 1);
+        g.drawString(coord, strX + 1, fm.getHeight() - 1);
+        g.drawString(coord, strX - 1, fm.getHeight() + 1);
+        g.drawString(coord, strX + 1, fm.getHeight() + 1);
+        g.setColor(Color.orange);
+        g.drawString(coord, strX, fm.getHeight());
 
         nextAvailableSpace = strX + strWidth + 10;
       }
@@ -207,9 +270,12 @@ public class SquareGrid extends Grid {
 
       if (y > fm.getHeight() && strY > nextAvailableSpace) {
         g.setColor(Color.black);
-        g.drawString(coord, 10, strY);
-        g.setColor(Color.yellow);
         g.drawString(coord, 10 - 1, strY - 1);
+        g.drawString(coord, 10 + 1, strY - 1);
+        g.drawString(coord, 10 - 1, strY + 1);
+        g.drawString(coord, 10 + 1, strY + 1);
+        g.setColor(Color.yellow);
+        g.drawString(coord, 10, strY);
 
         nextAvailableSpace = strY + fm.getAscent() / 2 + 10;
       }
@@ -218,18 +284,6 @@ public class SquareGrid extends Grid {
     }
     g.setFont(oldFont);
     SwingUtil.restoreAntiAliasing(g, oldAA);
-  }
-
-  @Override
-  public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
-      } catch (IOException ioe) {
-        MapTool.showError("SquareGrid.error.squareGridNotLoaded", ioe);
-      }
-    }
-    return footprintList;
   }
 
   @Override
@@ -249,7 +303,8 @@ public class SquareGrid extends Grid {
   }
 
   @Override
-  protected Area createCellShape(int size) {
+  protected Area createCellShape() {
+    var size = getSize();
     return new Area(new Rectangle(0, 0, size, size));
   }
 
@@ -266,11 +321,6 @@ public class SquareGrid extends Grid {
   @Override
   public double getCellWidth() {
     return getSize();
-  }
-
-  @Override
-  public int[] getFacingAngles() {
-    return FACING_ANGLES;
   }
 
   @Override
@@ -293,16 +343,28 @@ public class SquareGrid extends Grid {
     int newX = (int) (calcX < 0 && !exactCalcX ? calcX - 1 : calcX);
     int newY = (int) (calcY < 0 && !exactCalcY ? calcY - 1 : calcY);
 
-    // System.out.format("%d / %d => %f, %f => %d, %d\n", zp.x, getSize(), calcX, calcY, newX,
-    // newY);
     return new CellPoint(newX, newY);
+  }
+
+  @Override
+  public Point2D snapFine(ZonePoint point) {
+    double offsetX = getOffsetX();
+    double offsetY = getOffsetY();
+
+    double stepX = getCellWidth() / 2.;
+    double stepY = getCellHeight() / 2.;
+
+    double gridx = Math.round((point.x - offsetX) / stepX);
+    double gridy = Math.round((point.y - offsetY) / stepY);
+
+    return new Point2D.Double(gridx * stepX + offsetX, gridy * stepY + offsetY);
   }
 
   @Override
   public ZoneWalker createZoneWalker() {
     WalkerMetric metric =
         MapTool.isPersonalServer()
-            ? AppPreferences.getMovementMetric()
+            ? AppPreferences.movementMetric.get()
             : MapTool.getServerPolicy().getMovementMetric();
     return new AStarSquareEuclideanWalker(getZone(), metric);
   }
@@ -329,35 +391,26 @@ public class SquareGrid extends Grid {
 
     int startCol = (int) ((int) (bounds.x / gridSize) * gridSize);
     int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
-
+    Path2D path = new Path2D.Double();
     for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
-      if (AppState.getGridSize() == 1) {
-        g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
-      } else {
-        g.fillRect(
-            bounds.x,
-            (int) (row + offY - (AppState.getGridSize() / 2)),
-            bounds.width,
-            AppState.getGridSize());
-      }
+      path.append(
+          new Line2D.Double(
+              bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY)),
+          false);
     }
     for (double col = startCol; col < bounds.x + bounds.width + gridSize; col += gridSize) {
-      if (AppState.getGridSize() == 1) {
-        g.drawLine((int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height);
-      } else {
-        g.fillRect(
-            (int) (col + offX - (AppState.getGridSize() / 2)),
-            bounds.y,
-            AppState.getGridSize(),
-            bounds.height);
-      }
+      path.append(
+          new Line2D.Double(
+              (int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height),
+          false);
     }
+    GridRenderer.drawGridShape(g, path);
   }
 
   public ZonePoint getCenterPoint(CellPoint cellPoint) {
     ZonePoint zp = convert(cellPoint);
-    zp.x += getCellWidth() / 2;
-    zp.y += getCellHeight() / 2;
+    zp.x += (int) (getCellWidth() / 2d);
+    zp.y += (int) (getCellHeight() / 2d);
     return zp;
   }
 

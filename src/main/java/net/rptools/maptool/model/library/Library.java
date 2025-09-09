@@ -19,8 +19,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.data.LibraryData;
@@ -43,6 +46,23 @@ public interface Library {
    * @throws IOException if there is an io error reading the location.
    */
   CompletableFuture<Boolean> locationExists(URL location) throws IOException;
+
+  /**
+   * Checks to see if the specified location is an Asset.
+   *
+   * @param location the location to check.
+   * @return {@code true} if the location is an asset, otherwise {@code false}.
+   */
+  CompletableFuture<Boolean> isAsset(URL location);
+
+  /**
+   * Returns the asset at the specified location. This will only return a value if {@link
+   * #isAsset(URL)} returns {@code true}.
+   *
+   * @param location the location to get the asset for.
+   * @return the asset at the specified location.
+   */
+  CompletableFuture<Optional<MD5Key>> getAssetKey(URL location);
 
   /**
    * Reads the location as a string.
@@ -137,6 +157,14 @@ public interface Library {
   /**
    * Returns the information about MapTool Macro Script on this library.
    *
+   * @param macroPath The path to the macro, as used in lib: URIs.
+   * @return the information about the MapTool Macro Script.
+   */
+  CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoForUriPath(String macroPath);
+
+  /**
+   * Returns the information about MapTool Macro Script on this library.
+   *
    * @param macroName The name of the macro.
    * @return the information about the MapTool Macro Script.
    */
@@ -209,4 +237,11 @@ public interface Library {
    * needed.
    */
   void cleanup();
+
+  /**
+   * Returns the slash commands defined by the library.
+   *
+   * @return the slash commands defined by for the library.
+   */
+  Set<MacroDetails> getSlashCommands();
 }

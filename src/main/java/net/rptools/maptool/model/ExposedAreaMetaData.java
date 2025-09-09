@@ -30,9 +30,6 @@ public class ExposedAreaMetaData {
   }
 
   public Area getExposedAreaHistory() {
-    // if (exposedAreaHistory == null) {
-    // exposedAreaHistory = new Area();
-    // }
     return exposedAreaHistory;
   }
 

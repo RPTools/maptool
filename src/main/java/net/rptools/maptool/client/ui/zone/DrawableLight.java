@@ -15,27 +15,36 @@
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.geom.Area;
+import java.util.Collection;
+import javax.annotation.Nonnull;
+import net.rptools.lib.GeometryUtil;
 import net.rptools.maptool.model.drawing.DrawablePaint;
+import org.locationtech.jts.geom.Polygon;
 
 public class DrawableLight {
-
-  private DrawablePaint paint;
-  private Area area;
+  private @Nonnull DrawablePaint paint;
+  private @Nonnull Area area;
+  private @Nonnull Collection<Polygon> areaAsPolygons;
   private int lumens;
 
-  public DrawableLight(DrawablePaint paint, Area area, int lumens) {
+  public DrawableLight(@Nonnull DrawablePaint paint, @Nonnull Area area, int lumens) {
     super();
     this.paint = paint;
     this.area = area;
+    this.areaAsPolygons = GeometryUtil.toJtsPolygons(area);
     this.lumens = lumens;
   }
 
-  public DrawablePaint getPaint() {
+  public @Nonnull DrawablePaint getPaint() {
     return paint;
   }
 
-  public Area getArea() {
+  public @Nonnull Area getArea() {
     return area;
+  }
+
+  public @Nonnull Collection<Polygon> getAreaAsPolygons() {
+    return areaAsPolygons;
   }
 
   public int getLumens() {

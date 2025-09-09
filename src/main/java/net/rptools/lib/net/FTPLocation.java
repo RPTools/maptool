@@ -23,7 +23,7 @@ import javax.imageio.ImageWriter;
 import net.rptools.maptool.server.proto.FtpLocationDto;
 import net.rptools.maptool.server.proto.LocationDto;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class FTPLocation implements Location {
   private final String username;
@@ -83,7 +83,6 @@ public class FTPLocation implements Location {
   }
 
   public InputStream getContent() throws IOException {
-    // return composeURL().openConnection().getInputStream();
     return new URL(composeFileLocation()).openConnection().getInputStream();
   }
 

@@ -27,7 +27,7 @@ public class HtmlEditorSplit extends JPanel {
   public HtmlEditorSplit() {
     setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
     add(
-        gui.$$$getRootComponent$$$(),
+        gui.getRootComponent(),
         new GridConstraints(
             0,
             0,
@@ -50,6 +50,14 @@ public class HtmlEditorSplit extends JPanel {
 
   public void setText(String text) {
     gui.setText(text);
+  }
+
+  public String getTextType() {
+    return gui.getTextStyle();
+  }
+
+  public void setTextType(String type) {
+    gui.setTextStyle(type);
   }
 
   public String getSelectedText() {

@@ -421,7 +421,6 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
      * We replaced the line below with the two below it because zzRefill no longer "refills" the buffer (since the way we do it, it's always "full" the first time through, since it points to the
      * segment's array). So, we assign zzEndRead here.
      */
-    // zzStartRead = zzEndRead = s.offset;
     zzStartRead = s.offset;
     zzEndRead = zzStartRead + s.count - 1;
     zzCurrentPos = zzMarkedPos = zzPushbackPos = s.offset;
@@ -480,7 +479,9 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     if (zzReader != null) zzReader.close();
   }
 
-  /** @return the current lexical state. */
+  /**
+   * @return the current lexical state.
+   */
   public final int yystate() {
     return zzLexicalState;
   }
@@ -494,7 +495,9 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     zzLexicalState = newState;
   }
 
-  /** @return the text matched by the current regular expression. */
+  /**
+   * @return the text matched by the current regular expression.
+   */
   public final String yytext() {
     return new String(zzBuffer, zzStartRead, zzMarkedPos - zzStartRead);
   }
@@ -511,7 +514,9 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     return zzBuffer[zzStartRead + pos];
   }
 
-  /** @return the length of the matched text region. */
+  /**
+   * @return the length of the matched text region.
+   */
   public final int yylength() {
     return zzMarkedPos - zzStartRead;
   }

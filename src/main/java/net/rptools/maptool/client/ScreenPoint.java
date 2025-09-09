@@ -15,12 +15,18 @@
 package net.rptools.maptool.client;
 
 import java.awt.geom.Point2D;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 
 public class ScreenPoint extends Point2D.Double {
   public ScreenPoint(double x, double y) {
     super(x, y);
+  }
+
+  public static Point2D.Double convertToZone2d(ZoneRenderer renderer, double x, double y) {
+    double scale = renderer.getScale();
+    return new Point2D.Double(
+        (x - renderer.getViewOffsetX()) / scale, (y - renderer.getViewOffsetY()) / scale);
   }
 
   /**
@@ -33,23 +39,8 @@ public class ScreenPoint extends Point2D.Double {
    * @return the {@link ZonePoint} representing the screen point.
    */
   public static ZonePoint convertToZone(ZoneRenderer renderer, double x, double y) {
-    double scale = renderer.getScale();
-
-    double zX = x;
-    double zY = y;
-
-    // Translate
-    zX -= renderer.getViewOffsetX();
-    zY -= renderer.getViewOffsetY();
-
-    // Scale
-    zX = (int) Math.floor(zX / scale);
-    zY = (int) Math.floor(zY / scale);
-
-    // System.out.println("s:" + scale + " x:" + x + " zx:" + zX + " c:" + (zX / scale) + " - " +
-    // Math.floor(zX / scale));
-
-    return new ZonePoint((int) zX, (int) zY);
+    var doublePrecision = convertToZone2d(renderer, x, y);
+    return new ZonePoint((int) Math.floor(doublePrecision.x), (int) Math.floor(doublePrecision.y));
   }
 
   /**
@@ -83,19 +74,7 @@ public class ScreenPoint extends Point2D.Double {
   }
 
   public static ScreenPoint fromZonePoint(ZoneRenderer renderer, double x, double y) {
-    double scale = renderer.getScale();
-
-    double sX = x;
-    double sY = y;
-
-    sX = sX * scale;
-    sY = sY * scale;
-
-    // Translate
-    sX += renderer.getViewOffsetX();
-    sY += renderer.getViewOffsetY();
-
-    return new ScreenPoint(sX, sY);
+    return renderer.getZoneScale().toScreenSpace(x, y);
   }
 
   /**
@@ -149,7 +128,9 @@ public class ScreenPoint extends Point2D.Double {
     return "ScreenPoint" + super.toString();
   }
 
-  /** @see java.lang.Object#equals(java.lang.Object) */
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
   @Override
   public boolean equals(Object pt) {
     if (!(pt instanceof ScreenPoint)) return false;

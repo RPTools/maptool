@@ -66,8 +66,8 @@ public class GameDataImporter {
           case STRING_VALUE -> DataValueFactory.fromString(value.getName(), value.getStringValue());
           case LONG_VALUE -> DataValueFactory.fromLong(value.getName(), value.getLongValue());
           case DOUBLE_VALUE -> DataValueFactory.fromDouble(value.getName(), value.getDoubleValue());
-          case BOOLEAN_VALUE -> DataValueFactory.fromBoolean(
-              value.getName(), value.getBooleanValue());
+          case BOOLEAN_VALUE ->
+              DataValueFactory.fromBoolean(value.getName(), value.getBooleanValue());
           case ASSET_VALUE -> {
             var asset = AssetManager.getAssetAndWait(new MD5Key(value.getAssetValue()));
             yield DataValueFactory.fromAsset(value.getName(), asset);
@@ -80,17 +80,17 @@ public class GameDataImporter {
               yield DataValueFactory.fromJsonObject(value.getName(), json.getAsJsonObject());
             }
           }
-          case UNDEFINED_STRING_VALUE -> DataValueFactory.undefined(
-              value.getName(), DataType.STRING);
+          case UNDEFINED_STRING_VALUE ->
+              DataValueFactory.undefined(value.getName(), DataType.STRING);
           case UNDEFINED_LONG_VALUE -> DataValueFactory.undefined(value.getName(), DataType.LONG);
-          case UNDEFINED_DOUBLE_VALUE -> DataValueFactory.undefined(
-              value.getName(), DataType.DOUBLE);
-          case UNDEFINED_BOOLEAN_VALUE -> DataValueFactory.undefined(
-              value.getName(), DataType.BOOLEAN);
-          case UNDEFINED_JSON_ARRAY_VALUE -> DataValueFactory.undefined(
-              value.getName(), DataType.JSON_ARRAY);
-          case UNDEFINED_JSON_OBJECT_VALUE -> DataValueFactory.undefined(
-              value.getName(), DataType.JSON_OBJECT);
+          case UNDEFINED_DOUBLE_VALUE ->
+              DataValueFactory.undefined(value.getName(), DataType.DOUBLE);
+          case UNDEFINED_BOOLEAN_VALUE ->
+              DataValueFactory.undefined(value.getName(), DataType.BOOLEAN);
+          case UNDEFINED_JSON_ARRAY_VALUE ->
+              DataValueFactory.undefined(value.getName(), DataType.JSON_ARRAY);
+          case UNDEFINED_JSON_OBJECT_VALUE ->
+              DataValueFactory.undefined(value.getName(), DataType.JSON_OBJECT);
           case UNDEFINED_ASSET_VALUE -> DataValueFactory.undefined(value.getName(), DataType.ASSET);
           case UNDEFINED_VALUE, VALUE_NOT_SET -> DataValueFactory.undefined(value.getName());
         };

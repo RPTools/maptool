@@ -44,16 +44,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
-import javax.swing.KeyStroke;
 import net.miginfocom.swing.MigLayout;
+import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.AppActions.TranslatedClientAction;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
@@ -68,9 +68,12 @@ import net.rptools.maptool.model.library.token.LibTokenConverter;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.FunctionUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TokenPopupMenu extends AbstractTokenPopupMenu {
   private static final long serialVersionUID = -622385975780832588L;
+  private static final Logger log = LogManager.getLogger(TokenPopupMenu.class);
 
   public TokenPopupMenu(
       Set<GUID> selectedTokenSet, int x, int y, ZoneRenderer renderer, Token tokenUnderMouse) {
@@ -95,7 +98,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
     add(createHaloMenu());
     addOwnedItem(createArrangeMenu());
-    addGMItem(createChangeToMenu(Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
+    addGMItem(createChangeToMenu(Zone.Layer.values()));
     add(new JSeparator());
 
     /*
@@ -106,12 +109,9 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
     if (MapTool.getPlayer().isGM() || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
       add(createExposeMenu());
-      // if (MapTool.getPlayer().isGM()) {
-      // addGMItem(createVisionMenu());
-      // }
-      // add(new JSeparator());
     }
     addOwnedItem(createLightSourceMenu());
+    addOwnedItem(createAurasMenu());
     add(new JSeparator());
 
     addToggledItem(new ShowPathsAction(), renderer.isPathShowing(tokenUnderMouse));
@@ -151,10 +151,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     Map<String, JMenu> groups = new TreeMap<String, JMenu>();
     for (MacroButtonProperties macro : macroList) {
       group = macro.getGroup();
-      group =
-          (group == null || group.isEmpty()
-              ? " General"
-              : group); // leading space makes it come first
+      group = (group.isEmpty() ? " General" : group); // leading space makes it come first
       JMenu submenu = groups.get(group);
       if (submenu == null) {
         submenu = new JMenu(group);
@@ -183,10 +180,10 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 
   private JMenu createExposeMenu() {
     JMenu menu = new JMenu(I18N.getText("token.popup.menu.fow.expose"));
-    menu.add(new ExposeVisibleAreaAction());
-    menu.add(new ExposeLastPathAction());
+    menu.add(AppActions.EXPOSE_VISIBLE_AREA_ACTION);
+    menu.add(AppActions.EXPOSE_LAST_PATH_ACTION);
     if (MapTool.getPlayer().getRole() == Role.GM) {
-      menu.add(new ExposeVisibleAreaOnlyAction());
+      menu.add(AppActions.EXPOSE_VISIBLE_AREA_ONLY_ACTION);
     }
     menu.setEnabled(getTokenUnderMouse().getHasSight());
     return menu;
@@ -195,11 +192,11 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   private JMenu createExposedFOWMenu() {
     String viewMenu = I18N.getText("token.popup.menu.fow");
     JMenu menu = new JMenu(viewMenu);
-    // menu.add(new AddGlobalExposedAreaAction());
     menu.add(new AddPartyExposedAreaAction());
 
     Zone zone = getRenderer().getZone();
-    List<Token> tokens = zone.getTokens();
+    List<Token> tokens =
+        zone.getTokensForLayers(layer -> layer.supportsVision() && layer.isTokenLayer());
     if (tokens != null && !tokens.isEmpty()) {
       String tokenViewMenu = I18N.getText("token.popup.menu.fow.tokens");
       JMenu subMenu = new JMenu(tokenViewMenu);
@@ -231,7 +228,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       tokID = theTokId;
       Token sourceToken = getRenderer().getZone().getToken(tokID);
       String tokensView = I18N.getText("token.popup.menu.fow.tokens.view", sourceToken.getName());
-      I18N.setAction(tokensView, this, true);
+      I18N.setAction(tokensView, this);
     }
 
     @Override
@@ -254,17 +251,11 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
   }
 
-  /**
-   * XXX If this object is supposed to merge all exposed areas together and apply that to the
-   * currently selected tokens, why is it using a nested loop? Should one loop be used to create the
-   * exposed area object, then a second (non-nested) loop be used to modify the exposed area of all
-   * selected tokens?
-   */
   private class AddPartyExposedAreaAction extends AbstractAction {
     private static final long serialVersionUID = 3672180436608883849L;
 
     public AddPartyExposedAreaAction() {
-      I18N.setAction("token.popup.menu.fow.party", this, true);
+      I18N.setAction("token.popup.menu.fow.party", this);
     }
 
     @Override
@@ -275,7 +266,8 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       // This is ALL tokens; perhaps it should be owned tokens? Or just PC tokens? Or only those
       // with HasSight?
       // Or can players not use this feature at all so the above don't matter?
-      List<Token> allToks = zone.getTokens();
+      List<Token> allToks =
+          zone.getTokensForLayers(layer -> layer.supportsVision() && layer.isTokenLayer());
 
       // First create an Area that includes the exposed areas of all tokens
       Area tokenArea = new Area();
@@ -298,36 +290,11 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
   }
 
-  @SuppressWarnings("unused")
-  private class AddGlobalExposedAreaAction extends AbstractAction {
-    private static final long serialVersionUID = -3558008167872719635L;
-
-    public AddGlobalExposedAreaAction() {
-      I18N.setAction("token.popup.menu.fow.global", this, true);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Zone zone = getRenderer().getZone();
-      Area area = zone.getExposedArea();
-      for (GUID tok : selectedTokenSet) {
-        Token token = zone.getToken(tok);
-        ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
-        meta.addToExposedAreaHistory(area);
-        getRenderer().flush(token);
-        zone.setExposedAreaMetaData(token.getExposedAreaGUID(), meta);
-        MapTool.serverCommand()
-            .updateExposedAreaMeta(zone.getId(), token.getExposedAreaGUID(), meta);
-      }
-      getRenderer().repaint();
-    }
-  }
-
   private class ClearSelectedExposedAreaAction extends AbstractAction {
     private static final long serialVersionUID = 7969000504336361693L;
 
     public ClearSelectedExposedAreaAction() {
-      I18N.setAction("token.popup.menu.fow.clearselected", this, true);
+      I18N.setAction("token.popup.menu.fow.clearselected", this);
     }
 
     @Override
@@ -344,48 +311,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
               .updateExposedAreaMeta(zone.getId(), token.getExposedAreaGUID(), meta);
         }
       }
-      getRenderer().repaint();
-    }
-  }
-
-  private class ExposeVisibleAreaAction extends AbstractAction {
-    private static final long serialVersionUID = 1773049658219864418L;
-
-    public ExposeVisibleAreaAction() {
-      I18N.setAction("token.popup.menu.expose.visible", this, true);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      FogUtil.exposeVisibleArea(getRenderer(), selectedTokenSet, true);
-      getRenderer().repaint();
-    }
-  }
-
-  private class ExposeVisibleAreaOnlyAction extends AbstractAction {
-    private static final long serialVersionUID = 7889640443069061220L;
-
-    public ExposeVisibleAreaOnlyAction() {
-      I18N.setAction("token.popup.menu.expose.currentonly", this, true);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      FogUtil.exposePCArea(getRenderer());
-    }
-  }
-
-  private class ExposeLastPathAction extends AbstractAction {
-    private static final long serialVersionUID = 6840373835089920277L;
-
-    public ExposeLastPathAction() {
-      I18N.setAction("token.popup.menu.expose.lastpath", this, true);
-      setEnabled(getTokenUnderMouse().getLastPath() != null);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      FogUtil.exposeLastPath(getRenderer(), selectedTokenSet);
       getRenderer().repaint();
     }
   }
@@ -450,7 +375,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         haloMenu.add(item);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while building halo color selection menu");
     }
     return haloMenu;
   }
@@ -472,7 +397,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   protected JMenu createStateMenu() {
     // Create the base menu
     JMenu stateMenu = I18N.createMenu("defaultTool.stateMenu");
-    stateMenu.add(new ChangeStateAction("clear"));
+    stateMenu.add(new ClearStateAction());
     stateMenu.addSeparator();
     List<BooleanTokenOverlay> overlays =
         new ArrayList<BooleanTokenOverlay>(MapTool.getCampaign().getTokenStatesMap().values());
@@ -554,6 +479,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 
   @Override
   public void showPopup(JComponent component) {
+    AppActions.updateActions();
     show(component, x, y);
   }
 
@@ -662,8 +588,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     protected Color currentColor;
     protected Set<GUID> tokenSet;
     protected ZoneRenderer renderer;
-
-    // private final String title = "Choose Halo Color";
 
     public SetColorChooserAction(ZoneRenderer renderer, Set<GUID> tokenSet, String name) {
       this.tokenSet = tokenSet;
@@ -803,10 +727,27 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
   }
 
+  private class ClearStateAction extends TranslatedClientAction {
+    public ClearStateAction() {
+      super("defaultTool.stateAction.clear");
+    }
+
+    @Override
+    protected void executeAction() {
+      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+      for (GUID tokenGUID : selectedTokenSet) {
+        Token token = renderer.getZone().getToken(tokenGUID);
+        for (String state : MapTool.getCampaign().getTokenStatesMap().keySet()) {
+          token.setState(state, null);
+        }
+        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+      }
+      renderer.repaint();
+    }
+  }
+
   /** Internal class used to handle token state changes. */
   private class ChangeStateAction extends AbstractAction {
-    private static final long serialVersionUID = 8403066587828844564L;
-
     /**
      * Initialize a state action for a given state.
      *
@@ -814,23 +755,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
      */
     public ChangeStateAction(String state) {
       putValue(ACTION_COMMAND_KEY, state); // Set the state command
-
-      // Load the name, mnemonic, accelerator, and description if
-      // available
-      String key = "defaultTool.stateAction." + state;
-      String name = net.rptools.maptool.language.I18N.getText(key);
-      if (!name.equals(key)) {
-        putValue(NAME, name);
-        int mnemonic = I18N.getMnemonic(key);
-        if (mnemonic != -1) putValue(MNEMONIC_KEY, mnemonic);
-        String accel = I18N.getAccelerator(key);
-        if (accel != null) putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(accel));
-        String description = I18N.getDescription(key);
-        if (description != null) putValue(SHORT_DESCRIPTION, description);
-      } else {
-        // Default name if no I18N set
-        putValue(NAME, state);
-      } // endif
+      putValue(NAME, state);
     }
 
     /**
@@ -842,18 +767,12 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     public void actionPerformed(ActionEvent aE) {
       ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
       for (GUID tokenGUID : selectedTokenSet) {
-
         Token token = renderer.getZone().getToken(tokenGUID);
-        if (aE.getActionCommand().equals("clear")) {
-          for (String state : MapTool.getCampaign().getTokenStatesMap().keySet())
-            token.setState(state, null);
-        } else {
-          token.setState(
-              aE.getActionCommand(),
-              ((JCheckBoxMenuItem) aE.getSource()).isSelected() ? Boolean.TRUE : null);
-        } // endif
+        token.setState(
+            aE.getActionCommand(),
+            ((JCheckBoxMenuItem) aE.getSource()).isSelected() ? Boolean.TRUE : null);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-      } // endfor
+      }
       renderer.repaint();
     }
   }
@@ -994,7 +913,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
           continue;
         }
         // Get the start cell of the last move
-        // TODO: I don't like this hard wiring, find a better way
         ZonePoint zp = null;
         if (path.getCellPath().get(0) instanceof CellPoint) {
           zp = zone.getGrid().convert((CellPoint) path.getCellPath().get(0));

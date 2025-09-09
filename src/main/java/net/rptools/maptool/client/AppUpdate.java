@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
 import net.rptools.lib.ModelVersionManager;
+import net.rptools.lib.OsDetection;
 import net.rptools.maptool.language.I18N;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -46,14 +47,15 @@ public class AppUpdate {
    * @return has an update been made
    */
   public static boolean gitHubReleases() {
-    // AppPreferences.setSkipAutoUpdate(false); // For testing only
-    if (AppPreferences.getSkipAutoUpdate()) return false;
+    if (AppPreferences.skipAutoUpdate.get()) {
+      return false;
+    }
 
     // Default for Linux?
     String DOWNLOAD_EXTENSION = ".deb";
 
-    if (AppUtil.WINDOWS) DOWNLOAD_EXTENSION = ".exe";
-    else if (AppUtil.MAC_OS_X) DOWNLOAD_EXTENSION = ".pkg"; // Better default than .dmg?
+    if (OsDetection.WINDOWS) DOWNLOAD_EXTENSION = ".exe";
+    else if (OsDetection.MAC_OS_X) DOWNLOAD_EXTENSION = ".pkg"; // Better default than .dmg?
 
     String runningVersion = getImplementationVersion();
     if (StringUtils.isBlank(runningVersion)) {
@@ -75,7 +77,7 @@ public class AppUpdate {
       return false;
     }
 
-    if (!AppPreferences.getSkipAutoUpdateRelease().equals(latestReleaseId)
+    if (!AppPreferences.skipAutoUpdateRelease.get().equals(latestReleaseId)
         && ModelVersionManager.isBefore(runningVersion, latestReleaseVersion)) {
       JsonArray releaseAssets = latestRelease.get("assets").getAsJsonArray();
 
@@ -240,9 +242,11 @@ public class AppUpdate {
             options[1]);
     boolean dontAsk = dontAskCheckbox.isSelected();
 
-    if (dontAsk) AppPreferences.setSkipAutoUpdate(true);
+    if (dontAsk) {
+      AppPreferences.skipAutoUpdate.set(true);
+    }
 
-    if (result == JOptionPane.CANCEL_OPTION) AppPreferences.setSkipAutoUpdateRelease(releaseId);
+    if (result == JOptionPane.CANCEL_OPTION) AppPreferences.skipAutoUpdateRelease.set(releaseId);
 
     return (result == JOptionPane.YES_OPTION);
   }

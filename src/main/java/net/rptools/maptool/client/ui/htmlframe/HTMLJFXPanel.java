@@ -119,8 +119,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   }
 
   @Override
-  public void updateContents(final String html, boolean scrollReset) {
-    Platform.runLater(() -> webViewManager.updateContents(html, scrollReset));
+  public void updateContents(final HTMLContent htmlContent, boolean scrollReset) {
+    Platform.runLater(() -> webViewManager.updateContents(htmlContent, scrollReset));
   }
 
   /**

@@ -352,7 +352,6 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     Platform.runLater(
         () -> {
           addOnList.clear();
-          System.out.println("Closing");
           new MapToolEventBus().getMainEventBus().unregister(this);
         });
   }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <path style="fill: none; stroke: rgb(110, 110, 110); stroke-width: 2px; visibility: hidden;" d="M 2.593 2.568 L 13.4 2.6 L 8.517 8.471 L 2.633 13.428 L 2.593 2.568 Z M 13.433 13.386 L 8.517 8.472">
+    <title>Original path</title>
+  </path>
+  <g style="visibility: hidden;">
+    <title>Node cutouts</title>
+    <ellipse style="fill: rgb(255, 255, 255);" cx="2.6" cy="13.4" rx="2.6" ry="2.6">
+      <title>Handle 1</title>
+    </ellipse>
+    <ellipse style="fill: rgb(255, 255, 255);" cx="2.6" cy="2.6" rx="2.6" ry="2.6">
+      <title>Handle 2</title>
+    </ellipse>
+    <ellipse style="fill: rgb(255, 255, 255);" cx="13.4" cy="2.6" rx="2.6" ry="2.6">
+      <title>Handle 3</title>
+    </ellipse>
+    <ellipse style="fill: rgb(255, 255, 255);" cx="13.4" cy="13.4" rx="2.6" ry="2.6">
+      <title>Handle 5</title>
+    </ellipse>
+    <ellipse style="fill: rgb(255, 255, 255);" cx="8.5" cy="8.5" rx="2.6" ry="2.6">
+      <title>Handle 7</title>
+    </ellipse>
+  </g>
+  <path d="M 9.505 10.899 C 10.143 10.631 10.651 10.117 10.911 9.476 L 12.425 10.989 C 11.783 11.249 11.269 11.757 11.002 12.395 Z M 1.609 5.004 C 1.914 5.13 2.249 5.2 2.6 5.2 C 2.958 5.2 3.299 5.128 3.609 4.997 L 3.631 11.012 C 3.315 10.876 2.966 10.8 2.6 10.8 C 2.257 10.8 1.93 10.866 1.631 10.987 Z M 6.025 9.3 C 6.24 9.963 6.713 10.51 7.326 10.82 L 5.103 12.693 C 4.913 12.02 4.459 11.457 3.86 11.125 Z M 11.109 3.831 C 11.434 4.435 11.991 4.895 12.66 5.093 L 10.814 7.313 C 10.5 6.702 9.951 6.232 9.287 6.021 Z M 4.998 3.607 C 5.128 3.297 5.2 2.957 5.2 2.6 C 5.2 2.248 5.13 1.913 5.004 1.607 L 10.989 1.625 C 10.867 1.926 10.8 2.255 10.8 2.6 C 10.8 2.964 10.875 3.311 11.01 3.625 Z" style="fill: rgb(110, 110, 110);">
+    <title>Cut path</title>
+  </path>
+  <g>
+    <title>Nodes</title>
+    <ellipse style="fill: rgb(56, 159, 214);" cx="8.5" cy="8.5" rx="2" ry="2">
+      <title>Node 1</title>
+    </ellipse>
+    <ellipse style="fill: rgb(56, 159, 214);" cx="13.4" cy="2.6" rx="2" ry="2">
+      <title>Node 2</title>
+    </ellipse>
+    <ellipse style="fill: rgb(56, 159, 214);" cx="2.6" cy="2.6" rx="2" ry="2">
+      <title>Node 3</title>
+    </ellipse>
+    <ellipse style="fill: rgb(56, 159, 214);" cx="13.4" cy="13.4" rx="2" ry="2">
+      <title>Node 5</title>
+    </ellipse>
+    <ellipse style="fill: rgb(56, 159, 214);" cx="2.6" cy="13.4" rx="2" ry="2">
+      <title>Node 7</title>
+    </ellipse>
+  </g>
+</svg>

@@ -1,0 +1,31 @@
+plugins {
+    id "base"
+    id "java-library"
+}
+
+apply from: rootProject.file('buildSrc/shared.gradle')
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    implementation(libs.findbugs.jsr305)
+
+    implementation(libs.bundles.log4j)
+    implementation(libs.slf4j.simple)
+    implementation(libs.apache.commons.logging)
+
+    implementation(libs.gson)
+
+    // webrtc
+    implementation(libs.websocket)
+    implementation(libs.webrtc)
+    if (osdetector.os.is('windows'))
+        implementation(variantOf(libs.webrtc) { classifier('windows-x86_64')})
+    else if (osdetector.os.is('osx'))
+        implementation(variantOf(libs.webrtc) { classifier('macos-x86_64')})
+    else if (osdetector.os.is('linux'))
+        implementation(variantOf(libs.webrtc) { classifier('linux-x86_64')})
+
+    // compression of messages between client and server
+    implementation(libs.apache.commons.compress)
+    implementation(libs.zstd)
+}

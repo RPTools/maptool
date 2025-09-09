@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.startserverdialog.StartServerDialogView">
-  <grid id="67a17" binding="mainPanel" layout-manager="GridLayoutManager" row-count="8" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="67a17" binding="mainPanel" layout-manager="GridLayoutManager" row-count="7" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="573" height="673"/>
+      <xy x="10" y="10" width="830" height="838"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -287,57 +287,12 @@
             <properties>
               <actionCommand value="comboBoxChanged"/>
               <name value="movementMetric"/>
-              <toolTipText value ="Determines how MapTool handles movement on the selected grid type."/>
+              <toolTipText value="Determines how MapTool handles movement on the selected grid type."/>
             </properties>
           </component>
           <hspacer id="6c8b3">
             <constraints>
               <grid row="13" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </hspacer>
-        </children>
-      </grid>
-      <grid id="68138" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
-        <constraints>
-          <grid row="7" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <component id="1cc28" class="javax.swing.JButton">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <actionCommand value="Test Connection"/>
-              <name value="networkingHelpButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="ServerDialog.button.networkinghelp"/>
-            </properties>
-          </component>
-          <component id="db56e" class="javax.swing.JButton">
-            <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <actionCommand value="OK"/>
-              <name value="okButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.ok"/>
-            </properties>
-          </component>
-          <component id="9e8d4" class="javax.swing.JButton">
-            <constraints>
-              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <actionCommand value="Cancel"/>
-              <name value="cancelButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.cancel"/>
-            </properties>
-          </component>
-          <hspacer id="51414">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
         </children>

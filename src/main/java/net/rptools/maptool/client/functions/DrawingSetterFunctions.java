@@ -54,7 +54,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
     FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
     String mapName = parameters.get(0).toString();
     String id = parameters.get(1).toString();
-    Zone map = getNamedMap(functionName, mapName).getZone();
+    Zone map = FunctionUtil.getZoneRenderer(functionName, mapName).getZone();
     GUID guid = getGUID(functionName, id);
     if ("setDrawingLayer".equalsIgnoreCase(functionName)) {
       Layer layer = getLayer(parameters.get(2).toString());
@@ -70,20 +70,22 @@ public class DrawingSetterFunctions extends DrawingFunctions {
       return "";
     } else if ("setPenColor".equalsIgnoreCase(functionName)) {
       String paint = parameters.get(2).toString();
-      if ("".equalsIgnoreCase(paint))
+      if ("".equalsIgnoreCase(paint)) {
         getPen(functionName, map, guid).setForegroundMode(Pen.MODE_TRANSPARENT);
-      else {
+        getPen(functionName, map, guid).setPaint(null);
+      } else {
         getPen(functionName, map, guid).setForegroundMode(Pen.MODE_SOLID);
-        getPen(functionName, map, guid).setPaint(paintFromString(paint));
+        getPen(functionName, map, guid).setPaint(FunctionUtil.getPaintFromString(paint));
       }
       return "";
     } else if ("setFillColor".equalsIgnoreCase(functionName)) {
       String paint = parameters.get(2).toString();
-      if ("".equalsIgnoreCase(paint))
+      if ("".equalsIgnoreCase(paint)) {
         getPen(functionName, map, guid).setBackgroundMode(Pen.MODE_TRANSPARENT);
-      else {
+        getPen(functionName, map, guid).setBackgroundPaint(null);
+      } else {
         getPen(functionName, map, guid).setBackgroundMode(Pen.MODE_SOLID);
-        getPen(functionName, map, guid).setBackgroundPaint(paintFromString(paint));
+        getPen(functionName, map, guid).setBackgroundPaint(FunctionUtil.getPaintFromString(paint));
       }
       return "";
     } else if ("setDrawingEraser".equalsIgnoreCase(functionName)) {

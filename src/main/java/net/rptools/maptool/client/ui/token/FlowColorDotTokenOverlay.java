@@ -57,7 +57,9 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
     grid = aGrid;
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new FlowColorDotTokenOverlay(getName(), getColor(), grid);
@@ -112,12 +114,14 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
    * @param token Token being rendered.
    * @return An ellipse that fits inside of the bounding box returned by the flow.
    */
-  protected Shape getShape(Rectangle bounds, Token token) {
+  public Shape getShape(Rectangle bounds, Token token) {
     Rectangle2D r = getFlow().getStateBounds2D(bounds, token, getName());
     return new Ellipse2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
   }
 
-  /** @return Getter for grid */
+  /**
+   * @return Getter for grid
+   */
   public int getGrid() {
     return grid;
   }

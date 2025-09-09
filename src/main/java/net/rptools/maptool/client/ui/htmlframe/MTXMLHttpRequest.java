@@ -14,24 +14,24 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
-import java.awt.*;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import javafx.scene.web.*;
-import javax.swing.*;
 import net.rptools.maptool.model.library.url.*;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import netscape.javascript.*;
-import org.w3c.dom.*;
-import org.w3c.dom.html.*;
 
 public class MTXMLHttpRequest {
   // The javascript counterpart to this request.
-  private JSObject ctx = null;
+  private final JSObject ctx;
 
   // Used for resolving relative resources.
-  private String href;
+  private final String href;
+
+  private final HashMap<String, String> requestHeaders;
+
+  // Private state for the response side
+  private final HashMap<String, String> responseHeaders;
 
   // Private state for the request side
   private String uri = null;
@@ -43,10 +43,6 @@ public class MTXMLHttpRequest {
   private String responseType = "text";
   private int readyState = 0;
   private String status = null;
-  private HashMap<String, String> requestHeaders = null;
-
-  // Private state for the response side
-  private HashMap<String, String> responseHeaders = null;
 
   private static boolean warned = false;
 
@@ -84,7 +80,7 @@ public class MTXMLHttpRequest {
     this.async = async;
     this.user = user;
     this.psw = psw;
-    readyState = 1;
+    this.readyState = 1;
     this.readyStateChanged();
     if (!async && !warned) {
       this.ctx.call("_warnAsync");
@@ -202,7 +198,7 @@ public class MTXMLHttpRequest {
       _uri = new URI(this.href).resolve(this.uri);
     } catch (Exception e) {
       readyState = 0;
-      CompletableFuture c = new CompletableFuture<String>();
+      var c = new CompletableFuture<String>();
       c.complete(e.getMessage());
       return c;
     }

@@ -86,6 +86,14 @@ public class AssetLoader {
     repositoryStateMap.clear();
   }
 
+  /**
+   * Check whether there is currently a pending request for the given asset ID.
+   *
+   * <p>NOTE: This may be immediately incorrect by the time this function returns so decisions on
+   * whether to request an asset must not depend on the result.
+   *
+   * @return true if there is an incomplete request.
+   */
   public synchronized boolean isIdRequested(MD5Key id) {
     return requestedIdSet.contains(id);
   }
@@ -134,19 +142,13 @@ public class AssetLoader {
       }
       indexMap = parseIndex(decode(index));
     } catch (MalformedURLException e) {
-      if (log.isDebugEnabled()) {
-        log.error("Invalid repository URL: " + repository, e);
-      }
+      log.warn("Invalid repository URL: " + repository, e);
       status = RepoState.BAD_URL;
     } catch (IOException e) {
-      if (log.isDebugEnabled()) {
-        log.error("I/O error retrieving/saving index for '" + repository + "'", e);
-      }
+      log.error("I/O error retrieving/saving index for '" + repository + "'", e);
       status = RepoState.UNAVAILABLE;
     } catch (Throwable t) {
-      if (log.isDebugEnabled()) {
-        log.error("Could not retrieve index for '" + repository + "'", t);
-      }
+      log.error("Could not retrieve index for '" + repository + "'", t);
       status = RepoState.UNAVAILABLE;
     }
     repositoryStateMap.put(repository, status);
@@ -232,9 +234,20 @@ public class AssetLoader {
     return new File(REPO_CACHE_DIR.getAbsolutePath() + "/" + new MD5Key(repository.getBytes()));
   }
 
-  public synchronized void requestAsset(MD5Key id) {
+  /**
+   * Submit a new request to retrieve the asset with the given ID if needed.
+   *
+   * @param id The ID of the asset to request.
+   * @return false if there was already a request, true if a new request was submitted.
+   */
+  public synchronized boolean requestAsset(MD5Key id) {
+    if (requestedIdSet.contains(id)) {
+      return false;
+    }
+
     retrievalThreadPool.submit(new ImageRetrievalRequest(id, createRequestQueue(id)));
     requestedIdSet.add(id);
+    return true;
   }
 
   public synchronized void completeRequest(MD5Key id) {
@@ -294,11 +307,8 @@ public class AssetLoader {
           MD5Key sum = new MD5Key(data);
           if (!sum.equals(id)) {
             // Bad file
-            // TODO: Does this mean it's time to update our cache of the index.gz?
             // (See hasCurrentIndexFile() for the comment there.)
-            String msg = "Downloaded invalid file from: " + path;
-            log.warn(msg);
-            System.err.println(msg);
+            log.warn("Downloaded invalid file from: {}", path);
 
             // Try a different repo
             continue;
@@ -309,33 +319,23 @@ public class AssetLoader {
           if (split >= 0) {
             ref = ref.substring(split + 1);
           }
-          // System.out.println("Got " + id + " from " + repo);
           ref = FileUtil.getNameWithoutExtension(ref);
           AssetManager.putAsset(Asset.createAssetDetectType(ref, data));
 
           completeRequest(id);
           return;
         } catch (IOException ioe) {
-          // Well, try a different repo
-          // ioe.printStackTrace();
+          log.error("Error while reading bytes", ioe);
           continue;
         } catch (Throwable t) {
-          t.printStackTrace();
+          log.error("Unexpected error while reading bytes", t);
         }
       }
 
-      // System.out.println("Got " + id + " from MT");
       // Last resort, ask the MT server
-      final var serverCommand = MapTool.serverCommand();
-      if (serverCommand != null) {
-        // We can drop off the end of this runnable because it'll background load the
-        // image from the server
-        serverCommand.getAsset(id);
-      } else {
-        // This could be too early in the loading process for a server command to be set.
-        AssetManager.putAsset(Asset.createBrokenImageAsset(id));
-        completeRequest(id);
-      }
+      // We can drop off the end of this runnable because it'll background load the
+      // image from the server
+      MapTool.serverCommand().getAsset(id);
     }
   }
 }

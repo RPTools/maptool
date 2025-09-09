@@ -17,18 +17,17 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.awt.Point;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
 import java.util.List;
-import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.AbstractDrawing;
+import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -204,28 +203,11 @@ public class DrawingFunctions extends AbstractFunction {
    * @return Layer
    */
   protected Layer getLayer(String layer) {
-    if ("GM".equalsIgnoreCase(layer)) return Layer.GM;
-    else if ("OBJECT".equalsIgnoreCase(layer)) return Layer.OBJECT;
-    else if ("BACKGROUND".equalsIgnoreCase(layer)) return Layer.BACKGROUND;
-    return Layer.TOKEN;
-  }
-
-  /**
-   * Find the map/zone for a given map name
-   *
-   * @param functionName String Name of the calling function.
-   * @param mapName String Name of the searched for map.
-   * @return ZoneRenderer The map/zone.
-   * @throws ParserException if the map is not found
-   */
-  protected ZoneRenderer getNamedMap(String functionName, String mapName) throws ParserException {
-    for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-      if (mapName.equals(zr.getZone().getName())) {
-        return zr;
-      }
+    try {
+      return Layer.valueOf(layer.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      return Layer.getDefaultPlayerLayer();
     }
-    throw new ParserException(
-        I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, mapName));
   }
 
   /**
@@ -240,23 +222,6 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected Pen getPen(String functionName, Zone map, GUID guid) throws ParserException {
     return getDrawnElement(functionName, map, guid).getPen();
-  }
-
-  /**
-   * Parses a string into either a Color Paint or Texture Paint.
-   *
-   * @param paint String containing the paint description.
-   * @return Pen DrawableTexturePaint or DrawableColorPaint.
-   */
-  protected DrawablePaint paintFromString(String paint) {
-    if (paint.toLowerCase().startsWith("asset://")) {
-      String id = paint.substring(8);
-      return new DrawableTexturePaint(new MD5Key(id));
-    } else if (paint.length() == 32) {
-      return new DrawableTexturePaint(new MD5Key(paint));
-    } else {
-      return new DrawableColorPaint(MapToolUtil.getColor(paint));
-    }
   }
 
   protected String paintToString(DrawablePaint drawablePaint) {
@@ -287,39 +252,39 @@ public class DrawingFunctions extends AbstractFunction {
     dinfo.addProperty("id", el.getDrawable().getId().toString());
     dinfo.addProperty("name", d.getName());
     dinfo.addProperty("layer", el.getDrawable().getLayer().name());
-    dinfo.addProperty("type", getDrawbleType(d));
-    dinfo.add("bounds", boundsToJSON(d));
+    dinfo.addProperty("type", getDrawableType(el));
+    dinfo.add("bounds", boundsToJSON(map, d));
     dinfo.addProperty("penColor", paintToString(el.getPen().getPaint()));
     dinfo.addProperty("fillColor", paintToString(el.getPen().getBackgroundPaint()));
     dinfo.addProperty("opacity", el.getPen().getOpacity());
     dinfo.addProperty("isEraser", el.getPen().isEraser() ? BigDecimal.ONE : BigDecimal.ZERO);
     dinfo.addProperty("penWidth", el.getPen().getThickness());
     dinfo.add("path", pathToJSON(d));
+    if (el.getDrawable() instanceof AbstractTemplate t) {
+      dinfo.addProperty("templateSize", t.getRadius());
+    }
 
     return dinfo;
   }
 
-  private JsonObject boundsToJSON(AbstractDrawing d) {
+  private JsonObject boundsToJSON(Zone map, AbstractDrawing d) {
     JsonObject binfo = new JsonObject();
-    binfo.addProperty("x", d.getBounds().x);
-    binfo.addProperty("y", d.getBounds().y);
-    binfo.addProperty("width", d.getBounds().width);
-    binfo.addProperty("height", d.getBounds().height);
+    binfo.addProperty("x", d.getBounds(map).x);
+    binfo.addProperty("y", d.getBounds(map).y);
+    binfo.addProperty("width", d.getBounds(map).width);
+    binfo.addProperty("height", d.getBounds(map).height);
     return binfo;
   }
 
-  private String getDrawbleType(AbstractDrawing d) {
-    if (d instanceof LineSegment) {
+  private String getDrawableType(DrawnElement el) {
+    if (el.getDrawable() instanceof LineSegment) {
       return "Line";
-    } else if (d instanceof ShapeDrawable) {
-      String shape = ((ShapeDrawable) d).getShape().getClass().getSimpleName();
-      if ("Float".equalsIgnoreCase(shape)) {
-        return "Oval";
-      } else {
-        return shape;
-      }
-    } else if (d instanceof DrawablesGroup) {
+    } else if (el.getDrawable() instanceof ShapeDrawable sd) {
+      return sd.getShapeTypeName();
+    } else if (el.getDrawable() instanceof DrawablesGroup) {
       return "Group";
+    } else if (el.getDrawable() instanceof AbstractTemplate t) {
+      return t.getClass().getSimpleName();
     } else {
       return "unknown";
     }
@@ -336,14 +301,15 @@ public class DrawingFunctions extends AbstractFunction {
         pinfo.add(info);
       }
       return pinfo;
-    } else if (d instanceof ShapeDrawable) {
-      String shape = ((ShapeDrawable) d).getShape().getClass().getSimpleName();
-      if ("Float".equalsIgnoreCase(shape)) {
+    } else if (d instanceof ShapeDrawable sd) {
+      var shape = sd.getShape();
+      if (shape instanceof Ellipse2D) {
+        // We don't support converting ellipses to path.
         return new JsonArray();
       } else {
         // Convert shape into path
         JsonArray pinfo = new JsonArray();
-        final PathIterator pathIter = ((ShapeDrawable) d).getShape().getPathIterator(null);
+        final PathIterator pathIter = shape.getPathIterator(null);
         float[] coords = new float[6];
         JsonObject lastinfo = new JsonObject();
         while (!pathIter.isDone()) {

@@ -19,6 +19,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -34,6 +35,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.FileTransferableHandler;
 import net.rptools.lib.transferable.GroupTokenTransferData;
@@ -48,7 +50,6 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.util.PersistenceUtil;
-import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.mime.MediaType;
@@ -81,6 +82,7 @@ public class TransferableHelper extends TransferHandler {
    */
   private static final DataFlavor URI_LIST_FLAVOR =
       new DataFlavor("text/uri-list; class=java.lang.String", "Image"); // $NON-NLS-1$
+
   /**
    * <b>application/x-java-url; class=java.net.URL</b>
    *
@@ -91,6 +93,7 @@ public class TransferableHelper extends TransferHandler {
       new DataFlavor(
           "application/x-java-url; class=java.net.URL", // $NON-NLS-1$
           "Image");
+
   /**
    * <b>image/x-java-image; class=java.awt.Image</b>
    *
@@ -99,6 +102,7 @@ public class TransferableHelper extends TransferHandler {
    */
   private static final DataFlavor X_JAVA_IMAGE =
       new DataFlavor("image/x-java-image; class=java.awt.Image", "Image"); // $NON-NLS-1$
+
   /**
    * <b>text/plain; class=java.lang.String</b>
    *
@@ -123,6 +127,7 @@ public class TransferableHelper extends TransferHandler {
     // never used herein...
     GroupTokenTransferData.GROUP_TOKEN_LIST_FLAVOR,
   };
+
   // @formatter:on
 
   /**
@@ -191,11 +196,11 @@ public class TransferableHelper extends TransferHandler {
 
       // EXISTING ASSET
       if (transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + TransferableAsset.dataFlavor);
+        log.info("Selected: {}", TransferableAsset.dataFlavor);
         o = handleTransferableAsset(transferable);
       }
       if (o == null && transferable.isDataFlavorSupported(TransferableAssetReference.dataFlavor)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + TransferableAssetReference.dataFlavor);
+        log.info("Selected: {}", TransferableAssetReference.dataFlavor);
         o = handleTransferableAssetReference(transferable);
       }
 
@@ -227,7 +232,7 @@ public class TransferableHelper extends TransferHandler {
       // "text/x-java-file-list", but
       // until it does...
       if (o == null && transferable.isDataFlavorSupported(URI_LIST_FLAVOR)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + URI_LIST_FLAVOR);
+        log.info("Selected: {}", URI_LIST_FLAVOR);
         String data = (String) transferable.getTransferData(URI_LIST_FLAVOR);
         List<URL> list = textURIListToFileList(data);
         if (!list.isEmpty()) {
@@ -240,7 +245,7 @@ public class TransferableHelper extends TransferHandler {
       // Used by OSX (and Windows?) when files are dragged from the desktop: 'text/java-file-list;
       // java.util.List<java.io.File>'
       if (o == null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + DataFlavor.javaFileListFlavor);
+        log.info("Selected: {}", DataFlavor.javaFileListFlavor);
         List<URL> list = new FileTransferableHandler().getTransferObject(transferable);
         if (!list.isEmpty()) {
           List<Object> urls = handleURLList(list);
@@ -251,16 +256,18 @@ public class TransferableHelper extends TransferHandler {
       // DIRECT/BROWSER
       // Try 'image/x-java-image; java.awt.Image' to see if Java has recognized the image as such
       if (o == null && transferable.isDataFlavorSupported(X_JAVA_IMAGE)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + X_JAVA_IMAGE);
+        log.info("Selected: {}", X_JAVA_IMAGE);
         BufferedImage image =
-            (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
+            (BufferedImage)
+                new ImageTransferableHandler(AppPreferences.renderQuality::get)
+                    .getTransferObject(transferable);
         o = Asset.createImageAsset("unnamed", ImageUtil.imageToBytes(image));
       }
 
       // DIRECT/BROWSER
       // Try 'application/x-java-url; java.net.URL'
       if (o == null && transferable.isDataFlavorSupported(URL_FLAVOR_URI)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + URL_FLAVOR_URI);
+        log.info("Selected: {}", URL_FLAVOR_URI);
         URL url = (URL) transferable.getTransferData(URL_FLAVOR_URI);
         o = handleImage(url, "URL_FLAVOR_URI", transferable);
       }
@@ -270,7 +277,7 @@ public class TransferableHelper extends TransferHandler {
       // are better than
       // other file types...
       if (o == null && transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + URL_FLAVOR_PLAIN);
+        log.info("Selected: {}", URL_FLAVOR_PLAIN);
         String text = (String) transferable.getTransferData(URL_FLAVOR_PLAIN);
         URL url = new URL(text);
         o = handleImage(url, "URL_FLAVOR_PLAIN", transferable);
@@ -314,15 +321,8 @@ public class TransferableHelper extends TransferHandler {
         URI uri = new URI(s);
         URL url = uri.toURL();
         list.add(url);
-      } catch (Exception e) {
-        // There's no reason to trap the individual exceptions when a single catch suffices.
-        if (log.isInfoEnabled()) log.info(s, e);
-        // } catch (URISyntaxException e) { // Thrown by the URI constructor
-        // e.printStackTrace();
-        // } catch (IllegalArgumentException e) { // Thrown by URI.toURL()
-        // e.printStackTrace();
-        // } catch (MalformedURLException e) { // Thrown by URI.toURL()
-        // e.printStackTrace();
+      } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
+        log.error("Error while parsing URL {}", s, e);
       }
     }
     return list;
@@ -333,17 +333,19 @@ public class TransferableHelper extends TransferHandler {
     BufferedImage image = null;
     Asset asset = null;
     try {
-      if (log.isDebugEnabled()) log.debug("Reading URL:  " + url); // $NON-NLS-1$
+      log.debug("Reading URL:  {}", url); // $NON-NLS-1$
       image = ImageIO.read(url);
     } catch (Exception e) {
       MapTool.showError("TransferableHelper.error.urlFlavor", e); // $NON-NLS-1$
     }
     if (image == null) {
-      if (log.isDebugEnabled())
-        log.debug(
-            type
-                + " didn't work; trying ImageTransferableHandler().getTransferObject()"); // $NON-NLS-1$
-      image = (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
+      log.debug(
+          "{} didn't work; trying ImageTransferableHandler().getTransferObject()",
+          type); // $NON-NLS-1$
+      image =
+          (BufferedImage)
+              new ImageTransferableHandler(AppPreferences.renderQuality::get)
+                  .getTransferObject(transferable);
     }
     if (image != null) {
       String name = findName(url);
@@ -354,48 +356,6 @@ public class TransferableHelper extends TransferHandler {
     }
     return asset;
   }
-
-  // private static Asset handleImage(Transferable transferable) throws IOException,
-  // UnsupportedFlavorException {
-  // String name = null;
-  // BufferedImage image = null;
-  // if (transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN)) {
-  // try {
-  // String fname = (String) transferable.getTransferData(URL_FLAVOR_PLAIN);
-  // if (log.isDebugEnabled())
-  // log.debug("Transferable " + fname); //$NON-NLS-1$
-  // name = FileUtil.getNameWithoutExtension(fname);
-  //
-  // File file;
-  // URL url = new URL(fname);
-  // try {
-  // URI uri = url.toURI(); // Should replace '%20' sequences and such
-  // file = new File(uri);
-  // } catch (URISyntaxException e) {
-  // file = new File(fname);
-  // }
-  // if (file.exists()) {
-  // if (log.isDebugEnabled())
-  // log.debug("Reading local file: " + file); //$NON-NLS-1$
-  // image = ImageIO.read(file);
-  // } else {
-  // if (log.isDebugEnabled())
-  // log.debug("Reading remote URL: " + url); //$NON-NLS-1$
-  // image = ImageIO.read(url);
-  // }
-  // } catch (Exception e) {
-  // MapTool.showError("TransferableHelper.error.urlFlavor", e); //$NON-NLS-1$
-  // }
-  // }
-  // if (image == null) {
-  // if (log.isDebugEnabled())
-  // log.debug("URL_FLAVOR_PLAIN didn't work; trying
-  // ImageTransferableHandler().getTransferObject()"); //$NON-NLS-1$
-  // image = (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
-  // }
-  // Asset asset = new Asset(name, ImageUtil.imageToBytes(image));
-  // return asset;
-  // }
 
   private static List<Object> handleURLList(List<URL> list) throws Exception {
     List<Object> assets = new ArrayList<Object>();
@@ -413,8 +373,8 @@ public class TransferableHelper extends TransferHandler {
           Asset temp = AssetManager.createAsset(url, Type.MTLIB);
           if (temp != null) { // `null' means no image available
             assets.add(temp);
-          } else if (log.isInfoEnabled()) {
-            log.info("Invalid MTLib for " + url);
+          } else {
+            log.info("Invalid MTLib for {}", url);
           }
         } else {
           // Get the MediaType so we can use it when creating the Asset later
@@ -428,8 +388,8 @@ public class TransferableHelper extends TransferHandler {
             Asset temp = AssetManager.createAsset(url);
             if (temp != null) { // `null' means no image available
               assets.add(temp);
-            } else if (log.isInfoEnabled()) {
-              log.info("No image available for " + url);
+            } else {
+              log.info("No image available for {}", url);
             }
           }
         }
@@ -444,14 +404,16 @@ public class TransferableHelper extends TransferHandler {
     String subType = mediaType.getSubtype();
     return switch (contentType) {
       case "audio", "image" -> true;
-      case "text" -> switch (subType) {
-        case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
-        default -> false;
-      };
-      case "application" -> switch (subType) {
-        case "pdf", "json", "javascript", "xml" -> true;
-        default -> false;
-      };
+      case "text" ->
+          switch (subType) {
+            case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
+            default -> false;
+          };
+      case "application" ->
+          switch (subType) {
+            case "pdf", "json", "javascript", "xml" -> true;
+            default -> false;
+          };
       default -> false;
     };
   }
@@ -493,8 +455,6 @@ public class TransferableHelper extends TransferHandler {
                 "TransferableHelper.warning.tokensAddedAndExcluded",
                 tokens.size(), // $NON-NLS-1$
                 missingTokens);
-        // if (EventQueue.isDispatchThread())
-        // System.out.println("Yes, we are on the EDT already.");
         SwingUtilities.invokeLater(() -> MapTool.showWarning(message));
       } // endif
     } catch (IOException e) {
@@ -549,47 +509,33 @@ public class TransferableHelper extends TransferHandler {
    * @param t Transferable to check
    * @return a list of all DataFlavor objects that succeeded
    */
+  // The result is always ignored, this method is just used for informational logging now.
   private static List<DataFlavor> whichOnesWork(Transferable t) {
     List<DataFlavor> worked = new ArrayList<DataFlavor>();
 
-    // On OSX Java6, any data flavor that uses java.nio.ByteBuffer or an array of bytes
-    // appears to output the object to the console (via System.out?). Geez, can't
-    // Apple even run a frakkin' grep against their code before releasing it?!
-    // PrintStream old = null;
-    // if (MapTool.MAC_OS_X) {
-    // old = System.out;
-    // setOnOff(null);
-    // }
     for (DataFlavor flavor : t.getTransferDataFlavors()) {
       Object result = null;
       try {
         result = t.getTransferData(flavor);
       } catch (UnsupportedFlavorException ufe) {
-        if (log.isDebugEnabled()) log.debug("Failed (UFE):  " + flavor.toString()); // $NON-NLS-1$
+        log.debug("Failed (UFE):  {}", flavor.toString(), ufe);
       } catch (IOException ioe) {
-        if (log.isDebugEnabled()) log.debug("Failed (IOE):  " + flavor.toString()); // $NON-NLS-1$
+        log.debug("Failed (IOE):  {}", flavor.toString(), ioe);
       } catch (Exception e) {
-        // System.err.println(e);
+        log.error("Unable to get transfer data", e);
       }
       if (result != null) {
         for (Class<?> type : validTypes) {
           if (type.equals(result.getClass())) {
             worked.add(flavor);
-            if (log.isInfoEnabled())
-              log.info("Possible: " + flavor.toString() + " (" + result + ")"); // $NON-NLS-1$
+            log.info("Possible: {} ({})", flavor, result);
             break;
           }
         }
       }
     }
-    // if (MapTool.MAC_OS_X)
-    // setOnOff(old);
     return worked;
   }
-
-  // private static void setOnOff(PrintStream old) {
-  // System.setOut(old);
-  // }
 
   private static final Class<?> validTypes[] = {
     java.lang.String.class, java.net.URL.class, java.util.List.class, java.awt.Image.class,
@@ -602,12 +548,9 @@ public class TransferableHelper extends TransferHandler {
   @Override
   public boolean importData(JComponent comp, Transferable t) {
     if (tokens != null) {
-      // tokens.clear(); // will not help with memory cleanup and we may see unmodifiable lists here
       tokens = null;
     }
     if (configureTokens != null) {
-      // configureTokens.clear(); // will not help with memory cleanup and we may see unmodifiable
-      // lists here
       configureTokens = null;
     }
     if (log.isInfoEnabled()) whichOnesWork(t);
@@ -616,7 +559,6 @@ public class TransferableHelper extends TransferHandler {
     if (assets != null) {
       tokens = new ArrayList<Token>(assets.size());
       configureTokens = new ArrayList<Boolean>(assets.size());
-      // Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       for (Object working : assets) {
         if (working instanceof Asset asset) {
           if (asset.getType() == Type.MTLIB) {
@@ -640,14 +582,12 @@ public class TransferableHelper extends TransferHandler {
             }
           } else {
             Token token = new Token(asset.getName(), asset.getMD5Key());
-            // token.setName(MapToolUtil.nextTokenId(zone, token));
             tokens.add(token);
             // A token from an image asset needs additional configuration.
             configureTokens.add(true);
           }
         } else if (working instanceof Token) {
           Token token = new Token((Token) working);
-          // token.setName(MapToolUtil.nextTokenId(zone, token));
           tokens.add(token);
           // A token from an .rptok file is already fully configured.
           configureTokens.add(false);
@@ -679,30 +619,40 @@ public class TransferableHelper extends TransferHandler {
     return tokens != null;
   }
 
-  /** @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent) */
+  /**
+   * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
+   */
   @Override
   public int getSourceActions(JComponent c) {
     return NONE;
   }
 
-  /** @return Getter for tokens */
+  /**
+   * @return Getter for tokens
+   */
   public List<Token> getTokens() {
     return tokens;
   }
 
-  /** @param tokens Setter for tokens */
+  /**
+   * @param tokens Setter for tokens
+   */
   public void setTokens(List<Token> tokens) {
     // This doesn't appear to be called from anywhere; this class simply makes assignments
     // to the instance member variable. Remove this method?
     this.tokens = tokens;
   }
 
-  /** @return Getter for configureTokens */
+  /**
+   * @return Getter for configureTokens
+   */
   public List<Boolean> getConfigureTokens() {
     return configureTokens;
   }
 
-  /** @param configureTokens Setter for configureTokens */
+  /**
+   * @param configureTokens Setter for configureTokens
+   */
   public void setConfigureTokens(List<Boolean> configureTokens) {
     this.configureTokens = configureTokens;
   }

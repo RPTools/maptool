@@ -15,6 +15,13 @@
 package net.rptools.maptool.model;
 
 public class CampaignFactory {
+  /**
+   * @return A new campaign with no zones or properties.
+   */
+  public static Campaign createEmptyCampaign() {
+    return new Campaign();
+  }
+
   public static Campaign createBasicCampaign() {
     Campaign campaign = new Campaign();
     campaign.initDefault();

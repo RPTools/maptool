@@ -14,68 +14,33 @@
  */
 package net.rptools.maptool.model.drawing;
 
-import com.google.protobuf.StringValue;
-import java.awt.Graphics2D;
-import java.awt.geom.Area;
+import java.awt.Point;
 import java.awt.geom.Ellipse2D;
+import java.io.Serial;
+import java.io.Serializable;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.server.Mapper;
-import net.rptools.maptool.server.proto.drawing.DrawableDto;
-import net.rptools.maptool.server.proto.drawing.OvalDrawableDto;
 
-/** An oval. */
-public class Oval extends Rectangle {
-  /**
-   * @param x the x offset
-   * @param y the y offset
-   * @param width the width of the oval
-   * @param height the height of the oval
-   */
-  public Oval(int x, int y, int width, int height) {
-    super(x, y, width, height);
-  }
+/**
+ * An oval.
+ *
+ * @deprecated This is a legacy class not currently in use. It is kept here in case it has been
+ *     serialized in any existing campaigns. It used to extend {@link Rectangle} and {@link
+ *     AbstractDrawing} but is now just a holder for data and will replace itself with a {@link
+ *     ShapeDrawable}.
+ */
+@Deprecated
+public final class Oval implements Serializable {
+  private GUID id;
+  private String layer;
+  private String name;
+  private Point startPoint;
+  private Point endPoint;
 
-  public Oval(GUID id, int x, int y, int width, int height) {
-    super(id, x, y, width, height);
-  }
-
-  @Override
-  protected void draw(Graphics2D g) {
-    int minX = Math.min(startPoint.x, endPoint.x);
-    int minY = Math.min(startPoint.y, endPoint.y);
-
-    int width = Math.abs(startPoint.x - endPoint.x);
-    int height = Math.abs(startPoint.y - endPoint.y);
-
-    g.drawOval(minX, minY, width, height);
-  }
-
-  @Override
-  protected void drawBackground(Graphics2D g) {
-    int minX = Math.min(startPoint.x, endPoint.x);
-    int minY = Math.min(startPoint.y, endPoint.y);
-
-    int width = Math.abs(startPoint.x - endPoint.x);
-    int height = Math.abs(startPoint.y - endPoint.y);
-
-    g.fillOval(minX, minY, width, height);
-  }
-
-  @Override
-  public Area getArea() {
-    java.awt.Rectangle r = getBounds();
-    return new Area(new Ellipse2D.Double(r.x, r.y, r.width, r.height));
-  }
-
-  public DrawableDto toDto() {
-    var dto =
-        OvalDrawableDto.newBuilder()
-            .setId(getId().toString())
-            .setStartPoint(Mapper.map(getStartPoint()))
-            .setEndPoint(Mapper.map(getEndPoint()));
-
-    if (getName() != null) dto.setName(StringValue.of(getName()));
-
-    return DrawableDto.newBuilder().setOvalDrawable(dto).build();
+  @Serial
+  private Object readResolve() {
+    var ellipse =
+        new Ellipse2D.Double(
+            startPoint.x, startPoint.y, endPoint.x - startPoint.x, endPoint.y - startPoint.y);
+    return new ShapeDrawable(id, ellipse, true);
   }
 }

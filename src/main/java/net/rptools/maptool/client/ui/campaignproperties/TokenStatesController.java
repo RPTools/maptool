@@ -14,11 +14,7 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -26,52 +22,22 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
-import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
-import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.token.ColorDotTokenOverlay;
-import net.rptools.maptool.client.ui.token.CornerImageTokenOverlay;
-import net.rptools.maptool.client.ui.token.CrossTokenOverlay;
-import net.rptools.maptool.client.ui.token.DiamondTokenOverlay;
-import net.rptools.maptool.client.ui.token.FlowColorDotTokenOverlay;
-import net.rptools.maptool.client.ui.token.FlowColorSquareTokenOverlay;
-import net.rptools.maptool.client.ui.token.FlowDiamondTokenOverlay;
-import net.rptools.maptool.client.ui.token.FlowImageTokenOverlay;
-import net.rptools.maptool.client.ui.token.FlowTriangleTokenOverlay;
-import net.rptools.maptool.client.ui.token.FlowYieldTokenOverlay;
-import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
-import net.rptools.maptool.client.ui.token.OTokenOverlay;
-import net.rptools.maptool.client.ui.token.ShadedTokenOverlay;
-import net.rptools.maptool.client.ui.token.TriangleTokenOverlay;
-import net.rptools.maptool.client.ui.token.XTokenOverlay;
-import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
+import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
-import net.rptools.maptool.util.StringUtil;
 
 /**
  * This controller will handle all of the components on the States panel of the {@link
@@ -233,6 +199,7 @@ public class TokenStatesController
     GridTriangle,
     GridSquare
   }
+
   // the order needs to match the OverlayType enum
   private static final List<String> types =
       List.of(
@@ -256,10 +223,10 @@ public class TokenStatesController
   // the order needs to match the AbstractTemplate.Quadrant enum
   private static final List<String> corners =
       List.of(
-          "CampaignPropertiesDialog.combo.states.corner.topRight",
-          "CampaignPropertiesDialog.combo.states.corner.topLeft",
-          "CampaignPropertiesDialog.combo.states.corner.bottomRight",
-          "CampaignPropertiesDialog.combo.states.corner.bottomLeft");
+          "position.corner.topRight",
+          "position.corner.topLeft",
+          "position.corner.bottomRight",
+          "position.corner.bottomLeft");
 
   /**
    * Set up the button listeners, spinner models, list cell renderer and selection listeners
@@ -293,9 +260,7 @@ public class TokenStatesController
         .getSpinner(FLOW_GRID)
         .setModel(new SpinnerListModel(new String[] {"2x2", "3x3", "4x4", "5x5", "8x8"}));
     panel.getSpinner(OPACITY).setModel(new SpinnerNumberModel(100, 1, 100, 5));
-    panel
-        .getSpinner(INDEX)
-        .setModel(new SpinnerNumberModel(0, 0, 10000, 1)); // FIXME set proper upper limit?
+    panel.getSpinner(INDEX).setModel(new SpinnerNumberModel(0, 0, 10000, 1));
     panel.getSpinner(INDEX).addChangeListener(this);
     panel.getList(STATES).setCellRenderer(new StateListRenderer());
     panel.getList(STATES).addListSelectionListener(this);
@@ -308,7 +273,9 @@ public class TokenStatesController
     changedUpdate(null);
   }
 
-  /** @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent) */
+  /**
+   * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+   */
   @Override
   public void itemStateChanged(ItemEvent e) {
     changedUpdate(null);
@@ -334,7 +301,6 @@ public class TokenStatesController
           model.addElement(overlay);
           getNames().add(overlay.getName());
           selected = model.size() - 1;
-          System.out.println("selected = " + selected);
         } else {
           // model.addElement(overlay);
           // Jamz: Lets insert the new state at the current index instead of at the bottom, we'll
@@ -376,12 +342,13 @@ public class TokenStatesController
             || !imageFile.exists()
             || !imageFile.canRead()) return;
         formPanel.getTextComponent(IMAGE).setText(imageFile.getPath());
-        AppPreferences.setLoadDir(imageFile.getParentFile());
+        AppPreferences.loadDirectory.set(imageFile.getParentFile());
       } // endif
 
       // Change the enabled data components.
     } else if (TYPE.equals(name)) {
       enableDataComponents();
+      changedUpdate(null);
 
       // Update the selected overlay
     } else if (UPDATE.equals(name)) {
@@ -498,13 +465,17 @@ public class TokenStatesController
         .setEnabled(hasName && hasUniqueUpdateName && selectedState != null && hasShow);
   }
 
-  /** @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent) */
+  /**
+   * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
+   */
   @Override
   public void insertUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
 
-  /** @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent) */
+  /**
+   * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
+   */
   @Override
   public void removeUpdate(DocumentEvent e) {
     changedUpdate(e);
@@ -597,6 +568,7 @@ public class TokenStatesController
       // Set the type and change components
       formPanel.getComboBox(TYPE).setSelectedIndex(type.ordinal());
       enableDataComponents();
+      changedUpdate(null);
     }
   }
 
@@ -839,12 +811,16 @@ public class TokenStatesController
     return width;
   }
 
-  /** @return Getter for names */
+  /**
+   * @return Getter for names
+   */
   public Set<String> getNames() {
     return names;
   }
 
-  /** @param names Setter for names */
+  /**
+   * @param names Setter for names
+   */
   public void setNames(Set<String> names) {
     this.names = names;
   }

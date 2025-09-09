@@ -15,23 +15,17 @@
 package net.rptools.maptool.model;
 
 import com.google.protobuf.BoolValue;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.ToolbarPanel;
-import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
 import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
@@ -40,6 +34,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.proto.CampaignDto;
 
 /**
@@ -50,10 +45,7 @@ import net.rptools.maptool.server.proto.CampaignDto;
  * <p>Roughly this is equivalent to multiple tabs that will appear on the client and all of the
  * images that will appear on it (and also campaign macro buttons).
  */
-public class Campaign {
-  /** The only built-in property type is "Basic". Any others are user-defined. */
-  public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
-
+public class Campaign implements Serializable {
   private GUID id = new GUID();
 
   /** The {@link Zone}s that make up this {@code Campaign}. */
@@ -62,23 +54,18 @@ public class Campaign {
 
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
-  @SuppressWarnings("unused")
-  private static transient ExportDialog exportInfo =
-      null; // transient so it is not written out; entire element ignore when reading
-
   private static ExportDialog exportDialog =
       ExportDialog
           .getInstance(); // this is the new export dialog (different name for upward compatibility)
-  private static CampaignExportDialog campaignExportDialog = CampaignExportDialog.getInstance();
 
   // Static data isn't written to the campaign file when saved; these two fields hold the output
   // location and type, and the
   // settings of all JToggleButton objects (JRadioButtons and JCheckBoxes).
-  private Location exportLocation; // FJE 2011-01-14
+  private Location exportLocation;
   private Map<String, Boolean> exportSettings =
       new HashMap<>(); // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
 
-  private CampaignProperties campaignProperties = new CampaignProperties();
+  private @Nonnull CampaignProperties campaignProperties = new CampaignProperties();
   private transient boolean isBeingSerialized;
 
   // campaign macro button properties. these are saved along with the campaign.
@@ -95,14 +82,13 @@ public class Campaign {
 
   // DEPRECATED: As of 1.3b20 these are now in campaignProperties, but are here for backward
   // compatibility
-  private Map<String, List<TokenProperty>> tokenTypeMap;
-  private List<String> remoteRepositoryList;
+  @Deprecated private Map<String, List<TokenProperty>> tokenTypeMap;
 
-  private Map<String, Map<GUID, LightSource>> lightSourcesMap;
-  private Map<String, LookupTable> lookupTableMap;
+  @Deprecated private List<String> remoteRepositoryList;
 
-  // DEPRECATED: as of 1.3b19 here to support old serialized versions
-  // private Map<GUID, LightSource> lightSourceMap;
+  @Deprecated private Map<String, Map<GUID, LightSource>> lightSourcesMap;
+
+  @Deprecated private Map<String, LookupTable> lookupTableMap;
 
   /**
    * This flag indicates whether the manual fog tools have been used in this campaign while a server
@@ -118,6 +104,9 @@ public class Campaign {
    */
   private Boolean hasUsedFogToolbar = null;
 
+  /** When a player connects to a server, this will be the map they are sent to at first. */
+  private @Nullable GUID landingMapId = null;
+
   public Campaign() {
     name = "Default";
     macroButtonLastIndex = 0;
@@ -126,15 +115,21 @@ public class Campaign {
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
   }
 
+  public void setLandingMapId(@Nullable GUID zoneId) {
+    // Doesn't really matter if it belongs to {@link #zones}, that can be checked at lookup time.
+    this.landingMapId = zoneId;
+  }
+
+  public @Nullable GUID getLandingMapId() {
+    return this.landingMapId;
+  }
+
+  @Serial
   private Object readResolve() {
     if (exportSettings == null) {
       exportSettings = new HashMap<>();
     }
 
-    return this;
-  }
-
-  private void checkCampaignPropertyConversion() {
     if (campaignProperties == null) {
       campaignProperties = new CampaignProperties();
     }
@@ -147,17 +142,18 @@ public class Campaign {
       remoteRepositoryList = null;
     }
     if (lightSourcesMap != null) {
-      campaignProperties.setLightSourcesMap(lightSourcesMap);
+      campaignProperties.setLightSources(CategorizedLights.copyOf(lightSourcesMap));
       lightSourcesMap = null;
     }
     if (lookupTableMap != null) {
       campaignProperties.setLookupTableMap(lookupTableMap);
       lookupTableMap = null;
     }
+
+    return this;
   }
 
   public List<String> getRemoteRepositoryList() {
-    checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
     return campaignProperties.getRemoteRepositoryList();
   }
 
@@ -169,6 +165,7 @@ public class Campaign {
   public Campaign(Campaign campaign) {
     id = campaign.getId();
     name = campaign.getName();
+    landingMapId = campaign.landingMapId;
 
     /*
      * Don't forget that since these are new zones AND new tokens created here from the old one,
@@ -230,19 +227,41 @@ public class Campaign {
     return list;
   }
 
-  public List<String> getSightTypes() {
-    List<String> list = new ArrayList<String>(getSightTypeMap().keySet());
-    Collections.sort(list);
-    return list;
+  /**
+   * Returns the default Stat Sheet ID for the specified token property type.
+   *
+   * @param tokenProperty the token property type to get the sheet ID for.
+   * @return the properties of the Stat Sheet.
+   */
+  public StatSheetProperties getTokenTypeDefaultSheetId(String tokenProperty) {
+    return campaignProperties.getTokenTypeDefaultStatSheet(tokenProperty);
   }
 
-  public void setSightTypes(List<SightType> typeList) {
-    checkCampaignPropertyConversion();
-    Map<String, SightType> map = new HashMap<String, SightType>();
-    for (SightType sightType : typeList) {
-      map.put(sightType.getName(), sightType);
-    }
-    campaignProperties.setSightTypeMap(map);
+  /**
+   * Sets the default Stat Sheet ID for the specified token property type.
+   *
+   * @param tokenProperty the token property type to set the sheet ID of.
+   * @param sheetId the Stat Sheet properties.
+   */
+  public void setTokenTypeDefaultSheetId(String tokenProperty, StatSheetProperties sheetId) {
+    campaignProperties.setTokenTypeDefaultStatSheet(tokenProperty, sheetId);
+  }
+
+  /**
+   * Sets the default property type for tokens.
+   *
+   * @param def the default property type.
+   */
+  public void setDefaultTokenPropertyType(String def) {
+    campaignProperties.setDefaultTokenPropertyType(def);
+  }
+
+  public Sights getSightTypes() {
+    return campaignProperties.getSightTypes();
+  }
+
+  public void setSightTypes(Sights sights) {
+    campaignProperties.setSightTypes(sights);
   }
 
   public List<TokenProperty> getTokenPropertyList(String tokenType) {
@@ -261,33 +280,22 @@ public class Campaign {
    * @return the {@link Map} of token types
    */
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
-    checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
     return campaignProperties.getTokenTypeMap();
   }
 
   /**
-   * Convenience method that calls {@link #getSightTypeMap()} and returns the value for the key
-   * <code>type</code>.
+   * Convenience method that calls {@link #getSightTypes()} and returns the value for the key <code>
+   * type</code>.
    *
    * @param type the String corresponding to the SightType.
    * @return the SightType.
    */
   public SightType getSightType(String type) {
-    return getSightTypeMap()
-        .get(
-            (type != null && getSightTypeMap().containsKey(type))
-                ? type
-                : campaignProperties.getDefaultSightType());
-  }
+    if (type == null) {
+      type = campaignProperties.getDefaultSightType();
+    }
 
-  /**
-   * Stub that calls <code>campaignProperties.getSightTypeMap()</code>.
-   *
-   * @return the {@link Map} of {@link SightType}s
-   */
-  public Map<String, SightType> getSightTypeMap() {
-    checkCampaignPropertyConversion();
-    return campaignProperties.getSightTypeMap();
+    return getSightTypes().get(type).orElse(null);
   }
 
   /**
@@ -296,7 +304,6 @@ public class Campaign {
    * @return the {@link Map} of {@link LookupTable}s types
    */
   public Map<String, LookupTable> getLookupTableMap() {
-    checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
     return campaignProperties.getLookupTableMap();
   }
 
@@ -307,41 +314,16 @@ public class Campaign {
   }
 
   /**
-   * Convenience method that iterates through {@link #getLightSourcesMap()} and returns the value
-   * for the key <code>lightSourceId</code>.
-   *
-   * @param lightSourceId the id to look for
-   * @return the {@link LightSource} or null if not found
-   */
-  public LightSource getLightSource(GUID lightSourceId) {
-
-    for (Map<GUID, LightSource> map : getLightSourcesMap().values()) {
-      if (map.containsKey(lightSourceId)) {
-        return map.get(lightSourceId);
-      }
-    }
-    return null;
-  }
-
-  /**
    * Stub that calls <code>campaignProperties.getLightSourcesMap()</code>.
    *
    * @return the {@link Map} of between lightSourceIds and {@link LightSource}s
    */
-  public Map<String, Map<GUID, LightSource>> getLightSourcesMap() {
-    checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
-    return campaignProperties.getLightSourcesMap();
+  public CategorizedLights getLightSources() {
+    return campaignProperties.getLightSources();
   }
 
-  /**
-   * Convenience method that calls {@link #getLightSourcesMap()} and returns the value for the key
-   * <code>type</code>.
-   *
-   * @param type the key
-   * @return the {@link Map} of between lightSourceIds and {@link LightSource}s for a specifict type
-   */
-  public Map<GUID, LightSource> getLightSourceMap(String type) {
-    return getLightSourcesMap().get(type);
+  public void setLightSources(CategorizedLights map) {
+    campaignProperties.setLightSources(map);
   }
 
   /**
@@ -361,12 +343,6 @@ public class Campaign {
   public Map<String, BarTokenOverlay> getTokenBarsMap() {
     return campaignProperties.getTokenBarsMap();
   }
-
-  /*
-   * public void setExportInfo(ExportInfo exportInfo) { this.exportInfo = exportInfo; }
-   *
-   * public ExportInfo getExportInfo() { return exportInfo; }
-   */
 
   public void setId(GUID id) {
     this.id = id;
@@ -388,9 +364,9 @@ public class Campaign {
    * Return the <code>Zone</code> with the given GUID.
    *
    * @param id the id to look for
-   * @return the Zone for the id
+   * @return the Zone for the id, or {@code null} if there is no such zone.
    */
-  public Zone getZone(GUID id) {
+  public @Nullable Zone getZone(GUID id) {
     return zones.get(id);
   }
 
@@ -664,22 +640,30 @@ public class Campaign {
     return assetSet;
   }
 
-  /** @return Getter for initiativeOwnerPermissions */
+  /**
+   * @return Getter for initiativeOwnerPermissions
+   */
   public boolean isInitiativeOwnerPermissions() {
     return campaignProperties != null && campaignProperties.isInitiativeOwnerPermissions();
   }
 
-  /** @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions */
+  /**
+   * @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions
+   */
   public void setInitiativeOwnerPermissions(boolean initiativeOwnerPermissions) {
     campaignProperties.setInitiativeOwnerPermissions(initiativeOwnerPermissions);
   }
 
-  /** @return Getter for initiativeMovementLock */
+  /**
+   * @return Getter for initiativeMovementLock
+   */
   public boolean isInitiativeMovementLock() {
     return campaignProperties != null && campaignProperties.isInitiativeMovementLock();
   }
 
-  /** @param initiativeMovementLock Setter for initiativeMovementLock */
+  /**
+   * @param initiativeMovementLock Setter for initiativeMovementLock
+   */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     campaignProperties.setInitiativeMovementLock(initiativeMovementLock);
   }
@@ -700,17 +684,14 @@ public class Campaign {
     campaignProperties.setInitiativePanelButtonsDisabled(disabled);
   }
 
-  /** @return Getter for characterSheets */
+  /**
+   * @return Getter for characterSheets
+   */
   public Map<String, String> getCharacterSheets() {
     return getCampaignProperties().getCharacterSheets();
   }
 
   public ExportDialog getExportDialog() {
-    // TODO: Ugh, what a kludge. This needs to be refactored so that the settings are separate from
-    // the dialog
-    // and easily accessible from elsewhere. I want separate XML files in the .cmpgn file eventually
-    // so that
-    // will be a good time to do this.
     exportDialog.setExportSettings(exportSettings);
     exportDialog.setExportLocation(exportLocation);
     return exportDialog;
@@ -722,10 +703,6 @@ public class Campaign {
     exportLocation = d.getExportLocation();
   }
 
-  public CampaignExportDialog getExportCampaignDialog() {
-    return campaignExportDialog;
-  }
-
   public void initDefault() {
     campaignProperties.initDefaultProperties();
   }
@@ -734,6 +711,7 @@ public class Campaign {
     var campaign = new Campaign();
     campaign.id = GUID.valueOf(dto.getId());
     campaign.name = dto.getName();
+    campaign.landingMapId = dto.hasLandingMapId() ? GUID.valueOf(dto.getLandingMapId()) : null;
     campaign.hasUsedFogToolbar =
         dto.hasHasUsedFogToolbar() ? dto.getHasUsedFogToolbar().getValue() : null;
     campaign.campaignProperties = CampaignProperties.fromDto(dto.getProperties());
@@ -759,6 +737,9 @@ public class Campaign {
     var dto = CampaignDto.newBuilder();
     dto.setId(id.toString());
     dto.setName(name);
+    if (landingMapId != null) {
+      dto.setLandingMapId(landingMapId.toString());
+    }
     if (hasUsedFogToolbar != null) {
       dto.setHasUsedFogToolbar(BoolValue.of(hasUsedFogToolbar));
     }
@@ -782,5 +763,24 @@ public class Campaign {
               .collect(Collectors.toList()));
     }
     return dto.build();
+  }
+
+  /**
+   * Renames the token types on existing tokens in the campaign.
+   *
+   * @param oldName the token type to rename from.
+   * @param newName the token type to rename to.
+   */
+  public void renameTokenTypes(@Nonnull String oldName, @Nonnull String newName) {
+    for (Zone zone : getZones()) {
+      zone.getAllTokens()
+          .forEach(
+              t -> {
+                if (oldName.equals(t.getPropertyType())) {
+                  t.setPropertyType(newName);
+                  zone.putToken(t);
+                }
+              });
+    }
   }
 }

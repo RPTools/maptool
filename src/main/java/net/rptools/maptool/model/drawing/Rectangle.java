@@ -14,101 +14,31 @@
  */
 package net.rptools.maptool.model.drawing;
 
-import com.google.protobuf.StringValue;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.geom.Area;
+import java.io.Serial;
+import java.io.Serializable;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.server.Mapper;
-import net.rptools.maptool.server.proto.drawing.DrawableDto;
-import net.rptools.maptool.server.proto.drawing.RectangleDrawableDto;
 
-/** An rectangle */
-public class Rectangle extends AbstractDrawing {
-  protected Point startPoint;
-  protected Point endPoint;
-  private transient java.awt.Rectangle bounds;
+/**
+ * A rectangle.
+ *
+ * @deprecated This is a legacy class not currently in use. It is kept here in case it has been
+ *     serialized in any existing campaigns. It used to extend {@link AbstractDrawing} but is now
+ *     just a holder for data and will replace itself with a {@link ShapeDrawable}.
+ */
+@Deprecated
+public final class Rectangle implements Serializable {
+  private GUID id;
+  private String layer;
+  private String name;
+  private Point startPoint;
+  private Point endPoint;
 
-  public Rectangle(GUID id, int startX, int startY, int endX, int endY) {
-    super(id);
-    startPoint = new Point(startX, startY);
-    endPoint = new Point(endX, endY);
-  }
-
-  public Rectangle(int startX, int startY, int endX, int endY) {
-    startPoint = new Point(startX, startY);
-    endPoint = new Point(endX, endY);
-  }
-
-  public Area getArea() {
-    return new Area(getBounds());
-  }
-
-  @Override
-  public DrawableDto toDto() {
-    var dto =
-        RectangleDrawableDto.newBuilder()
-            .setId(getId().toString())
-            .setLayer(getLayer().name())
-            .setStartPoint(Mapper.map(getStartPoint()))
-            .setEndPoint(Mapper.map(getEndPoint()));
-
-    if (getName() != null) dto.setName(StringValue.of(getName()));
-
-    return DrawableDto.newBuilder().setRectangleDrawable(dto).build();
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public java.awt.Rectangle getBounds() {
-    if (bounds == null) {
-      int x = Math.min(startPoint.x, endPoint.x);
-      int y = Math.min(startPoint.y, endPoint.y);
-      int width = Math.abs(endPoint.x - startPoint.x);
-      int height = Math.abs(endPoint.y - startPoint.y);
-
-      bounds = new java.awt.Rectangle(x, y, width, height);
-    }
-    return bounds;
-  }
-
-  public Point getStartPoint() {
-    return startPoint;
-  }
-
-  public Point getEndPoint() {
-    return endPoint;
-  }
-
-  @Override
-  protected void draw(Graphics2D g) {
-    int minX = Math.min(startPoint.x, endPoint.x);
-    int minY = Math.min(startPoint.y, endPoint.y);
-
-    int width = Math.abs(startPoint.x - endPoint.x);
-    int height = Math.abs(startPoint.y - endPoint.y);
-
-    Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-    g.drawRect(minX, minY, width, height);
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
-  }
-
-  @Override
-  protected void drawBackground(Graphics2D g) {
-    int minX = Math.min(startPoint.x, endPoint.x);
-    int minY = Math.min(startPoint.y, endPoint.y);
-
-    int width = Math.abs(startPoint.x - endPoint.x);
-    int height = Math.abs(startPoint.y - endPoint.y);
-
-    Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-    g.fillRect(minX, minY, width, height);
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+  @Serial
+  private Object readResolve() {
+    var rectangle =
+        new java.awt.Rectangle(
+            startPoint.x, startPoint.y, endPoint.x - startPoint.x, endPoint.y - startPoint.y);
+    return new ShapeDrawable(this.id, rectangle, false);
   }
 }

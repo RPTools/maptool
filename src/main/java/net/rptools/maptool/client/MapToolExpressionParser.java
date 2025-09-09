@@ -17,16 +17,17 @@ package net.rptools.maptool.client;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.rptools.common.expression.ExpressionParser;
+import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.script.javascript.*;
-import net.rptools.maptool.client.script.javascript.api.*;
+import net.rptools.maptool.client.script.javascript.JSMacro;
 import net.rptools.parser.Expression;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 
 public class MapToolExpressionParser extends ExpressionParser {
@@ -44,6 +45,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               ExecFunction.getInstance(),
               FindTokenFunctions.getInstance(),
               HasImpersonated.getInstance(),
+              IlluminationFunctions.getInstance(),
               InitiativeRoundFunction.getInstance(),
               InputFunction.getInstance(),
               IsTrustedFunction.getInstance(),
@@ -95,6 +97,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               DrawingGetterFunctions.getInstance(),
               DrawingSetterFunctions.getInstance(),
               DrawingMiscFunctions.getInstance(),
+              ShapeFunctions.getInstance(),
               ExportDataFunctions.getInstance(),
               RESTfulFunctions.getInstance(),
               HeroLabFunctions.getInstance(),
@@ -109,10 +112,16 @@ public class MapToolExpressionParser extends ExpressionParser {
               new PlayerFunctions(),
               new LibraryFunctions(),
               new DataFunctions(),
-              new ServerFunctions())
+              new ServerFunctions(),
+              new SlashCommands(),
+              new CallFunction())
           .collect(Collectors.toList());
 
-  public MapToolExpressionParser() {
+  public MapToolExpressionParser(
+      BiFunction<VariableResolver, String, Object> variableLookup,
+      BiFunction<VariableResolver, String, Object> propertyLookup,
+      java.util.function.Function<String, String> prompter) {
+    super(variableLookup, propertyLookup, prompter);
     super.getParser().addFunctions(mapToolParserFunctions);
   }
 
@@ -138,7 +147,6 @@ public class MapToolExpressionParser extends ExpressionParser {
 
     @Override
     public Expression parseExpression(String expression) throws ParserException {
-      // Expression exp = super.parseExpression(expression);
       Expression exp = expressionCache.getIfPresent(expression);
       if (exp == null) {
         exp = super.parseExpression(expression);

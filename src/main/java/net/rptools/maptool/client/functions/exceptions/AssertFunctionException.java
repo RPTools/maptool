@@ -14,10 +14,10 @@
  */
 package net.rptools.maptool.client.functions.exceptions;
 
-import net.rptools.parser.function.ParameterException;
+import net.rptools.parser.ParserException;
 
 /** Exception type thrown by assert() function, allowing a user-defined error message. */
-public class AssertFunctionException extends ParameterException {
+public class AssertFunctionException extends ParserException {
   public AssertFunctionException(String msg) {
     super(msg);
   }

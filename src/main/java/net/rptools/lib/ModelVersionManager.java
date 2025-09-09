@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.util.PersistenceUtil;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * An object of this class is created in the {@link PersistenceUtil} code for the purpose of

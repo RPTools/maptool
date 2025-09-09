@@ -25,6 +25,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import net.rptools.lib.transferable.ImageTransferableHandler;
+import net.rptools.maptool.client.AppPreferences;
 
 /**
  * This class will show a frame that accepts system drag-and-drop events it is a discovery tool
@@ -64,7 +65,9 @@ public class DropTargetInfo extends JFrame implements DropTargetListener {
     @SuppressWarnings("unused")
     Object handlerObj = null;
     try {
-      handlerObj = new ImageTransferableHandler().getTransferObject(dtde.getTransferable());
+      handlerObj =
+          new ImageTransferableHandler(AppPreferences.renderQuality::get)
+              .getTransferObject(dtde.getTransferable());
 
       System.out.println("DropAction:" + dtde.getDropAction());
       System.out.println("Source:" + dtde.getSource());
@@ -79,7 +82,9 @@ public class DropTargetInfo extends JFrame implements DropTargetListener {
       }
       System.out.println("--------------------");
       label.setIcon(
-          new ImageIcon(new ImageTransferableHandler().getTransferObject(dtde.getTransferable())));
+          new ImageIcon(
+              new ImageTransferableHandler(AppPreferences.renderQuality::get)
+                  .getTransferObject(dtde.getTransferable())));
     } catch (Exception e) {
       e.printStackTrace();
     }

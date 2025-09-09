@@ -18,7 +18,6 @@ import java.awt.GridLayout;
 import javax.swing.JComponent;
 import javax.swing.JSplitPane;
 import net.rptools.maptool.client.swing.AbstractPaintChooserPanel;
-import net.rptools.maptool.client.swing.ImagePanel;
 import net.rptools.maptool.client.swing.PaintChooser;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
@@ -28,7 +27,6 @@ import net.rptools.maptool.model.Asset;
 public class TextureChooserPanel extends AbstractPaintChooserPanel {
 
   private PaintChooser paintChooser;
-  private ImagePanel imagePanel;
 
   public TextureChooserPanel(PaintChooser paintChooser, AssetPanelModel model) {
     this(paintChooser, model, "textureChooser");
@@ -60,7 +58,7 @@ public class TextureChooserPanel extends AbstractPaintChooserPanel {
 
           paintChooser.setPaint(new AssetPaint(asset));
         });
-    assetPanel.setThumbSize(100);
+    assetPanel.setThumbSize(50);
 
     return assetPanel;
   }

@@ -16,31 +16,13 @@ package net.rptools.lib.io;
 
 import com.google.common.io.CharStreams;
 import com.thoughtworks.xstream.XStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
+import com.thoughtworks.xstream.security.ExplicitTypePermission;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -55,6 +37,9 @@ import net.rptools.lib.ModelVersionManager;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.util.PersistenceUtil;
+import org.apache.batik.ext.awt.geom.ExtendedGeneralPath;
+import org.apache.batik.ext.awt.geom.Polygon2D;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -113,7 +98,7 @@ public class PackedFile implements AutoCloseable {
   private static File tmpDir =
       new File(System.getProperty("java.io.tmpdir")); // Shared temporary directory
 
-  private final XStream xstream = FileUtil.getConfiguredXStream();
+  private final XStream xstream = PersistenceUtil.getConfiguredXStream();
 
   private final File file; // Original zip file
   private final File tmpFile; // Temporary directory where changes are kept
@@ -271,7 +256,9 @@ public class PackedFile implements AutoCloseable {
         if (obj instanceof Map<?, ?>) {
           propertyMap = (Map<String, Object>) obj;
           propsLoaded = true;
-        } else log.error("Unexpected class type for property object: " + obj.getClass().getName());
+        } else {
+          log.error("Unexpected class type for property object: " + obj.getClass().getName());
+        }
       } catch (NullPointerException npe) {
         log.error("Problem finding/converting property file", npe);
       }
@@ -284,127 +271,126 @@ public class PackedFile implements AutoCloseable {
   }
 
   public void save() throws IOException {
-    CodeTimer saveTimer;
-
     if (!dirty) {
       return;
     }
-    saveTimer = new CodeTimer("PackedFile.save");
-    saveTimer.setEnabled(log.isDebugEnabled());
 
-    // Create the new file
-    File newFile = new File(tmpDir, new GUID() + ".pak");
-    ZipOutputStream zout =
-        new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(newFile)));
-    zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
-    try {
-      saveTimer.start(CONTENT_FILE);
-      if (hasFile(CONTENT_FILE)) {
-        saveEntry(zout, CONTENT_FILE);
-      }
-      saveTimer.stop(CONTENT_FILE);
+    CodeTimer.using(
+        "PackedFile.save",
+        saveTimer -> {
+          // Create the new file
+          File newFile = new File(tmpDir, new GUID() + ".pak");
+          ZipOutputStream zout =
+              new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(newFile)));
+          zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
 
-      saveTimer.start(PROPERTY_FILE);
-      if (getPropertyMap().isEmpty()) {
-        removeFile(PROPERTY_FILE);
-      } else {
-        zout.putNextEntry(new ZipEntry(PROPERTY_FILE));
-        xstream.toXML(getPropertyMap(), zout);
-        zout.closeEntry();
-      }
-      saveTimer.stop(PROPERTY_FILE);
-
-      // Now put each file
-      saveTimer.start("addFiles");
-      addedFileSet.remove(CONTENT_FILE);
-      for (String path : addedFileSet) {
-        saveEntry(zout, path);
-      }
-      saveTimer.stop("addFiles");
-
-      // Copy the rest of the zip entries over
-      saveTimer.start("copyFiles");
-      if (file.exists()) {
-        Enumeration<? extends ZipEntry> entries = zFile.entries();
-        while (entries.hasMoreElements()) {
-          ZipEntry entry = entries.nextElement();
-          if (!entry.isDirectory()
-              && !addedFileSet.contains(entry.getName())
-              && !removedFileSet.contains(entry.getName())
-              && !CONTENT_FILE.equals(entry.getName())
-              && !PROPERTY_FILE.equals(entry.getName())) {
-            // if (entry.getName().endsWith(".png") ||
-            // entry.getName().endsWith(".gif") ||
-            // entry.getName().endsWith(".jpeg"))
-            // zout.setLevel(Deflater.NO_COMPRESSION); // none needed for images as they are already
-            // compressed
-            // else
-            // zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
-            zout.putNextEntry(entry);
-            try (InputStream is = getFileAsInputStream(entry.getName())) {
-              // When copying, always use an InputStream
-              IOUtils.copy(is, zout);
+          try {
+            saveTimer.start(CONTENT_FILE);
+            if (hasFile(CONTENT_FILE)) {
+              saveEntry(zout, CONTENT_FILE);
             }
-            zout.closeEntry();
-          } else if (entry.isDirectory()) {
-            zout.putNextEntry(entry);
-            zout.closeEntry();
+            saveTimer.stop(CONTENT_FILE);
+
+            saveTimer.start(PROPERTY_FILE);
+            if (getPropertyMap().isEmpty()) {
+              removeFile(PROPERTY_FILE);
+            } else {
+              zout.putNextEntry(new ZipEntry(PROPERTY_FILE));
+              xstream.toXML(getPropertyMap(), zout);
+              zout.closeEntry();
+            }
+            saveTimer.stop(PROPERTY_FILE);
+
+            // Now put each file
+            saveTimer.start("addFiles");
+            addedFileSet.remove(CONTENT_FILE);
+            for (String path : addedFileSet) {
+              saveEntry(zout, path);
+            }
+            saveTimer.stop("addFiles");
+
+            // Copy the rest of the zip entries over
+            saveTimer.start("copyFiles");
+            if (file.exists()) {
+              Enumeration<? extends ZipEntry> entries = zFile.entries();
+              while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                if (!entry.isDirectory()
+                    && !addedFileSet.contains(entry.getName())
+                    && !removedFileSet.contains(entry.getName())
+                    && !CONTENT_FILE.equals(entry.getName())
+                    && !PROPERTY_FILE.equals(entry.getName())) {
+                  zout.putNextEntry(entry);
+                  try (InputStream is = getFileAsInputStream(entry.getName())) {
+                    // When copying, always use an InputStream
+                    IOUtils.copy(is, zout);
+                  }
+                  zout.closeEntry();
+                } else if (entry.isDirectory()) {
+                  zout.putNextEntry(entry);
+                  zout.closeEntry();
+                }
+              }
+            }
+            try {
+              if (zFile != null) {
+                zFile.close();
+              }
+            } catch (IOException e) {
+              // ignore close exception
+            }
+            zFile = null;
+            saveTimer.stop("copyFiles");
+
+            saveTimer.start("close");
+            IOUtils.closeQuietly(zout);
+            zout = null;
+            saveTimer.stop("close");
+
+            // Backup the original
+            saveTimer.start("backup");
+            File backupFile = new File(tmpDir, new GUID() + ".mv");
+            if (file.exists()) {
+              backupFile.delete(); // Always delete the old backup file first; renameTo() is very
+              // platform-dependent
+              if (!file.renameTo(backupFile)) {
+                saveTimer.start("backup file");
+                FileUtil.copyFile(file, backupFile);
+                file.delete();
+                saveTimer.stop("backup file");
+              }
+            }
+            saveTimer.stop("backup");
+
+            saveTimer.start("finalize");
+            // Finalize
+            if (!newFile.renameTo(file)) {
+              saveTimer.start("backup newFile");
+              FileUtil.copyFile(newFile, file);
+              saveTimer.stop("backup newFile");
+            }
+            if (backupFile.exists()) {
+              backupFile.delete();
+            }
+            saveTimer.stop("finalize");
+
+            dirty = false;
+          } finally {
+            saveTimer.start("cleanup");
+            try {
+              if (zFile != null) {
+                zFile.close();
+              }
+            } catch (IOException e) {
+              // ignore close exception
+            }
+            if (newFile.exists()) {
+              newFile.delete();
+            }
+            IOUtils.closeQuietly(zout);
+            saveTimer.stop("cleanup");
           }
-        }
-      }
-      try {
-        if (zFile != null) zFile.close();
-      } catch (IOException e) {
-        // ignore close exception
-      }
-      zFile = null;
-      saveTimer.stop("copyFiles");
-
-      saveTimer.start("close");
-      IOUtils.closeQuietly(zout);
-      zout = null;
-      saveTimer.stop("close");
-
-      // Backup the original
-      saveTimer.start("backup");
-      File backupFile = new File(tmpDir, new GUID() + ".mv");
-      if (file.exists()) {
-        backupFile.delete(); // Always delete the old backup file first; renameTo() is very
-        // platform-dependent
-        if (!file.renameTo(backupFile)) {
-          saveTimer.start("backup file");
-          FileUtil.copyFile(file, backupFile);
-          file.delete();
-          saveTimer.stop("backup file");
-        }
-      }
-      saveTimer.stop("backup");
-
-      saveTimer.start("finalize");
-      // Finalize
-      if (!newFile.renameTo(file)) {
-        saveTimer.start("backup newFile");
-        FileUtil.copyFile(newFile, file);
-        saveTimer.stop("backup newFile");
-      }
-      if (backupFile.exists()) backupFile.delete();
-      saveTimer.stop("finalize");
-
-      dirty = false;
-    } finally {
-      saveTimer.start("cleanup");
-      try {
-        if (zFile != null) zFile.close();
-      } catch (IOException e) {
-        // ignore close exception
-      }
-      if (newFile.exists()) newFile.delete();
-      IOUtils.closeQuietly(zout);
-      saveTimer.stop("cleanup");
-
-      if (log.isDebugEnabled()) log.debug(saveTimer);
-      saveTimer = null;
-    }
+        });
   }
 
   private void saveEntry(ZipOutputStream zout, String path) throws IOException {
@@ -435,7 +421,9 @@ public class PackedFile implements AutoCloseable {
    * @return the <code>File</code> object for the temporary location
    */
   private File putFileImpl(String path) {
-    if (!tmpFile.exists()) tmpFile.getParentFile().mkdirs();
+    if (!tmpFile.exists()) {
+      tmpFile.getParentFile().mkdirs();
+    }
 
     // Have to store it in the exploded area since we can't directly save it to the zip
     File explodedFile = getExplodedFile(path);
@@ -505,8 +493,6 @@ public class PackedFile implements AutoCloseable {
    * Write the data from the given URL to the path in the ZIP file; as the data is presumed binary
    * there is no {@link Charset} conversion.
    *
-   * <p>FIXME Should the MIME type of the InputStream be checked??
-   *
    * @param path location within the ZIP file
    * @param url the url of the binary data to be written
    * @throws IOException If an I/O error occurs
@@ -518,10 +504,14 @@ public class PackedFile implements AutoCloseable {
   }
 
   public boolean hasFile(String path) throws IOException {
-    if (removedFileSet.contains(path)) return false;
+    if (removedFileSet.contains(path)) {
+      return false;
+    }
 
     File explodedFile = getExplodedFile(path);
-    if (explodedFile.exists()) return true;
+    if (explodedFile.exists()) {
+      return true;
+    }
 
     boolean ret = false;
     if (file.exists()) {
@@ -535,7 +525,9 @@ public class PackedFile implements AutoCloseable {
   private ZipFile zFile = null;
 
   private ZipFile getZipFile() throws IOException {
-    if (zFile == null) zFile = new ZipFile(file);
+    if (zFile == null) {
+      zFile = new ZipFile(file);
+    }
     return zFile;
   }
 
@@ -544,22 +536,17 @@ public class PackedFile implements AutoCloseable {
    * via the associated XStream object. (Because the XML is character data, this routine calls
    * {@link #getFileAsReader(String)} to handle character encoding.)
    *
-   * <p><b>TODO:</b> add {@link ModelVersionManager} support
-   *
    * @param path zip file archive path entry
    * @return Object created by translating the XML
    * @throws IOException If an I/O error occurs
    */
   public Object getFileObject(String path) throws IOException {
-    // This next line really should be routed thru the version manager...
-    // Update: a new XStreamConverter was created for the Asset object that
-    // never marshalls the image data, but *does* unmarshall it. This allows
-    // older pre-1.3.b64 campaigns to be loaded but only the newer format
-    // (with a separate image file) works on output.
     LineNumberReader r = getFileAsReader(path);
     try (r) {
-      xstream
-          .ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields
+      xstream.ignoreUnknownElements();
+      xstream.addPermission(
+          new ExplicitTypePermission(new Class[] {ExtendedGeneralPath.class, Polygon2D.class}));
+
       // added.
       var obj = xstream.fromXML(r);
       return obj;
@@ -687,8 +674,12 @@ public class PackedFile implements AutoCloseable {
   public LineNumberReader getFileAsReader(String path) throws IOException {
     File explodedFile = getExplodedFile(path);
     if ((!file.exists() && !tmpFile.exists() && !explodedFile.exists())
-        || removedFileSet.contains(path)) throw new FileNotFoundException(path);
-    if (explodedFile.exists()) return new LineNumberReader(FileUtil.getFileAsReader(explodedFile));
+        || removedFileSet.contains(path)) {
+      throw new FileNotFoundException(path);
+    }
+    if (explodedFile.exists()) {
+      return new LineNumberReader(FileUtil.getFileAsReader(explodedFile));
+    }
 
     ZipEntry entry = new ZipEntry(path);
     ZipFile zipFile = getZipFile();
@@ -698,12 +689,13 @@ public class PackedFile implements AutoCloseable {
       if (log.isDebugEnabled()) {
         String type;
         type = FileUtil.getContentType(in);
-        if (type == null) type = FileUtil.getContentType(explodedFile);
+        if (type == null) {
+          type = FileUtil.getContentType(explodedFile);
+        }
         log.debug("FileUtil.getContentType() returned " + (type != null ? type : "(null)"));
       }
       return new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (IOException ex) {
-      // Don't need to close 'in' since zipFile.close() will do so
       throw ex;
     }
   }
@@ -720,17 +712,22 @@ public class PackedFile implements AutoCloseable {
   public InputStream getFileAsInputStream(String path) throws IOException {
     File explodedFile = getExplodedFile(path);
     if ((!file.exists() && !tmpFile.exists() && !explodedFile.exists())
-        || removedFileSet.contains(path)) throw new FileNotFoundException(path);
-    if (explodedFile.exists()) return FileUtil.getFileAsInputStream(explodedFile);
+        || removedFileSet.contains(path)) {
+      throw new FileNotFoundException(path);
+    }
+    if (explodedFile.exists()) {
+      return FileUtil.getFileAsInputStream(explodedFile);
+    }
 
     ZipEntry entry = new ZipEntry(path);
     ZipFile zipFile = getZipFile();
 
     InputStream in = zipFile.getInputStream(entry);
-    if (in == null) throw new FileNotFoundException(path);
+    if (in == null) {
+      throw new FileNotFoundException(path);
+    }
     String type = FileUtil.getContentType(in);
-    if (log.isDebugEnabled() && type != null)
-      log.debug("FileUtil.getContentType() returned " + type);
+    log.debug("FileUtil.getContentType() returned {}", type);
     return in;
   }
 
@@ -743,17 +740,14 @@ public class PackedFile implements AutoCloseable {
       }
       zFile = null;
     }
-    if (tmpFile.exists()) FileUtil.delete(tmpFile);
+    if (tmpFile.exists()) {
+      FileUtil.delete(tmpFile);
+    }
     propertyMap.clear();
     addedFileSet.clear();
     removedFileSet.clear();
     propsLoaded = false;
     dirty = !file.exists();
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    close();
   }
 
   protected File getExplodedFile(String path) {
@@ -784,7 +778,9 @@ public class PackedFile implements AutoCloseable {
     return paths;
   }
 
-  /** @return Getter for file */
+  /**
+   * @return Getter for file
+   */
   public File getPackedFile() {
     return file;
   }
@@ -797,15 +793,20 @@ public class PackedFile implements AutoCloseable {
    * @throws IOException invalid zip file.
    */
   public URL getURL(String path) throws IOException {
-    if (!hasFile(path))
+    if (!hasFile(path)) {
       throw new FileNotFoundException("The path '" + path + "' is not in this packed file.");
+    }
     try {
       // Check for exploded first
       File explodedFile = getExplodedFile(path);
-      if (explodedFile.exists()) return explodedFile.toURI().toURL();
+      if (explodedFile.exists()) {
+        return explodedFile.toURI().toURL();
+      }
 
       // Otherwise it is in the zip file.
-      if (!path.startsWith("/")) path = "/" + path;
+      if (!path.startsWith("/")) {
+        path = "/" + path;
+      }
       String url = "jar:" + file.toURI().toURL().toExternalForm() + "!" + path;
       return new URL(url);
     } catch (MalformedURLException e) {

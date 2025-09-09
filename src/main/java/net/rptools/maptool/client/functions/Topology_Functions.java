@@ -31,7 +31,7 @@ import java.util.function.BiConsumer;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
@@ -41,6 +41,8 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * New class extending AbstractFunction to create new "Macro Functions" drawVBL, eraseVBL, getVBL
@@ -68,6 +70,14 @@ import net.rptools.parser.function.AbstractFunction;
  * Shape in Pit VBL
  *
  * <p>getPitVBL(jsonArray) :: Get the Pit VBL for a given area and return as array of points
+ *
+ * <p>drawCoverVBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a
+ * Shape in Cover VBL
+ *
+ * <p>eraseCoverVBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a
+ * Shape in Cover VBL
+ *
+ * <p>getCoverVBL(jsonArray) :: Get the Cover VBL for a given area and return as array of points
  *
  * <p>drawMBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a Shape in
  * MBL
@@ -101,6 +111,14 @@ import net.rptools.parser.function.AbstractFunction;
  * <p>transferPitVBL(direction[, delete][, tokenId] :: move or copy Pit VBL between token and Pit
  * VBL layer
  *
+ * <p>getTokenCoverVBL(tokenId) :: Get the Pit Cover attached to a token
+ *
+ * <p>setTokenCoverVBL(jsonArray, tokenId) :: Sets the token's Cover VBL to the information contains
+ * in the JSON Objects.
+ *
+ * <p>transferCoverVBL(direction[, delete][, tokenId] :: move or copy Cover VBL between token and
+ * Pit VBL layer
+ *
  * <p>getTokenMBL(tokenId) :: Get the MBL attached to a token
  *
  * <p>setTokenMBL(jsonArray, tokenId) :: Sets the token's MBL to the information contains in the
@@ -113,6 +131,7 @@ public class Topology_Functions extends AbstractFunction {
   private static final Topology_Functions instance = new Topology_Functions();
   private static final String[] paramTranslate = new String[] {"tx", "ty"};
   private static final String[] paramScale = new String[] {"sx", "sy"};
+  private static final Logger log = LogManager.getLogger(Topology_Functions.class);
 
   private Topology_Functions() {
     super(
@@ -127,20 +146,26 @@ public class Topology_Functions extends AbstractFunction {
         "drawPitVBL",
         "erasePitVBL",
         "getPitVBL",
+        "drawCoverVBL",
+        "eraseCoverVBL",
+        "getCoverVBL",
         "drawMBL",
         "eraseMBL",
         "getMBL",
         "getTokenVBL",
         "getTokenHillVBL",
         "getTokenPitVBL",
+        "getTokenCoverVBL",
         "getTokenMBL",
         "setTokenVBL",
         "setTokenHillVBL",
         "setTokenPitVBL",
+        "setTokenCoverVBL",
         "setTokenMBL",
         "transferVBL",
         "transferHillVBL",
         "transferPitVBL",
+        "transferCoverVBL",
         "transferMBL");
   }
 
@@ -160,22 +185,27 @@ public class Topology_Functions extends AbstractFunction {
         || functionName.equalsIgnoreCase("eraseHillVBL")
         || functionName.equalsIgnoreCase("drawPitVBL")
         || functionName.equalsIgnoreCase("erasePitVBL")
+        || functionName.equalsIgnoreCase("drawCoverVBL")
+        || functionName.equalsIgnoreCase("eraseCoverVBL")
         || functionName.equalsIgnoreCase("drawMBL")
         || functionName.equalsIgnoreCase("eraseMBL")) {
       childEvaluateDrawEraseTopology(functionName, parameters);
     } else if (functionName.equalsIgnoreCase("getVBL")
         || functionName.equalsIgnoreCase("getHillVBL")
         || functionName.equalsIgnoreCase("getPitVBL")
+        || functionName.equalsIgnoreCase("getCoverVBL")
         || functionName.equalsIgnoreCase("getMBL")) {
       return childEvaluateGetTopology(functionName, parameters);
     } else if (functionName.equalsIgnoreCase("getTokenVBL")
         || functionName.equalsIgnoreCase("getTokenHillVBL")
         || functionName.equalsIgnoreCase("getTokenPitVBL")
+        || functionName.equalsIgnoreCase("getTokenCoverVBL")
         || functionName.equalsIgnoreCase("getTokenMBL")) {
       return childEvaluateGetTokenTopology(resolver, functionName, parameters).toString();
     } else if (functionName.equalsIgnoreCase("setTokenVBL")
         || functionName.equalsIgnoreCase("setTokenHillVBL")
         || functionName.equalsIgnoreCase("setTokenPitVBL")
+        || functionName.equalsIgnoreCase("setTokenCoverVBL")
         || functionName.equalsIgnoreCase("setTokenMBL")) {
       var results = childEvaluateSetTokenTopology(resolver, functionName, parameters);
       if (results >= 0) {
@@ -184,6 +214,7 @@ public class Topology_Functions extends AbstractFunction {
     } else if (functionName.equalsIgnoreCase("transferVBL")
         || functionName.equalsIgnoreCase("transferHillVBL")
         || functionName.equalsIgnoreCase("transferPitVBL")
+        || functionName.equalsIgnoreCase("transferCoverVBL")
         || functionName.equalsIgnoreCase("transferMBL")) {
       childEvaluateTransferTopology(resolver, functionName, parameters);
     } else {
@@ -210,6 +241,7 @@ public class Topology_Functions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("eraseVBL")
         || functionName.equalsIgnoreCase("eraseHillVBL")
         || functionName.equalsIgnoreCase("erasePitVBL")
+        || functionName.equalsIgnoreCase("eraseCoverVBL")
         || functionName.equalsIgnoreCase("eraseMBL")) {
       erase = true;
     }
@@ -244,6 +276,9 @@ public class Topology_Functions extends AbstractFunction {
       } else if (functionName.equalsIgnoreCase("drawPitVBL")
           || functionName.equalsIgnoreCase("erasePitVBL")) {
         topologyType = Zone.TopologyType.PIT_VBL;
+      } else if (functionName.equalsIgnoreCase("drawCoverVBL")
+          || functionName.equalsIgnoreCase("eraseCoverVBL")) {
+        topologyType = Zone.TopologyType.COVER_VBL;
       } else {
         topologyType = Zone.TopologyType.MBL;
       }
@@ -258,7 +293,8 @@ public class Topology_Functions extends AbstractFunction {
             default -> null;
           };
       if (newArea != null) {
-        TokenVBL.renderTopology(renderer, newArea, erase, topologyType);
+        MapTool.serverCommand()
+            .updateMaskTopology(renderer.getZone(), newArea, erase, topologyType);
       }
     }
   }
@@ -273,6 +309,8 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.HILL_VBL;
     } else if (functionName.equalsIgnoreCase("getPitVBL")) {
       topologyType = Zone.TopologyType.PIT_VBL;
+    } else if (functionName.equalsIgnoreCase("getCoverVBL")) {
+      topologyType = Zone.TopologyType.COVER_VBL;
     } else {
       topologyType = Zone.TopologyType.MBL;
     }
@@ -315,7 +353,7 @@ public class Topology_Functions extends AbstractFunction {
     Area topologyArea = new Area();
     for (int i = 0; i < topologyArray.size(); i++) {
       JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
-      Area tempTopologyArea = getTopology(renderer, topologyObject, topologyType, functionName);
+      Area tempTopologyArea = getMaskTopology(renderer, topologyObject, topologyType, functionName);
       topologyArea.add(tempTopologyArea);
     }
 
@@ -345,6 +383,8 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.HILL_VBL;
     } else if (functionName.equalsIgnoreCase("getTokenPitVBL")) {
       topologyType = Zone.TopologyType.PIT_VBL;
+    } else if (functionName.equalsIgnoreCase("getTokenCoverVBL")) {
+      topologyType = Zone.TopologyType.COVER_VBL;
     } else {
       topologyType = Zone.TopologyType.MBL;
     }
@@ -354,24 +394,22 @@ public class Topology_Functions extends AbstractFunction {
       if (token == null) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.unknownToken",
-                "getTokenVBL",
-                parameters.get(0).toString()));
+                "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
       }
     } else if (parameters.size() == 0) {
       MapToolVariableResolver res = (MapToolVariableResolver) resolver;
       token = res.getTokenInContext();
       if (token == null) {
         throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+            I18N.getText("macro.function.general.noImpersonated", functionName));
       }
     } else {
       throw new ParserException(
-          I18N.getText("macro.function.general.tooManyParam", "getTokenVBL", 1, parameters.size()));
+          I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
     }
 
     JsonArray allShapes = new JsonArray();
-    Area topologyArea = token.getTopology(topologyType);
+    Area topologyArea = token.getMaskTopology(topologyType);
     if (topologyArea != null) {
       var areaShape = getAreaShapeObject(topologyArea);
       if (areaShape != null) {
@@ -394,6 +432,8 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.HILL_VBL;
     } else if (functionName.equalsIgnoreCase("setTokenPitVBL")) {
       topologyType = Zone.TopologyType.PIT_VBL;
+    } else if (functionName.equalsIgnoreCase("setTokenCoverVBL")) {
+      topologyType = Zone.TopologyType.COVER_VBL;
     } else {
       topologyType = Zone.TopologyType.MBL;
     }
@@ -437,7 +477,7 @@ public class Topology_Functions extends AbstractFunction {
     }
     if (token == null) {
       throw new ParserException(
-          I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+          I18N.getText("macro.function.general.noImpersonated", functionName));
     }
 
     Area tokenTopology = new Area();
@@ -472,15 +512,11 @@ public class Topology_Functions extends AbstractFunction {
 
           break;
         case NONE:
-          // Setting to null causes various token topology updating to be skipped during event
-          // handling. Leaving it as an empty Area fixed that.
-          // tokenTopology = null;
           break;
       }
     }
     // Replace with new topology
-    MapTool.serverCommand()
-        .updateTokenProperty(token, Token.Update.setTopology, topologyType, tokenTopology);
+    MapTool.serverCommand().setTokenMaskTopology(token, tokenTopology, topologyType);
 
     return results;
   }
@@ -488,7 +524,6 @@ public class Topology_Functions extends AbstractFunction {
   private void childEvaluateTransferTopology(
       VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     Token token = null;
 
     Zone.TopologyType topologyType;
@@ -498,6 +533,8 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.HILL_VBL;
     } else if (functionName.equalsIgnoreCase("transferPitVBL")) {
       topologyType = Zone.TopologyType.PIT_VBL;
+    } else if (functionName.equalsIgnoreCase("transferCoverVBL")) {
+      topologyType = Zone.TopologyType.COVER_VBL;
     } else {
       topologyType = Zone.TopologyType.MBL;
     }
@@ -525,9 +562,7 @@ public class Topology_Functions extends AbstractFunction {
       if (token == null) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.unknownToken",
-                "getTokenVBL",
-                parameters.get(0).toString()));
+                "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
       }
     } else {
       MapToolVariableResolver res = (MapToolVariableResolver) resolver;
@@ -558,18 +593,23 @@ public class Topology_Functions extends AbstractFunction {
       }
     }
 
+    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     if (topologyFromToken) {
-      TokenVBL.renderTopology(
-          renderer, token.getTransformedTopology(topologyType), false, topologyType);
+      var newMapTopology = token.getTransformedMaskTopology(zone, topologyType);
+      if (newMapTopology != null) {
+        MapTool.serverCommand().updateMaskTopology(zone, newMapTopology, false, topologyType);
+      }
       if (delete) {
-        token.setTopology(topologyType, null);
+        MapTool.serverCommand().setTokenMaskTopology(token, null, topologyType);
       }
     } else {
-      Area topology = TokenVBL.getTopology_underToken(renderer, token, topologyType);
-      token.setTopology(
-          topologyType, TokenVBL.getMapTopology_transformed(renderer, token, topologyType));
+      Area topology = TokenVBL.getTopology_underToken(zone, token, topologyType);
+
+      MapTool.serverCommand()
+          .setTokenMaskTopology(
+              token, TokenVBL.transformTopology_toToken(zone, token, topology), topologyType);
       if (delete) {
-        TokenVBL.renderTopology(renderer, topology, true, topologyType);
+        MapTool.serverCommand().updateMaskTopology(zone, topology, true, topologyType);
       }
     }
   }
@@ -732,8 +772,8 @@ public class Topology_Functions extends AbstractFunction {
           I18N.getText("macro.function.json.getInvalidEndIndex", funcname, 2, points.size()));
     }
     // Optional Parameters
-    int fill = getJSONint(topologyObject, "fill", funcname);
-    int close = getJSONint(topologyObject, "close", funcname);
+    boolean close = 0 != getJSONint(topologyObject, "close", funcname);
+    boolean fill = close && 0 != getJSONint(topologyObject, "fill", funcname);
     double r = getJSONdouble(topologyObject, "r", funcname);
     double facing = getJSONdouble(topologyObject, "facing", funcname);
     float t = (float) getJSONdouble(topologyObject, "thickness", funcname);
@@ -745,63 +785,43 @@ public class Topology_Functions extends AbstractFunction {
 
     Area area = null;
 
-    if (close == 0) {
-      // User requests for polygon to not be closed, so a Path is used
-      Path2D path = new Path2D.Double();
-      double lastX = 0;
-      double lastY = 0;
+    Path2D path = new Path2D.Double();
+    double lastX = 0;
+    double lastY = 0;
 
-      for (int i = 0; i < points.size(); i++) {
-        JsonObject point = points.get(i).getAsJsonObject();
+    String[] requiredPointParms = {"x", "y"};
+    for (int i = 0; i < points.size(); i++) {
+      JsonObject point = points.get(i).getAsJsonObject();
 
-        String requiredPointParms[] = {"x", "y"};
-        if (!jsonKeysExist(point, requiredPointParms, funcname)) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
-        }
-
-        double x = getJSONdouble(point, "x", funcname);
-        double y = getJSONdouble(point, "y", funcname);
-
-        if (path.getCurrentPoint() == null) {
-          path.moveTo(x, y);
-        } else if (!(lastX == x && lastY == y)) {
-          path.lineTo(x, y);
-          lastX = x;
-          lastY = y;
-        }
+      if (!jsonKeysExist(point, requiredPointParms, funcname)) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
       }
+
+      double x = getJSONdouble(point, "x", funcname);
+      double y = getJSONdouble(point, "y", funcname);
+
+      if (path.getCurrentPoint() == null) {
+        path.moveTo(x, y);
+      } else if (!(lastX == x && lastY == y)) {
+        path.lineTo(x, y);
+        lastX = x;
+        lastY = y;
+      }
+    }
+
+    if (close) {
+      path.closePath();
+    }
+    if (fill) {
+      area = new Area(path);
+    } else {
+      // A strokedShape will not be filled in and have a defined thickness.
       BasicStroke stroke =
           new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
       area = new Area(stroke.createStrokedShape(path));
-    } else {
-      // User requests for polygon to be closed, so a Polygon is used which is automatically
-      // closed
-      Polygon poly = new Polygon();
-
-      for (int i = 0; i < points.size(); i++) {
-        JsonObject point = points.get(i).getAsJsonObject();
-
-        String requiredPointParms[] = {"x", "y"};
-        if (!jsonKeysExist(point, requiredPointParms, funcname)) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
-        }
-
-        int x = getJSONint(point, "x", funcname);
-        int y = getJSONint(point, "y", funcname);
-
-        poly.addPoint(x, y);
-      }
-      // A strokedShape will not be filled in and have a defined thickness.
-      if (fill == 0) {
-        BasicStroke stroke =
-            new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-        area = new Area(stroke.createStrokedShape(poly));
-      } else {
-        area = new Area(poly);
-      }
     }
+
     AffineTransform atArea = new AffineTransform();
     applyTranslate(funcname, atArea, topologyObject, paramTranslate);
 
@@ -1046,7 +1066,7 @@ public class Topology_Functions extends AbstractFunction {
    * @return the topology area.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area getTopology(
+  private Area getMaskTopology(
       ZoneRenderer renderer,
       JsonObject topologyObject,
       Zone.TopologyType topologyType,
@@ -1135,7 +1155,7 @@ public class Topology_Functions extends AbstractFunction {
 
     // Note: when multiple modes are requested, the overlap between each topology is returned.
     var zone = renderer.getZone();
-    var topology = zone.getTopology(topologyType);
+    var topology = zone.getMaskTopology(topologyType);
     area.intersect(topology);
 
     return area;
@@ -1198,10 +1218,6 @@ public class Topology_Functions extends AbstractFunction {
     double[] moveTo = null;
 
     for (double[] currentElement : areaPoints) {
-      // 2 decimals is precise enough, we will deal in .5 pixels mostly.
-      currentElement[1] = Math.floor(currentElement[1] * 100) / 100;
-      currentElement[2] = Math.floor(currentElement[2] * 100) / 100;
-
       // Make the lines
       if (currentElement[0] == PathIterator.SEG_MOVETO) {
         if (defaultPos == null) {
@@ -1217,7 +1233,7 @@ public class Topology_Functions extends AbstractFunction {
       } else if (currentElement[0] == PathIterator.SEG_CLOSE) {
         pointConsumer.accept(moveTo[1], moveTo[2]);
       } else {
-        // System.out.println("in getAreaPoints(): found a curve, ignoring");
+        log.error("Found a curve in the path (segment type {}). Ignoring.", currentElement[0]);
       }
     }
   }

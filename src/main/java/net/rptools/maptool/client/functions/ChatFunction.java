@@ -18,15 +18,20 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import java.util.List;
 import java.util.regex.Pattern;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Chat related functions like broadcast()
@@ -34,22 +39,40 @@ import net.rptools.parser.function.AbstractFunction;
  * @author bdornauf
  */
 public class ChatFunction extends AbstractFunction {
+  private static final Logger log = LogManager.getLogger(ChatFunction.class);
+
   /** Ctor */
   public ChatFunction() {
-    super(1, 3, "broadcast");
+    super(1, 3, "broadcast", "chat");
   }
 
   /** The singleton instance. */
   private static final ChatFunction instance = new ChatFunction();
 
   /**
-   * Gets the Input instance.
+   * Gets the instance.
    *
    * @return the instance.
    */
   public static ChatFunction getInstance() {
     return instance;
   }
+
+  public static final List<String> chatBlackList =
+      List.of(
+          "alias",
+          "cc",
+          "color",
+          "clearaliases",
+          "loadaliases",
+          "savealiases",
+          "exp",
+          "exper",
+          "experiments",
+          "loadtokenstates",
+          "tsl",
+          "savetokenstates",
+          "tss");
 
   @Override
   public Object childEvaluate(
@@ -58,9 +81,50 @@ public class ChatFunction extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("broadcast")) {
       return broadcast(resolver, parameters);
+    } else if (functionName.equalsIgnoreCase("chat")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      return chat(parameters);
     } else {
-      throw new ParserException("Unknown function: " + functionName);
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
+  }
+
+  /**
+   * Function to expose "/" chat commands to use by macro.
+   *
+   * @param parameters command and arguments
+   * @return true on success
+   */
+  private Object chat(List<Object> parameters) throws ParserException {
+    String command = FunctionUtil.paramAsString("chat", parameters, 0, false).trim();
+    String content =
+        parameters.size() == 2
+            ? FunctionUtil.paramAsString("chat", parameters, 1, false).trim()
+            : "";
+    if (command.contains(" ")) { // split command if it contains a space
+      int index = command.indexOf(" ");
+      if (parameters.size() == 1) {
+        content = command.substring(index);
+        command = command.substring(0, index);
+      } else {
+        content = FunctionUtil.paramAsString("chat", parameters, 1, false);
+        content = command.substring(index) + " " + content; // concatenate with split command string
+        command = command.substring(0, index);
+      }
+    }
+    if (chatBlackList.contains(command.startsWith("/") ? command.substring(1) : command)) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", command));
+    }
+    if (!command.startsWith("/")) { // prepend an oblique if not present
+      command = "/" + command;
+    }
+    if (!content.isEmpty()) { // concatenate with content
+      command += " " + content;
+    }
+    MacroManager.executeMacro(command);
+    return "";
+    // [chat("me does something")]<br>[chat("me ","does something")]
   }
 
   /**
@@ -86,20 +150,22 @@ public class ChatFunction extends AbstractFunction {
             I18N.getText("macro.function.general.notEnoughParam", "broadcast", 1, 0));
       case 3:
         delim = param.get(2).toString();
-        // FALLTHRU
+      // FALLTHRU
       case 2:
         String temp = param.get(1).toString().trim();
-        if ("json".equals(delim) || temp.charAt(0) == '[')
+        if ("json".equals(delim) || temp.charAt(0) == '[') {
           jarray = JsonParser.parseString(temp).getAsJsonArray();
-        else {
+        } else {
           jarray = new JsonArray();
-          for (String t : temp.split(delim)) jarray.add(t.trim());
+          for (String t : StringUtil.split(temp, delim)) {
+            jarray.add(t.trim());
+          }
         }
         if (jarray.size() == 0) {
           return ""; // dont send to empty lists
         }
 
-        // FALLTHRU
+      // FALLTHRU
       case 1:
         message = checkForCheating(param.get(0).toString());
         if (message != null) {

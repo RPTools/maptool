@@ -26,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ImagePanel;
@@ -35,16 +36,19 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.util.PersistenceUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
   private static final long serialVersionUID = -4404834393567699280L;
+  private static final Logger log = LogManager.getLogger(LookupTablePanel.class);
 
   private ImagePanel imagePanel;
   private JDialog editorDialog;
   private EditLookupTablePanel editorPanel;
 
   public LookupTablePanel() {
-    super(new LookupTablePaneView().$$$getRootComponent$$$());
+    super(new LookupTablePaneView().getRootComponent());
     panelInit();
   }
 
@@ -277,8 +281,18 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
             e -> {
               JFileChooser chooser = MapTool.getFrame().getSaveTableFileChooser();
 
-              if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-                return;
+              boolean tryAgain = true;
+              while (tryAgain) {
+                if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                  return;
+                }
+                var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+                var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+                if (saveDir.startsWith(installDir)) {
+                  MapTool.showWarning("msg.warning.saveTableToInstallDir");
+                } else {
+                  tryAgain = false;
+                }
               }
               final File selectedFile = chooser.getSelectedFile();
               EventQueue.invokeLater(
@@ -305,7 +319,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
                       MapTool.showInformation(
                           I18N.getText("LookupTablePanel.info.saved", selectedFile.getName()));
                     } catch (IOException ioe) {
-                      ioe.printStackTrace();
+                      log.error("Error while saving table", ioe);
                       MapTool.showError("LookupTablePanel.error.saveFailed", ioe);
                     }
                   });

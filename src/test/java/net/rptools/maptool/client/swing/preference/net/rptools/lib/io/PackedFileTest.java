@@ -33,9 +33,10 @@ public class PackedFileTest {
   @Test
   public void emptySave(@TempDir File tempDir) throws IOException {
     File f = new File(tempDir, PACKED_TEST_FILE);
-    PackedFile pf = new PackedFile(f);
-    pf.save();
-    assertTrue(f.exists());
+    try (PackedFile pf = new PackedFile(f)) {
+      pf.save();
+      assertTrue(f.exists());
+    }
   }
 
   @Test

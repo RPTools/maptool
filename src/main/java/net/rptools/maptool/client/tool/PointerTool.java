@@ -24,6 +24,7 @@ import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
 import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -32,10 +33,15 @@ import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.swing.*;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.TokenHoverEnter;
+import net.rptools.maptool.client.events.TokenHoverExit;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -44,20 +50,17 @@ import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Pointer.Type;
-import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.util.GraphicsUtil;
+import net.rptools.maptool.util.HTMLUtil;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.TokenUtil;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This is the pointer tool from the top-level of the toolbar. It allows tokens to be selected and
@@ -66,28 +69,24 @@ import org.apache.logging.log4j.Logger;
  * held down (possibly in combination with Shift or Ctrl).
  */
 public class PointerTool extends DefaultTool {
+
   private static final long serialVersionUID = 8606021718606275084L;
-  private static final Logger log = LogManager.getLogger(PointerTool.class);
   private BufferedImage panelTexture = RessourceManager.getImage(Images.TEXTURE_PANEL);
 
   private boolean isShowingTokenStackPopup;
   private boolean isShowingPointer;
-  private boolean isDraggingToken;
   private boolean isNewTokenSelected;
   private boolean isDrawingSelectionBox;
   private boolean isSpaceDown;
-  private boolean isMovingWithKeys;
   private Rectangle selectionBoundBox;
 
   // Hovers
   private boolean isShowingHover;
-  private Area hoverTokenBounds;
   private String hoverTokenNotes;
 
   // Track token interactions to hide statsheets when doing other stuff
   private boolean mouseButtonDown = false;
 
-  private Token tokenBeingDragged;
   private Token tokenUnderMouse;
   private Token markerUnderMouse;
   private int keysDown; // used to record whether Shift/Ctrl/Meta keys are down
@@ -102,15 +101,14 @@ public class PointerTool extends DefaultTool {
   private static int PADDING = 7;
   private static int STATSHEET_EXTERIOR_PADDING = 5;
 
-  // Offset from token's X,Y when dragging. Values are in zone coordinates.
-  private int dragOffsetX = 0;
-  private int dragOffsetY = 0;
+  // Keeps track of the start of a token drag, in screen coordinates. Useful for drawing selection
+  // boxes.
   private int dragStartX = 0;
   private int dragStartY = 0;
 
-  private String currentPointerName;
+  private @Nullable TokenDragOp tokenDragOp;
 
-  private final Stack<Set<GUID>> savedTokenSelectionSet = new Stack<>();
+  private String currentPointerName;
 
   public PointerTool() {
     htmlRenderer.setBackground(new Color(0, 0, 0, 200));
@@ -123,7 +121,7 @@ public class PointerTool extends DefaultTool {
   @Override
   protected void selectedLayerChanged(Zone.Layer layer) {
     super.selectedLayerChanged(layer);
-    if (layer != Layer.TOKEN) {
+    if (layer.isStampLayer()) {
       MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
     }
   }
@@ -137,7 +135,7 @@ public class PointerTool extends DefaultTool {
     }
     htmlRenderer.attach(renderer);
 
-    if (renderer.getActiveLayer() != Zone.Layer.TOKEN) {
+    if (getSelectedLayer().isStampLayer()) {
       MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
     }
   }
@@ -148,8 +146,8 @@ public class PointerTool extends DefaultTool {
    * use. Those keystrokes are then added to the InputMap and ActionMap for the component by calling
    * the superclass's addListeners() method.
    *
-   * @deprecated
    * @param comp the component to add as listener
+   * @deprecated
    */
   @Deprecated
   protected void addListeners_NOT_USED(JComponent comp) {
@@ -169,8 +167,7 @@ public class PointerTool extends DefaultTool {
    * criminal acts on the code base. :(
    */
   @Override
-  protected void addGridBasedKeys(Grid grid, boolean enable) { // XXX Currently not called from
-    // anywhere
+  protected void addGridBasedKeys(Grid grid, boolean enable) {
     try {
       if (enable) {
         grid.installMovementKeys(this, keyActionMap);
@@ -192,7 +189,7 @@ public class PointerTool extends DefaultTool {
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     super.detachFrom(renderer);
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     htmlRenderer.detach(renderer);
   }
 
@@ -206,101 +203,34 @@ public class PointerTool extends DefaultTool {
     return "tool.pointer.tooltip";
   }
 
-  public void startTokenDrag(Token keyToken, Set<GUID> selectedTokens) {
-    savedTokenSelectionSet.push(new HashSet<>(renderer.getSelectedTokenSet()));
-    renderer.clearSelectedTokens();
-    renderer.selectTokens(selectedTokens);
-    startTokenDrag(keyToken);
+  public void startTokenDrag(Token keyToken, Set<GUID> tokens) {
+    startTokenDrag(
+        keyToken, tokens, new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer), false);
   }
 
-  public void startTokenDrag(Token keyToken) {
-    tokenBeingDragged = keyToken;
-
-    Player p = MapTool.getPlayer();
-    if (!p.isGM()
+  private void startTokenDrag(
+      Token keyToken, Set<GUID> tokens, ZonePoint dragStart, boolean isMovingWithKeys) {
+    if (!MapTool.getPlayer().isGM()
         && (MapTool.getServerPolicy().isMovementLocked()
             || MapTool.getFrame().getInitiativePanel().isMovementLocked(keyToken))) {
       // Not allowed
       return;
     }
 
-    renderer.addMoveSelectionSet(
-        p.getName(),
-        tokenBeingDragged.getId(),
-        renderer.getOwnedTokens(renderer.getSelectedTokenSet()),
-        false);
+    tokens = renderer.getOwnedTokens(tokens);
+    renderer.addMoveSelectionSet(MapTool.getPlayer().getName(), keyToken.getId(), tokens);
     MapTool.serverCommand()
         .startTokenMove(
-            p.getName(),
-            renderer.getZone().getId(),
-            tokenBeingDragged.getId(),
-            renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
+            MapTool.getPlayer().getName(), renderer.getZone().getId(), keyToken.getId(), tokens);
 
-    isDraggingToken = true;
+    tokenDragOp = new TokenDragOp(renderer, keyToken, dragStart, isMovingWithKeys);
   }
 
   /** Complete the drag of the token, and expose FOW */
   public void stopTokenDrag() {
-    renderer.commitMoveSelectionSet(tokenBeingDragged.getId()); // TODO: figure out a better way
-    isDraggingToken = false;
-    isMovingWithKeys = false;
-
-    dragOffsetX = 0;
-    dragOffsetY = 0;
-
-    exposeFoW(null);
-    if (!savedTokenSelectionSet.isEmpty()) {
-      renderer.clearSelectedTokens();
-      renderer.selectTokens(savedTokenSelectionSet.pop());
-    }
-  }
-
-  /**
-   * Expose the FoW at a ZonePoint, or at the visible area, for the selected token
-   *
-   * @param p the ZonePoint to expose, or a null if exposing visible area and last path
-   */
-  public void exposeFoW(ZonePoint p) {
-    // if has fog(required)
-    // and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
-
-    String name = MapTool.getPlayer().getName();
-    boolean isGM = MapTool.getPlayer().isGM();
-    boolean ownerReveal; // if true, reveal FoW if current player owns the token.
-    boolean hasOwnerReveal; // if true, reveal FoW if token has an owner.
-    boolean noOwnerReveal; // if true, reveal FoW if token has no owners.
-
-    if (MapTool.isPersonalServer()) {
-      ownerReveal =
-          hasOwnerReveal = noOwnerReveal = AppPreferences.getAutoRevealVisionOnGMMovement();
-    } else {
-      ownerReveal = MapTool.getServerPolicy().isAutoRevealOnMovement();
-      hasOwnerReveal = isGM && MapTool.getServerPolicy().isAutoRevealOnMovement();
-      noOwnerReveal = isGM && MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens();
-    }
-    if (renderer.getZone().hasFog() && (ownerReveal || hasOwnerReveal || noOwnerReveal)) {
-      Set<GUID> exposeSet = new HashSet<GUID>();
-      Zone zone = renderer.getZone();
-      for (GUID tokenGUID : renderer.getOwnedTokens(renderer.getSelectedTokenSet())) {
-        Token token = zone.getToken(tokenGUID);
-        if (token == null) {
-          continue;
-        }
-        if (ownerReveal && token.isOwner(name)) exposeSet.add(tokenGUID);
-        else if (hasOwnerReveal && token.hasOwners()) exposeSet.add(tokenGUID);
-        else if (noOwnerReveal && !token.hasOwners()) exposeSet.add(tokenGUID);
-      }
-
-      if (p != null) {
-        FogUtil.exposeVisibleAreaAtWaypoint(renderer, exposeSet, p);
-        return;
-      }
-
-      // Lee: fog exposure according to reveal type
-      if (!zone.getWaypointExposureToggle()) {
-        FogUtil.exposeLastPath(renderer, exposeSet);
-      }
-      FogUtil.exposeVisibleArea(renderer, exposeSet, false);
+    if (tokenDragOp != null) {
+      tokenDragOp.finish();
+      tokenDragOp = null;
     }
   }
 
@@ -311,6 +241,7 @@ public class PointerTool extends DefaultTool {
   }
 
   private class TokenStackPanel {
+
     private static final int PADDING = 4;
 
     private List<Token> tokenList;
@@ -367,17 +298,24 @@ public class PointerTool extends DefaultTool {
       if (token == null || !AppUtil.playerOwns(token)) {
         return;
       }
-      renderer.clearSelectedTokens();
-      boolean selected = renderer.selectToken(token.getId());
-      renderer.updateAfterSelection();
 
-      if (selected) {
+      final var selectionModel = renderer.getSelectionModel();
+      final var wasNotAlreadySelected = !selectionModel.isSelected(token.getId());
+      // Only this token should be selected going forward.
+      renderer.getSelectionModel().replaceSelection(Collections.singletonList(token.getId()));
+
+      if (wasNotAlreadySelected) {
         Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
         if (!(tool instanceof PointerTool)) {
           return;
         }
         tokenUnderMouse = token;
-        ((PointerTool) tool).startTokenDrag(token);
+        ((PointerTool) tool)
+            .startTokenDrag(
+                token,
+                Collections.singleton(token.getId()),
+                new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer),
+                false);
       }
     }
 
@@ -404,7 +342,7 @@ public class PointerTool extends DefaultTool {
         BufferedImage image = ImageManager.getImage(token.getImageAssetId(), renderer);
 
         Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-        SwingUtil.constrainTo(imgSize, gridSize);
+        AwtUtil.constrainTo(imgSize, gridSize);
 
         Rectangle bounds =
             new Rectangle(
@@ -436,7 +374,9 @@ public class PointerTool extends DefaultTool {
   }
 
   private boolean handledByHover(Point p) {
-    if (!isShowingHover) return false;
+    if (!isShowingHover) {
+      return false;
+    }
 
     if (htmlRenderer.contains(p)) {
       htmlRenderer.clickAt(p);
@@ -451,13 +391,14 @@ public class PointerTool extends DefaultTool {
   public void mousePressed(MouseEvent e) {
     super.mousePressed(e);
 
-    if (handledByHover(e.getPoint())) return;
+    if (handledByHover(e.getPoint())) {
+      return;
+    }
 
     mouseButtonDown = true;
 
     if (isShowingHover) {
       isShowingHover = false;
-      hoverTokenBounds = null;
       hoverTokenNotes = null;
       markerUnderMouse = renderer.getMarkerAt(e.getX(), e.getY());
       repaint();
@@ -476,7 +417,7 @@ public class PointerTool extends DefaultTool {
     if (isDraggingMap()) {
       return;
     }
-    if (isDraggingToken) {
+    if (tokenDragOp != null) {
       return;
     }
     dragStartX = e.getX(); // These same two lines are in super.mousePressed(). Why do them
@@ -489,9 +430,8 @@ public class PointerTool extends DefaultTool {
       List<Token> tokenList = renderer.getTokenStackAt(mouseX, mouseY);
       if (tokenList != null) {
         // Stack
-        renderer.clearSelectedTokens();
+        renderer.getSelectionModel().replaceSelection(Collections.emptyList());
         showTokenStackPopup(tokenList, e.getX(), e.getY());
-        renderer.updateAfterSelection();
       } else {
         // Single
         Token token = renderer.getTokenAt(e.getX(), e.getY());
@@ -506,34 +446,24 @@ public class PointerTool extends DefaultTool {
     }
     // SELECTION
     Token token = renderer.getTokenAt(e.getX(), e.getY());
-    if (token != null && !isDraggingToken && SwingUtilities.isLeftMouseButton(e)) {
+    final var selectionModel = renderer.getSelectionModel();
+    if (token != null && tokenDragOp == null && SwingUtilities.isLeftMouseButton(e)) {
       // Don't select if it's already being moved by someone
       isNewTokenSelected = false;
       if (!renderer.isTokenMoving(token)) {
+        final var isSelected = selectionModel.isSelected(token.getId());
         if (SwingUtil.isShiftDown(e)) {
           // if shift, we invert the selection of the token
-          if (renderer.getSelectedTokenSet().contains(token.getId())) {
-            renderer.deselectToken(token.getId());
+          if (isSelected) {
+            selectionModel.removeTokensFromSelection(Collections.singletonList(token.getId()));
           } else {
-            renderer.selectToken(token.getId());
+            selectionModel.addTokensToSelection(Collections.singletonList(token.getId()));
           }
-          renderer.updateAfterSelection();
-        } else if (!renderer.getSelectedTokenSet().contains(token.getId())) {
+        } else if (!isSelected) {
           // if not shift and click on non-selected token, switch selection to the token
           isNewTokenSelected = true;
-          renderer.clearSelectedTokens();
-          renderer.selectToken(token.getId());
-          renderer.updateAfterSelection();
+          selectionModel.replaceSelection(Collections.singletonList(token.getId()));
         }
-        // ZonePoint dragged to
-        ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-
-        // Offset specific to the token
-        Point tokenOffset = token.getDragOffset(getZone());
-
-        // Dragging offset for currently selected token
-        dragOffsetX = pos.x - tokenOffset.x;
-        dragOffsetY = pos.y - tokenOffset.y;
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
@@ -550,8 +480,9 @@ public class PointerTool extends DefaultTool {
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    super.mouseReleased(e);
+
     mouseButtonDown = false;
-    // System.out.println("mouseReleased " + e.toString());
 
     if (isShowingTokenStackPopup) {
       if (tokenStackPanel.contains(e.getX(), e.getY())) {
@@ -566,9 +497,9 @@ public class PointerTool extends DefaultTool {
     // Jamz: We have to capture here as isLeftMouseButton is also true during drag
     // Jamz: Also, changed to right button which is easier to click during drag
     // WAYPOINT
-    if (SwingUtilities.isRightMouseButton(e) && isDraggingToken) {
-      setWaypoint();
-      setDraggingMap(false); // We no longer drag the map. Fixes bug #616
+    if (SwingUtilities.isRightMouseButton(e) && tokenDragOp != null) {
+      tokenDragOp.setWaypoint();
+      cancelMapDrag(); // We no longer drag the map. Fixes bug #616
       return;
     }
 
@@ -581,47 +512,44 @@ public class PointerTool extends DefaultTool {
         if (tokenUnderMouse == null
             && markerUnderMouse != null
             && !isShowingHover
-            && !isDraggingToken) {
+            && tokenDragOp == null) {
           isShowingHover = true;
-          hoverTokenBounds = renderer.getMarkerBounds(markerUnderMouse);
           hoverTokenNotes = createHoverNote(markerUnderMouse);
-          if (hoverTokenBounds == null) {
-            // Uhhhh, where's the token ?
-            isShowingHover = false;
-          }
           repaint();
         }
         // SELECTION BOUND BOX
+        final var selectionModel = renderer.getSelectionModel();
         if (isDrawingSelectionBox) {
           isDrawingSelectionBox = false;
 
+          final var tokens = renderer.getTokenIdsInBounds(selectionBoundBox);
           if (!SwingUtil.isShiftDown(e)) {
-            renderer.clearSelectedTokens();
+            selectionModel.replaceSelection(tokens);
+          } else {
+            selectionModel.addTokensToSelection(tokens);
           }
-          renderer.selectTokens(selectionBoundBox);
-          renderer.updateAfterSelection();
-
           selectionBoundBox = null;
           return;
         }
         // DRAG TOKEN COMPLETE
-        if (isDraggingToken) {
+        if (tokenDragOp != null) {
           SwingUtil.showPointer(renderer);
           stopTokenDrag();
         } else {
           // IF SELECTING MULTIPLE, SELECT SINGLE TOKEN
-          if (SwingUtilities.isLeftMouseButton(e) && !SwingUtil.isShiftDown(e)) {
+          if (!SwingUtil.isShiftDown(e)) {
             Token token = renderer.getTokenAt(e.getX(), e.getY());
-            // Only if it isn't already being moved
-            if (renderer.isSubsetSelected(token) && !renderer.isTokenMoving(token)) {
-              renderer.clearSelectedTokens();
-              renderer.selectToken(token.getId());
-              renderer.updateAfterSelection();
+            // Mouse down already selected the token. Now let's enforce it being the only one.
+            // ... but only if it isn't being moved at the same time.
+            if (token != null
+                && selectionModel.isSelected(token.getId())
+                && !renderer.isTokenMoving(token)) {
+              selectionModel.replaceSelection(Collections.singletonList(token.getId()));
             }
           }
         }
       } finally {
-        isDraggingToken = false;
+        tokenDragOp = null;
         isDrawingSelectionBox = false;
       }
       return;
@@ -632,43 +560,28 @@ public class PointerTool extends DefaultTool {
     // And Middle button? That's a pain to click while dragging isn't it? How about Right click
     // during drag?
     // WAYPOINT
-    if (SwingUtilities.isMiddleMouseButton(e) && isDraggingToken) {
-      setWaypoint();
+    if (SwingUtilities.isMiddleMouseButton(e) && tokenDragOp != null) {
+      tokenDragOp.setWaypoint();
     }
 
     // POPUP MENU
-    if (SwingUtilities.isRightMouseButton(e) && !isDraggingToken && !isDraggingMap()) {
-      if (tokenUnderMouse != null
-          && !renderer.getSelectedTokenSet().contains(tokenUnderMouse.getId())) {
+    if (SwingUtilities.isRightMouseButton(e) && tokenDragOp == null && !isDraggingMap()) {
+      final var selectionModel = renderer.getSelectionModel();
+      if (tokenUnderMouse != null && !selectionModel.isSelected(tokenUnderMouse.getId())) {
         if (!SwingUtil.isShiftDown(e)) {
-          renderer.clearSelectedTokens();
+          selectionModel.replaceSelection(Collections.singletonList(tokenUnderMouse.getId()));
+        } else {
+          selectionModel.addTokensToSelection(Collections.singletonList(tokenUnderMouse.getId()));
         }
-        renderer.selectToken(tokenUnderMouse.getId());
-        renderer.updateAfterSelection();
         isNewTokenSelected = false;
       }
-      if (tokenUnderMouse != null && !renderer.getSelectedTokenSet().isEmpty()) {
-        if (tokenUnderMouse.isStamp()) {
-          new StampPopupMenu(
-                  renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse)
+      final var selectedTokens = renderer.getSelectedTokenSet();
+      if (tokenUnderMouse != null && !selectedTokens.isEmpty()) {
+        if (tokenUnderMouse.getLayer().isStampLayer()) {
+          new StampPopupMenu(selectedTokens, e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
         } else if (AppUtil.playerOwns(tokenUnderMouse)) {
-          // FIXME Every once in awhile we get a report on the forum of the following
-          // exception:
-          // java.awt.IllegalComponentStateException: component must be showing on the
-          // screen to
-          // determine its location
-          // It's thrown as a result of the showPopup() call on the next line. For the
-          // life of me, I
-          // can't figure out why the
-          // "renderer" component might not be "showing on the screen"??? Maybe it has
-          // something to
-          // do with a dual-monitor
-          // configuration? Or a monitor added after Java was started and then MT dragged
-          // to that
-          // monitor?
-          new TokenPopupMenu(
-                  renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse)
+          new TokenPopupMenu(selectedTokens, e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
         }
         return;
@@ -681,13 +594,12 @@ public class PointerTool extends DefaultTool {
   // MouseMotion
   @Override
   public void mouseMoved(MouseEvent e) {
+    super.mouseMoved(e);
+
     if (renderer == null) {
       return;
     }
-    super.mouseMoved(e);
 
-    // mouseX = e.getX(); // done by super.mouseMoved()
-    // mouseY = e.getY();
     if (isShowingPointer) {
       ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
       Pointer pointer =
@@ -710,30 +622,49 @@ public class PointerTool extends DefaultTool {
       return;
     }
 
-    if (isDraggingToken) {
-      // FJE If we're dragging the token, wouldn't mouseDragged() be called instead? Can this
-      // code
-      // ever be executed?
-      if (isMovingWithKeys) {
-        return;
-      }
-      ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-      ZonePoint last;
-      if (tokenUnderMouse == null) last = zp;
-      else {
-        last = renderer.getLastWaypoint(tokenUnderMouse.getId());
-        // XXX This shouldn't be possible, but it happens?!
-        if (last == null) last = zp;
-      }
-      handleDragToken(zp, zp.x - last.x, zp.y - last.y);
+    if (tokenDragOp != null) {
+      // Note that a token "drag" can be started from the context menu, so mouseMoved() is called,
+      // not mouseDragged().
+      tokenDragOp.dragTo(mouseX, mouseY);
       return;
     }
+    var oldTokenUnderMouse = tokenUnderMouse;
     tokenUnderMouse = renderer.getTokenAt(mouseX, mouseY);
     keysDown = e.getModifiersEx();
     renderer.setMouseOver(tokenUnderMouse);
 
     if (tokenUnderMouse == null) {
       statSheet = null;
+      if (oldTokenUnderMouse != null) {
+        new MapToolEventBus()
+            .getMainEventBus()
+            .post(
+                new TokenHoverExit(
+                    oldTokenUnderMouse,
+                    getZone(),
+                    SwingUtil.isShiftDown(keysDown),
+                    SwingUtil.isControlDown(keysDown)));
+      }
+    } else if (tokenUnderMouse != oldTokenUnderMouse) {
+      statSheet = null;
+      if (oldTokenUnderMouse != null) {
+        new MapToolEventBus()
+            .getMainEventBus()
+            .post(
+                new TokenHoverExit(
+                    oldTokenUnderMouse,
+                    getZone(),
+                    SwingUtil.isShiftDown(keysDown),
+                    SwingUtil.isControlDown(keysDown)));
+      }
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(
+              new TokenHoverEnter(
+                  tokenUnderMouse,
+                  getZone(),
+                  SwingUtil.isShiftDown(keysDown),
+                  SwingUtil.isControlDown(keysDown)));
     }
     Token marker = renderer.getMarkerAt(mouseX, mouseY);
     if (!AppUtil.tokenIsVisible(renderer.getZone(), marker, renderer.getPlayerView())) {
@@ -764,9 +695,7 @@ public class PointerTool extends DefaultTool {
         renderer.repaint();
       }
     }
-    // XXX Updating the status bar is done in super.mouseDragged() -- maybe just call that here?
-    // But
-    // it also causes repaint events...
+
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mouseX, mouseY));
     if (cellUnderMouse != null) {
       MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
@@ -795,45 +724,17 @@ public class PointerTool extends DefaultTool {
           || !renderer.getSelectedTokenSet().contains(tokenUnderMouse.getId())) {
         return;
       }
-      if (isDraggingToken) {
-        if (isMovingWithKeys) {
-          return;
-        }
-        ZonePoint last = renderer.getLastWaypoint(tokenUnderMouse.getId());
-        if (last == null) {
-          // This makes no sense to me. Why create a fake last point that is
-          // half the token width away from the current point? (Phil)
-          // last =  new ZonePoint(
-          //        tokenUnderMouse.getX() + r.width / 2,
-          //        tokenUnderMouse.getY() + r.height / 2);
-
-          // Just make a last ZP that is the same.
-          last = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-        }
-        ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-        // These lines were causing tokens to end up in the wrong grid cell in
-        // relation to the the mouse location.
-        // if (tokenUnderMouse.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-        //          zp.translate(-r.width / 2, -r.height / 2);
-        //          last.translate(-r.width / 2, -r.height / 2);
-        // }
-        //        zp.translate(-dragOffsetX, -dragOffsetY);
-
-        // Now the dx/dy are calculated on Zone Points that haven't been
-        // translated for drag offset or for snapping. That is being done in
-        // handleDragToken().
-        int dx = zp.x - last.x;
-        int dy = zp.y - last.y;
-        handleDragToken(zp, dx, dy);
+      if (tokenDragOp != null) {
+        tokenDragOp.dragTo(mouseX, mouseY);
         return;
       }
-      if (!isDraggingToken && renderer.isTokenMoving(tokenUnderMouse)) {
+      if (renderer.isTokenMoving(tokenUnderMouse)) {
         return;
       }
-      if (isNewTokenSelected && !renderer.isOnlyTokenSelected(tokenUnderMouse)) {
-        renderer.clearSelectedTokens();
-        renderer.selectToken(tokenUnderMouse.getId());
-        renderer.updateAfterSelection();
+      if (isNewTokenSelected) {
+        renderer
+            .getSelectionModel()
+            .replaceSelection(Collections.singletonList(tokenUnderMouse.getId()));
       }
       isNewTokenSelected = false;
 
@@ -855,182 +756,18 @@ public class PointerTool extends DefaultTool {
             }
           }
         }
-        startTokenDrag(tokenUnderMouse);
-        isDraggingToken = true;
-        if (AppPreferences.getHideMousePointerWhileDragging()) SwingUtil.hidePointer(renderer);
+        startTokenDrag(
+            tokenUnderMouse,
+            selectedTokenSet,
+            new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer),
+            false);
+        if (AppPreferences.hideMousePointerWhileDragging.get()) {
+          SwingUtil.hidePointer(renderer);
+        }
       }
       return;
     }
     super.mouseDragged(e);
-  }
-
-  public boolean isDraggingToken() {
-    return isDraggingToken;
-  }
-
-  /**
-   * Move the keytoken being dragged to this zone point
-   *
-   * @param zonePoint The new ZonePoint for the token.
-   * @param dx The amount being moved in the X direction
-   * @param dy The amount being moved in the Y direction
-   * @return true if the move was successful
-   */
-  public boolean handleDragToken(ZonePoint zonePoint, int dx, int dy) {
-    Grid grid = renderer.getZone().getGrid();
-    // Always correct for offset. Fix #1589
-    zonePoint.translate(-dragOffsetX, -dragOffsetY);
-    // For snapped dragging
-    if (tokenBeingDragged.isSnapToGrid()
-        && grid.getCapabilities().isSnapToGridSupported()
-        && AppPreferences.getTokensSnapWhileDragging()) {
-      // Convert the zone point to a cell point and back to force the snap to grid on drag
-      zonePoint = grid.convert(grid.convert(zonePoint));
-    }
-    CellPoint cellUnderMouse = grid.convert(zonePoint);
-    MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
-    // Don't bother if there isn't any movement
-    if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), zonePoint)) {
-      return false;
-    }
-    // Make sure it's a valid move
-    boolean isValid;
-    if (grid.getSize() >= 9)
-      isValid = validateMove(tokenBeingDragged, renderer.getSelectedTokenSet(), zonePoint, dx, dy);
-    else
-      isValid = validateMove_legacy(tokenBeingDragged, renderer.getSelectedTokenSet(), zonePoint);
-
-    if (!isValid) {
-      return false;
-    }
-    dragStartX = zonePoint.x;
-    dragStartY = zonePoint.y;
-
-    renderer.updateMoveSelectionSet(tokenBeingDragged.getId(), zonePoint);
-    MapTool.serverCommand()
-        .updateTokenMove(
-            renderer.getZone().getId(), tokenBeingDragged.getId(), zonePoint.x, zonePoint.y);
-    return true;
-  }
-
-  private boolean validateMove(
-      Token leadToken, Set<GUID> tokenSet, ZonePoint point, int dirx, int diry) {
-    if (MapTool.getPlayer().isGM()) {
-      return true;
-    }
-    boolean isBlocked = false;
-    Zone zone = renderer.getZone();
-    if (zone.hasFog()) {
-      // Check that the new position for each token is within the exposed area
-      Area zoneFog = zone.getExposedArea();
-      if (zoneFog == null) zoneFog = new Area();
-      boolean useTokenExposedArea =
-          MapTool.getServerPolicy().isUseIndividualFOW() && zone.getVisionType() != VisionType.OFF;
-      int deltaX = point.x - leadToken.getX();
-      int deltaY = point.y - leadToken.getY();
-      Grid grid = zone.getGrid();
-      // Loop through all tokens. As soon as one of them is blocked, stop processing and
-      // return
-      // false.
-      // Jamz: Option this for lead token only? It's annoying dragging a group when one token
-      // has
-      // limited vision...
-      // Or if ANY token in group can move, finish move?
-      for (Iterator<GUID> iter = tokenSet.iterator(); !isBlocked && iter.hasNext(); ) {
-        Area tokenFog = new Area(zoneFog);
-        GUID tokenGUID = iter.next();
-        Token token = zone.getToken(tokenGUID);
-        if (token == null) {
-          continue;
-        }
-
-        // Rolled back change from commit 3d5f619 because of reported bug by dorpond
-        // https://github.com/JamzTheMan/maptool/commit/3d5f619dff6e61c605ee532ac3c86a3860e91864
-        if (useTokenExposedArea) {
-          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
-          tokenFog.add(meta.getExposedAreaHistory());
-
-          // Jamz: Allow a token without site to move within the current PlayerView
-          if (!token.getHasSight()) {
-            tokenFog.add(renderer.getZoneView().getVisibleArea(new PlayerView(Role.PLAYER)));
-          }
-        }
-
-        Rectangle tokenSize = token.getBounds(zone);
-        Rectangle destination =
-            new Rectangle(
-                tokenSize.x + deltaX, tokenSize.y + deltaY, tokenSize.width, tokenSize.height);
-        isBlocked = !grid.validateMove(token, destination, dirx, diry, tokenFog);
-      }
-    }
-    return !isBlocked;
-  }
-
-  private boolean validateMove_legacy(Token leadToken, Set<GUID> tokenSet, ZonePoint point) {
-    Zone zone = renderer.getZone();
-    if (MapTool.getPlayer().isGM()) {
-      return true;
-    }
-    boolean isVisible = true;
-    if (zone.hasFog()) {
-      // Check that the new position for each token is within the exposed area
-      Area fow = zone.getExposedArea();
-      if (fow == null) {
-        return true;
-      }
-      isVisible = false;
-      int fudgeSize = Math.max(Math.min((zone.getGrid().getSize() - 2) / 3 - 1, 8), 0);
-      int deltaX = point.x - leadToken.getX();
-      int deltaY = point.y - leadToken.getY();
-      Rectangle bounds = new Rectangle();
-      for (GUID tokenGUID : tokenSet) {
-        Token token = zone.getToken(tokenGUID);
-        if (token == null) {
-          continue;
-        }
-        int x = token.getX() + deltaX;
-        int y = token.getY() + deltaY;
-
-        Rectangle tokenSize = token.getBounds(zone);
-        /*
-         * Perhaps create a counter and count the number of times that the contains() check returns true? There are currently 9 rectangular areas checked by this code (note the "/3" in the two
-         * 'interval' variables) so checking for 5 or more would mean more than 55%+ of the destination was visible...
-         */
-        int intervalX = tokenSize.width - fudgeSize * 2;
-        int intervalY = tokenSize.height - fudgeSize * 2;
-        int counter = 0;
-        for (int dy = 0; dy < 3; dy++) {
-          for (int dx = 0; dx < 3; dx++) {
-            int by = y + fudgeSize + (intervalY * dy / 3);
-            int bx = x + fudgeSize + (intervalX * dx / 3);
-            bounds.x = bx;
-            bounds.y = by;
-            bounds.width = intervalY * (dy + 1) / 3 - intervalY * dy / 3; // No, this
-            // isn't the
-            // same as
-            // intervalY*1/3
-            // because of
-            // integer
-            // arithmetic
-            bounds.height = intervalX * (dx + 1) / 3 - intervalX * dx / 3;
-
-            if (!MapTool.getServerPolicy().isUseIndividualFOW()
-                || zone.getVisionType() == VisionType.OFF) {
-              if (fow.contains(bounds)) {
-                counter++;
-              }
-            } else {
-              ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
-              if (meta.getExposedAreaHistory().contains(bounds)) {
-                counter++;
-              }
-            }
-          }
-        }
-        isVisible = (counter >= 6);
-      }
-    }
-    return isVisible;
   }
 
   /**
@@ -1120,28 +857,8 @@ public class PointerTool extends DefaultTool {
     actionMap.put(AppActions.CUT_TOKENS.getKeyStroke(), AppActions.CUT_TOKENS);
     actionMap.put(AppActions.COPY_TOKENS.getKeyStroke(), AppActions.COPY_TOKENS);
     actionMap.put(AppActions.PASTE_TOKENS.getKeyStroke(), AppActions.PASTE_TOKENS);
-    actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_R, AppActions.menuShortcut),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
+    actionMap.put(AppActions.SET_FACING_ACTION.getKeyStroke(), AppActions.SET_FACING_ACTION);
 
-          public void actionPerformed(ActionEvent e) {
-            // TODO: Combine all this crap with the Stamp tool
-            if (renderer.getSelectedTokenSet().isEmpty()) {
-              return;
-            }
-            Toolbox toolbox = MapTool.getFrame().getToolbox();
-
-            FacingTool tool = (FacingTool) toolbox.getTool(FacingTool.class);
-            tool.init(
-                renderer.getZone().getToken(renderer.getSelectedTokenSet().iterator().next()),
-                renderer.getSelectedTokenSet());
-
-            toolbox.setSelectedTool(FacingTool.class);
-          }
-        });
-
-    // TODO: Optimize this by making it non anonymous
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), ToolHelper.getDeleteTokenAction());
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true), new StopPointerActionListener());
@@ -1176,7 +893,7 @@ public class PointerTool extends DefaultTool {
           private static final long serialVersionUID = 1L;
 
           public void actionPerformed(ActionEvent e) {
-            if (!isDraggingToken) {
+            if (tokenDragOp == null) {
               return;
             }
             // Stop
@@ -1190,7 +907,7 @@ public class PointerTool extends DefaultTool {
           private static final long serialVersionUID = 1L;
 
           public void actionPerformed(ActionEvent e) {
-            if (!isDraggingToken) {
+            if (tokenDragOp == null) {
               return;
             }
             // Stop
@@ -1204,8 +921,6 @@ public class PointerTool extends DefaultTool {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(this, size, -size));
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(this, -size, 0));
-    // actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(this, 0,
-    // 0));
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(this, size, 0));
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0), new MovementKey(this, -size, size));
@@ -1275,55 +990,15 @@ public class PointerTool extends DefaultTool {
         });
 
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_I, AppActions.menuShortcut),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            if (MapTool.getPlayer().isGM()
-                || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
-              FogUtil.exposeVisibleArea(
-                  renderer, renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
-            }
-          }
-        });
+        AppActions.EXPOSE_VISIBLE_AREA_ACTION.getKeyStroke(),
+        AppActions.EXPOSE_VISIBLE_AREA_ACTION);
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_O, AppActions.menuShortcut | InputEvent.SHIFT_DOWN_MASK),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            // Only let the GM's do this
-            if (MapTool.getPlayer().isGM()) {
-              FogUtil.exposePCArea(renderer);
-            }
-          }
-        });
+        AppActions.EXPOSE_VISIBLE_AREA_ONLY_ACTION.getKeyStroke(),
+        AppActions.EXPOSE_VISIBLE_AREA_ONLY_ACTION);
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_F, AppActions.menuShortcut | InputEvent.SHIFT_DOWN_MASK),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            // Only let the GM's do this
-            if (MapTool.getPlayer().isGM()) {
-              FogUtil.exposeAllOwnedArea(renderer);
-            }
-          }
-        });
+        AppActions.EXPOSE_ALL_OWNED_ACTION.getKeyStroke(), AppActions.EXPOSE_ALL_OWNED_ACTION);
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_P, AppActions.menuShortcut),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            if (MapTool.getPlayer().isGM()
-                || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
-              FogUtil.exposeLastPath(
-                  renderer, renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
-            }
-          }
-        });
+        AppActions.EXPOSE_LAST_PATH_ACTION.getKeyStroke(), AppActions.EXPOSE_LAST_PATH_ACTION);
   }
 
   /**
@@ -1344,26 +1019,20 @@ public class PointerTool extends DefaultTool {
       if (!AppUtil.playerOwns(token)) {
         continue;
       }
-      Integer facing = token.getFacing();
-      // TODO: this should really be a per grid setting
-      if (facing == null) {
-        facing = -90; // natural alignment
-      }
+
+      int facing = token.getFacing();
       if (freeRotate) {
         facing += direction * 5;
       } else {
-        int[] facingArray = renderer.getZone().getGrid().getFacingAngles();
-        int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
-
-        facingIndex += direction;
-
-        if (facingIndex < 0) {
-          facingIndex = facingArray.length - 1;
-        }
-        if (facingIndex == facingArray.length) {
-          facingIndex = 0;
-        }
-        facing = facingArray[facingIndex];
+        facing =
+            renderer
+                .getZone()
+                .getGrid()
+                .nextFacing(
+                    facing,
+                    AppPreferences.faceEdge.get(),
+                    AppPreferences.faceVertex.get(),
+                    direction < 0);
       }
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, facing);
     }
@@ -1377,11 +1046,11 @@ public class PointerTool extends DefaultTool {
    * @param dy The Y movement in Cell units
    */
   public void handleKeyMove(double dx, double dy) {
-    Token keyToken = null;
-    if (!isDraggingToken) {
+    if (tokenDragOp == null) {
       // Start
       Set<GUID> selectedTokenSet = renderer.getOwnedTokens(renderer.getSelectedTokenSet());
 
+      Token keyToken = null;
       for (GUID tokenId : selectedTokenSet) {
         Token token = renderer.getZone().getToken(tokenId);
         if (token == null) {
@@ -1403,50 +1072,22 @@ public class PointerTool extends DefaultTool {
       // Note these are zone space coordinates
       dragStartX = keyToken.getX();
       dragStartY = keyToken.getY();
-      startTokenDrag(keyToken);
+      startTokenDrag(
+          keyToken, selectedTokenSet, new ZonePoint(keyToken.getX(), keyToken.getY()), true);
     }
-    if (!isMovingWithKeys) {
-      dragOffsetX = 0;
-      dragOffsetY = 0;
-    }
-    // The zone point the token will be moved to after adjusting for dx/dy
-    ZonePoint zp = new ZonePoint(dragStartX, dragStartY);
-    Grid grid = renderer.getZone().getGrid();
-    if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      CellPoint cp = grid.convert(zp);
-      cp.x += dx;
-      cp.y += dy;
-      zp = grid.convert(cp);
-      dx = zp.x - tokenBeingDragged.getX();
-      dy = zp.y - tokenBeingDragged.getY();
-    } else {
-      // Scalar for dx/dy in zone space. Defaulting to essentially 1 pixel.
-      int moveFactor = 1;
-      if (tokenBeingDragged.isSnapToGrid()) {
-        // Move in grid size increments. Allows tokens set snap-to-grid on gridless maps
-        // to move in whole cell size increments.
-        moveFactor = grid.getSize();
-      }
-      int x = dragStartX + (int) (dx * moveFactor);
-      int y = dragStartY + (int) (dy * moveFactor);
-      zp = new ZonePoint(x, y);
-    }
-    isMovingWithKeys = true;
-    handleDragToken(zp, (int) dx, (int) dy);
-  }
 
-  private void setWaypoint() {
-    ZonePoint p = new ZonePoint(dragStartX, dragStartY);
-    exposeFoW(p);
+    if (tokenDragOp == null) {
+      // Typically would be set in startTokenDrag() above, but not if server policy prevents it.
+      return;
+    }
 
-    renderer.toggleMoveSelectionSetWaypoint(tokenBeingDragged.getId(), p);
-    MapTool.serverCommand()
-        .toggleTokenMoveWaypoint(renderer.getZone().getId(), tokenBeingDragged.getId(), p);
+    tokenDragOp.moveByKey(dx, dy);
   }
 
   // //
   // POINTER KEY ACTION
   private class PointerActionListener extends AbstractAction {
+
     private static final long serialVersionUID = 8348513388262364724L;
 
     Pointer.Type type;
@@ -1459,16 +1100,14 @@ public class PointerTool extends DefaultTool {
       if (isSpaceDown) {
         return;
       }
-      if (isDraggingToken) {
-        setWaypoint();
+      if (tokenDragOp != null) {
+        tokenDragOp.setWaypoint();
       } else {
         // Pointer
         isShowingPointer = true;
 
         ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
         Pointer pointer = new Pointer(renderer.getZone(), zp.x, zp.y, 0, type);
-        // Jamz test move clients to view when using point (for GM only)...
-        // TODO: Snap player view back when done?
         if (MapTool.getPlayer().isGM() && type.equals(Pointer.Type.LOOK_HERE)) {
           MapTool.serverCommand()
               .enforceZoneView(
@@ -1594,6 +1233,7 @@ public class PointerTool extends DefaultTool {
   // //
   // STOP POINTER ACTION
   private class StopPointerActionListener extends AbstractAction {
+
     private static final long serialVersionUID = -8508019800264211345L;
     private boolean restoreZoneView = false;
 
@@ -1659,7 +1299,7 @@ public class PointerTool extends DefaultTool {
       Stroke stroke = g.getStroke();
       g.setStroke(new BasicStroke(2));
 
-      if (AppPreferences.getFillSelectionBox()) {
+      if (AppPreferences.fillSelectionBox.get()) {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
         g.setPaint(AppStyle.selectionBoxFill);
         g.fillRoundRect(
@@ -1688,11 +1328,13 @@ public class PointerTool extends DefaultTool {
     }
     // Statsheet
     if (tokenUnderMouse != null
-        && !isDraggingToken
+        && tokenDragOp == null
         && AppUtil.tokenIsVisible(
             renderer.getZone(), tokenUnderMouse, new PlayerView(MapTool.getPlayer().getRole()))) {
-      if (AppPreferences.getPortraitSize() > 0
-          && (SwingUtil.isShiftDown(keysDown) == AppPreferences.getShowStatSheetModifier())
+      if (AppPreferences.portraitSize.get() > 0
+          && (SwingUtil.isShiftDown(keysDown)
+              == AppPreferences.showStatSheetRequiresModifierKey.get())
+          && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())
           && (tokenOnStatSheet == null
               || !tokenOnStatSheet.equals(tokenUnderMouse)
               || statSheet == null)) {
@@ -1700,7 +1342,7 @@ public class PointerTool extends DefaultTool {
 
         BufferedImage image = null;
         Dimension imgSize = new Dimension(0, 0);
-        if (AppPreferences.getShowPortrait()) {
+        if (AppPreferences.showPortrait.get()) {
           // Portrait
           MD5Key portraitId =
               tokenUnderMouse.getPortraitImage() != null
@@ -1721,7 +1363,7 @@ public class PointerTool extends DefaultTool {
           imgSize = new Dimension(image.getWidth(), image.getHeight());
 
           // Size
-          SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize());
+          AwtUtil.constrainTo(imgSize, AppPreferences.portraitSize.get());
         }
 
         Dimension statSize = null;
@@ -1741,41 +1383,42 @@ public class PointerTool extends DefaultTool {
         Map<String, String> propertyMap = new LinkedHashMap<String, String>();
         Map<String, Integer> propertyLineCount = new LinkedHashMap<String, Integer>();
         LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
-        if (AppPreferences.getShowStatSheet()) {
-          CodeTimer timer = new CodeTimer("statSheet");
-          timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
-          timer.setThreshold(5);
-          timer.start("allProps");
-          for (TokenProperty property :
-              MapTool.getCampaign().getTokenPropertyList(tokenUnderMouse.getPropertyType())) {
-            if (property.isShowOnStatSheet()) {
-              if (property.isGMOnly() && !MapTool.getPlayer().isGM()) {
-                continue;
-              }
-              if (property.isOwnerOnly() && !AppUtil.playerOwns(tokenUnderMouse)) {
-                continue;
-              }
-              timer.start(property.getName());
-              MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
-              resolver.initialize();
-              resolver.setAutoPrompt(false);
-              Object propertyValue =
-                  tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
-              resolver.flush();
-              if (propertyValue != null && propertyValue.toString().length() > 0) {
-                String propName = property.getShortName();
-                if (StringUtils.isEmpty(propName)) propName = property.getName();
-                propertyMap.put(propName, propertyValue.toString());
-              }
-              timer.stop(property.getName());
-            }
-          }
-          timer.stop("allProps");
-          if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
-            String results = timer.toString();
-            MapTool.getProfilingNoteFrame().addText(results);
-            if (log.isDebugEnabled()) log.debug(results);
-          }
+        if (AppPreferences.showStatSheet.get()
+            && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())) {
+          CodeTimer.using(
+              "statSheet",
+              timer -> {
+                timer.setThreshold(5);
+
+                timer.start("allProps");
+                for (TokenProperty property :
+                    MapTool.getCampaign().getTokenPropertyList(tokenUnderMouse.getPropertyType())) {
+                  if (property.isShowOnStatSheet()) {
+                    if (property.isGMOnly() && !MapTool.getPlayer().isGM()) {
+                      continue;
+                    }
+                    if (property.isOwnerOnly() && !AppUtil.playerOwns(tokenUnderMouse)) {
+                      continue;
+                    }
+                    timer.start(property.getName());
+                    MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
+                    resolver.initialize();
+                    resolver.setAutoPrompt(false);
+                    Object propertyValue =
+                        tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
+                    resolver.flush();
+                    if (propertyValue != null && propertyValue.toString().length() > 0) {
+                      String propName = property.getShortName();
+                      if (StringUtils.isEmpty(propName)) {
+                        propName = property.getName();
+                      }
+                      propertyMap.put(propName, propertyValue.toString());
+                    }
+                    timer.stop(property.getName());
+                  }
+                }
+                timer.stop("allProps");
+              });
         }
         if (tokenUnderMouse.getPortraitImage() != null || !propertyMap.isEmpty()) {
           Font font = AppStyle.labelFont;
@@ -1787,7 +1430,6 @@ public class PointerTool extends DefaultTool {
           int layoutWidth = 1;
           if (!propertyMap.isEmpty()) {
             // Figure out size requirements
-            // int height = propertyMap.size() * (rowHeight + PADDING);
             int height = 0;
             // Iterate over keys to reserve room for key column
             for (Entry<String, String> entry : propertyMap.entrySet()) {
@@ -1917,18 +1559,12 @@ public class PointerTool extends DefaultTool {
                 }
               }
 
-              // statsG.setFont(font);
-              // int strw = SwingUtilities.computeStringWidth(valueFM,
-              // entry.getValue());
-              // statsG.drawString(entry.getValue(), bounds.x + bounds.width - strw
-              // -PADDING, y);
-
               y += PADDING;
             }
           }
 
           // Draw the portrait
-          if (AppPreferences.getShowPortrait()) {
+          if (AppPreferences.showPortrait.get()) {
             Rectangle bounds =
                 new Rectangle(lm, height - imgSize.height - bm, imgSize.width, imgSize.height);
 
@@ -1937,7 +1573,7 @@ public class PointerTool extends DefaultTool {
                     panelTexture,
                     new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
             statsG.fill(bounds);
-            AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
+            AppPreferences.renderQuality.get().setShrinkRenderingHints(g);
             statsG.drawImage(image, bounds.x, bounds.y, imgSize.width, imgSize.height, this);
             AppStyle.miniMapBorder.paintAround(statsG, bounds);
             AppStyle.shadowBorder.paintWithin(statsG, bounds);
@@ -1945,7 +1581,7 @@ public class PointerTool extends DefaultTool {
             // Label
             GraphicsUtil.drawBoxedString(
                 statsG, tokenUnderMouse.getName(), bounds.width / 2 + lm, height - 15);
-          } else if (AppPreferences.getShowStatSheet() && statSize != null) {
+          } else if (AppPreferences.showStatSheet.get() && statSize != null) {
             // Label
             Rectangle bounds =
                 new Rectangle(
@@ -1966,7 +1602,7 @@ public class PointerTool extends DefaultTool {
     }
 
     // Jamz: Statsheet was still showing on drag, added other tests to hide statsheet as well
-    if (statSheet != null && !isDraggingToken && !mouseButtonDown) {
+    if (statSheet != null && tokenDragOp == null && !mouseButtonDown) {
       g.drawImage(
           statSheet,
           STATSHEET_EXTERIOR_PADDING,
@@ -1982,16 +1618,8 @@ public class PointerTool extends DefaultTool {
               hoverTokenNotes,
               (int) (renderer.getWidth() * .75),
               (int) (renderer.getHeight() * .75));
-      Point location =
-          new Point(
-              hoverTokenBounds.getBounds().x
-                  + hoverTokenBounds.getBounds().width / 2
-                  - size.width / 2,
-              hoverTokenBounds.getBounds().y);
-
       // Anchor in the bottom left corner
-      location.x = 4 + PADDING;
-      location.y = viewSize.height - size.height - 4 - PADDING;
+      Point location = new Point(4 + PADDING, viewSize.height - size.height - 4 - PADDING);
 
       // Keep it on screen
       if (location.x + size.width > viewSize.width) {
@@ -2008,10 +1636,6 @@ public class PointerTool extends DefaultTool {
       }
 
       // Background
-      // g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .5f));
-      // g.setColor(Color.black);
-      // g.fillRect(location.x, location.y, size.width, size.height);
-      // g.setComposite(composite);
       g.setPaint(
           new TexturePaint(
               panelTexture,
@@ -2026,22 +1650,15 @@ public class PointerTool extends DefaultTool {
       // Border
       AppStyle.miniMapBorder.paintAround(g, location.x, location.y, size.width, size.height);
       AppStyle.shadowBorder.paintWithin(g, location.x, location.y, size.width, size.height);
-      // AppStyle.border.paintAround(g, location.x, location.y,
-      // size.width, size.height);
     }
   }
 
   private String createHoverNote(Token marker) {
-    var notes = marker.getNotes();
-    var gmNotes = marker.getGMNotes();
+    var notes = HTMLUtil.htmlize(marker.getNotes(), marker.getNotesType());
+    var gmNotes = HTMLUtil.htmlize(marker.getGMNotes(), marker.getGmNotesType());
 
-    var notesWithoutTags =
-        Optional.ofNullable(notes).map(s -> s.replaceAll("<[^>]*>", "")).orElse(null);
-    var gmNotesWithoutTags =
-        Optional.ofNullable(gmNotes).map(s -> s.replaceAll("<[^>]*>", "")).orElse(null);
-
-    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotesWithoutTags);
-    boolean showNotes = !StringUtil.isEmpty(notesWithoutTags);
+    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotes);
+    boolean showNotes = !StringUtil.isEmpty(notes);
 
     StringBuilder builder = new StringBuilder();
 
@@ -2058,10 +1675,6 @@ public class PointerTool extends DefaultTool {
       builder.append("</span></b><br>");
     }
     if (showNotes) {
-      if (showGMNotes) {
-        notes = notes.replaceAll("</html>", "");
-        notes = notes.replaceAll("</body>", "");
-      }
       builder.append(notes);
       // add a gap between player and gmNotes
       if (showGMNotes) {
@@ -2071,8 +1684,6 @@ public class PointerTool extends DefaultTool {
     if (showGMNotes) {
       if (showNotes) {
         builder.append("<b><span class='title'>GM Notes</span></b><br>");
-        gmNotes = gmNotes.replaceAll("<html[^>]*>", "");
-        gmNotes = gmNotes.replaceAll("<body[^>]*>", "");
       }
       builder.append(gmNotes);
     }
@@ -2081,7 +1692,7 @@ public class PointerTool extends DefaultTool {
       Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
       if (imgSize.width > AppConstants.NOTE_PORTRAIT_SIZE
           || imgSize.height > AppConstants.NOTE_PORTRAIT_SIZE) {
-        SwingUtil.constrainTo(imgSize, AppConstants.NOTE_PORTRAIT_SIZE);
+        AwtUtil.constrainTo(imgSize, AppConstants.NOTE_PORTRAIT_SIZE);
       }
       builder.append("</td><td valign=top>");
       builder
@@ -2095,5 +1706,332 @@ public class PointerTool extends DefaultTool {
     }
     String hoverText = builder.toString();
     return hoverText;
+  }
+
+  private static final class TokenDragOp {
+
+    private final ZoneRenderer renderer;
+    private final Token tokenBeingDragged;
+    private boolean isMovingWithKeys;
+
+    private final ZonePoint dragAnchor;
+    // For snap-to-grid, the distance between the drag anchor and the snapped version of the drag
+    // anchor.
+    private final int snapOffsetX;
+    private final int snapOffsetY;
+    // Keeps track of the start and end of a token drag, in map coordinates.
+    // Useful for smoothly dragging tokens.
+    private final ZonePoint tokenDragStart;
+    private ZonePoint tokenDragCurrent;
+
+    public TokenDragOp(
+        ZoneRenderer renderer,
+        Token tokenBeingDragged,
+        ZonePoint dragStart,
+        boolean isMovingWithKeys) {
+      this.renderer = renderer;
+      this.tokenBeingDragged = tokenBeingDragged;
+      this.isMovingWithKeys = isMovingWithKeys;
+
+      // Drag offset is used to make the drag behave as if started at the token's drag point.
+      this.dragAnchor = tokenBeingDragged.getDragAnchor(renderer.getZone());
+      this.snapOffsetX = dragAnchor.x - tokenBeingDragged.getX();
+      this.snapOffsetY = dragAnchor.y - tokenBeingDragged.getY();
+
+      this.tokenDragStart = new ZonePoint(dragStart);
+      this.tokenDragCurrent = new ZonePoint(this.tokenDragStart);
+    }
+
+    public void finish() {
+      renderer.commitMoveSelectionSet(tokenBeingDragged.getId());
+      exposeFoW(null);
+    }
+
+    public void setWaypoint() {
+      var position = renderer.getKeyTokenDragAnchorPosition(tokenBeingDragged.getId());
+      exposeFoW(position);
+      renderer.toggleMoveSelectionSetWaypoint(tokenBeingDragged.getId(), position);
+      MapTool.serverCommand()
+          .toggleTokenMoveWaypoint(renderer.getZone().getId(), tokenBeingDragged.getId(), position);
+    }
+
+    public void dragTo(int mouseX, int mouseY) {
+      if (isMovingWithKeys) {
+        return;
+      }
+
+      final boolean debugEnabled = DeveloperOptions.Toggle.DebugTokenDragging.get();
+
+      if (debugEnabled) {
+        renderer.setShape3(
+            new Rectangle2D.Double(tokenDragStart.x - 5, tokenDragStart.y - 5, 10, 10));
+        renderer.setShape4(new Rectangle2D.Double(dragAnchor.x - 5, dragAnchor.y - 5, 10, 10));
+      }
+
+      ZonePoint zonePoint = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
+      zonePoint.x += dragAnchor.x - tokenDragStart.x;
+      zonePoint.y += dragAnchor.y - tokenDragStart.y;
+
+      if (debugEnabled) {
+        renderer.setShape2(new Rectangle2D.Double(zonePoint.x - 5, zonePoint.y - 5, 10, 10));
+      }
+      doDragTo(zonePoint);
+    }
+
+    public void moveByKey(double dx, double dy) {
+      isMovingWithKeys = true;
+
+      ZonePoint zp;
+      Grid grid = renderer.getZone().getGrid();
+      if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+        CellPoint cp = grid.convert(tokenDragCurrent);
+        cp.x += (int) dx;
+        cp.y += (int) dy;
+        zp = grid.convert(cp);
+
+        zp.x += snapOffsetX;
+        zp.y += snapOffsetY;
+      } else {
+        // Scalar for dx/dy in zone space. Defaulting to essentially 1 pixel.
+        int moveFactor = 1;
+        if (tokenBeingDragged.isSnapToGrid()) {
+          // Move in grid size increments. Allows tokens set snap-to-grid on gridless maps
+          // to move in whole cell size increments.
+          moveFactor = grid.getSize();
+        }
+        int x = tokenDragCurrent.x + (int) (dx * moveFactor);
+        int y = tokenDragCurrent.y + (int) (dy * moveFactor);
+        zp = new ZonePoint(x, y);
+      }
+
+      doDragTo(zp);
+    }
+
+    private void doDragTo(ZonePoint newAnchorPoint) {
+
+      // For snapped tokens, validation is done snapped as well, even if the "snap token while
+      // dragging preference" if disabled.
+      var validationAnchorPoint = newAnchorPoint;
+      var grid = renderer.getZone().getGrid();
+      ZonePoint previousAnchorPoint = tokenDragCurrent;
+      if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+        // Snap to grid point.
+        validationAnchorPoint = grid.convert(grid.convert(validationAnchorPoint));
+
+        // Adjust given offset from grid to anchor point.
+        validationAnchorPoint.x += this.snapOffsetX;
+        validationAnchorPoint.y += this.snapOffsetY;
+
+        previousAnchorPoint = grid.convert(grid.convert(previousAnchorPoint));
+        previousAnchorPoint.x += this.snapOffsetX;
+        previousAnchorPoint.y += this.snapOffsetY;
+      }
+      if (AppPreferences.tokensSnapWhileDragging.get()) {
+        newAnchorPoint = validationAnchorPoint;
+      }
+
+      // Don't bother if there isn't any movement
+      if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), newAnchorPoint)) {
+        return;
+      }
+
+      // Make sure it's a valid move.
+      int dirx = validationAnchorPoint.x - previousAnchorPoint.x;
+      int diry = validationAnchorPoint.y - previousAnchorPoint.y;
+      boolean isValid =
+          previousAnchorPoint.equals(validationAnchorPoint)
+              || ((renderer.getZone().getGrid().getSize() >= 9)
+                  ? validateMove(renderer.getSelectedTokenSet(), validationAnchorPoint, dirx, diry)
+                  : validateMove_legacy(renderer.getSelectedTokenSet(), validationAnchorPoint));
+      if (!isValid) {
+        return;
+      }
+
+      tokenDragCurrent = new ZonePoint(newAnchorPoint);
+
+      renderer.updateMoveSelectionSet(tokenBeingDragged.getId(), newAnchorPoint);
+      MapTool.serverCommand()
+          .updateTokenMove(
+              renderer.getZone().getId(),
+              tokenBeingDragged.getId(),
+              newAnchorPoint.x,
+              newAnchorPoint.y);
+    }
+
+    /**
+     * Expose the FoW at a ZonePoint, or at the visible area, for the selected token
+     *
+     * @param p the ZonePoint to expose, or a null if exposing visible area and last path
+     */
+    private void exposeFoW(ZonePoint p) {
+      // if has fog(required)
+      // and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
+
+      String name = MapTool.getPlayer().getName();
+      boolean isGM = MapTool.getPlayer().isGM();
+      boolean ownerReveal; // if true, reveal FoW if current player owns the token.
+      boolean hasOwnerReveal; // if true, reveal FoW if token has an owner.
+      boolean noOwnerReveal; // if true, reveal FoW if token has no owners.
+
+      if (MapTool.isPersonalServer()) {
+        ownerReveal =
+            hasOwnerReveal = noOwnerReveal = AppPreferences.autoRevealVisionOnGMMovement.get();
+      } else {
+        ownerReveal = MapTool.getServerPolicy().isAutoRevealOnMovement();
+        hasOwnerReveal = isGM && MapTool.getServerPolicy().isAutoRevealOnMovement();
+        noOwnerReveal = isGM && MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens();
+      }
+      if (renderer.getZone().hasFog() && (ownerReveal || hasOwnerReveal || noOwnerReveal)) {
+        Set<GUID> exposeSet = new HashSet<GUID>();
+        Zone zone = renderer.getZone();
+        for (GUID tokenGUID : renderer.getOwnedTokens(renderer.getSelectedTokenSet())) {
+          Token token = zone.getToken(tokenGUID);
+          if (token == null) {
+            continue;
+          }
+          if (ownerReveal && token.isOwner(name)) {
+            exposeSet.add(tokenGUID);
+          } else if (hasOwnerReveal && token.hasOwners()) {
+            exposeSet.add(tokenGUID);
+          } else if (noOwnerReveal && !token.hasOwners()) {
+            exposeSet.add(tokenGUID);
+          }
+        }
+
+        if (p != null) {
+          FogUtil.exposeVisibleAreaAtWaypoint(renderer, exposeSet, p);
+          return;
+        }
+
+        // Lee: fog exposure according to reveal type
+        if (!zone.getWaypointExposureToggle()) {
+          FogUtil.exposeLastPath(renderer, exposeSet);
+        }
+        FogUtil.exposeVisibleArea(renderer, exposeSet, false);
+      }
+    }
+
+    private boolean validateMove(
+        Set<GUID> tokenSet, ZonePoint leadTokenNewAnchor, int dirx, int diry) {
+      if (MapTool.getPlayer().isGM()) {
+        return true;
+      }
+      boolean isBlocked = false;
+      Zone zone = renderer.getZone();
+      if (zone.hasFog()) {
+        // Check that the new position for each token is within the exposed area
+        Area zoneFog = zone.getExposedArea();
+        if (zoneFog == null) {
+          zoneFog = new Area();
+        }
+        boolean useTokenExposedArea =
+            MapTool.getServerPolicy().isUseIndividualFOW()
+                && zone.getVisionType() != VisionType.OFF;
+        int deltaX = leadTokenNewAnchor.x - this.dragAnchor.x;
+        int deltaY = leadTokenNewAnchor.y - this.dragAnchor.y;
+        Grid grid = zone.getGrid();
+        // Loop through all tokens. As soon as one of them is blocked, stop processing and
+        // return
+        // false.
+        // Jamz: Option this for lead token only? It's annoying dragging a group when one token
+        // has
+        // limited vision...
+        // Or if ANY token in group can move, finish move?
+        for (Iterator<GUID> iter = tokenSet.iterator(); !isBlocked && iter.hasNext(); ) {
+          Area tokenFog = new Area(zoneFog);
+          GUID tokenGUID = iter.next();
+          Token token = zone.getToken(tokenGUID);
+          if (token == null) {
+            continue;
+          }
+
+          // Rolled back change from commit 3d5f619 because of reported bug by dorpond
+          // https://github.com/JamzTheMan/maptool/commit/3d5f619dff6e61c605ee532ac3c86a3860e91864
+          if (useTokenExposedArea) {
+            ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
+            tokenFog.add(meta.getExposedAreaHistory());
+
+            // Jamz: Allow a token without site to move within the current PlayerView
+            if (!token.getHasSight()) {
+              tokenFog.add(renderer.getZoneView().getVisibleArea(new PlayerView(Role.PLAYER)));
+            }
+          }
+
+          Rectangle tokenSize = token.getFootprintBounds(zone);
+          Rectangle destination =
+              new Rectangle(
+                  tokenSize.x + deltaX, tokenSize.y + deltaY, tokenSize.width, tokenSize.height);
+          isBlocked = !grid.validateMove(token, destination, dirx, diry, tokenFog);
+        }
+      }
+      return !isBlocked;
+    }
+
+    private boolean validateMove_legacy(Set<GUID> tokenSet, ZonePoint leadTokenNewAnchor) {
+      Zone zone = renderer.getZone();
+      if (MapTool.getPlayer().isGM()) {
+        return true;
+      }
+      boolean isVisible = true;
+      if (zone.hasFog()) {
+        // Check that the new position for each token is within the exposed area
+        Area fow = zone.getExposedArea();
+        if (fow == null) {
+          return true;
+        }
+        isVisible = false;
+        int fudgeSize = Math.max(Math.min((zone.getGrid().getSize() - 2) / 3 - 1, 8), 0);
+        int deltaX = leadTokenNewAnchor.x - this.dragAnchor.x;
+        int deltaY = leadTokenNewAnchor.y - this.dragAnchor.y;
+        Rectangle bounds = new Rectangle();
+        for (GUID tokenGUID : tokenSet) {
+          Token token = zone.getToken(tokenGUID);
+          if (token == null) {
+            continue;
+          }
+          int x = token.getX() + deltaX;
+          int y = token.getY() + deltaY;
+
+          Rectangle tokenSize = token.getFootprintBounds(zone);
+          /*
+           * Perhaps create a counter and count the number of times that the contains() check returns true? There are currently 9 rectangular areas checked by this code (note the "/3" in the two
+           * 'interval' variables) so checking for 5 or more would mean more than 55%+ of the destination was visible...
+           */
+          int intervalX = tokenSize.width - fudgeSize * 2;
+          int intervalY = tokenSize.height - fudgeSize * 2;
+          int counter = 0;
+          for (int dy = 0; dy < 3; dy++) {
+            for (int dx = 0; dx < 3; dx++) {
+              int by = y + fudgeSize + (intervalY * dy / 3);
+              int bx = x + fudgeSize + (intervalX * dx / 3);
+              bounds.x = bx;
+              bounds.y = by;
+              bounds.width = intervalY * (dy + 1) / 3 - intervalY * dy / 3; // No, this
+              // isn't the
+              // same as
+              // intervalY*1/3
+              // because of
+              // integer
+              // arithmetic
+              bounds.height = intervalX * (dx + 1) / 3 - intervalX * dx / 3;
+
+              if (!MapTool.getServerPolicy().isUseIndividualFOW()
+                  || zone.getVisionType() == VisionType.OFF) {
+                if (fow.contains(bounds)) {
+                  counter++;
+                }
+              } else {
+                ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
+                if (meta.getExposedAreaHistory().contains(bounds)) {
+                  counter++;
+                }
+              }
+            }
+          }
+          isVisible = (counter >= 6);
+        }
+      }
+      return isVisible;
+    }
   }
 }

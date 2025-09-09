@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,11 +34,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import net.rptools.maptool.client.AppStatePersisted;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.ui.AssetPaint;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
@@ -78,9 +80,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     this.elementUnderMouse = elementUnderMouse;
     this.topLevelOnly = topLevelOnly;
 
-    addGMItem(
-        createChangeToMenu(
-            Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
+    addGMItem(createChangeToMenu(Zone.Layer.values()));
     addGMItem(createArrangeMenu());
     if (isDrawnElementGroup(elementUnderMouse)) {
       add(new UngroupDrawingsAction());
@@ -88,11 +88,13 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     add(new MergeDrawingsAction());
     addGMItem(new JSeparator());
     add(new DeleteDrawingAction(selectedDrawSet));
-    // add(new JSeparator());
     add(new GetPropertiesAction());
     add(new SetPropertiesAction());
     add(new SetDrawingName());
     add(new GetDrawingId());
+    if (isDrawnElementTemplate(elementUnderMouse)) {
+      add(new DuplicateDrawingAction(selectedDrawSet));
+    }
     addGMItem(new JSeparator());
     add(createPathVblMenu());
     add(createShapeVblMenu());
@@ -170,6 +172,55 @@ public class DrawPanelPopupMenu extends JPopupMenu {
         MapTool.serverCommand().undoDraw(renderer.getZone().getId(), id);
       }
       selectedDrawings.clear();
+      renderer.repaint();
+      MapTool.getFrame().updateDrawTree();
+      MapTool.getFrame().refresh();
+    }
+  }
+
+  /**
+   * Duplicates selected drawings...
+   *
+   * <p>... but currently limited to templates only as we can drag and manipulate those
+   */
+  public static class DuplicateDrawingAction extends AbstractAction {
+
+    public DuplicateDrawingAction() {
+      super(I18N.getString("DrawPanelPopupMenu.menu.duplicate"));
+    }
+
+    public DuplicateDrawingAction(Set<GUID> selectedDrawings) {
+      super(I18N.getString("DrawPanelPopupMenu.menu.duplicate"));
+      this.selectedDrawings = selectedDrawings;
+    }
+
+    private Set<GUID> selectedDrawings;
+
+    public void setSelectedDrawings(Set<GUID> selectedDrawings) {
+      this.selectedDrawings = selectedDrawings;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      var frame = MapTool.getFrame();
+      var renderer = frame.getCurrentZoneRenderer();
+
+      if (selectedDrawings.isEmpty()) {
+        return;
+      }
+
+      // check to see if this is the required action
+      for (GUID id : selectedDrawings) {
+        DrawnElement de = renderer.getZone().getDrawnElement(id);
+        Drawable d = de.getDrawable();
+        if (de.getDrawable() instanceof AbstractTemplate) {
+          AbstractTemplate at = (AbstractTemplate) d.copy();
+          at.setId(new GUID());
+          // Draw it
+          MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), at);
+          // Allow it to be undone
+          renderer.getZone().addDrawable(de.getPen(), at);
+        }
+      }
       renderer.repaint();
       MapTool.getFrame().updateDrawTree();
       MapTool.getFrame().refresh();
@@ -281,20 +332,20 @@ public class DrawPanelPopupMenu extends JPopupMenu {
         // only bother doing stuff if more than one selected
         List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
         Iterator<DrawnElement> iter = drawableList.iterator();
-        Area a = elementUnderMouse.getDrawable().getArea();
+        Area a = elementUnderMouse.getDrawable().getArea(renderer.getZone());
         while (iter.hasNext()) {
           DrawnElement de = iter.next();
           if (selectedDrawSet.contains(de.getDrawable().getId())) {
             renderer.getZone().removeDrawable(de.getDrawable().getId());
             MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
             de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
-            if (!de.equals(elementUnderMouse)) a.add(de.getDrawable().getArea());
+            if (!de.equals(elementUnderMouse)) a.add(de.getDrawable().getArea(renderer.getZone()));
           }
         }
         Shape s = a;
         Pen newPen = new Pen(elementUnderMouse.getPen());
         if (elementUnderMouse.getDrawable() instanceof LineSegment) newPen = invertPen(newPen);
-        DrawnElement de = new DrawnElement(new ShapeDrawable(s), newPen);
+        DrawnElement de = new DrawnElement(new ShapeDrawable(s, true), newPen);
         de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
         MapTool.serverCommand().draw(renderer.getZone().getId(), newPen, de.getDrawable());
         MapTool.getFrame().updateDrawTree();
@@ -363,28 +414,35 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
     public void actionPerformed(ActionEvent e) {
       ColorPicker cp = MapTool.getFrame().getColorPicker();
-      Pen p = elementUnderMouse.getPen();
-      if (cp.getForegroundPaint() != null) {
-        p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
-        p.setForegroundMode(0);
-      } else {
-        p.setPaint(null);
-        p.setForegroundMode(1);
+
+      // Set the properties for each selected drawing
+      List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+      for (DrawnElement de : drawableList) {
+        if (selectedDrawSet.contains(de.getDrawable().getId())) {
+          Pen p = de.getPen();
+          if (cp.getForegroundPaint() != null) {
+            p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
+            p.setForegroundMode(0);
+          } else {
+            p.setPaint(null);
+            p.setForegroundMode(1);
+          }
+          if (cp.getBackgroundPaint() != null) {
+            p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
+            p.setBackgroundMode(0);
+          } else {
+            p.setBackgroundPaint(null);
+            p.setBackgroundMode(1);
+          }
+          p.setThickness(cp.getStrokeWidth());
+          p.setOpacity(cp.getOpacity());
+          p.setThickness(cp.getStrokeWidth());
+          p.setEraser(cp.isEraseSelected());
+          p.setSquareCap(cp.isSquareCapSelected());
+          MapTool.getFrame().updateDrawTree();
+          MapTool.serverCommand().updateDrawing(renderer.getZone().getId(), p, de);
+        }
       }
-      if (cp.getBackgroundPaint() != null) {
-        p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
-        p.setBackgroundMode(0);
-      } else {
-        p.setBackgroundPaint(null);
-        p.setBackgroundMode(1);
-      }
-      p.setThickness(cp.getStrokeWidth());
-      p.setOpacity(cp.getOpacity());
-      p.setThickness(cp.getStrokeWidth());
-      p.setEraser(cp.isEraseSelected());
-      p.setSquareCap(cp.isSquareCapSelected());
-      MapTool.getFrame().updateDrawTree();
-      MapTool.serverCommand().updateDrawing(renderer.getZone().getId(), p, elementUnderMouse);
     }
   }
 
@@ -408,6 +466,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private class VblAction extends AbstractAction {
     private final boolean isEraser;
     private final boolean pathOnly;
+
     /**
      * @param pathOnly - boolean, just path if true, otherwise fill shape.
      * @param isEraser - boolean, erase VBL if true.
@@ -537,11 +596,14 @@ public class DrawPanelPopupMenu extends JPopupMenu {
    * @return boolean
    */
   private boolean hasPath(DrawnElement drawnElement) {
-    if (drawnElement == null) return false;
-    if (drawnElement.getDrawable() instanceof LineSegment) return true;
-    if (drawnElement.getDrawable() instanceof ShapeDrawable) {
-      ShapeDrawable sd = (ShapeDrawable) drawnElement.getDrawable();
-      return "Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName()) == false;
+    if (drawnElement == null) {
+      return false;
+    }
+    if (drawnElement.getDrawable() instanceof LineSegment) {
+      return true;
+    }
+    if (drawnElement.getDrawable() instanceof ShapeDrawable sd) {
+      return !(sd.getShape() instanceof Ellipse2D);
     }
     return false;
   }
@@ -585,16 +647,10 @@ public class DrawPanelPopupMenu extends JPopupMenu {
         area = new Area(((ShapeDrawable) drawable).getShape());
       }
     }
-    if (isEraser) {
-      renderer.getZone().removeTopology(area);
-      MapTool.serverCommand()
-          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyTypes());
-    } else {
-      renderer.getZone().addTopology(area);
-      MapTool.serverCommand()
-          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyTypes());
-    }
-    renderer.repaint();
+
+    MapTool.serverCommand()
+        .updateMaskTopology(
+            renderer.getZone(), area, isEraser, AppStatePersisted.getTopologyTypes());
   }
 
   private Path2D getPath(Drawable drawable) {

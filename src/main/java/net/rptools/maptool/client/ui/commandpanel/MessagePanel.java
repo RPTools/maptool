@@ -48,9 +48,12 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.util.MessageUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MessagePanel extends JPanel {
 
+  private static final Logger log = LogManager.getLogger(MessagePanel.class);
   private final JScrollPane scrollPane;
   private final HTMLDocument document;
   private final JEditorPane textPane;
@@ -71,6 +74,9 @@ public class MessagePanel extends JPanel {
     textPane.setEditorKit(new MessagePanelEditorKit());
     if (ThemeSupport.shouldUseThemeColorsForChat()) {
       textPane.setUI(new javax.swing.plaf.basic.BasicEditorPaneUI());
+    } else {
+      textPane.setBackground(new Color(253, 253, 254));
+      textPane.setForeground(Color.BLACK);
     }
     textPane.addComponentListener(
         new ComponentListener() {
@@ -149,22 +155,28 @@ public class MessagePanel extends JPanel {
     new MapToolEventBus().getMainEventBus().register(this);
     // Create the style
     StyleSheet style = document.getStyleSheet();
-    var defColor =
+    var fgColour =
         ThemeSupport.shouldUseThemeColorsForChat()
             ? MessageUtil.getDefaultForegroundHex()
             : "black";
+    var bgColour =
+        ThemeSupport.shouldUseThemeColorsForChat()
+            ? MessageUtil.getDefaultBackgroundHex()
+            : "#fdfdfe";
     var mainCss =
-        "body {color: "
-            + defColor
+        "body {background-color: "
+            + bgColour
+            + "; color: "
+            + fgColour
             + " ; font-family: sans-serif; font-size: "
-            + AppPreferences.getFontSize()
+            + AppPreferences.fontSize.get()
             + "pt}";
 
     style.addRule(mainCss);
     style.addRule("div {margin-bottom: 5px}");
     style.addRule(".roll {background:#efefef}");
     setTrustedMacroPrefixColors(
-        AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
+        AppPreferences.trustedPrefixForeground.get(), AppPreferences.trustedPrefixBackground.get());
     var css = MessageUtil.getMessageCss();
     style.addRule(css);
     repaint();
@@ -258,7 +270,6 @@ public class MessagePanel extends JPanel {
                   "(^|\\s|>|\002)(https?://[^<>\002\003\\s]+)", "$1<a href='$2'>$2</a>");
 
           if (!message.getSource().equals(MapTool.getPlayer().getName())) {
-            // TODO change this so 'macro' is case-insensitive
             Matcher m =
                 Pattern.compile(
                         "href=([\"'])\\s*(macro://(?:[^/]*)/(?:[^?]*)(?:\\?(?:.*?))?)\\1\\s*",
@@ -269,8 +280,6 @@ public class MessagePanel extends JPanel {
             }
           }
           // if rolls not being visible to this user result in an empty message, display nothing
-          // TODO The leading and trailing '.*' are probably not needed -- test this before
-          // removing them
           if (!output.matches(".*\002\\s*\003.*")) {
             output = output.replaceAll("\002|\003", "");
 
@@ -285,7 +294,7 @@ public class MessagePanel extends JPanel {
                 MapTool.playSound(SND_MESSAGE_RECEIVED);
               }
             } catch (IOException | BadLocationException ioe) {
-              ioe.printStackTrace();
+              log.error("Error while adding message", ioe);
             }
           }
         });

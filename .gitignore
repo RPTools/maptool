@@ -5,7 +5,6 @@
 ._*
 .Spotlight-V100
 .Trashes
-Icon?
 ehthumbs.db
 Thumbs.db
 
@@ -15,19 +14,21 @@ Thumbs.db
 .gradle
 .gradletasknamecache
 build/
-/bin/
+bin/
 target/
 out/
 /releases/
 *.log
 *~
 \${sys:appHome}/
+build-resources/wikiDocExtraction/*.txt
+build-resources/wikiDocExtraction/*.xml
 
 
 # Automatically Generated
 ################################################################################
 package/windows/MapTool.iss
-src/main/resources/sentry.properties
+package/linux/MapTool*.desktop
 
 
 # IDEs

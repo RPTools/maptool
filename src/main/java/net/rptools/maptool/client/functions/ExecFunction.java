@@ -18,12 +18,14 @@ import com.google.gson.JsonArray;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -31,15 +33,22 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.Function;
 import net.rptools.parser.function.ParameterException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ExecFunction extends AbstractFunction {
 
   /** Singleton instance of the ExecFunction class. */
   private static final ExecFunction instance = new ExecFunction();
 
+  private static final Logger log = LogManager.getLogger(ExecFunction.class);
+
   /** Object used for various operations on {@link JsonArray}s. */
   private JsonArrayFunctions jsonArrayFunctions =
       JSONMacroFunctions.getInstance().getJsonArrayFunctions();
+
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   /**
    * Gets and instance of the ExecFunction class.
@@ -84,7 +93,7 @@ public class ExecFunction extends AbstractFunction {
       jsonTargets = jsonArrayFunctions.parseJsonArray(strTargets);
     } else {
       jsonTargets = new JsonArray();
-      for (String t : strTargets.split(delim)) {
+      for (String t : StringUtil.split(strTargets, delim)) {
         jsonTargets.add(t.trim());
       }
     }
@@ -199,12 +208,14 @@ public class ExecFunction extends AbstractFunction {
    * @param execArgs the arguments to the function
    */
   private static void runExecFunction(String functionName, List<Object> execArgs) {
-    Parser parser = new MapToolExpressionParser().getParser();
+    Parser parser = new ExpressionParserFactory().createMT().getParser();
     Function function = parser.getFunction(functionName);
-    MapTool.getParser().enterTrustedContext(functionName, "execFunction");
+    var loc = macroLocationFactory.createExecFunctionLocation(functionName);
+    MapTool.getParser().enterTrustedContext(functionName, loc);
     try {
       function.evaluate(parser, new MapToolVariableResolver(null), functionName, execArgs);
-    } catch (ParserException ignored) {
+    } catch (ParserException pe) {
+      log.error("execFunction failed:", pe);
     }
     MapTool.getParser().exitContext();
   }

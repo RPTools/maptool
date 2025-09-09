@@ -68,7 +68,7 @@ public class SoundFunctions extends AbstractFunction {
     int psize = args.size();
     if (functionName.equalsIgnoreCase("playStream")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 5);
-      if (!AppPreferences.getPlayStreams()) return -1; // do nothing if disabled in preferences
+      if (!AppPreferences.playStreams.get()) return -1; // do nothing if disabled in preferences
       String strUri = convertToURI(args.get(0), true);
 
       Integer cycleCount = getCycleCount(functionName, args, 1);
@@ -81,7 +81,7 @@ public class SoundFunctions extends AbstractFunction {
           : BigDecimal.ZERO;
     } else if (functionName.equalsIgnoreCase("playClip")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
-      if (!AppPreferences.getPlayStreams()) return -1; // do nothing if disabled in preferences
+      if (!AppPreferences.playStreams.get()) return -1; // do nothing if disabled in preferences
       String strUri = convertToURI(args.get(0), true);
 
       Integer cycleCount = getCycleCount(functionName, args, 1);

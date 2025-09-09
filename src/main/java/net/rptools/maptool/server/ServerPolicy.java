@@ -43,14 +43,34 @@ public class ServerPolicy {
   private boolean hidemapselectui;
   private boolean disablePlayerAssetPanel;
 
-  private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
-  private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
+  private boolean useAstarPathfinding = AppPreferences.pathfindingEnabled.get();
+  private boolean vblBlocksMove = AppPreferences.pathfindingBlockedByVbl.get();
 
   public ServerPolicy() {
     // Default tool tip usage for inline rolls to user preferences.
-    useToolTipsForDefaultRollFormat = AppPreferences.getUseToolTipForInlineRoll();
+    useToolTipsForDefaultRollFormat = AppPreferences.useToolTipForInlineRoll.get();
     // Default movement metric from preferences
-    movementMetric = AppPreferences.getMovementMetric();
+    movementMetric = AppPreferences.movementMetric.get();
+  }
+
+  public ServerPolicy(ServerPolicy other) {
+    this.strictTokenMovement = other.strictTokenMovement;
+    this.isMovementLocked = other.isMovementLocked;
+    this.isTokenEditorLocked = other.isTokenEditorLocked;
+    this.playersCanRevealVision = other.playersCanRevealVision;
+    this.gmRevealsVisionForUnownedTokens = other.gmRevealsVisionForUnownedTokens;
+    this.useIndividualViews = other.useIndividualViews;
+    this.restrictedImpersonation = other.restrictedImpersonation;
+    this.playersReceiveCampaignMacros = other.playersReceiveCampaignMacros;
+    this.useToolTipsForDefaultRollFormat = other.useToolTipsForDefaultRollFormat;
+    this.useIndividualFOW = other.useIndividualFOW;
+    this.isAutoRevealOnMovement = other.isAutoRevealOnMovement;
+    this.includeOwnedNPCs = other.includeOwnedNPCs;
+    this.movementMetric = other.movementMetric;
+    this.hidemapselectui = other.hidemapselectui;
+    this.disablePlayerAssetPanel = other.disablePlayerAssetPanel;
+    this.useAstarPathfinding = other.useAstarPathfinding;
+    this.vblBlocksMove = other.vblBlocksMove;
   }
 
   /**
@@ -164,7 +184,7 @@ public class ServerPolicy {
    * @return the current server time as the difference, measured in milliseconds, between the now
    *     and midnight, January 1, 1970 UTC
    */
-  public long getSystemTime() {
+  private long getSystemTime() {
     return System.currentTimeMillis();
   }
 
@@ -174,7 +194,7 @@ public class ServerPolicy {
     return sdf.format(cal.getTime());
   }
 
-  public String getTimeDate() {
+  private String getTimeDate() {
     return getLocalTimeDate();
   }
 
@@ -194,12 +214,16 @@ public class ServerPolicy {
     useIndividualFOW = flag;
   }
 
-  /** @return the includeOwnedNPCs */
+  /**
+   * @return the includeOwnedNPCs
+   */
   public boolean isIncludeOwnedNPCs() {
     return includeOwnedNPCs;
   }
 
-  /** @param includeOwnedNPCs the includeOwnedNPCs to set */
+  /**
+   * @param includeOwnedNPCs the includeOwnedNPCs to set
+   */
   public void setIncludeOwnedNPCs(boolean includeOwnedNPCs) {
     this.includeOwnedNPCs = includeOwnedNPCs;
   }
@@ -266,7 +290,7 @@ public class ServerPolicy {
         getDisablePlayerAssetPanel() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     WalkerMetric metric =
-        MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();
+        MapTool.isPersonalServer() ? AppPreferences.movementMetric.get() : getMovementMetric();
     sinfo.addProperty("movement metric", metric.name());
 
     sinfo.addProperty("using ai", isUsingAstarPathfinding() ? BigDecimal.ONE : BigDecimal.ZERO);

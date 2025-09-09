@@ -18,6 +18,7 @@ import java.awt.geom.Area;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.VisionType;
@@ -28,6 +29,9 @@ import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.topology.Wall;
+import net.rptools.maptool.model.topology.WallTopology;
 
 public interface ServerCommand {
   void bootPlayer(String player);
@@ -40,21 +44,18 @@ public interface ServerCommand {
 
   void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  default void addTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
+  void replaceWalls(Zone zone, WallTopology walls);
+
+  void updateWall(Zone zone, Wall wall);
+
+  default void updateMaskTopology(
+      Zone zone, Area area, boolean erase, Set<Zone.TopologyType> topologyTypes) {
     for (var topologyType : topologyTypes) {
-      addTopology(zoneGUID, area, topologyType);
+      updateMaskTopology(zone, area, erase, topologyType);
     }
   }
 
-  void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
-
-  default void removeTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
-    for (var topologyType : topologyTypes) {
-      removeTopology(zoneGUID, area, topologyType);
-    }
-  }
-
-  void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
+  void updateMaskTopology(Zone zone, Area area, boolean erase, Zone.TopologyType topologyType);
 
   void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
 
@@ -63,6 +64,8 @@ public interface ServerCommand {
   void setCampaign(Campaign campaign);
 
   void setCampaignName(String name);
+
+  void setLandingMap(@Nullable GUID landingMapId);
 
   void getZone(GUID zoneGUID);
 
@@ -188,6 +191,18 @@ public interface ServerCommand {
 
   void removeData(String type, String namespace, String name);
 
+  /**
+   * Adds or removes a light source on {@code token}.
+   *
+   * @param token The token to modify
+   * @param toggleOn If {@code true}, the light source is turned on for the token. Otherwise, it is
+   *     turned off.
+   * @param lightSource The light source to add.
+   */
+  void toggleLightSourceOnToken(Token token, boolean toggleOn, LightSource lightSource);
+
+  void setTokenMaskTopology(Token token, @Nullable Area area, Zone.TopologyType topologyType);
+
   void updateTokenProperty(Token token, Token.Update update, int value);
 
   void updateTokenProperty(Token token, Token.Update update, String value1, String value2);
@@ -200,10 +215,6 @@ public interface ServerCommand {
   void updateTokenProperty(Token token, Token.Update update, MacroButtonProperties value);
 
   void updateTokenProperty(Token token, Token.Update update, String value);
-
-  void updateTokenProperty(Token token, Token.Update update, LightSource value);
-
-  void updateTokenProperty(Token token, Token.Update update, LightSource value1, String value2);
 
   void updateTokenProperty(Token token, Token.Update update, int value1, int value2);
 
@@ -222,10 +233,9 @@ public interface ServerCommand {
   void updateTokenProperty(
       Token token, Token.Update update, boolean value1, int value2, int value3);
 
-  void updateTokenProperty(
-      Token token, Token.Update update, Zone.TopologyType topologyType, Area area);
-
   void updateTokenProperty(Token token, Token.Update update, String value1, boolean value2);
 
   void updateTokenProperty(Token token, Token.Update update, String value, BigDecimal value2);
+
+  void updatePlayerStatus(Player player);
 }

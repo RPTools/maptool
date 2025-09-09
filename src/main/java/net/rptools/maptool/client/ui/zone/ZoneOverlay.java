@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Graphics2D;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 
 /** */
 public interface ZoneOverlay {

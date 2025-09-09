@@ -17,8 +17,8 @@ package net.rptools.maptool.model;
 import static org.junit.jupiter.api.Assertions.*;
 
 import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRendererFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

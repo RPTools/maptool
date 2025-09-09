@@ -27,8 +27,10 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.OverlayVisibilityChanged;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,11 +42,13 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
 
   /** The default rule for an invisible body tag. */
   private static final String CSS_BODY =
-      "body { font-family: sans-serif; font-size: %dpt; background: none; -webkit-user-select: none; margin: 0; --pointermap:pass; overflow-x: hidden; overflow-y: hidden;}";
+      "body { font-family: sans-serif; font-size: %dpt; background: none; -webkit-user-select:"
+          + " none; margin: 0; --pointermap:pass; overflow-x: hidden; overflow-y: hidden;}";
 
   /** CSS rule: clicks on hyperlinks, buttons and input elements are not forwarded to map. */
   private static final String CSS_POINTERMAP =
-      "a {--pointermap:block;} button {--pointermap:block;} input {--pointermap:block;} area {--pointermap:block;} select {--pointermap:block}";
+      "a {--pointermap:block;} button {--pointermap:block;} input {--pointermap:block;} area"
+          + " {--pointermap:block;} select {--pointermap:block}";
 
   /** Script to return the HTML element at coordinates %d, %d. */
   private static final String SCRIPT_GET_FROM_POINT = "document.elementFromPoint(%d, %d)";
@@ -69,11 +73,11 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
 
   /** The RGB value for a fully invisible color (alpha = 0). */
   private static final int COLOR_INVISIBLE = new Color(0, 0, 0, 0).getRGB();
-  /** The RGB value for a nearly invisible color (alpha = 1). */
-  private static final int COLOR_VISIBLE = new Color(128, 128, 128, 1).getRGB();
 
   /** The ZOrder of the overlay. */
   private int zOrder;
+
+  private boolean locked;
 
   /** The name of the overlay. */
   private final String name;
@@ -84,11 +88,12 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   /** The map of the macro callbacks. */
   private final Map<String, String> macroCallbacks = new HashMap<>();
 
-  HTMLOverlayManager(String name, int zOrder) {
+  HTMLOverlayManager(String name, int zOrder, boolean locked) {
     super("overlay", name);
     addActionListener(this); // add the action listeners for form events
     this.name = name;
     this.zOrder = zOrder;
+    this.locked = locked;
   }
 
   @Override
@@ -96,9 +101,15 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     super.setupWebView(webView);
   }
 
-  /** @return the zOrder of the overlay. */
+  /**
+   * @return the zOrder of the overlay.
+   */
   public int getZOrder() {
     return zOrder;
+  }
+
+  public boolean getLocked() {
+    return locked;
   }
 
   /**
@@ -110,7 +121,13 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     this.zOrder = zOrder;
   }
 
-  /** @return the name of the overlay. */
+  void setLocked(boolean locked) {
+    this.locked = locked;
+  }
+
+  /**
+   * @return the name of the overlay.
+   */
   public String getName() {
     return name;
   }
@@ -126,11 +143,12 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   }
 
   @Override
-  public void updateContents(final String html, boolean scrollReset) {
-    // Sets the background to be barely visible. Workaround to fix #1976.
-    setPageBackgroundColor(COLOR_VISIBLE);
+  public void updateContents(final HTMLContent htmlContent, boolean scrollReset) {
+    // If we don't set the background to invisible here, we might see a white flash for overlays
+    // whose content is slow to load.
+    setPageBackgroundColor(COLOR_INVISIBLE);
     macroCallbacks.clear();
-    super.updateContents(html, scrollReset);
+    super.updateContents(htmlContent, scrollReset);
   }
 
   /**
@@ -153,10 +171,12 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     }
   }
 
-  /** @return the rule for an invisible body. */
+  /**
+   * @return the rule for an invisible body.
+   */
   @Override
   String getCSSRule() {
-    return String.format(CSS_BODY, AppPreferences.getFontSize())
+    return String.format(CSS_BODY, AppPreferences.fontSize.get())
         + CSS_SPAN
         + CSS_DIV
         + CSS_POINTERMAP;
@@ -172,7 +192,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
       WebPage page = (WebPage) getPageHandle.invokeExact(getWebEngine());
       page.setBackgroundColor(rgb);
     } catch (Throwable throwable) {
-      throwable.printStackTrace();
+      log.error("Error while setting page background color", throwable);
     }
   }
 
@@ -212,6 +232,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   @Override
   public void setVisible(boolean visible) {
     getWebView().setVisible(visible);
+    new MapToolEventBus().getMainEventBus().post(new OverlayVisibilityChanged(this, visible));
   }
 
   @Override
@@ -241,7 +262,8 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   public void remove(Component component) {}
 
   /**
-   * Returns a JsonObject with the properties of the overlay. Includes name, zorder, and visible.
+   * Returns a JsonObject with the properties of the overlay. Includes name, zorder, locked, and
+   * visible.
    *
    * @return the properties
    */
@@ -249,9 +271,11 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     JsonObject jobj = new JsonObject();
     jobj.addProperty("name", getName());
     jobj.addProperty("zorder", getZOrder());
+    jobj.addProperty("locked", getLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
     jobj.addProperty("visible", isVisible() ? BigDecimal.ONE : BigDecimal.ZERO);
     return jobj;
   }
+
   /**
    * Act when an action is performed.
    *

@@ -14,64 +14,107 @@
  */
 package net.rptools.maptool.model;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.IsometricGridDto;
-import net.rptools.maptool.util.GraphicsUtil;
 
 public class IsometricGrid extends Grid {
-  /**
-   * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at
-   * approx 30 degrees. However rather than being true isometric, each cell is twice as wide as
-   * high. This makes converting images significantly easier for end-users.
-   */
-  private static final int ISO_ANGLE = 27;
-
-  private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
-  private static int[] FACING_ANGLES;
-  private static List<TokenFootprint> footprintList;
-  private static BufferedImage pathHighlight =
+  private static final BufferedImage pathHighlight =
       RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
-
-  public IsometricGrid() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-  }
-
-  public IsometricGrid(boolean faceEdges, boolean faceVertices) {
-    setFacings(faceEdges, faceVertices);
-  }
 
   public boolean isIsometric() {
     return true;
+  }
+
+  @Override
+  protected List<TokenFootprint> createFootprints() {
+    return List.of(
+        new TokenFootprint(
+            new GUID("7F000101CD65152A010000002A000101"),
+            "Fine",
+            I18N.getString("TokenFootprint.name.fine"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CD65152A020000002A000101"),
+            "Diminutive",
+            I18N.getString("TokenFootprint.name.diminutive"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CE65152A030000002A000100"),
+            "Tiny",
+            I18N.getString("TokenFootprint.name.tiny"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CE65152A040000002A000100"),
+            "Small",
+            I18N.getString("TokenFootprint.name.small"),
+            false,
+            0.75),
+        new TokenFootprint(
+            new GUID("7F000101CF65152A050000002A000101"),
+            "Medium",
+            I18N.getString("TokenFootprint.name.medium"),
+            true,
+            1.0),
+        new TokenFootprint(
+            new GUID("7F000101D065152A060000002A000100"),
+            "Large",
+            I18N.getString("TokenFootprint.name.large"),
+            squareFootprintPoints(2)),
+        new TokenFootprint(
+            new GUID("7F000101D065152A070000002A000100"),
+            "Huge",
+            I18N.getString("TokenFootprint.name.huge"),
+            squareFootprintPoints(3)),
+        new TokenFootprint(
+            new GUID("7F000101D165152A080000002A000101"),
+            "Gargantuan",
+            I18N.getString("TokenFootprint.name.gargantuan"),
+            squareFootprintPoints(4)),
+        new TokenFootprint(
+            new GUID("7F000101E165152A090000002A000101"),
+            "Colossal",
+            I18N.getString("TokenFootprint.name.colossal"),
+            squareFootprintPoints(6)));
+  }
+
+  private static Point[] squareFootprintPoints(int size) {
+    Point[] pa = new Point[size * size - 1];
+
+    int indx = 0;
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        if (y == 0 && x == 0) {
+          continue;
+        }
+        pa[indx] = new Point(x, y);
+        indx++;
+      }
+    }
+    return pa;
   }
 
   /**
@@ -104,33 +147,7 @@ public class IsometricGrid extends Grid {
   }
 
   public double getCellHeightHalf() {
-    return getSize() / 2;
-  }
-
-  public static double degreesFromIso(double facing) {
-    /**
-     * Given a facing from an isometric map turn it into plan map equivalent i.e. 27 degree converts
-     * to 45 degree
-     */
-    double newFacing = facing;
-    if (Math.cos(facing) != 0) {
-      double v1 = Math.sin(Math.toRadians(newFacing)) * 2;
-      double v2 = Math.cos(Math.toRadians(newFacing));
-      double v3 = Math.toDegrees(Math.atan(v1 / v2));
-      if (facing > 90 || facing < -90) v3 = 180 + v3;
-      newFacing = Math.floor(v3);
-    }
-    return newFacing;
-  }
-
-  public static double degreesToIso(double facing) {
-    /**
-     * Given a facing from a plan map turn it into isometric map equivalent i.e 45 degree converts
-     * to 30 degree
-     */
-    double iso = Math.asin((Math.sin(facing) / 2) / Math.cos(facing));
-    System.out.println("in=" + facing + " out=" + iso);
-    return iso;
+    return getSize() / 2f;
   }
 
   @Override
@@ -144,8 +161,25 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  public int[] getFacingAngles() {
-    return FACING_ANGLES;
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
+    if (!faceEdges && !faceVertices) {
+      // Facing not support. Return a default answer.
+      return 90;
+    }
+
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = (faceEdges && faceVertices) ? 45 : 90;
+    /* The position of the first standard facing CCW from zero. */
+    int base = (faceEdges && !faceVertices) ? 45 : 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override
@@ -179,18 +213,6 @@ public class IsometricGrid extends Grid {
           return true;
         }
       };
-
-  @Override
-  public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
-      } catch (IOException ioe) {
-        MapTool.showError("SquareGrid.error.squareGridNotLoaded", ioe);
-      }
-    }
-    return footprintList;
-  }
 
   @Override
   public CellPoint convert(ZonePoint zp) {
@@ -235,7 +257,7 @@ public class IsometricGrid extends Grid {
   public ZoneWalker createZoneWalker() {
     WalkerMetric metric =
         MapTool.isPersonalServer()
-            ? AppPreferences.getMovementMetric()
+            ? AppPreferences.movementMetric.get()
             : MapTool.getServerPolicy().getMovementMetric();
     return new AStarSquareEuclideanWalker(getZone(), metric);
   }
@@ -246,15 +268,18 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  protected Area createCellShape(int size) {
-    int x[] = {size, size * 2, size, 0};
-    int y[] = {0, size / 2, size, size / 2};
+  protected Area createCellShape() {
+    return createCellShape(getSize());
+  }
+
+  private Area createCellShape(int size) {
+    int[] x = {size, size * 2, size, 0};
+    int[] y = {0, size / 2, size, size / 2};
     return new Area(new Polygon(x, y, 4));
   }
 
   @Override
   public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
-    System.out.println("install iso movement keys");
     if (movementKeys == null) {
       movementKeys = new HashMap<KeyStroke, Action>(18); // This is 13/0.75, rounded up
       int size = getSize();
@@ -290,7 +315,6 @@ public class IsometricGrid extends Grid {
 
   @Override
   public void uninstallMovementKeys(Map<KeyStroke, Action> actionMap) {
-    System.out.println("uninstall iso movement keys");
     if (movementKeys != null) {
       for (KeyStroke key : movementKeys.keySet()) {
         actionMap.remove(key);
@@ -299,106 +323,40 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
-    if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-90, 0, 90, 180};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-135, -45, 45, 135};
-    } else {
-      FACING_ANGLES = new int[] {90};
-    }
+  protected int getTokenFacingAngleRelativeToGridAxis(Token token) {
+    return -(token.getFacing() + 45);
   }
 
   @Override
-  public Area getShapedArea(
+  protected @Nonnull Area getShapedAreaWithoutFootprint(
       ShapeType shape,
-      Token token,
-      double range,
+      int tokenFacingAngle,
+      double visionRange,
+      double width,
       double arcAngle,
-      int offsetAngle,
-      boolean scaleWithToken) {
-    if (shape == null) {
-      shape = ShapeType.CIRCLE;
-    }
-    int visionDistance = getZone().getTokenVisionInPixels();
-    double visionRange =
-        (range == 0) ? visionDistance : range * getSize() / getZone().getUnitsPerCell();
+      int offsetAngle) {
+    var orthoShape =
+        super.getShapedAreaWithoutFootprint(
+            shape, tokenFacingAngle, visionRange, width, arcAngle, offsetAngle);
 
-    if (scaleWithToken) {
-      Rectangle footprint = token.getFootprint(this).getBounds(this);
-      visionRange += footprint.getHeight() / 2;
-      System.out.println(token.getName() + " footprint.getWidth() " + footprint.getWidth());
-      System.out.println(token.getName() + " footprint.getHeight() " + footprint.getHeight());
-    }
-    // System.out.println("this.getDefaultFootprint() " + this.getDefaultFootprint());
-    // System.out.println("token.getWidth() " + token.getWidth());
+    AffineTransform at = new AffineTransform();
+    var sqrt2 = Math.sqrt(2);
+    at.scale(sqrt2, sqrt2 / 2);
+    at.rotate(Math.PI / 4);
+    orthoShape.transform(at);
 
-    Area visibleArea = new Area();
-    switch (shape) {
-      case CIRCLE:
-        visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-        // visibleArea = new Area(new Ellipse2D.Double(-visionRange * 2, -visionRange, visionRange *
-        // 4, visionRange * 2));
-        visibleArea =
-            GraphicsUtil.createLineSegmentEllipse(
-                -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
-        break;
-      case SQUARE:
-        int x[] = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
-        int y[] = {(int) -visionRange, 0, (int) visionRange, 0};
-        visibleArea = new Area(new Polygon(x, y, 4));
-        break;
-      case CONE:
-        if (token.getFacing() == null) {
-          token.setFacing(0);
-        }
-        // Rotate the vision range by 45 degrees for isometric view
-        visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-        // Get the cone, use degreesFromIso to convert the facing from isometric to plan
+    return orthoShape;
+  }
 
-        // Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange,
-        // visionRange * 4, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle *
-        // 1.0), arcAngle,
-        // Arc2D.PIE));
-        Arc2D cone =
-            new Arc2D.Double(
-                -visionRange * 2,
-                -visionRange,
-                visionRange * 4,
-                visionRange * 2,
-                token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0),
-                arcAngle,
-                Arc2D.PIE);
-        GeneralPath path = new GeneralPath();
-        path.append(cone.getPathIterator(null, 1), false); // Flatten the cone to remove 'curves'
-        Area tempvisibleArea = new Area(path);
-
-        // Get the cell footprint
-        Rectangle footprint =
-            token.getFootprint(getZone().getGrid()).getBounds(getZone().getGrid());
-        footprint.x = -footprint.width / 2;
-        footprint.y = -footprint.height / 2;
-        // convert the cell footprint to an area
-        Area cellShape = getZone().getGrid().createCellShape(footprint.height);
-        // convert the area to isometric view
-        AffineTransform mtx = new AffineTransform();
-        mtx.translate(-footprint.width / 2, -footprint.height / 2);
-        cellShape.transform(mtx);
-        // join cell footprint and cone to create viewable area
-        visibleArea.add(cellShape);
-        visibleArea.add(tempvisibleArea);
-        break;
-      default:
-        // visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2,
-        // visionRange * 2));
-        visibleArea =
-            GraphicsUtil.createLineSegmentEllipse(
-                -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
-        break;
-    }
-    return visibleArea;
+  @Override
+  protected @Nonnull Area getFootprintShapedAreaForCone(Rectangle footprint) {
+    // convert the cell footprint to an area
+    Area cellShape = createCellShape(footprint.height);
+    // convert the area to isometric view
+    AffineTransform mtx = new AffineTransform();
+    mtx.translate(-footprint.width / 2f, -footprint.height / 2f);
+    cellShape.transform(mtx);
+    return cellShape;
   }
 
   @Override
@@ -413,7 +371,7 @@ public class IsometricGrid extends Grid {
     footprint.x = -footprint.width / 2;
     footprint.y = -footprint.height / 2;
     // convert the cell footprint to an area
-    Area cellShape = getZone().getGrid().createCellShape(footprint.height);
+    Area cellShape = createCellShape(footprint.height);
     // convert the area to isometric view
     AffineTransform mtx = new AffineTransform();
     mtx.translate(bounds.getBounds().getX(), bounds.getBounds().getY());
@@ -432,8 +390,7 @@ public class IsometricGrid extends Grid {
     double gridSize = getSize() * scale;
     double isoHeight = getSize() * scale;
     double isoWidth = getSize() * 2 * scale;
-
-    g.setColor(new Color(getZone().getGridColor()));
+    Path2D path = new Path2D.Double();
 
     int offX = (int) (renderer.getViewOffsetX() % isoWidth + getOffsetX() * scale);
     int offY = (int) (renderer.getViewOffsetY() % gridSize + getOffsetY() * scale);
@@ -443,7 +400,7 @@ public class IsometricGrid extends Grid {
 
     for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
       for (double col = startCol; col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
-        drawHatch(renderer, g, (int) (col + offX), (int) (row + offY));
+        path.append(drawHatch(renderer, (int) (col + offX), (int) (row + offY)), false);
       }
     }
 
@@ -453,17 +410,23 @@ public class IsometricGrid extends Grid {
       for (double col = startCol - (isoWidth / 2);
           col < bounds.x + bounds.width + isoWidth;
           col += isoWidth) {
-        drawHatch(renderer, g, (int) (col + offX), (int) (row + offY));
+        path.append(drawHatch(renderer, (int) (col + offX), (int) (row + offY)), false);
       }
     }
+    GridRenderer.drawGridShape(g, path);
   }
 
-  private void drawHatch(ZoneRenderer renderer, Graphics2D g, int x, int y) {
+  private Shape drawHatch(ZoneRenderer renderer, int x, int y) {
     double isoWidth = getSize() * renderer.getScale();
     int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
-    g.setStroke(new BasicStroke(AppState.getGridSize()));
-    g.drawLine(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize);
-    g.drawLine(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize);
+    Path2D path = new Path2D.Double();
+    path.append(
+        new Line2D.Double(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize),
+        false);
+    path.append(
+        new Line2D.Double(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize),
+        false);
+    return path;
   }
 
   /**
@@ -490,7 +453,7 @@ public class IsometricGrid extends Grid {
     BufferedImage rotateImage = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = rotateImage.createGraphics();
     g.translate((neww - w) / 2, (newh - h) / 2);
-    g.rotate(Math.toRadians(45), w / 2, h / 2);
+    g.rotate(Math.toRadians(45), w / 2f, h / 2f);
     g.drawRenderedImage(planImage, null);
     g.dispose();
     // scale image to half height
@@ -516,7 +479,6 @@ public class IsometricGrid extends Grid {
     int nSize = (planArea.getBounds().width + planArea.getBounds().height);
 
     return resize(rotate(planArea), nSize, nSize / 2);
-    // return rotate(planArea);
   }
 
   private static Area rotate(Area planArea) {
@@ -528,8 +490,8 @@ public class IsometricGrid extends Grid {
     int neww = (int) Math.floor(w * cos + h * sin);
     int newh = (int) Math.floor(h * cos + w * sin);
 
-    double scaleX = neww / w;
-    double scaleY = newh / h;
+    double scaleX = 1f * neww / w;
+    double scaleY = 1f * newh / h;
 
     int tx = (neww - w) / 2;
     int ty = (newh - h) / 2;
@@ -537,13 +499,13 @@ public class IsometricGrid extends Grid {
     // Rotate Area 45 degrees
     AffineTransform atArea = AffineTransform.getScaleInstance(scaleX, scaleY);
     atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
-    atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(45), w / 2, h / 2));
+    atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(45), w / 2f, h / 2f));
 
     return new Area(atArea.createTransformedShape(planArea));
   }
 
   private static Area resize(Area planArea, int newWidth, int newHeight) {
-    // Resize into a Area
+    // Resize into an Area
     double w = planArea.getBounds().width, h = planArea.getBounds().height;
     double scaleX = newWidth / w;
     double scaleY = newHeight / h;

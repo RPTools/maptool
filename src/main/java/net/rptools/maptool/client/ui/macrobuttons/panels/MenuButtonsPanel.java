@@ -14,14 +14,14 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
-import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 
 public class MenuButtonsPanel extends JToolBar {
@@ -47,8 +47,8 @@ public class MenuButtonsPanel extends JToolBar {
             ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
             // Check if there is a map. Fix #1605
             if (zr != null) {
-              zr.selectTokens(new Rectangle(zr.getX(), zr.getY(), zr.getWidth(), zr.getHeight()));
-              zr.updateAfterSelection();
+              final var tokens = zr.getTokenIdsOnScreen();
+              zr.getSelectionModel().replaceSelection(tokens);
             }
           }
         });
@@ -65,8 +65,7 @@ public class MenuButtonsPanel extends JToolBar {
           public void mouseReleased(MouseEvent event) {
             ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
             if (renderer != null) {
-              renderer.clearSelectedTokens();
-              renderer.updateAfterSelection();
+              renderer.getSelectionModel().replaceSelection(Collections.emptyList());
             }
           }
         });
@@ -83,7 +82,7 @@ public class MenuButtonsPanel extends JToolBar {
           public void mouseReleased(MouseEvent event) {
             ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
             if (zr != null) {
-              zr.undoSelectToken();
+              zr.getSelectionModel().undoSelection(zr.getActiveLayer());
             }
           }
         });

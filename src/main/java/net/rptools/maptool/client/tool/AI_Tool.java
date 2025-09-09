@@ -24,14 +24,18 @@ public class AI_Tool extends DefaultTool {
   public AI_Tool() {
     // Server policy is not available yet but that's ok, we have it saved as a preference which
     // is OK at this stage of initialization.
-    setSelected(AppPreferences.isUsingAstarPathfinding());
+    setSelected(AppPreferences.pathfindingEnabled.get());
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    AppPreferences.setUseAstarPathfinding(isSelected());
-    MapTool.getServerPolicy().setUsingAstarPathfinding(isSelected());
-    MapTool.updateServerPolicy();
+    AppPreferences.pathfindingEnabled.set(isSelected());
+
+    var client = MapTool.getClient();
+    var policy = client.getServerPolicy();
+    policy.setUsingAstarPathfinding(isSelected());
+    client.setServerPolicy(policy);
+    client.getServerCommand().setServerPolicy(policy);
 
     // Trigger AI_UseVblTool's isAvailable
     MapTool.getFrame().getToolbox().updateTools();

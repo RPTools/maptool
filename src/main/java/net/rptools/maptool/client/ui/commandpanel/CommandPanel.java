@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
+import net.rptools.lib.AwtUtil;
+import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ChatMessageAdded;
@@ -36,16 +38,20 @@ import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.tokens.TokenPanelChanged;
 import net.rptools.maptool.model.zones.TokenEdited;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
 
 public class CommandPanel extends JPanel {
+
   private static final long serialVersionUID = 8710948417044703674L;
+
+  private static final String COMMAND_UP_ID = "action.commandUp";
+  private static final String COMMAND_DOWN_ID = "action.commandDown";
 
   private final List<String> commandHistory = new LinkedList<String>();
 
@@ -65,13 +71,12 @@ public class CommandPanel extends JPanel {
           RessourceManager.getSmallIcon(Icons.ACTION_CANCEL).getImage());
 
   // Chat timers
-  // private long chatNotifyDuration; // Initialize it on first load
-  // private Timer chatTimer;
 
   private ChatProcessor chatProcessor;
 
   /** The impersonated identity as displayed in the Impersonate panel. */
   private TokenIdentity globalIdentity = new TokenIdentity();
+
   /** The stack of impersonated identities. The most current is at the top of the stack. */
   private final Stack<TokenIdentity> identityStack = new Stack<>();
 
@@ -81,7 +86,6 @@ public class CommandPanel extends JPanel {
   public CommandPanel() {
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createLineBorder(Color.gray));
-
     add(BorderLayout.SOUTH, createSouthPanel());
     add(BorderLayout.CENTER, getMessagePanel());
     initializeSmilies();
@@ -198,12 +202,16 @@ public class CommandPanel extends JPanel {
     }
   }
 
-  /** @return whether the current identity is a token. */
+  /**
+   * @return whether the current identity is a token.
+   */
   public boolean isImpersonatingToken() {
     return getCurrentIdentity().validToken();
   }
 
-  /** @return whether the global identity is a token. */
+  /**
+   * @return whether the global identity is a token.
+   */
   public boolean isGlobalImpersonatingToken() {
     return globalIdentity.validToken();
   }
@@ -290,7 +298,7 @@ public class CommandPanel extends JPanel {
     // Resize on demand
     if (commandTextArea != null) {
       commandTextArea.setFont(
-          commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
+          commandTextArea.getFont().deriveFont((float) AppPreferences.fontSize.get()));
       doLayout();
     }
 
@@ -311,10 +319,13 @@ public class CommandPanel extends JPanel {
    * specified name.
    */
   public static class TokenIdentity {
+
     /** The name of the identity. If null, nothing is impersonated. */
     private final String identityName;
+
     /** The GUID of the identity. */
     private final GUID identityGUID;
+
     /** Whether the player is allowed to set the token in the Impersonate panel. */
     private final boolean canImpersonate;
 
@@ -385,36 +396,51 @@ public class CommandPanel extends JPanel {
       }
     }
 
-    /** @return a string representing the identity. */
+    /**
+     * @return a string representing the identity.
+     */
     public String getIdentity() {
       if (identityName == null) {
-        if (identityGUID == null) return MapTool.getPlayer().getName();
-        else return identityGUID.toString();
+        if (identityGUID == null) {
+          return MapTool.getPlayer().getName();
+        } else {
+          return identityGUID.toString();
+        }
       }
       return identityName;
     }
 
-    /** @return a string for the character label of the identity. */
+    /**
+     * @return a string for the character label of the identity.
+     */
     public String getCharacterLabel() {
       return hasName() ? identityName : "";
     }
 
-    /** @return the GUID of the identity. */
+    /**
+     * @return the GUID of the identity.
+     */
     public GUID getIdentityGUID() {
       return identityGUID;
     }
 
-    /** @return the token of the identity. */
+    /**
+     * @return the token of the identity.
+     */
     public Token getToken() {
       return FindTokenFunctions.findToken(identityGUID, null);
     }
 
-    /** @return whether the identity has a name. */
+    /**
+     * @return whether the identity has a name.
+     */
     public boolean hasName() {
       return identityName != null;
     }
 
-    /** @return whether the token can still be found on the current map. */
+    /**
+     * @return whether the token can still be found on the current map.
+     */
     public boolean validToken() {
       if (identityGUID == null) {
         return false;
@@ -474,12 +500,16 @@ public class CommandPanel extends JPanel {
 
             public void itemStateChanged(ItemEvent e) {
               if (e.getStateChange() == ItemEvent.SELECTED) {
-                if (ours != null) commandTextArea.removeKeyListener(ours);
+                if (ours != null) {
+                  commandTextArea.removeKeyListener(ours);
+                }
                 ours = null;
                 // Go ahead and turn off the chat panel right away.
                 MapTool.getFrame().getChatTypingPanel().setVisible(false);
               } else if (e.getStateChange() == ItemEvent.DESELECTED) {
-                if (ours == null) ours = new ChatTypingListener();
+                if (ours == null) {
+                  ours = new ChatTypingListener();
+                }
                 commandTextArea.addKeyListener(ours);
               }
             }
@@ -525,9 +555,6 @@ public class CommandPanel extends JPanel {
     constraints.gridy = 0;
 
     panel.add(getTextColorWell(), constraints);
-
-    // constraints.gridy++;
-    // panel.add(Box.createVerticalStrut(2), constraints);
 
     constraints.gridy++;
     panel.add(getScrollLockButton(), constraints);
@@ -586,27 +613,33 @@ public class CommandPanel extends JPanel {
             }
           };
       commandTextArea.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-      commandTextArea.setPreferredSize(new Dimension(50, 40)); // XXX should be resizable
-      commandTextArea.setFont(new Font("sans-serif", 0, AppPreferences.getFontSize()));
+      commandTextArea.setPreferredSize(new Dimension(50, 40));
+      commandTextArea.setFont(new Font("sans-serif", 0, AppPreferences.fontSize.get()));
+      if (!ThemeSupport.shouldUseThemeColorsForChat()) {
+        commandTextArea.setBackground(Color.WHITE);
+        commandTextArea.setForeground(Color.BLACK);
+      }
       commandTextArea.addKeyListener(new ChatTypingListener());
       SwingUtil.useAntiAliasing(commandTextArea);
 
       ActionMap actions = commandTextArea.getActionMap();
-      actions.put(AppActions.COMMIT_COMMAND_ID, AppActions.COMMIT_COMMAND);
-      actions.put(AppActions.ENTER_COMMAND_ID, AppActions.ENTER_COMMAND);
-      actions.put(AppActions.CANCEL_COMMAND_ID, AppActions.CANCEL_COMMAND);
-      actions.put(AppActions.COMMAND_UP_ID, new CommandHistoryUpAction());
-      actions.put(AppActions.COMMAND_DOWN_ID, new CommandHistoryDownAction());
-      actions.put(AppActions.NEWLINE_COMMAND_ID, AppActions.NEWLINE_COMMAND);
+      actions.put(AppActions.COMMIT_COMMAND.getI18nKey(), AppActions.COMMIT_COMMAND);
+      actions.put(AppActions.ENTER_COMMAND.getI18nKey(), AppActions.ENTER_COMMAND);
+      actions.put(AppActions.CANCEL_COMMAND.getI18nKey(), AppActions.CANCEL_COMMAND);
+      actions.put(COMMAND_UP_ID, new CommandHistoryUpAction());
+      actions.put(COMMAND_DOWN_ID, new CommandHistoryDownAction());
+      actions.put(AppActions.NEWLINE_COMMAND.getI18nKey(), AppActions.NEWLINE_COMMAND);
 
       InputMap inputs = commandTextArea.getInputMap();
-      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), AppActions.CANCEL_COMMAND_ID);
-      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), AppActions.COMMIT_COMMAND_ID);
-      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), AppActions.COMMAND_UP_ID);
-      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), AppActions.COMMAND_DOWN_ID);
+      inputs.put(
+          KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), AppActions.CANCEL_COMMAND.getI18nKey());
+      inputs.put(
+          KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), AppActions.COMMIT_COMMAND.getI18nKey());
+      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), COMMAND_UP_ID);
+      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), COMMAND_DOWN_ID);
       inputs.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK),
-          AppActions.NEWLINE_COMMAND_ID);
+          AppActions.NEWLINE_COMMAND.getI18nKey());
     }
     return commandTextArea;
   }
@@ -616,6 +649,7 @@ public class CommandPanel extends JPanel {
    * removes the typing notification after the duration set in AppPreferences expires.
    */
   private class ChatTypingListener extends KeyAdapter {
+
     @Override
     public void keyReleased(KeyEvent kre) {
       // Get the key released
@@ -644,9 +678,6 @@ public class CommandPanel extends JPanel {
     }
   }
 
-  /*
-   * FIXME: this is insufficient for stopping faked rolls; the user can still do something like &{"laquo;"}.
-   */
   public static final Pattern CHEATER_PATTERN =
       Pattern.compile("\u00AB|\u00BB|&#171;?|&#187;?|&laquo;?|&raquo;?|&#xAB;?|&#xBB;?|\036|\037");
 
@@ -701,7 +732,6 @@ public class CommandPanel extends JPanel {
       return;
     }
     // Make sure they aren't trying to break out of the div
-    // FIXME: as above, </{"div"}> can be used to get around this
     int divCount = StringUtil.countOccurances(command, "<div");
     int closeDivCount = StringUtil.countOccurances(command, "</div>");
     while (closeDivCount < divCount) {
@@ -727,8 +757,6 @@ public class CommandPanel extends JPanel {
   public void cancelCommand() {
     commandTextArea.setText("");
     validate();
-    // Why were we closing the chat window on Esc?
-    // MapTool.getFrame().hideCommandPanel();
   }
 
   /** Inserts a newline into the chat input box. */
@@ -756,6 +784,7 @@ public class CommandPanel extends JPanel {
   }
 
   private class CommandHistoryUpAction extends AbstractAction {
+
     public void actionPerformed(ActionEvent e) {
       if (commandHistory.size() == 0) {
         return;
@@ -772,6 +801,7 @@ public class CommandPanel extends JPanel {
   }
 
   private class CommandHistoryDownAction extends AbstractAction {
+
     private static final long serialVersionUID = 7070274680351186504L;
 
     public void actionPerformed(ActionEvent e) {
@@ -811,10 +841,11 @@ public class CommandPanel extends JPanel {
   }
 
   public static class TextColorWell extends JPanel {
+
     private static final long serialVersionUID = -9006587537198176935L;
 
     // Set the Color from the saved chat color from AppPreferences
-    private Color color = AppPreferences.getChatColor();
+    private Color color = AppPreferences.chatColor.get();
 
     public TextColorWell() {
       setMinimumSize(new Dimension(15, 15));
@@ -839,7 +870,7 @@ public class CommandPanel extends JPanel {
     public void setColor(Color newColor) {
       color = newColor;
       repaint();
-      AppPreferences.setChatColor(color); // Set the Chat Color in AppPreferences
+      AppPreferences.chatColor.set(color); // Set the Chat Color in AppPreferences
     }
 
     public Color getColor() {
@@ -854,6 +885,7 @@ public class CommandPanel extends JPanel {
   }
 
   private class AvatarPanel extends JComponent {
+
     private static final long serialVersionUID = -8027749503951260361L;
     private static final int PADDING = 5;
 
@@ -894,9 +926,9 @@ public class CommandPanel extends JPanel {
         return;
       }
       Dimension imgSize = new Dimension(image.getWidth(null), image.getHeight(null));
-      SwingUtil.constrainTo(imgSize, size.width - PADDING * 2, size.height - PADDING * 2);
+      AwtUtil.constrainTo(imgSize, size.width - PADDING * 2, size.height - PADDING * 2);
 
-      AppPreferences.getRenderQuality().setShrinkRenderingHints((Graphics2D) g);
+      AppPreferences.renderQuality.get().setShrinkRenderingHints((Graphics2D) g);
       g.drawImage(
           image,
           (size.width - imgSize.width) / 2,

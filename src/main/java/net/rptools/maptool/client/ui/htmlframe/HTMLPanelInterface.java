@@ -22,10 +22,10 @@ interface HTMLPanelInterface {
   /**
    * Update the HTML content and the close button.
    *
-   * @param html the html to load.
+   * @param htmlContent the {@link HTMLContent} to load.
    * @param scrollreset whether the scroll bar should be reset.
    */
-  void updateContents(final String html, boolean scrollreset);
+  void updateContents(final HTMLContent htmlContent, boolean scrollreset);
 
   /** Flush the Panel. */
   void flush();
@@ -74,7 +74,7 @@ interface HTMLPanelInterface {
             "\036(\001\002)?([^\036]*)\036",
             "&#171;<span class='roll' style='color:blue'>&nbsp;$2&nbsp;</span>&#187;");
     // Auto inline expansion
-    html = html.replaceAll("(^|\\s)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
+    html = html.replaceAll("(^|\\s)(https?://[\\w.%\\-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
 
     // Web view doesn't have any way to turn off caching for a link so we have to resort to a bit
     // of a hack

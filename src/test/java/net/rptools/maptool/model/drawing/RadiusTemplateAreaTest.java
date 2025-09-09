@@ -37,7 +37,6 @@ public class RadiusTemplateAreaTest {
     radiusTemplate.setName("test");
     radiusTemplate.setVertex(vertex);
     radiusTemplate.setRadius(radius);
-    radiusTemplate.setZoneId(testZone.getId());
 
     radiusTemplate = Mockito.spy(radiusTemplate);
     Mockito.when(radiusTemplate.getCampaign()).thenReturn(testCampaign);
@@ -47,8 +46,15 @@ public class RadiusTemplateAreaTest {
   @Test
   @DisplayName("Test getArea function on radius drawing template")
   void testRadiusDrawingArea() throws Exception {
+    Campaign testCampaign = new Campaign();
+    Zone testZone = new Zone();
+    Grid testGrid = new SquareGrid();
+    testGrid.setSize(50);
+    testZone.setGrid(testGrid);
+    testCampaign.putZone(testZone);
+
     RadiusTemplate radiusTemplate = testRadiusTemplate(new ZonePoint(50, 50), 1);
-    Area area = radiusTemplate.getArea();
+    Area area = radiusTemplate.getArea(testZone);
     assertFalse(area.isEmpty());
     // Radius is 1, so it should be a 2x2 square.
     // With a gridsize of 50, that's 100x100, with the ul origin at 0,0
@@ -56,7 +62,7 @@ public class RadiusTemplateAreaTest {
 
     // And now a slightly bigger radius
     radiusTemplate = testRadiusTemplate(new ZonePoint(50, 50), 2);
-    area = radiusTemplate.getArea();
+    area = radiusTemplate.getArea(testZone);
     // This one contains the same squares as above, + 2 more on each edge
     assert (area.contains(new Rectangle(0, 0, 100, 100)));
     // The full list of all 12 points a radius 2 template should contain

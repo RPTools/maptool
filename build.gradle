@@ -7,42 +7,34 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.18'
-    }
 }
 
 // Access Git info from build script
 plugins {
     id "application"
-    id "org.ajoberstar.grgit" version "4.1.1"
-    id "com.diffplug.spotless" version "6.16.0"
-    id 'org.openjfx.javafxplugin' version '0.0.13'
-    id 'org.beryx.runtime' version '1.12.7'
-    id "com.google.protobuf" version "0.8.19"
+    id "base"
+    id "java"
+
+    alias(libs.plugins.git.version)
+    alias(libs.plugins.javafx)
+    alias(libs.plugins.jpackage.runtime)
+    alias(libs.plugins.shadow)
+
+    alias(libs.plugins.spotless) apply false
 }
 
-// Apply the java plugin to add support for Java
-apply plugin: 'base'
-apply plugin: 'application'
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'com.diffplug.spotless'
-apply plugin: 'com.google.protobuf'
+allprojects {
+    apply plugin: "com.diffplug.spotless"
+}
+
+apply from: rootProject.file('buildSrc/shared.gradle')
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 17
-targetCompatibility = 17
 
-
-// Used by gradle assemble & run tasks
-mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
-applicationDefaultJvmArgs = ["-Xss8M"]
-def appSemVer = ""
-def winUpgradeUUID = UUID.randomUUID().toString();
 
 // Custom properties
+def appSemVer = ""
 ext {
     // Allow packagers to build from the source code tarball, which doesn't
     // have '.git'
@@ -54,24 +46,29 @@ ext {
 
     if (!project.hasProperty('noGit')) {
         // Get tag and commit info from Git to use for version numbering
-        def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
-        def head = grgit.head()
-        def tags = grgit.tag.list().find {
-            it.commit == head
-        }
+        def details = versionDetails()
 
-        revision = head.abbreviatedId
-        revisionFull = head.id
-
-        if (tags) {
-            tagVersion = tags.getName()
-            environment = "Production"
-            sentryDSN = sentry_production_dsn
-        } else {
+        revision = details.gitHash
+        revisionFull = details.gitHashFull
+        // Do not count as production if changes (committed or otherwise) have been made to the tree
+        // since the tag. And if the tag is a nightly tag, give it the special "Nightly" environment
+        // instead of counting it the same as a production release.
+        if (!details.isCleanTag) {
             tagVersion = 'SNAPSHOT-' + revision
             project.description = "SNAPSHOT-" + revision
             environment = "Development"
             sentryDSN = sentry_development_dsn
+        }
+        else if (details.lastTag.startsWith('nightly')) {
+            tagVersion = 'NIGHTLY-' + revision
+            project.description = "NIGHTLY-" + revision
+            environment = "Nightly"
+            sentryDSN = sentry_production_dsn
+        }
+        else {
+            tagVersion = details.lastTag
+            environment = "Production"
+            sentryDSN = sentry_production_dsn
         }
     }
 
@@ -95,74 +92,134 @@ ext {
     println "OS Detected: " + osdetector.os
 }
 
-spotless {
-    java {
-        target project.fileTree(project.rootDir) {
-            include 'src/**/*.java'
-            exclude '**/JTextAreaAppender.java'
-        }
-        licenseHeaderFile 'spotless.license.java'
-        toggleOffOn()
+def javaArgs = [
+        "-Xss8M", "-Dsun.java2d.d3d=false", "-Dfile.encoding=UTF-8",
+        "-Dpolyglot.engine.WarnInterpreterOnly=false",
+        "-Djava.util.Arrays.useLegacyMergeSort=true",
+        "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
+        "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+        "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED","--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.awt=ALL-UNNAMED", "--add-opens=java.desktop/sun.java2d=ALL-UNNAMED",
+        "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
+        "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
 
-        // Now using the Google Java style guide
-        googleJavaFormat("1.11.0")
-    }
-
-    format 'misc', {
-        target '**/*.gradle', '**/.gitignore'
-
-        // spotless has built-in rules for most basic formatting tasks
-        trimTrailingWhitespace()
-        // or spaces. Takes an integer argument if you don't like 4
-        indentWithSpaces(4)
+// Used by gradle assemble & run tasks
+application {
+    mainClass = 'net.rptools.maptool.client.LaunchInstructions'
+    applicationDefaultJvmArgs = javaArgs + ["-DRUN_FROM_IDE=true", "-Dsentry.environment=Development"]
+    if (osdetector.os.is('osx')) {
+        applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
     }
 }
 
+configurations {
+    forms.extendsFrom implementation
+}
+
+spotless {
+    java {
+        target project.fileTree(project.projectDir) {
+            include 'src/**/*.java'
+            exclude '**/JTextAreaAppender.java', '**/GifDecoder.java'
+            exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Flat*ContrastIJTheme.java'
+            exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Utils.java'
+        }
+    }
+}
 
 // org.openjfx.javafxplugin
 javafx {
-    version = '18'
+    version = '22'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
 
-protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:3.20.0" }
-}
-
-// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
-sourceSets {
-    main {
-        java {
-            srcDirs 'build/generated/source/proto/main/java'
-        }
-    }
-}
-
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
-                                 "-Dpolyglot.engine.WarnInterpreterOnly=false",
-                                 "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
-                                 "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-                                 "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/javax.swing=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
-
-    if (osdetector.os.is('osx')) {
-        applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
-    }
 
     if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
     }
 }
 
-// Badass Runtime Plugin Options
+compileJava.configure {
+    // Keep the uninstrumented .class files out of the final destination directory. Otherwise we
+    // might instrument the same file twice, resulting in duplicate methods.
+    destinationDirectory = file("${layout.buildDirectory.get()}/classes/java/main-uninstrumented")
+}
+
+def instrumentForms = tasks.register('instrumentForms', Sync) {
+    dependsOn compileJava
+
+    from compileJava.destinationDirectory
+    into sourceSets.main.java.destinationDirectory
+
+    def formsSet = objects.sourceDirectorySet('forms', 'IntelliJ form files')
+    formsSet.srcDirs sourceSets.main.java.sourceDirectories
+    formsSet.include '**/*.form'
+    inputs.files(formsSet.files)
+
+    doLast {
+        ant.echo "Instrumenting IntelliJ GUI forms"
+        ant.taskdef(
+                name: "javac2",
+                classname: "com.intellij.ant.InstrumentIdeaExtensions",
+                classpath: configurations.forms.asPath
+        )
+        ant.javac2(
+                includeantruntime: false,
+                srcdir: sourceSets.main.allSource.sourceDirectories.asPath,
+                destdir: sourceSets.main.java.destinationDirectory.get(),
+                classpath: configurations.forms.asPath
+        )
+    }
+}
+
+classes.configure {
+    dependsOn instrumentForms
+}
+
+
+if (osdetector.os.is('linux')) {
+    def generateDesktop = tasks.register('generateDesktop', Copy) {
+        from 'package/linux/launcher.desktop'
+        into 'package/linux/'
+        expand(
+            description: project.description,
+            projectName: project.name,
+            developerRelease: developerRelease
+        )
+        filteringCharset = 'UTF-8'
+        rename { fileName ->
+            project.name + developerRelease + '.desktop'
+        }
+    }
+
+    tasks.jpackageImage.dependsOn generateDesktop
+    tasks.spotlessMisc.dependsOn generateDesktop
+}
+
+// Workaround the runtime plugin's hardcoded dependencies on the shadow plugin. It sneakily
+// (dynamically) adds dependencies when shadow is detected, but we don't want it to do that since we
+// only use shadow for a completely separate build artifact.
+tasks.runtime.configure {
+    dependsOn installDist
+    afterEvaluate {
+        dependsOn -= installShadowDist
+    }
+}
+tasks.jpackageImage.configure {
+    dependsOn installDist
+    afterEvaluate {
+        dependsOn -= installShadowDist
+    }
+}
 runtime {
+    distDir.set(installDist.destinationDir)
     options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']
     modules = ['java.base',
                'java.compiler',
@@ -187,21 +244,15 @@ runtime {
                'jdk.unsupported.desktop',
                'jdk.xml.dom',
                'jdk.crypto.cryptoki',
-               'jdk.crypto.ec'
+               'jdk.crypto.ec',
+               'jdk.zipfs'
     ]
 
-
-
     jpackage {
+        mainJar = jar.archiveFile.get().asFile.name
+
         installerOutputDir = file("releases")
-        jvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
-                   "-Dpolyglot.engine.WarnInterpreterOnly=false",
-                   "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
-                   "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
-                   "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-                   "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
-                   "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
+        jvmArgs = javaArgs
 
         imageOptions = []
         imageName = project.name + developerRelease
@@ -218,36 +269,39 @@ runtime {
         ]
 
         if (osdetector.os.is('windows')) {
+            def winUpgradeUUID = "74d934b9-5fb5-433e-aca4-c6f14bd9aa6b"
             println "Setting Windows installer options with upgrade uuid = " + winUpgradeUUID
+            targetPlatformName = "win"
             resourceDir = file('package/windows')
             imageOptions += ['--icon', 'package/windows/' + project.name + developerRelease + '.ico']
             installerOptions += [
                     '--win-dir-chooser',
-                    '--win-per-user-install',
                     '--win-shortcut',
                     '--win-menu',
                     '--win-menu-group', vendor,
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.zip')
             }
         }
 
         if (osdetector.os.is('osx')) {
             println "Setting MacOS installer options"
+            targetPlatformName = "mac"
             imageOptions += ['--icon', 'package/macosx/' + project.name + developerRelease + '.icns']
             installerOptions += [
                     '--mac-package-name', project.name + developerRelease
             ]
             targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_mac_hotspot_17.0.1_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz')
                 jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
 
         if (osdetector.os.is('linux')) {
             println "Setting Linux installer options"
+            targetPlatformName = "linux"
             resourceDir = file('package/linux')
             imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
             installerOptions += [
@@ -267,216 +321,134 @@ runtime {
                 ]
             }
             targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_linux_hotspot_17.0.1_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_linux_hotspot_21.0.1_12.tar.gz')
             }
         }
     }
 }
-// In this section you declare where to find the dependencies of your project
-repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    mavenLocal()
-    mavenCentral()
-    maven { url = 'https://maptool.craigs-stuff.net/repo/' }
-    maven { url = 'https://jitpack.io' }
-    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
-}
 
+def zipJpackageImage = tasks.register('zipJpackageImage', Zip) {
+    // Really we depend on the app-image produce by the jpackageImage task, but for some reason it
+    // is defined as an output of the jpackage task. As a result, Gradle will get mad at us if we
+    // say we depend directly on jpackageImage.
+    dependsOn tasks.jpackage
+
+    def extension = ''
+    if (osdetector.os.is('osx')) {
+        extension = '.app'
+    }
+
+    from "${jpackageImage.jpackageData.imageOutputDirOrDefault}${File.separator}${jpackageImage.jpackageData.imageNameOrDefault}${extension}"
+    destinationDirectory = jpackageImage.jpackageData.installerOutputDir
+    archiveFileName = project.name + "-" + appSemVer + "-" + jpackageImage.jpackageData.targetPlatformName + "${extension}.zip"
+}
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.15.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
+    implementation project(':common')
+    implementation project(':dicelib')
+    implementation project(':clientserver')
+    implementation project(':messages')
 
-    // Image processing lib
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.8.2'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.8.2'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.8.2'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.8.2'
-    // For Twelvemonkey SVG
-    implementation 'org.apache.xmlgraphics:batik-all:1.14'
+    implementation(libs.bundles.log4j)
+    implementation(libs.slf4j.simple)
+    implementation(libs.apache.commons.logging)
+    implementation(libs.bundles.sentry)
 
+    implementation(libs.servicediscovery)
+    implementation(libs.upnplib)
+    implementation(libs.okhttp)
 
-    // For Sentry bug reporting
-    implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
-    implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
+    implementation(libs.bundles.imageio)
+    implementation(libs.batik)
+    implementation(libs.bundles.pdfbox)
+    implementation(libs.bcmail)
+    implementation(libs.bundles.jai.imageio)
+    implementation(libs.webp.imageio)
 
-    // parsing of configuration data
-    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
+    implementation(libs.bundles.jide) // Currently hosted on nerps.net/repo
+    implementation(libs.fifesoft.rsyntaxtexxtarea)
+    implementation(libs.fifesoft.rstaui)
+    implementation(libs.fifesoft.autocomplete)
+    implementation(libs.fifesoft.languagesupport)
+    implementation(libs.bundles.flatlaf)
+    implementation(libs.tinylaf.nocp)
+    implementation(libs.jsvg)
 
-    // ftp client
-    implementation 'commons-net:commons-net:3.8.0'
-    // commandline parsing
-    implementation 'commons-cli:commons-cli:1.4'
+    implementation(libs.bundles.handlebars)
 
-    // needed for preference dialog at runtime
-    implementation 'commons-beanutils:commons-beanutils:1.9.4'
+    implementation(libs.apache.commons.configuration)
+    implementation(libs.apache.commons.collections)
+    implementation(libs.apache.commons.io)
+    implementation(libs.apache.commons.net)
+    implementation(libs.apache.commons.cli)
+    implementation(libs.apache.commons.lang)
+    implementation(libs.apache.commons.beanutils)
+    implementation(libs.apache.commons.jxpath)
+    implementation(libs.apache.tika)
 
-    // RPTool Libs
-    // default ressources (token, textures etc.)
-    implementation 'com.github.RPTools:maptool-resources:1.6.0'
-    // parser for macros
-    implementation 'com.github.RPTools:parser:1.8.3'
-    // dice expressions
-    implementation 'net.rptools.dicelib:dicelib:1.8.6'
+    implementation(libs.gson)
 
-    // Currently hosted on nerps.net/repo
-    implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
-    implementation group: 'com.jidesoft', name: 'jide-components', version: '3.7.9'
-    implementation group: 'com.jidesoft', name: 'jide-dialogs', version: '3.7.9'
-    implementation group: 'com.jidesoft', name: 'jide-dock', version: '3.7.9'
-    implementation group: 'com.jidesoft', name: 'jide-editor', version: '3.7.9'
-    implementation group: 'com.jidesoft', name: 'jide-grids', version: '3.7.9'
-    implementation group: 'com.jidesoft', name: 'jide-properties', version: '3.7.9'
-    implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
+    // region json-smart <2.5.2 is subject to DoS, but json-path has not updated yet. Force it to.
+    implementation(libs.jsonpath) {
+        exclude group: 'net.minidev', module: 'json-smart'
+    }
+    implementation("net.minidev:json-smart:2.5.2")
+    // endregion
 
-    // webserver for old webapp that is scheduled for removal
-    implementation 'org.eclipse.jetty:jetty-server:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty:jetty-servlet:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty:jetty-webapp:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.42.v20210604'
+    implementation(libs.jsoup)
+    implementation(libs.jcabi.xml)
+    implementation(libs.xstream)
 
+    implementation(libs.javatuples)
+    implementation(libs.guava)
+    implementation(libs.jts.core)
+    implementation(libs.jgrapht.core)
+    implementation(libs.flexmark.all)
+    implementation(libs.reflections)
+    implementation(libs.yasb)
 
-    // old json lib only used for one macro function. Use gson instead
-    implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
+    implementation(libs.bundles.graalvm.js)
 
-    // utils for handling reflection
-    implementation 'org.reflections:reflections:0.9.11'
+    forms(libs.intellij.forms.tasks)
+    implementation(libs.intellij.forms.runtime)
+    implementation(libs.miglayout.swing)
 
-    // find running instances in LAN
-    implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
+    implementation(libs.rptools.maptool.resources)
+    implementation(libs.rptools.parser)
+    implementation(libs.rptools.maptool.addons)
+    implementation(libs.rptools.dice.roller)
+    implementation(libs.noiselib)
 
-    //maybe replace with jupnp
-    implementation 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
-
-    // custom binding stuff, should probably be replace with Beans Binding (JSR 295)
-    implementation 'yasb:yasb:0.2-21012007'
-
-    implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
-
-    // serialize to and from xml
-    implementation 'com.thoughtworks.xstream:xstream:1.4.19'
-
-    // themes
-    implementation 'com.formdev:flatlaf:2.4'
-    implementation 'com.formdev:flatlaf-intellij-themes:2.4'
-    implementation 'com.formdev:flatlaf-extras:2.4'
-    implementation 'com.formdev:svgSalamander:1.1.3'
-    implementation 'com.formdev:flatlaf-jide-oss:2.4'
-
-    // JS support for macros
-    implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'
-    implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
-
-    implementation 'com.jayway.jsonpath:json-path:2.6.0'
-
-    // For PDF image extraction
-    implementation 'org.apache.pdfbox:pdfbox:2.0.25'
-    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.25'
-    implementation 'org.bouncycastle:bcmail-jdk15on:1.70'								// To decrypt passworded/secured pdf's
-    implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
-    implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
-
-    implementation 'com.github.gotson:webp-imageio:0.2.1' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.1/jar
-
-    // For syntax highlighting in macro editor
-    implementation "com.fifesoft:rsyntaxtextarea:3.3.0"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
-    implementation "com.fifesoft:rstaui:3.3.0"				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-    implementation "com.fifesoft:autocomplete:3.3.0"		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
-    implementation "com.fifesoft:languagesupport:3.3.0"
-
-    // For simple xml work in Hero Lab integration
-    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.23.1'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
-
-    // For some math functions used in the A* Pathfinding
-    // https://locationtech.github.io/jts/jts-features.html
-    implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.16.1'	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
-
-    // For RESTful functions
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.3'
-
-    // Better JSON functions...
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.0'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-
-    // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.11.2'
-
-    // flexmark markdown parsing / conversion
-    implementation 'com.vladsch.flexmark:flexmark-all:0.62.2'
-
-    // Apache Tika Parsers for determining file type
-    implementation 'com.github.lafa.tikaNoExternal:tika-parsers:1.0.18'
-
-    // Noise Generator
-    implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
-
-    // webrtc
-    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.2'
-    implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0'
-    if (osdetector.os.is('windows'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:windows-x86_64'
-    else if (osdetector.os.is('osx'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:macos-x86_64'
-    else if (osdetector.os.is('linux'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:linux-x86_64'
-
-    // protobuf
-    implementation "io.grpc:grpc-protobuf:1.47.0"
-    implementation "com.google.protobuf:protobuf-java-util:3.20.0"
-
-    // Java Tuples
-    implementation 'com.flipkart.utils:javatuples:3.0'
-
-    // HTTP End Point
-    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
-
-    // HTML Parsing
-    implementation 'org.jsoup:jsoup:1.14.3'
-    // eventbus
-    implementation 'com.google.guava:guava:31.0.1-jre'
-    // compression of messages between client and server
-    implementation 'org.apache.commons:commons-compress:1.22'
-    implementation 'org.tukaani:xz:1.9'
-    // intellij forms runtime
-    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:223.7571.182'
-    // layout for forms created in code
-    implementation 'com.miglayout:miglayout-swing:11.0'
+    // libgdx
+    implementation(libs.bundles.gdx)
+    implementation(variantOf(libs.gdx.platform) { classifier('natives-desktop')})
+    implementation(variantOf(libs.gdx.freetype.platform) { classifier('natives-desktop')})
 }
 
-
-task configSentryRelease(type: Copy) {
-    from("build-resources/sentry.properties.template")
-    into("src/main/resources/")
-    rename("sentry.properties.template", "sentry.properties")
-    def tokens = [
-            AppVersion : "${tagVersion}",
-            Environment: "${environment}",
-            SentryDSN  : "${sentryDSN}"
-    ]
-    expand(tokens)
-    inputs.properties(tokens)
+processResources {
+    with copySpec {
+        from("build-resources/sentry.properties.template")
+        rename("sentry.properties.template", "sentry.properties")
+        duplicatesStrategy = DuplicatesStrategy.WARN
+        def tokens = [
+                AppVersion : "${tagVersion}",
+                Environment: "${environment}",
+                SentryDSN  : "${sentryDSN}"
+        ]
+        expand(tokens)
+        inputs.properties(tokens)
+    }
 }
 
-task uberJar(type: Jar) {
-    group = 'distribution'
+shadowJar {
     zip64 = true
-    description = 'Create uber jar for native installers'
+    mergeServiceFiles()
 
-    baseName project.name + '-' + tagVersion
+    archiveBaseName = project.name + '-' + tagVersion
     destinationDirectory = file("$rootDir/releases")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    archiveClassifier = null
 
     manifest {
         attributes 'Implementation-Title': project.name + developerRelease,
@@ -487,19 +459,12 @@ task uberJar(type: Jar) {
                 'Built-By': System.getProperty('user.name'),
                 'Built-Date': new Date(),
                 'Built-JDK': System.getProperty('java.version'),
-                'Source-Compatibility': project.sourceCompatibility,
-                'Target-Compatibility': project.targetCompatibility,
-                'Main-Class': project.mainClassName,
+                'Source-Compatibility': project.java.sourceCompatibility,
+                'Target-Compatibility': project.java.targetCompatibility,
+                'Main-Class': project.application.mainClass,
                 'Multi-Release': true
     }
 
-    from {
-        configurations.runtimeClasspath.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-    with jar
-    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
     exclude 'module-info.class' //This is to make sure maptool doesn't become a module by including module-info of dependencies. Probably needs to be fixed before we go to jdk 11+
 }
 
@@ -513,9 +478,9 @@ jar {
                 'Built-By': System.getProperty('user.name'),
                 'Built-Date': new Date(),
                 'Built-JDK': System.getProperty('java.version'),
-                'Source-Compatibility': project.sourceCompatibility,
-                'Target-Compatibility': project.targetCompatibility,
-                'Main-Class': project.mainClassName
+                'Source-Compatibility': project.java.sourceCompatibility,
+                'Target-Compatibility': project.java.targetCompatibility,
+                'Main-Class': project.application.mainClass
     }
 }
 
@@ -540,13 +505,6 @@ javadoc {
     options.tags("note:a:<strong><u>Note:</u></strong>")
 }
 
-test {
-    useJUnitPlatform()
-}
-
 task createWrapper(type: Wrapper) {
-    gradleVersion = '7.6'
+    gradleVersion = '8.2.1'
 }
-
-// Configure current release tag in Sentry.io properties
-processResources.dependsOn configSentryRelease

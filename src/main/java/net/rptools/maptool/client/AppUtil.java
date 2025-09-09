@@ -21,7 +21,6 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -34,7 +33,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.player.Player;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,25 +49,6 @@ public class AppUtil {
       new ScheduledThreadPoolExecutor(1);
 
   private static Logger log;
-
-  /** Returns true if currently running on a Windows based operating system. */
-  public static boolean WINDOWS =
-      (System.getProperty("os.name").toLowerCase().startsWith("windows"));
-  /** Returns true if currently running on a Mac OS X based operating system. */
-  public static boolean MAC_OS_X =
-      (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
-
-  /** Returns true if currently running on Linux or other Unix/Unix like system. */
-  public static boolean LINUX_OR_UNIX =
-      (System.getProperty("os.name").indexOf("nix") >= 0
-          || System.getProperty("os.name").indexOf("nux") >= 0
-          || System.getProperty("os.name").indexOf("aix") >= 0
-          || System.getProperty("os.name").indexOf("sunos") >= 0);
-
-  public static final String LOOK_AND_FEEL_NAME =
-      MAC_OS_X
-          ? "net.rptools.maptool.client.TinyLookAndFeelMac"
-          : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 
   private static File dataDirPath;
   private static String packagerCfgFileName =
@@ -124,7 +104,7 @@ public class AppUtil {
         RuntimeException re =
             new RuntimeException(
                 I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log != null && log.isInfoEnabled()) {
+        if (log != null) {
           log.info("msg.error.unableToCreateDataDir", re);
         }
         throw re;
@@ -203,6 +183,38 @@ public class AppUtil {
   }
 
   /**
+   * This function tries to determine the installation directory of the application. This can differ
+   * from the directory the application is running from as returned by {@link
+   * #getAppInstallLocation()}.
+   *
+   * @return the installation directory of the application.
+   */
+  public static Path getInstallDirectory() {
+    var path = Path.of(getAppInstallLocation());
+    if (MapTool.isDevelopment()) {
+      // remove build/classes/java
+      path = path.getParent().getParent().getParent();
+    } else { // First try to find MapTool* directory in path
+      while (path != null) {
+        if (path.getFileName() == null) {
+          // We have gone too far!
+          path = null;
+          break;
+        }
+        if (path.getFileName().toString().matches("(?i).*maptool.*")) {
+          break;
+        }
+        path = path.getParent();
+      }
+    }
+    if (path == null) { // if not found then just return the parent of the app subdir
+      return Path.of(getAppInstallLocation()).resolve("..").toAbsolutePath();
+    } else {
+      return path;
+    }
+  }
+
+  /**
    * Returns a File path representing the configuration file in the base directory that the
    * application is running from. e.g. C:\Users\Troll\AppData\Local\MapTool\app
    *
@@ -229,6 +241,7 @@ public class AppUtil {
 
     return cfgFile;
   }
+
   /**
    * Returns a File path representing configuration file under the app home directory structure.
    *
@@ -295,16 +308,7 @@ public class AppUtil {
    * @return true if owned by all, or one of the owners is online and not a gm.
    */
   public static boolean ownedByOnePlayer(Token token) {
-    if (token.isOwnedByAll()) {
-      return true;
-    }
-    List<String> players = MapTool.getNonGMs();
-    for (String owner : token.getOwners()) {
-      if (players.contains(owner)) {
-        return true;
-      }
-    }
-    return false;
+    return token.isOwnedByAny(MapTool.getNonGMs());
   }
 
   /**
@@ -366,7 +370,7 @@ public class AppUtil {
 
       return FileUtils.byteCountToDisplaySize(visitor.totalSize) + " ";
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while calculating disk usage", e);
     }
     return null;
   }

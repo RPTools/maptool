@@ -16,8 +16,8 @@ package net.rptools.maptool.client.ui.token;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
@@ -53,7 +53,9 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
     assetId = anAssetId;
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new ImageTokenOverlay(getName(), assetId);
@@ -80,7 +82,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 
     BufferedImage image = ImageManager.getImageAndWait(assetId);
     Dimension size = new Dimension(image.getWidth(), image.getHeight());
-    SwingUtil.constrainTo(size, d.width, d.height);
+    AwtUtil.constrainTo(size, d.width, d.height);
 
     // Paint it at the right location
     int width = size.width;
@@ -95,7 +97,9 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @return Getter for assetId */
+  /**
+   * @return Getter for assetId
+   */
   public MD5Key getAssetId() {
     return assetId;
   }
@@ -107,7 +111,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
    * @param token Token being decorated.
    * @return The bounds w/in the token where the image is painted.
    */
-  protected Rectangle getImageBounds(Rectangle bounds, Token token) {
+  public Rectangle getImageBounds(Rectangle bounds, Token token) {
     return bounds;
   }
 

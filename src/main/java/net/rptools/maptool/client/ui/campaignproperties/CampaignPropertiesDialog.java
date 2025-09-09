@@ -14,173 +14,167 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
+import static org.apache.commons.text.WordUtils.capitalize;
+import static org.apache.commons.text.WordUtils.uncapitalize;
+
+import com.google.protobuf.util.JsonFormat;
+import com.jidesoft.dialog.ButtonPanel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.StringReader;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.AbeillePanel;
-import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.swing.*;
+import net.rptools.maptool.client.ui.StaticMessageDialog;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Light;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.ShapeType;
-import net.rptools.maptool.model.SightType;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.CategorizedLights;
+import net.rptools.maptool.model.Sights;
+import net.rptools.maptool.server.proto.CampaignPropertiesDto;
+import net.rptools.maptool.util.AuraSyntax;
+import net.rptools.maptool.util.LightSyntax;
 import net.rptools.maptool.util.PersistenceUtil;
-import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool.util.SightSyntax;
+import org.apache.commons.text.*;
 
-public class CampaignPropertiesDialog extends JDialog {
-  public enum Status {
-    OK,
-    CANCEL
-  }
+public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDialogView> {
 
-  private TokenPropertiesManagementPanel tokenPropertiesPanel;
+  private final TokenPropertiesManagementPanel tokenPropertiesPanel =
+      new TokenPropertiesManagementPanel();
   private TokenStatesController tokenStatesController;
   private TokenBarController tokenBarController;
 
-  private Status status;
-  private AbeillePanel formPanel;
+  private JEditorPane getSightPanel() {
+    return (JEditorPane) getComponent("sightPanel");
+  }
+
+  private JEditorPane getLightPanel() {
+    return (JEditorPane) getComponent("lightPanel");
+  }
+
+  private JEditorPane getAuraPanel() {
+    return (JEditorPane) getComponent("auraPanel");
+  }
+
+  private JEditorPane getAuraHelp() {
+    return (JEditorPane) getComponent("auraHelp");
+  }
+
+  private JEditorPane getLightHelp() {
+    return (JEditorPane) getComponent("lightHelp");
+  }
+
+  private JEditorPane getSightHelp() {
+    return (JEditorPane) getComponent("sightHelp");
+  }
+
   private Campaign campaign;
+  private final GenericDialogFactory dialogFactory =
+      GenericDialog.getFactory()
+          .setDialogTitle(I18N.getText("CampaignPropertiesDialog.label.title"))
+          .setCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
-  public CampaignPropertiesDialog(JFrame owner) {
-    super(owner, I18N.getText("CampaignPropertiesDialog.label.title"), true);
-
-    initialize();
-
-    pack(); // FJE
+  public CampaignPropertiesDialog() {
+    super(new CampaignPropertiesDialogView().getRootComponent());
+    init();
+    dialogFactory
+        .setContent(this)
+        .setButtonOrder(dialogFactory.getButtonOrder().replace("O", ""))
+        .setOppositeButtonOrder("HO")
+        .addButton(ButtonKind.OK, e -> accept())
+        .setDefaultButton(ButtonKind.OK)
+        .addButton(
+            ButtonKind.CANCEL, e -> dialogFactory.setDialogResult(GenericDialog.DENY).closeDialog())
+        .addButton(ButtonKind.IMPORT, importListener)
+        .addButton(ButtonKind.EXPORT, exportListener)
+        .addButton(
+            getImportPredefinedButton(), importPredefinedButtonListener, ButtonPanel.OTHER_BUTTON)
+        .addNonButton(getPredefinedPropertiesComboBox(), ButtonPanel.OTHER_BUTTON)
+        .onBeforeShow(e -> tokenPropertiesPanel.getTokenTypeList().setSelectedIndex(0));
   }
 
-  public Status getStatus() {
-    return status;
+  public String showDialog() {
+    return dialogFactory.displayWithReturnValue();
   }
 
-  @Override
-  public void setVisible(boolean b) {
-    if (b) {
-      SwingUtil.centerOver(this, MapTool.getFrame());
-    } else {
-      MapTool.getFrame().repaint();
-    }
-    super.setVisible(b);
-  }
-
-  private void initialize() {
+  private void init() {
     setLayout(new GridLayout());
-    formPanel = new AbeillePanel(new CampaignPropertiesDialogView().$$$getRootComponent$$$());
+    replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
+    tokenPropertiesPanel.prettify();
 
-    initTokenPropertiesDialog(formPanel);
-    tokenStatesController = new TokenStatesController(formPanel);
-    tokenBarController = new TokenBarController(formPanel);
+    tokenStatesController = new TokenStatesController(this);
+    tokenBarController = new TokenBarController(this);
     tokenBarController.setNames(tokenStatesController.getNames());
-
-    initHelp();
-    initOKButton();
-    initCancelButton();
-    initAddRepoButton();
-    //    initAddGalleryIndexButton();
-    initDeleteRepoButton();
-
-    initImportButton();
-    initExportButton();
-    initImportPredefinedButton();
     initPredefinedPropertiesComboBox();
-
-    add(formPanel);
-
-    // Escape key
-    formPanel
-        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-        .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
-    formPanel
-        .getActionMap()
-        .put(
-            "cancel",
-            new AbstractAction() {
-              public void actionPerformed(ActionEvent e) {
-                cancel();
-              }
-            });
-    getRootPane().setDefaultButton(getOKButton());
-  }
-
-  // need to access update button action in token properties panel
-  public void tokenPropertiesDialogUpdate() {
-    tokenPropertiesPanel.update();
-  }
-
-  private void initTokenPropertiesDialog(AbeillePanel panel) {
-    tokenPropertiesPanel = new TokenPropertiesManagementPanel();
-    panel.replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
+    initHelp();
+    initAddRepoButton();
+    initDeleteRepoButton();
   }
 
   public JTextField getNewServerTextField() {
-    return formPanel.getTextField("newServer");
+    return this.getTextField("newServer");
   }
 
   private void initHelp() {
-    JEditorPane lightHelp = (JEditorPane) formPanel.getComponent("lightHelp");
+    String[] helpText = generateHelpText();
+
+    HyperlinkListener hyperLinkListener =
+        e -> {
+          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            MapTool.showDocument(e.getURL().toString());
+          }
+        };
+
+    JEditorPane lightHelp = getLightHelp();
     lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-    lightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.light"));
+    lightHelp.addHyperlinkListener(hyperLinkListener);
+    lightHelp.setText(helpText[1]);
     lightHelp.setCaretPosition(0);
 
-    JEditorPane sightHelp = (JEditorPane) formPanel.getComponent("sightHelp");
+    JEditorPane auraHelp = getAuraHelp();
+    auraHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+    auraHelp.addHyperlinkListener(hyperLinkListener);
+    auraHelp.setText(helpText[2]);
+    auraHelp.setCaretPosition(0);
+
+    JEditorPane sightHelp = getSightHelp();
     sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-    sightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.sight"));
+    sightHelp.addHyperlinkListener(hyperLinkListener);
+    sightHelp.setText(helpText[0]);
     sightHelp.setCaretPosition(0);
   }
 
   private void initAddRepoButton() {
-    JButton button = (JButton) formPanel.getButton("addRepoButton");
+    JButton button = (JButton) this.getButton("addRepoButton");
     button.addActionListener(
         e -> {
           String newRepo = getNewServerTextField().getText();
-          if (newRepo == null || newRepo.length() == 0) {
+          if (newRepo == null || newRepo.isEmpty()) {
             return;
           }
-          // TODO: Check for uniqueness
           ((DefaultListModel) getRepositoryList().getModel()).addElement(newRepo);
         });
   }
 
-  //  private void initAddGalleryIndexButton() {
-  //    JButton button = (JButton) formPanel.getButton("addGalleryIndexButton");
-  //    button.addActionListener(
-  //        new ActionListener() {
-  //          public void actionPerformed(ActionEvent e) {
-  //            // TODO: Check for uniqueness
-  //            ((DefaultListModel) getRepositoryList().getModel())
-  //                .addElement("http://www.rptools.net/image-indexes/gallery.rpax.gz");
-  //          }
-  //        });
-  //  }
-
   public void initDeleteRepoButton() {
-    JButton button = (JButton) formPanel.getButton("deleteRepoButton");
+    JButton button = (JButton) this.getButton("deleteRepoButton");
     button.addActionListener(
         e -> {
           int[] selectedRows = getRepositoryList().getSelectedIndices();
@@ -191,18 +185,18 @@ public class CampaignPropertiesDialog extends JDialog {
         });
   }
 
-  private void cancel() {
-    status = Status.CANCEL;
-    setVisible(false);
-  }
-
   private void accept() {
     try {
-      tokenPropertiesDialogUpdate(); // update token properties for the forgetful
+      MapTool.getFrame()
+          .showFilledGlassPane(
+              new StaticMessageDialog("campaignPropertiesDialog.tokenTypeNameRename"));
+      tokenPropertiesPanel.finalizeCellEditing();
+      tokenPropertiesPanel.getRenameTypes().forEach((o, n) -> campaign.renameTokenTypes(o, n));
+      MapTool.getFrame().hideGlassPane();
       copyUIToCampaign();
       AssetManager.updateRepositoryList();
-      status = Status.OK;
-      setVisible(false);
+      dialogFactory.setDialogResult(GenericDialog.AFFIRM).closeDialog();
+
     } catch (IllegalArgumentException iae) {
       MapTool.showError(iae.getMessage());
     }
@@ -218,206 +212,35 @@ public class CampaignPropertiesDialog extends JDialog {
     tokenPropertiesPanel.copyCampaignToUI(campaignProperties);
     updateRepositoryList(campaignProperties);
 
-    String text;
-    text = updateSightPanel(campaignProperties.getSightTypeMap());
-    getSightPanel().setText(text);
+    String sightText = new SightSyntax().stringify(campaignProperties.getSightTypes());
+    getSightPanel().setText(sightText);
     getSightPanel().setCaretPosition(0);
 
-    text = updateLightPanel(campaignProperties.getLightSourcesMap());
-    getLightPanel().setText(text);
+    // Separate auras from lights before populating fields.
+    CategorizedLights lightSources = new CategorizedLights();
+    CategorizedLights auras = new CategorizedLights();
+
+    for (var category : campaignProperties.getLightSources().getCategories()) {
+      for (var source : category.lights()) {
+        CategorizedLights targetMap =
+            switch (source.getType()) {
+              case NORMAL -> lightSources;
+              case AURA -> auras;
+            };
+        targetMap.addToCategory(category.name(), source);
+      }
+    }
+
+    String lightText = new LightSyntax().stringifyCategorizedLights(lightSources);
+    getLightPanel().setText(lightText);
     getLightPanel().setCaretPosition(0);
+
+    String auraText = new AuraSyntax().stringifyCategorizedAuras(auras);
+    getAuraPanel().setText(auraText);
+    getAuraPanel().setCaretPosition(0);
 
     tokenStatesController.copyCampaignToUI(campaignProperties);
     tokenBarController.copyCampaignToUI(campaignProperties);
-    // updateTableList();
-  }
-
-  private String updateSightPanel(Map<String, SightType> sightTypeMap) {
-    StringBuilder builder = new StringBuilder();
-    for (SightType sight : sightTypeMap.values()) {
-      builder.append(sight.getName()).append(": ");
-
-      switch (sight.getShape()) {
-        case SQUARE:
-          builder.append("square ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case CIRCLE:
-          builder.append("circle ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case GRID:
-          builder.append("grid ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case HEX:
-          builder.append("hex ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case CONE:
-          builder.append("cone ");
-          if (sight.getArc() != 0)
-            builder.append("arc=").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
-          if (sight.getOffset() != 0)
-            builder
-                .append("offset=")
-                .append(StringUtil.formatDecimal(sight.getOffset()))
-                .append(' ');
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        default:
-          throw new IllegalArgumentException("Invalid shape?!");
-      }
-      // Scale with Token
-      if (sight.isScaleWithToken()) {
-        builder.append("scale ");
-      }
-      // Multiplier
-      if (sight.getMultiplier() != 1 && sight.getMultiplier() != 0) {
-        builder.append("x").append(StringUtil.formatDecimal(sight.getMultiplier())).append(' ');
-      }
-      // Personal light
-      if (sight.getPersonalLightSource() != null) {
-        LightSource source = sight.getPersonalLightSource();
-
-        if (source.getLightList() != null) {
-          for (Light light : source.getLightList()) {
-            double range = light.getRadius();
-
-            builder.append("r").append(StringUtil.formatDecimal(range));
-
-            if (light.getPaint() != null && light.getPaint() instanceof DrawableColorPaint) {
-              Color color = (Color) light.getPaint().getPaint();
-              builder.append(toHex(color));
-            }
-            final var lumens = light.getLumens();
-            if (lumens >= 0) {
-              builder.append('+');
-            }
-            builder.append(Integer.toString(lumens, 10));
-            builder.append(' ');
-          }
-        }
-      }
-      builder.append('\n');
-    }
-    return builder.toString();
-  }
-
-  private String updateLightPanel(Map<String, Map<GUID, LightSource>> lightSources) {
-    StringBuilder builder = new StringBuilder();
-    for (Entry<String, Map<GUID, LightSource>> entry : lightSources.entrySet()) {
-      builder.append(entry.getKey());
-      builder.append("\n----\n");
-
-      for (LightSource lightSource : entry.getValue().values()) {
-        builder.append(lightSource.getName()).append(":");
-
-        if (lightSource.getType() != LightSource.Type.NORMAL) {
-          builder.append(' ').append(lightSource.getType().name().toLowerCase());
-        }
-        if (lightSource.isScaleWithToken()) {
-          builder.append(" scale");
-        }
-
-        String lastShape = ""; // this forces 'circle' to be printed
-        double lastArc = 90;
-        boolean lastGM = false;
-        boolean lastOwner = false;
-        for (Light light : lightSource.getLightList()) {
-          String shape;
-          // TODO: This HAS to change, the lights need to be auto describing, this hard wiring sucks
-          if (lightSource.getType() == LightSource.Type.AURA) {
-            // Currently these are mutually exclusive but perhaps not in the future?
-            if (light.isGM() && light.isGM() != lastGM) builder.append(" GM");
-            if (light.isOwnerOnly() && light.isOwnerOnly() != lastOwner) builder.append(" OWNER");
-            lastGM = light.isGM();
-            lastOwner = light.isOwnerOnly();
-          }
-          if (light.getShape() != null) {
-            switch (light.getShape()) {
-              default:
-                throw new RuntimeException(
-                    "Unrecognized shape: " + light.getShape().toString().toLowerCase());
-              case SQUARE:
-              case GRID:
-              case CIRCLE:
-              case HEX:
-                // TODO: Make this a preference
-                shape = light.getShape().toString().toLowerCase();
-                break;
-              case CONE:
-                // if (light.getArcAngle() != 0 && light.getArcAngle() != 90 && light.getArcAngle()
-                // != lastArc)
-                {
-                  lastArc = light.getArcAngle();
-                  shape = "cone arc=" + StringUtil.formatDecimal(lastArc);
-                  if (light.getFacingOffset() != 0)
-                    builder
-                        .append(" offset=")
-                        .append(StringUtil.formatDecimal(light.getFacingOffset()))
-                        .append(' ');
-                }
-                break;
-            }
-            if (!lastShape.equals(shape)) builder.append(' ').append(shape);
-            lastShape = shape;
-          }
-          builder.append(' ').append(StringUtil.formatDecimal(light.getRadius()));
-          if (light.getPaint() instanceof DrawableColorPaint) {
-            Color color = (Color) light.getPaint().getPaint();
-            builder.append(toHex(color));
-          }
-          if (lightSource.getType() == LightSource.Type.NORMAL) {
-            final var lumens = light.getLumens();
-            if (lumens >= 0) {
-              builder.append('+');
-            }
-            builder.append(Integer.toString(lumens, 10));
-          }
-        }
-        builder.append('\n');
-      }
-      builder.append('\n');
-    }
-    return builder.toString();
-  }
-
-  private String toHex(Color color) {
-    StringBuilder builder = new StringBuilder("#");
-
-    builder.append(padLeft(Integer.toHexString(color.getRed()), '0', 2));
-    builder.append(padLeft(Integer.toHexString(color.getGreen()), '0', 2));
-    builder.append(padLeft(Integer.toHexString(color.getBlue()), '0', 2));
-
-    return builder.toString();
-  }
-
-  private String padLeft(String str, char padChar, int length) {
-    while (str.length() < length) {
-      str = padChar + str;
-    }
-    return str;
   }
 
   private void updateRepositoryList(CampaignProperties properties) {
@@ -429,7 +252,7 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   public JList getRepositoryList() {
-    return formPanel.getList("repoList");
+    return this.getList("repoList");
   }
 
   private void copyUIToCampaign() {
@@ -440,12 +263,19 @@ public class CampaignPropertiesDialog extends JDialog {
       String repo = (String) getRepositoryList().getModel().getElementAt(i);
       campaign.getRemoteRepositoryList().add(repo);
     }
-    Map<String, Map<GUID, LightSource>> lightMap;
-    lightMap = commitLightMap(getLightPanel().getText(), campaign.getLightSourcesMap());
-    campaign.getLightSourcesMap().clear();
-    campaign.getLightSourcesMap().putAll(lightMap);
 
-    commitSightMap(getSightPanel().getText());
+    CategorizedLights existingLightSources = campaign.getLightSources();
+
+    CategorizedLights lights =
+        new LightSyntax().parseCategorizedLights(getLightPanel().getText(), existingLightSources);
+    CategorizedLights auras =
+        new AuraSyntax().parseCategorizedAuras(getAuraPanel().getText(), existingLightSources);
+    lights.addAll(auras);
+    campaign.setLightSources(lights);
+
+    Sights sightMap = commitSightMap(getSightPanel().getText());
+    campaign.setSightTypes(sightMap);
+
     tokenStatesController.copyUIToCampaign(campaign);
     tokenBarController.copyUIToCampaign(campaign);
 
@@ -458,499 +288,119 @@ public class CampaignPropertiesDialog extends JDialog {
     }
   }
 
-  private void commitSightMap(final String text) {
-    List<SightType> sightList = new LinkedList<SightType>();
-    LineNumberReader reader = new LineNumberReader(new BufferedReader(new StringReader(text)));
-    String line = null;
-    String toBeParsed = null, errmsg = null;
-    List<String> errlog = new LinkedList<String>();
-    try {
-      while ((line = reader.readLine()) != null) {
-        line = line.trim();
-
-        // Blanks
-        if (line.length() == 0 || line.indexOf(':') < 1) {
-          continue;
-        }
-        // Parse line
-        int split = line.indexOf(':');
-        String label = line.substring(0, split).trim();
-        String value = line.substring(split + 1).trim();
-
-        if (label.length() == 0) {
-          continue;
-        }
-        // Parse Details
-        double magnifier = 1;
-        LightSource personalLight = null;
-
-        String[] args = value.split("\\s+");
-        ShapeType shape = ShapeType.CIRCLE;
-        boolean scaleWithToken = false;
-        int arc = 90;
-        float range = 0;
-        int offset = 0;
-        double pLightRange = 0;
-
-        for (String arg : args) {
-          assert arg.length() > 0; // The split() uses "one or more spaces", removing empty strings
-          try {
-            shape = ShapeType.valueOf(arg.toUpperCase());
-            continue;
-          } catch (IllegalArgumentException iae) {
-            // Expected when not defining a shape
-          }
-          // Scale with Token
-          if (arg.equalsIgnoreCase("SCALE")) {
-            scaleWithToken = true;
-            continue;
-          }
-          try {
-
-            if (arg.startsWith("x")) {
-              toBeParsed = arg.substring(1); // Used in the catch block, below
-              errmsg = "msg.error.mtprops.sight.multiplier"; // (ditto)
-              magnifier = StringUtil.parseDecimal(toBeParsed);
-            } else if (arg.startsWith("r")) { // XXX Why not "r=#" instead of "r#"??
-              toBeParsed = arg.substring(1);
-              errmsg = "msg.error.mtprops.sight.range";
-
-              final var rangeRegex = Pattern.compile("([^#+-]*)(#[0-9a-fA-F]+)?([+-]\\d*)?");
-              final var matcher = rangeRegex.matcher(toBeParsed);
-              if (matcher.find()) {
-                pLightRange = StringUtil.parseDecimal(matcher.group(1));
-                final var colorString = matcher.group(2);
-                final var lumensString = matcher.group(3);
-                // Note that Color.decode() _wants_ the leading "#", otherwise it might not treat
-                // the value as a hex code.
-                Color personalLightColor = null;
-                if (colorString != null) {
-                  personalLightColor = Color.decode(colorString);
-                }
-                int perRangeLumens = 100;
-                if (lumensString != null) {
-                  perRangeLumens = Integer.parseInt(lumensString, 10);
-                  if (perRangeLumens == 0) {
-                    errlog.add(
-                        I18N.getText("msg.error.mtprops.sight.zerolumens", reader.getLineNumber()));
-                    perRangeLumens = 100;
-                  }
-                }
-
-                if (personalLight == null) {
-                  personalLight = new LightSource();
-                  personalLight.setType(LightSource.Type.NORMAL);
-                }
-                personalLight.add(
-                    new Light(
-                        shape,
-                        0,
-                        pLightRange,
-                        arc,
-                        personalLightColor == null
-                            ? null
-                            : new DrawableColorPaint(personalLightColor),
-                        perRangeLumens,
-                        false,
-                        false));
-                personalLight.setScaleWithToken(scaleWithToken);
-              } else {
-                throw new ParseException(
-                    String.format("Unrecognized personal light syntax: %s", arg), 0);
-              }
-            } else if (arg.startsWith("arc=") && arg.length() > 4) {
-              toBeParsed = arg.substring(4);
-              errmsg = "msg.error.mtprops.sight.arc";
-              arc = StringUtil.parseInteger(toBeParsed);
-            } else if (arg.startsWith("distance=") && arg.length() > 9) {
-              toBeParsed = arg.substring(9);
-              errmsg = "msg.error.mtprops.sight.distance";
-              range = StringUtil.parseDecimal(toBeParsed).floatValue();
-            } else if (arg.startsWith("offset=") && arg.length() > 7) {
-              toBeParsed = arg.substring(7);
-              errmsg = "msg.error.mtprops.sight.offset";
-              offset = StringUtil.parseInteger(toBeParsed);
-            } else {
-              toBeParsed = arg;
-              errmsg =
-                  I18N.getText(
-                      "msg.error.mtprops.sight.unknownField", reader.getLineNumber(), toBeParsed);
-              errlog.add(errmsg);
-            }
-          } catch (ParseException e) {
-            assert errmsg != null;
-            errlog.add(I18N.getText(errmsg, reader.getLineNumber(), toBeParsed));
-          }
-        }
-        SightType sight =
-            new SightType(label, magnifier, personalLight, shape, arc, scaleWithToken);
-        sight.setDistance(range);
-        sight.setOffset(offset);
-
-        // Store
-        sightList.add(sight);
-      }
-    } catch (IOException ioe) {
-      MapTool.showError("msg.error.mtprops.sight.ioexception", ioe);
-    }
-    if (!errlog.isEmpty()) {
-      // Show the user a list of errors so they can (attempt to) correct all of them at once
-      MapTool.showFeedback(errlog.toArray());
-      errlog.clear();
-      throw new IllegalArgumentException(
-          "msg.error.mtprops.sight.definition"); // Don't save sights...
-    }
-    campaign.setSightTypes(sightList);
+  private Sights commitSightMap(final String text) {
+    return new SightSyntax().parse(text);
   }
 
-  /**
-   * Converts the string stored in <code>getLightPanel().getText()</code> into a Map that relates a
-   * group of light sources to a Map of GUID and LightSource.
-   *
-   * <p>The format for the text is as follows:
-   *
-   * <ol>
-   *   <li>Any line starting with a dash ("-") is a comment and is ignored.
-   *   <li>Blank lines (those containing only zero or more spaces) are group separators.
-   *   <li>The first line of a sequence is the group name.
-   *   <li>Within a group, any line without a colon (":") is ignored.
-   *   <li>Remaining lines are of the following format:
-   *       <p><b> <code>
-   *       [Gm | Owner] [Circle+ | Square | Cone] [Normal+ | Aura] [Arc=angle] [Offset=angle] distance [#rrggbb]
-   *       </code> </b>
-   *       <p>Brackets indicate optional components. A plus sign follows any default value for a
-   *       given field. Fields starting with an uppercase letter are literal text (although they are
-   *       case-insensitive). Fields that do not start with an uppercase letter represent
-   *       user-supplied values, typically numbers (such as <code>angle</code>, <code>distance
-   *       </code>, and <code>#rrggbb</code>). The <code>GM</code>/<code>Owner</code> field is only
-   *       valid for Auras.
-   * </ol>
-   */
-  private Map<String, Map<GUID, LightSource>> commitLightMap(
-      final String text, final Map<String, Map<GUID, LightSource>> originalLightSourcesMap) {
-    Map<String, Map<GUID, LightSource>> lightMap = new TreeMap<String, Map<GUID, LightSource>>();
-    LineNumberReader reader = new LineNumberReader(new BufferedReader(new StringReader(text)));
-    String line = null;
-    List<String> errlog = new LinkedList<String>();
-
-    try {
-      String currentGroupName = null;
-      Map<GUID, LightSource> lightSourceMap = null;
-
-      while ((line = reader.readLine()) != null) {
-        line = line.trim();
-
-        // Comments
-        if (line.length() > 0 && line.charAt(0) == '-') {
-          continue;
-        }
-        // Blank lines
-        if (line.length() == 0) {
-          if (currentGroupName != null) {
-            lightMap.put(currentGroupName, lightSourceMap);
-          }
-          currentGroupName = null;
-          continue;
-        }
-        // New group
-        if (currentGroupName == null) {
-          currentGroupName = line;
-          lightSourceMap = new HashMap<GUID, LightSource>();
-          continue;
-        }
-        // Item
-        int split = line.indexOf(':');
-        if (split < 1) {
-          continue;
-        }
-
-        String name = line.substring(0, split).trim();
-        LightSource lightSource = new LightSource(name);
-        ShapeType shape = ShapeType.CIRCLE; // TODO: Make a preference for default shape
-        double arc = 0;
-        double offset = 0;
-        boolean gmOnly = false;
-        boolean owner = false;
-        String distance = null;
-        for (String arg : line.substring(split + 1).split("\\s+")) {
-          arg = arg.trim();
-          if (arg.length() == 0) {
-            continue;
-          }
-          if (arg.equalsIgnoreCase("GM")) {
-            gmOnly = true;
-            owner = false;
-            continue;
-          }
-          if (arg.equalsIgnoreCase("OWNER")) {
-            gmOnly = false;
-            owner = true;
-            continue;
-          }
-          // Scale with token designation
-          if (arg.equalsIgnoreCase("SCALE")) {
-            lightSource.setScaleWithToken(true);
-            continue;
-          }
-          // Shape designation ?
-          try {
-            shape = ShapeType.valueOf(arg.toUpperCase());
-            continue;
-          } catch (IllegalArgumentException iae) {
-            // Expected when not defining a shape
-          }
-
-          // Type designation ?
-          try {
-            LightSource.Type type = LightSource.Type.valueOf(arg.toUpperCase());
-            lightSource.setType(type);
-            continue;
-          } catch (IllegalArgumentException iae) {
-            // Expected when not defining a shape
-          }
-
-          // Facing offset designation
-          if (arg.toUpperCase().startsWith("OFFSET=")) {
-            try {
-              offset = Integer.parseInt(arg.substring(7));
-              continue;
-            } catch (NullPointerException noe) {
-              errlog.add(
-                  I18N.getText("msg.error.mtprops.light.offset", reader.getLineNumber(), arg));
-            }
-          }
-
-          // Parameters
-          split = arg.indexOf('=');
-          if (split > 0) {
-            String key = arg.substring(0, split);
-            String value = arg.substring(split + 1);
-
-            // TODO: Make this a generic map to pass instead of 'arc'
-            if ("arc".equalsIgnoreCase(key)) {
-              try {
-                arc = StringUtil.parseDecimal(value);
-                shape = ShapeType.CONE; // If the user specifies an arc, force the shape to CONE
-              } catch (ParseException pe) {
-                errlog.add(
-                    I18N.getText("msg.error.mtprops.light.arc", reader.getLineNumber(), value));
-              }
-            }
-            continue;
-          }
-
-          Color color = null;
-          int perRangeLumens = 100;
-          distance = arg;
-
-          final var rangeRegex = Pattern.compile("([^#+-]*)(#[0-9a-fA-F]+)?([+-]\\d*)?");
-          final var matcher = rangeRegex.matcher(arg);
-          if (matcher.find()) {
-            distance = matcher.group(1);
-            final var colorString = matcher.group(2);
-            final var lumensString = matcher.group(3);
-            // Note that Color.decode() _wants_ the leading "#", otherwise it might not treat the
-            // value as a hex code.
-            if (colorString != null) {
-              color = Color.decode(colorString);
-            }
-            if (lumensString != null) {
-              perRangeLumens = Integer.parseInt(lumensString, 10);
-              if (perRangeLumens == 0) {
-                errlog.add(
-                    I18N.getText("msg.error.mtprops.light.zerolumens", reader.getLineNumber()));
-                perRangeLumens = 100;
-              }
-            }
-          }
-
-          boolean isAura = lightSource.getType() == LightSource.Type.AURA;
-          if (!isAura && (gmOnly || owner)) {
-            errlog.add(I18N.getText("msg.error.mtprops.light.gmOrOwner", reader.getLineNumber()));
-            gmOnly = false;
-            owner = false;
-          }
-          owner = gmOnly ? false : owner;
-          try {
-            Light t =
-                new Light(
-                    shape,
-                    offset,
-                    StringUtil.parseDecimal(distance),
-                    arc,
-                    color == null ? null : new DrawableColorPaint(color),
-                    perRangeLumens,
-                    gmOnly,
-                    owner);
-            lightSource.add(t);
-          } catch (ParseException pe) {
-            errlog.add(
-                I18N.getText("msg.error.mtprops.light.distance", reader.getLineNumber(), distance));
-          }
-        }
-        // Keep ID the same if modifying existing light
-        // TODO FJE Why? Is there some benefit to doing so? Changes to light sources require the map
-        // to be re-rendered anyway, don't they?
-        if (originalLightSourcesMap.containsKey(currentGroupName)) {
-          for (LightSource ls : originalLightSourcesMap.get(currentGroupName).values()) {
-            if (ls.getName().equalsIgnoreCase(name)) {
-              lightSource.setId(ls.getId());
-              break;
-            }
-          }
-        }
-        lightSourceMap.put(lightSource.getId(), lightSource);
-      }
-      // Last group
-      if (currentGroupName != null) {
-        lightMap.put(currentGroupName, lightSourceMap);
-      }
-    } catch (IOException ioe) {
-      MapTool.showError("msg.error.mtprops.light.ioexception", ioe);
-    }
-    if (!errlog.isEmpty()) {
-      MapTool.showFeedback(errlog.toArray());
-      errlog.clear();
-      throw new IllegalArgumentException(
-          "msg.error.mtprops.light.definition"); // Don't save lights...
-    }
-    return lightMap;
-  }
-
-  public JEditorPane getLightPanel() {
-    return (JEditorPane) formPanel.getTextComponent("lightPanel");
-  }
-
-  public JEditorPane getSightPanel() {
-    return (JEditorPane) formPanel.getTextComponent("sightPanel");
-  }
-
-  public JTextArea getTokenPropertiesTextArea() {
-    return (JTextArea) formPanel.getTextComponent("tokenProperties");
-  }
-
-  public JButton getOKButton() {
-    return (JButton) formPanel.getButton("okButton");
-  }
-
-  private void initOKButton() {
-    getOKButton().addActionListener(e -> accept());
-  }
-
-  public JButton getCancelButton() {
-    return (JButton) formPanel.getButton("cancelButton");
-  }
-
-  public JButton getImportButton() {
-    return (JButton) formPanel.getButton("importButton");
-  }
-
-  public JButton getExportButton() {
-    return (JButton) formPanel.getButton("exportButton");
-  }
+  private final JButton importPredefined =
+      new JButton(I18N.getText("CampaignPropertiesDialog.button.importPredefined"));
 
   public JButton getImportPredefinedButton() {
-    return (JButton) formPanel.getButton("importPredefinedButton");
+    return importPredefined;
   }
+
+  JComboBox<String> predefinedPropertiesComboBox = new JComboBox<>();
 
   public JComboBox<String> getPredefinedPropertiesComboBox() {
-    return (JComboBox<String>) formPanel.getComboBox("predefinedPropertiesComboBox");
+    return predefinedPropertiesComboBox;
   }
 
-  private void initCancelButton() {
-    getCancelButton()
-        .addActionListener(
-            e -> {
-              status = Status.CANCEL;
-              setVisible(false);
+  private final ActionListener importListener =
+      e -> {
+        JFileChooser chooser = MapTool.getFrame().getLoadPropsFileChooser();
+
+        if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
+
+        final File selectedFile = chooser.getSelectedFile();
+        EventQueue.invokeLater(
+            () -> {
+              CampaignProperties properties = PersistenceUtil.loadCampaignProperties(selectedFile);
+              if (properties != null) {
+                MapTool.getCampaign().mergeCampaignProperties(properties);
+                copyCampaignToUI(properties);
+              }
             });
-  }
+      };
 
-  private void initImportButton() {
-    getImportButton()
-        .addActionListener(
-            e -> {
-              JFileChooser chooser = MapTool.getFrame().getLoadPropsFileChooser();
+  private final ActionListener exportListener =
+      e -> {
+        copyUIToCampaign();
 
-              if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
+        JFileChooser fileChooser = MapTool.getFrame().getSaveCampaignPropsFileChooser();
 
-              final File selectedFile = chooser.getSelectedFile();
-              EventQueue.invokeLater(
-                  () -> {
-                    CampaignProperties properties =
-                        PersistenceUtil.loadCampaignProperties(selectedFile);
-                    // TODO: Allow specifying whether it is a replace or merge
-                    if (properties != null) {
-                      MapTool.getCampaign().mergeCampaignProperties(properties);
-                      copyCampaignToUI(properties);
-                    }
-                  });
-            });
-  }
+        boolean tryAgain = true;
+        while (tryAgain) {
+          if (fileChooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+            return;
+          }
+          var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+          var saveDir = fileChooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+          if (saveDir.startsWith(installDir)) {
+            MapTool.showWarning("msg.warning.savePropToInstallDir");
+          } else {
+            tryAgain = false;
+          }
+        }
 
-  private void initExportButton() {
-    getExportButton()
-        .addActionListener(
-            e -> {
-              // TODO: Remove this hack. Specifically, make the export use a properties object
-              // composed of the current dialog entries instead of directly from the campaign
-              copyUIToCampaign();
-              // END HACK
+        File selectedFile = fileChooser.getSelectedFile();
+        if (selectedFile.exists()) {
+          if (selectedFile.getName().endsWith(".rpgame")) {
+            if (!MapTool.confirm("Import into game settings file?")) {
+              return;
+            }
+          } else if (!MapTool.confirm("Overwrite existing file?")) {
+            return;
+          }
+        }
+        try {
+          if (selectedFile.getName().endsWith(".mtprops")) {
+            PersistenceUtil.saveCampaignProperties(campaign, fileChooser.getSelectedFile());
+            MapTool.showInformation("Properties Saved.");
+          } else {
+            MapTool.showMessage(
+                "CampaignPropertiesDialog.export.message",
+                "msg.title.exportProperties",
+                JOptionPane.INFORMATION_MESSAGE);
+            CampaignPropertiesDto campaignPropertiesDto =
+                MapTool.getCampaign().getCampaignProperties().toDto();
+            FileOutputStream fos = new FileOutputStream(fileChooser.getSelectedFile());
+            fos.write(JsonFormat.printer().print(campaignPropertiesDto).getBytes());
+            fos.close();
+          }
 
-              JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
-              if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
+        } catch (IOException ioe) {
+          MapTool.showError("Could not save properties: ", ioe);
+        }
+      };
 
-              File selectedFile = chooser.getSelectedFile();
-              if (selectedFile.exists()) {
-                if (selectedFile.getName().endsWith(".rpgame")) {
-                  if (!MapTool.confirm("Import into game settings file?")) {
-                    return;
-                  }
-                } else if (!MapTool.confirm("Overwrite existing file?")) {
-                  return;
+  private final ActionListener importPredefinedButtonListener =
+      new ActionListener() {
+
+        private File getSelectedPropertyFile() {
+          String property = (String) getPredefinedPropertiesComboBox().getSelectedItem();
+          return new File(
+              AppConstants.CAMPAIGN_PROPERTIES_DIR,
+              property + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          File selectedFile = getSelectedPropertyFile();
+          EventQueue.invokeLater(
+              () -> {
+                CampaignProperties properties =
+                    PersistenceUtil.loadCampaignProperties(selectedFile);
+                if (properties != null) {
+                  MapTool.getCampaign().mergeCampaignProperties(properties);
+                  copyCampaignToUI(properties);
                 }
-              }
-              try {
-                PersistenceUtil.saveCampaignProperties(campaign, chooser.getSelectedFile());
-                MapTool.showInformation("Properties Saved.");
-              } catch (IOException ioe) {
-                MapTool.showError("Could not save properties: ", ioe);
-              }
-            });
-  }
-
-  private void initImportPredefinedButton() {
-    getImportPredefinedButton()
-        .addActionListener(
-            new ActionListener() {
-
-              private File getSelectedPropertyFile() {
-                String property = (String) getPredefinedPropertiesComboBox().getSelectedItem();
-                return new File(
-                    AppConstants.CAMPAIGN_PROPERTIES_DIR,
-                    property + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
-              }
-
-              @Override
-              public void actionPerformed(ActionEvent e) {
-                File selectedFile = getSelectedPropertyFile();
-                EventQueue.invokeLater(
-                    () -> {
-                      CampaignProperties properties =
-                          PersistenceUtil.loadCampaignProperties(selectedFile);
-                      if (properties != null) {
-                        MapTool.getCampaign().mergeCampaignProperties(properties);
-                        copyCampaignToUI(properties);
-                      }
-                    });
-              }
-            });
-  }
+              });
+        }
+      };
 
   private void initPredefinedPropertiesComboBox() {
-    DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
+    DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
     for (File f : getPredefinedProperty()) {
-
       model.addElement(FileUtil.getNameWithoutExtension(f));
     }
     getPredefinedPropertiesComboBox().setModel(model);
@@ -968,60 +418,496 @@ public class CampaignPropertiesDialog extends JDialog {
     return propertyDir.listFiles(AppConstants.CAMPAIGN_PROPERTIES_FILE_FILTER);
   }
 
-  public static void main(String[] args) {
-    JFrame frame = new JFrame("Testing campaign properties dialog syntax-specific fields");
-    CampaignPropertiesDialog cpd = new CampaignPropertiesDialog(frame);
-    // @formatter:off
-    String lights =
-        "D20\n"
-            + "----\n"
-            + "Lantern, Bullseye - 60 : cone arc=60 60#f0f0f0 120#330000\n"
-            + "Lantern, Hooded - 30 : circle 30 60#330000 arc=60 120#f0f0f0\n"
-            + "Torch - 20 : circle 20 40#330000\n"
-            + "\n"
-            + "Aura\n"
-            + "----\n"
-            + "Arc 120deg OWNERonly - 20 : owner aura arc=120 22.5#115511\n"
-            + "Arc 60deg - 60 : aura cone arc=60 facing=15 62.5#77ffaa\n"
-            + "Circle - 20 : aura circle 22.5#220000\n"
-            + "Circle GM+Owner : aura circle GM Owner 62.5#ff8080\n"
-            + "Circle GMonly : aura circle GM 62.5#ff8080\n"
-            + "Fancy - 30/60/120 : aura GM circle 30 60#330000 owner arc=60 120#f0f0f0\n"
-            + "\n";
-    // @formatter:on
-    System.out.print(lights);
+  /**
+   * Fetches all the translations necessary to construct the sight and light help text
+   *
+   * @return Map of keys to translations
+   */
+  private Map<String, String> createSightLightHelpTextMap() {
+    Map<String, String> parameters = new HashMap<>();
+    /* cell formatting string */
+    parameters.put("alignCellCenter", " align=center");
+    /* Useful words and phrases */
+    parameters.put("phraseMultipleEntriesAllowed", I18N.getText("phrase.multipleEntriesAllowed"));
+    parameters.put("mapVisionDistance", I18N.getText("sight.default.distance"));
 
-    Map<String, Map<GUID, LightSource>> originalLightSourcesMap =
-        new HashMap<String, Map<GUID, LightSource>>();
-    Map<String, Map<GUID, LightSource>> lightMap = new HashMap<String, Map<GUID, LightSource>>();
-    try {
-      lightMap = cpd.commitLightMap(lights, originalLightSourcesMap);
-    } catch (Exception e) {
+    /* Build list of useful words and phrases */
+    List<String> helpKeys = I18N.getMatchingKeys(Pattern.compile("^word."));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^option.type.")));
+    /* example text */
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^sight.example.")));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^light.example.")));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^auras.example.")));
+
+    /* Generate parameter map from list */
+    for (String key : helpKeys) {
+      parameters.putIfAbsent(
+          uncapitalize(capitalize(key, '.').replace(".", "")), I18N.getText(key));
     }
 
-    String text = cpd.updateLightPanel(lightMap);
-    System.out.print(text);
+    /* Parameterised strings - need to be done individually */
+    parameters.put(
+        "wikiLinkReferral",
+        I18N.getText(
+            "sightLight.wikiLinkReferral",
+            "<a href=\"https://wiki.rptools.info/index.php/Introduction_to_Lights_and_Sights\">https://wiki.rptools.info/index.php/Introduction_to_Lights_and_Sights</a>"));
 
-    // keySet() might be empty if an exception occurred.
-    for (String string : lightMap.keySet()) {
-      System.out.println("\nGroup Name: " + string);
-      System.out.println("-------------");
-      for (GUID guid : lightMap.get(string).keySet()) {
-        LightSource ls = lightMap.get(string).get(guid);
-        System.out.println(ls.getType() + ", " + ls.getName() + ":");
-        for (Light light : ls.getLightList()) {
-          System.out.print("  [shape=" + light.getShape());
-          if (light.getShape() == ShapeType.CONE) {
-            System.out.print(", arc=" + light.getArcAngle());
-            System.out.print(", facing=" + light.getFacingOffset());
-          }
-          System.out.print(", gm=" + light.isGM());
-          System.out.print(", owner=" + light.isOwnerOnly());
-          System.out.print(", radius=" + light.getRadius());
-          System.out.print(", color=" + light.getPaint() + "]\n");
-        }
-      }
+    var optionShapeDescription =
+        I18N.getText(
+            "sightLight.optionDescription.shape",
+            "<code>beam</code>",
+            "<code>circle</code>",
+            "<code>cone</code>",
+            "<code>grid</code>",
+            "<code>hex</code>",
+            "<code>square</code>");
+    if (MapTool.getLanguage().toLowerCase().startsWith("en")) {
+      /* remove translated version of words for English locales. */
+      optionShapeDescription = optionShapeDescription.replaceAll("\\s*[(][^)]+[)]", "");
     }
-    System.exit(1);
+    parameters.put("optionDescriptionShape", optionShapeDescription);
+
+    parameters.put(
+        "optionDescriptionPersonalLightComponentColor",
+        I18N.getText("sightLight.optionDescription.personalLight.component.color", "#rrggbb"));
+    parameters.put(
+        "optionDescriptionAuraRestriction",
+        I18N.getText(
+            "sightLight.optionDescription.auraRestriction",
+            "<code>gm</code>",
+            "<code>owner</code>"));
+
+    /* everything else */
+    helpKeys = I18N.getMatchingKeys("sightLight");
+    for (String key : helpKeys) {
+      parameters.putIfAbsent(
+          uncapitalize(
+              capitalize(key, new char[] {'.'}).replace("SightLight", "").replace(".", "")),
+          I18N.getText(key));
+    }
+    return parameters;
+  }
+
+  /**
+   * Creates HTML for both sight and light help
+   *
+   * @return String[]
+   */
+  private String[] generateHelpText() {
+    Map<String, String> parameters = createSightLightHelpTextMap();
+    /* html building blocks */
+    String wikiLink = "<font size=4>${wikiLinkReferral}</font><br>";
+    String structureListStart =
+        """
+            <h1>${subheadingStructure}</h1>
+            <ul compact>
+            <li>${structureListItemLines}</li>
+            <li>${structureListItemMeasurement}</li>
+            <li>${structureListItemDefaults}</li>
+            <li>${structureListItemComments}</li>
+            <li>${structureListItemLetterCase}</li>
+            """;
+    String structureListLight =
+        """
+            <li>${structureListItemMultipleLights}<sup>1</sup></li>
+            <li>${structureListItemGroupName}</li>
+            <li>${structureListItemGroupedNames}</li>
+            <li>${structureListItemGroups}</li>
+            <li>${structureListItemSorting}</li>
+            """;
+    String structureListAuras =
+        """
+                <li>${structureListItemMultipleAuras}<sup>1</sup></li>
+                <li>${structureListItemGroupName}</li>
+                <li>${structureListItemGroupedNames}</li>
+                <li>${structureListItemGroups}</li>
+                <li>${structureListItemSorting}</li>
+                """;
+    String structureListClose = "</ul>";
+    String syntaxHeading = "<h1>${subheadingDefinitionSyntax}</h1>";
+    String syntaxSight =
+        """
+              <pre><font size="3">
+              [ ${syntaxLabelName} ] <b>:</b> [ ${optionLabelShape} [ arc= ] [ width= ] [ offset= ]] [ distance= ] [ scale ] [ ${optionLabelMagnifier} ] ([ ${optionLabelPersonalLight} ])...<sup>1</sup>
+              </font></pre>
+              """;
+    String syntaxLight =
+        """
+            <pre><font size="3">
+            ${syntaxLabelGroupName}
+            -------
+            [ ${syntaxLabelName} ] : [ scale ] [ ignores-vbl ] ([ ${optionLabelShape} [ arc= ] [ width= ] [ offset= ]] [ ${optionLabelRange}|${optionLabelColor}|${optionLabelLumens} ])...<sup>1</sup>
+            </font></pre>
+            """;
+    String syntaxAuras =
+        """
+                <pre><font size="3">
+                ${syntaxLabelGroupName}
+                -------
+                [ ${syntaxLabelName} ] : [ scale ] [ ignores-vbl ] ([ ${optionLabelRestriction} ] [ ${optionLabelShape} [ arc= ] [ width= ] [ offset= ]] [ ${optionLabelRange}|${optionLabelColor} ])...<sup>1</sup>
+                </font></pre>
+                """;
+    /*
+     * Tabular options presentation
+     * Columns are; Option Name, Option Type, Description, Default Value, Example
+     */
+    String optionsTableStart =
+        """
+            <h2>${syntaxLabelOptions}</h2>
+            <table border=1 cellpadding=3 cellspacing=0>
+            <tr>
+              <th>${columnHeadingOption}</th>
+              <th>${columnHeadingOptionType}</th>
+              <th>${columnHeadingOptionDescription}</th>
+              <th>${columnHeadingOptionDefaultValue}</th>
+              <th>${wordExample}</th>
+            </tr>
+            <tr>
+              <th>${syntaxLabelName}</th>
+              <td${alignCellCenter}>${wordString}</td>
+              <td>${optionDescriptionName}</td>
+              <td${alignCellCenter}>&mdash;</td>
+              <td${alignCellCenter}>Torch</td>
+            </tr>
+            <tr>
+              <th>${optionLabelShape}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionShape} ${phraseMultipleEntriesAllowed}<sup>2</sup></td>
+              <td${alignCellCenter}><code>circle</code></td>
+              <td${alignCellCenter}><code>cone</code></td>
+            </tr>
+            <tr>
+              <th><code>arc=</code></th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
+              <td>${optionDescriptionArc}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}><code>arc=120</code></td>
+            </tr>
+            <tr>
+              <th><code>width=</code></th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+              <td>${optionDescriptionWidth}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}><code>width=0.4</code></td>
+            </tr>
+            <tr>
+              <th><code>offset=</code></th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
+              <td>${optionDescriptionOffset1} ${optionDescriptionOffset2}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}><code>offset=140</code></td>
+            </tr>
+            """;
+    String optionsTableLightRows =
+        """
+            <tr>
+              <th><code>scale</code></th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionScale}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}><code>scale</code></td>
+            </tr>
+            <tr>
+              <th><code>ignores-vbl</code></th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionIgnoresVBL}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}><code>ignores-vbl</code></td>
+            </tr>
+            <tr>
+              <th>${optionLabelRange}</th>
+              <td${alignCellCenter}>${optionTypeSpecial} (${wordString})</td>
+              <td>${optionDescriptionLightComponents} ${phraseMultipleEntriesAllowed}<sup>3</sup></td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}><code>30#afafaa+100</code></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${columnHeadingOptionComponent}</th>
+              <th>${wordSyntax}&nbsp;&#10233;&nbsp; 00|#rrggbb|+y&nbsp;&nbsp;(${optionLabelRange}|${optionLabelColor}|${optionLabelLumens})</th>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelRange}</th>
+              <td>${optionDescriptionRange}</td>
+              <td></td>
+              <td${alignCellCenter}><code>30</code></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelColor}</th>
+              <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalLightComponentColor}</td>
+              <td>${wordUnused}</td>
+              <td${alignCellCenter}><code>#afafaa</code></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelLumens}</th>
+              <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalLightComponentLumens}<sup>4</sup></td>
+              <td${alignCellCenter}><code>+100</code></td>
+              <td${alignCellCenter}><code>+100</code></td>
+            </tr>
+            """;
+    String optionsTableAurasRows =
+        """
+                <tr>
+                  <th><code>scale</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionScale}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>scale</code></td>
+                </tr>
+                <tr>
+                  <th><code>ignores-vbl</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionIgnoresVBL}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>ignores-vbl</code></td>
+                </tr>
+                <tr>
+                  <th>${optionLabelRestriction}</th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionAuraRestriction}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>owner</code></td>
+                </tr>
+                <tr>
+                  <th>${optionLabelRange}</th>
+                  <td${alignCellCenter}>${optionTypeSpecial} (${wordString})</td>
+                  <td>${optionDescriptionLightComponents} ${phraseMultipleEntriesAllowed}<sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>30#afafaa</code></td>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th>${columnHeadingOptionComponent}</th>
+                  <th>${wordSyntax}&nbsp;&#10233;&nbsp; 00|#rrggbb|&nbsp;&nbsp;(${optionLabelRange}|${optionLabelColor})</th>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th>${optionLabelRange}</th>
+                  <td>${optionDescriptionRange}</td>
+                  <td></td>
+                  <td${alignCellCenter}><code>30</code></td>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th>${optionLabelColor}</th>
+                  <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalLightComponentColor}</td>
+                  <td>${wordUnused}</td>
+                  <td${alignCellCenter}><code>#afafaa</code></td>
+                </tr>
+                """;
+    String optionsTableSightRows =
+        """
+            <tr>
+              <th><code>distance=</code></th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+              <td>${optionDescriptionDistance}</td>
+              <td${alignCellCenter}>${mapVisionDistance}</td>
+              <td${alignCellCenter}><code>distance=120</code></td>
+            </tr>
+            <tr>
+              <th><code>scale</code></th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionScale}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}><code>scale</code></td>
+            </tr>
+            <tr>
+              <th>${optionLabelMagnifier}</th>
+              <td${alignCellCenter}>${optionTypePrefixedValue}</td>
+              <td><i>[ x0.0 ]</i> ${optionDescriptionMagnifier}</td>
+              <td${alignCellCenter}><code>x1</code></td>
+              <td${alignCellCenter}><code>x2.5</code></td>
+            </tr>
+            <tr>
+              <th>${optionLabelPersonalLight}</th>
+              <td${alignCellCenter}>${optionTypeSpecial} (${wordString})</td>
+              <td>${optionDescriptionPersonalLight} ${phraseMultipleEntriesAllowed}<sup>3</sup></td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}><code>r30#afafaa+100</code></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${columnHeadingOptionComponent}</th>
+              <th>${wordSyntax}&nbsp;&#10233;&nbsp;r00|#rrggbb|+y&nbsp;&nbsp;(${optionLabelRange}|${optionLabelColor}|${optionLabelLumens})</th>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelRange}</th>
+              <td><i>[${optionTypePrefixedValue} "r"]</i> ${optionDescriptionPersonalLightComponentRange}</td>
+              <td></td>
+              <td${alignCellCenter}><code>r30</code></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelColor}</th>
+              <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalLightComponentColor}</td>
+              <td>${wordUnused}</td>
+              <td${alignCellCenter}><code>#afafaa</code></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelLumens}</th>
+              <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalLightComponentLumens}<sup>4</sup></td>
+              <td${alignCellCenter}><code>+100</code></td>
+              <td${alignCellCenter}><code>+100</code></td>
+            </tr>
+            """;
+    String optionsTableEnd =
+        """
+            </table>
+            """;
+    String footnotesSight =
+        """
+            <ol>
+            <li>${footnoteMultipleLights}</li>
+            <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
+            <li>${footnoteMultipleRangeColourLumens}</li>
+            <li>${footnoteLumensLine1}<br>${footnoteLumensLine2}</li>
+            </ol>
+            """;
+    String footnotesLight =
+        """
+            <ol>
+            <li>${footnoteMultipleLights}</li>
+            <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
+            <li>${footnoteMultipleRangeColourLumens}</li>
+            <li>${footnoteLumensLine1}<br>${footnoteLumensLine2}</li>
+            </ol>
+            """;
+    String footnotesAuras =
+        """
+                <ol>
+                <li>${footnoteMultipleLights}</li>
+                <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
+                <li>${footnoteMultipleRangeColour}</li>
+                </ol>
+                """;
+    String examplesHeading =
+        """
+            <hr>
+            <h1>${wordExamples}</font></h1>
+            """;
+    String examplesSight =
+        """
+            <pre><font size="3">
+            ${sightExampleNameNormal}: circle
+            ${sightExampleNameDarkVision}: circle scale r60#000000+100
+            ${sightExampleNameConeVision}: cone arc=60 distance=120
+            ${sightExampleNameElfVision}: circle scale x3
+            - ${sightExampleComment}
+            ${sightExampleNameBlind}: r10000-1000
+            </font></pre>
+            <dl>
+              <dt>${sightExampleNameNormal}</dt><dd>${sightExampleTextNormal}</dd>
+              <dt>${sightExampleNameDarkVision}</dt><dd>${sightExampleTextDarkVision}</dd>
+              <dt>${sightExampleNameConeVision}</dt><dd>${sightExampleTextConeVision}</dd>
+              <dt>${sightExampleNameElfVision}</dt><dd>${sightExampleTextElfVision}</dd>
+              <dt>${sightExampleNameBlind}</dt><dd>${sightExampleTextBlind}</dd>
+            </dl>
+            """;
+    String examplesLight =
+        """
+            <pre><font size="3">
+            ${lightExampleGroupName}
+            ----
+            - ${sightExampleComment}
+            ${lightExampleNameLantern}:  circle 4#ffffaa cone arc=300 7.5#666600 circle 10#000000
+            ${lightExampleNameStreetLight}:  cone arc=350 1 10.05#aaaaaa arc=230 10 22.05#444444 arc=220 22 30#000000
+            </font></pre>
+            <dl>
+              <dt>${lightExampleNameLantern}</dt><dd>${lightExampleTextLantern}</dd>
+              <dt>${lightExampleNameStreetLight}</dt><dd>${lightExampleTextStreetLight}</dd>
+            </dl>
+            """;
+    String examplesAuras =
+        """
+                <pre><font size="3">
+                ${aurasExampleGroupName}
+                ----
+                - ${sightExampleComment}
+                ${aurasExampleNameGmRedSquare}: square GM 2.5#ff0000
+                ${aurasExampleNameGmRed}: GM 7.5#ff0000
+                ${aurasExampleNameOwner}: owner 7.5#00ff00
+                ${aurasExampleNameAllPlayers}: 7.5#0000ff
+                ${aurasExampleNameSideFields}: cone arc=90 12.5#6666ff offset=90  12.5#aadd00 offset=-90  12.5#aadd00 offset=180  12.5#bb00aa
+                ${aurasExampleNameDonutHole}: circle 20 40#ffff00
+                ${aurasExampleNameDonutCone}: cone arc=30 10 20#ffff00
+                ${aurasExampleNameRangeCircles} 30/60/90: circle 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000
+                ${aurasExampleNameRangeArcs} 30/60/90: cone arc=135 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000
+                ${aurasExampleNameLineOfSight}: beam width=0.4 150#ffff00
+                </font></pre>
+                <dl>
+                  <dt>${aurasExampleNameGmRedSquare}</dt><dd>${aurasExampleTextGmRedSquare}</dd>
+                  <dt>${aurasExampleNameGmRed}</dt><dd>${aurasExampleTextGmRed}</dd>
+                  <dt>${aurasExampleNameOwner}</dt><dd>${aurasExampleTextOwner}</dd>
+                  <dt>${aurasExampleNameAllPlayers}</dt><dd>${aurasExampleTextAllPlayers}</dd>
+                  <dt>${aurasExampleNameSideFields}</dt><dd>${aurasExampleTextSideFields}</dd>
+                  <dt>${aurasExampleNameDonutHole}</dt><dd>${aurasExampleTextDonutHole}</dd>
+                  <dt>${aurasExampleNameDonutCone}</dt><dd>${aurasExampleTextDonutCone}</dd>
+                  <dt>${aurasExampleNameRangeCircles}</dt><dd>${aurasExampleTextRangeCircles}</dd>
+                  <dt>${aurasExampleNameRangeArcs}</dt><dd>${aurasExampleTextRangeArcs}</dd>
+                  <dt>${aurasExampleNameLineOfSight}</dt><dd>${aurasExampleTextLineOfSight}</dd>
+                </dl>
+                """;
+    String htmlLight =
+        "<html><body>"
+            + wikiLink
+            + structureListStart
+            + structureListLight
+            + structureListClose
+            + syntaxHeading
+            + syntaxLight
+            + optionsTableStart
+            + optionsTableLightRows
+            + optionsTableEnd
+            + footnotesLight
+            + examplesHeading
+            + examplesLight
+            + "</body></html>";
+    String htmlAuras =
+        "<html><body>"
+            + wikiLink
+            + structureListStart
+            + structureListAuras
+            + structureListClose
+            + syntaxHeading
+            + syntaxAuras
+            + optionsTableStart
+            + optionsTableAurasRows
+            + optionsTableEnd
+            + footnotesAuras
+            + examplesHeading
+            + examplesAuras
+            + "</body></html>";
+
+    String htmlSight =
+        "<html><body>"
+            + wikiLink
+            + structureListStart
+            + structureListClose
+            + syntaxHeading
+            + syntaxSight
+            + optionsTableStart
+            + optionsTableSightRows
+            + optionsTableEnd
+            + footnotesSight
+            + examplesHeading
+            + examplesSight
+            + "</body></html>";
+
+    StringSubstitutor substitute = new StringSubstitutor(parameters);
+    String sightResult = substitute.replace(htmlSight);
+    String lightResult = substitute.replace(htmlLight);
+    String aurasResult = substitute.replace(htmlAuras);
+    return new String[] {sightResult, lightResult, aurasResult};
   }
 }

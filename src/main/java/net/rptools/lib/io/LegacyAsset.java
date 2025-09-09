@@ -23,8 +23,10 @@ import net.rptools.lib.MD5Key;
 public class LegacyAsset {
   /** the key of the asset */
   private MD5Key id;
+
   /** The image data */
   private byte[] image;
+
   /** The name of the asset */
   private String name;
 

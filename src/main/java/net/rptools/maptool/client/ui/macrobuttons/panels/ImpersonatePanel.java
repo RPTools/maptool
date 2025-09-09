@@ -28,6 +28,7 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.zone.SelectionModel;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -155,23 +156,43 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   }
 
   @Subscribe
+  private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+    SwingUtilities.invokeLater(
+        () -> {
+          reset();
+        });
+  }
+
+  @Subscribe
   private void onTokenMacroChanged(TokenMacroChanged event) {
-    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfAnyImpersonated(Collections.singletonList(event.token()));
+        });
   }
 
   @Subscribe
   private void onTokenPanelChanged(TokenPanelChanged event) {
-    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfAnyImpersonated(Collections.singletonList(event.token()));
+        });
   }
 
   @Subscribe
   private void onTokensRemoved(TokensRemoved event) {
-    resetIfAnyImpersonated(event.tokens());
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfAnyImpersonated(event.tokens());
+        });
   }
 
   @Subscribe
   private void onTokensEdited(TokenEdited event) {
-    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfAnyImpersonated(Collections.singletonList(event.token()));
+        });
   }
 
   private void resetIfAnyImpersonated(List<Token> tokens) {

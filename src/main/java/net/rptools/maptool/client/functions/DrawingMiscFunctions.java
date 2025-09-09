@@ -64,7 +64,7 @@ public class DrawingMiscFunctions extends DrawingFunctions {
     checkTrusted(functionName);
     String mapName = parameters.get(0).toString();
     String drawing = parameters.get(1).toString();
-    Zone map = getNamedMap(functionName, mapName).getZone();
+    Zone map = FunctionUtil.getZoneRenderer(functionName, mapName).getZone();
     if ("movedOverDrawing".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
       String jsonPath = parameters.get(2).toString();
@@ -108,7 +108,7 @@ public class DrawingMiscFunctions extends DrawingFunctions {
   private JsonArray getCrossedPoints(final Zone map, final DrawnElement de, final String pathStr) {
     List<Map<String, Integer>> pathPoints = convertJSONStringToList(pathStr);
     JsonArray returnPoints = new JsonArray();
-    Area a = de.getDrawable().getArea();
+    Area a = de.getDrawable().getArea(map);
     int cnt = 0;
     Point previousPoint = new Point();
     for (Map<String, Integer> entry : pathPoints) {

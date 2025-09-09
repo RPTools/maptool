@@ -28,51 +28,34 @@ import javax.annotation.Nonnull;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.Illumination.LumensLevel;
+import net.rptools.maptool.client.ui.zone.IlluminationModel.ContributedLight;
+import net.rptools.maptool.client.ui.zone.IlluminationModel.LightInfo;
 import net.rptools.maptool.client.ui.zone.Illuminator.LitArea;
-import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
+import net.rptools.maptool.client.ui.zone.vbl.NodedTopology;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.topology.VisibilityType;
+import net.rptools.maptool.model.zones.MaskTopologyChanged;
 import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensChanged;
 import net.rptools.maptool.model.zones.TokensRemoved;
-import net.rptools.maptool.model.zones.TopologyChanged;
+import net.rptools.maptool.model.zones.WallTopologyChanged;
+import net.rptools.maptool.model.zones.ZoneLightingChanged;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Responsible for calculating lights and vision. */
 public class ZoneView {
-  /**
-   * Associates a LitArea stored in an Illuminator with the Light that it was created for.
-   *
-   * <p>This is used to represent normal lights, personal lights, and day light. In the case of
-   * daylight, lightInfo will be null since it doesn't originate from an actual light, and should
-   * never be rendered.
-   *
-   * @param litArea
-   * @param lightInfo
-   */
-  private record ContributedLight(LitArea litArea, LightInfo lightInfo) {
-
-    public static ContributedLight forDaylight(Area visibleArea) {
-      return new ContributedLight(new LitArea(0, visibleArea), null);
-    }
-  }
-
-  /**
-   * Combines a LightSource and a Light for easy referencing in ContributedLight.
-   *
-   * @param lightSource
-   * @param light
-   */
-  private record LightInfo(LightSource lightSource, Light light) {}
 
   /**
    * Represents the important aspects of a sight for the purposes of calculating illumination.
    *
-   * <p>Obviously only one field for now, but in the future it may do more (e.g., lumens boosting),
-   * so let's keep it in an easily identifiable type.
+   * @param role Whether the illumination is valid for GM or player views, since they disagree which
+   *     lights exist.
+   * @param multiplier The sight multiplier to apply to lit areas.
    */
-  public record IlluminationKey(double multiplier) {}
+  private record IlluminationKey(Player.Role role, double multiplier) {}
 
   private static final Logger log = LogManager.getLogger(ZoneView.class);
 
@@ -83,8 +66,31 @@ public class ZoneView {
 
   // region These fields track light sources and their illuminated areas.
 
-  /** Map light source type to all tokens with that type. */
-  private final Map<LightSource.Type, Set<GUID>> lightSourceMap = new HashMap<>();
+  private record LightSourceMapKey(Player.Role role, LightSource.Type type) {}
+
+  /**
+   * Map light source type to all tokens with that type. Will always have entries for each light
+   * type, so no need to check whether they exist.
+   */
+  private final Map<LightSourceMapKey, Set<GUID>> lightSourceMap = new HashMap<>();
+
+  private Set<GUID> getLightSources(Player.Role role, LightSource.Type type) {
+    return lightSourceMap.computeIfAbsent(
+        new LightSourceMapKey(role, type), key -> new HashSet<>());
+  }
+
+  private void addLightSourceToken(Token token, Set<Player.Role> roles) {
+    for (AttachedLightSource als : token.getLightSources()) {
+      LightSource lightSource = als.resolve(token, MapTool.getCampaign());
+      if (lightSource == null) {
+        continue;
+      }
+
+      for (var role : roles) {
+        getLightSources(role, lightSource.getType()).add(token.getId());
+      }
+    }
+  }
 
   // endregion
 
@@ -104,7 +110,7 @@ public class ZoneView {
   /**
    * Map each token to the area they can see by themselves.
    *
-   * <p>This vision only accounts for topology, and does not include and other limits on the token's
+   * <p>This vision only accounts for topology, and does not include any other limits on the token's
    * vision. The results can be intersected with lighting results to produce the area that can
    * actually be seen by a token in a given view.
    */
@@ -115,23 +121,7 @@ public class ZoneView {
   // region These fields cache information that is specific to certain illumination parameters. They
   //        only need to be flushed when something globally changes, such as light definitions.
 
-  /**
-   * The list of all non-personal lights contributed to an illumination for each token.
-   *
-   * <p>This is used to generate DrawableLights and to remove light sources from any existing
-   * Illuminators.
-   */
-  private final Map<IlluminationKey, Map<GUID, List<ContributedLight>>> contributedLightsByToken =
-      new HashMap<>();
-
-  /** The illuminator structures that can be used for each set of illumination parameters. */
-  private final Map<IlluminationKey, Illuminator> illuminators = new HashMap<>();
-
-  /**
-   * A cache of results from the {@link #illuminators} that do includes all normal lights but no
-   * personal lights or daylight.
-   */
-  private final Map<IlluminationKey, Illumination> illuminationCache = new HashMap<>();
+  private final Map<IlluminationKey, IlluminationModel> illuminationModels = new HashMap<>();
 
   // endregion
 
@@ -145,7 +135,7 @@ public class ZoneView {
   /**
    * The illumination calculated for a view.
    *
-   * <p>Unlike {@link #illuminationCache}, this field includes personal lights and daylight.
+   * <p>This includes personal lights and daylight in addition to normal lights.
    */
   private final Map<PlayerView, Illumination> illuminationsPerView = new HashMap<>();
 
@@ -153,14 +143,18 @@ public class ZoneView {
   private final Map<PlayerView, Area> exposedAreaMap = new HashMap<>();
 
   /** Map the PlayerView to its visible area. */
-  private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<>();
+  private final Map<PlayerView, Area> visibleAreaMap = new HashMap<>();
 
   // endregion
 
-  private final Map<Zone.TopologyType, Area> topologyAreas = new EnumMap<>(Zone.TopologyType.class);
+  /** Caches the lights to be drawn for a each view. */
+  private final Map<PlayerView, List<DrawableLight>> drawableLights = new HashMap<>();
 
-  private final Map<Zone.TopologyType, AreaTree> topologyTrees =
-      new EnumMap<>(Zone.TopologyType.class);
+  /** Holds the auras from lightSourceMap after they have been combined. */
+  private final Map<PlayerView, List<DrawableLight>> drawableAuras = new HashMap<>();
+
+  /** Cached version of the zone's topology which is fully noded. */
+  private NodedTopology nodedTopology = null;
 
   /**
    * Construct ZoneView from zone. Build lightSourceMap, and add ZoneView to Zone as listener.
@@ -169,7 +163,8 @@ public class ZoneView {
    */
   public ZoneView(Zone zone) {
     this.zone = zone;
-    findLightSources();
+
+    updateLightSourcesFromTokens(zone.getAllTokens());
 
     new MapToolEventBus().getMainEventBus().register(this);
   }
@@ -192,7 +187,7 @@ public class ZoneView {
         // have sight (so weren't included in the PlayerView), but could still have previously
         // exposed areas.
         exposed = new Area();
-        for (Token tok : zone.getTokens()) {
+        for (Token tok : zone.getTokensForLayers(Zone.Layer::supportsVision)) {
           if (!AppUtil.playerOwns(tok)) {
             continue;
           }
@@ -210,14 +205,22 @@ public class ZoneView {
   /**
    * Calculate the visible area of the view, cache it in visibleAreaMap, and return it
    *
+   * <p>The visible area is calculated for each token in the view. The token's visible area is its
+   * vision obstructed by topology and restricted to the illuminated portions of the map.
+   *
    * @param view the PlayerView
    * @return the visible area
    */
-  public Area getVisibleArea(PlayerView view) {
-    calculateVisibleArea(view);
-    ZoneView.VisibleAreaMeta visible = visibleAreaMap.get(view);
-
-    return visible != null ? visible.visibleArea : new Area();
+  public @Nonnull Area getVisibleArea(PlayerView view) {
+    return visibleAreaMap.computeIfAbsent(
+        view,
+        view2 -> {
+          final var visibleArea = new Area();
+          getTokensForView(view2)
+              .map(token -> this.getVisibleArea(token, view2))
+              .forEach(visibleArea::add);
+          return visibleArea;
+        });
   }
 
   /**
@@ -230,90 +233,42 @@ public class ZoneView {
   }
 
   /**
-   * Get the map and token topology of the requested type.
-   *
-   * <p>The topology is cached and should only regenerate when not yet present, which should happen
-   * on flush calls.
-   *
-   * @param topologyType The type of topology tree to get.
-   * @return the area of the topology.
+   * Packages mask topology, including token masks, together with wall topology, adding nodes at any
+   * intersection points.
    */
-  public synchronized Area getTopology(Zone.TopologyType topologyType) {
-    var topology = topologyAreas.get(topologyType);
-
-    if (topology == null) {
-      log.debug("ZoneView topology area for {} is null, generating...", topologyType.name());
-
-      topology = new Area(zone.getTopology(topologyType));
-      List<Token> topologyTokens =
-          MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTopology(topologyType);
-      for (Token topologyToken : topologyTokens) {
-        topology.add(topologyToken.getTransformedTopology(topologyType));
-      }
-
-      topologyAreas.put(topologyType, topology);
+  private synchronized NodedTopology prepareNodedTopology() {
+    if (nodedTopology == null) {
+      var walls = zone.getWalls();
+      var masks = zone.getMasks(EnumSet.allOf(Zone.TopologyType.class), null);
+      nodedTopology = NodedTopology.prepare(walls, masks);
     }
-
-    return topology;
+    return nodedTopology;
   }
 
-  /**
-   * Get the topology tree of the requested type.
-   *
-   * <p>The topology tree is cached and should only regenerate when the tree is not present, which
-   * should happen on flush calls.
-   *
-   * <p>This method is equivalent to building an AreaTree from the results of getTopology(), but the
-   * results are cached.
-   *
-   * @param topologyType The type of topology tree to get.
-   * @return the AreaTree (topology tree).
-   */
-  private synchronized AreaTree getTopologyTree(Zone.TopologyType topologyType) {
-    var topologyTree = topologyTrees.get(topologyType);
-
-    if (topologyTree == null) {
-      log.debug("ZoneView topology tree for {} is null, generating...", topologyType.name());
-
-      var topology = getTopology(topologyType);
-
-      topologyTree = new AreaTree(topology);
-      topologyTrees.put(topologyType, topologyTree);
-    }
-
-    return topologyTree;
-  }
-
-  private Illuminator getUpToDateIlluminator(IlluminationKey illuminationKey) {
-    final var illuminator = illuminators.computeIfAbsent(illuminationKey, key -> new Illuminator());
-    final var contributingTokens =
-        contributedLightsByToken.computeIfAbsent(illuminationKey, key -> new HashMap<>());
+  private IlluminationModel getIlluminationModel(IlluminationKey illuminationKey) {
+    final var illuminationModel =
+        illuminationModels.computeIfAbsent(illuminationKey, key -> new IlluminationModel());
+    // Make sure it's up-to-date.
 
     // We need to get all lights ordered by lumens. From there, we can do darkness subtraction and
     // build drawable lights for each, and then build a lumens map.
     final var lightSourceTokenGuids =
-        new ArrayList<>(
-            lightSourceMap.getOrDefault(LightSource.Type.NORMAL, Collections.emptySet()));
-    // No need to recalculate for tokens already contributing.
-    lightSourceTokenGuids.removeAll(contributingTokens.keySet());
+        getLightSources(illuminationKey.role(), LightSource.Type.NORMAL);
     final var lightSourceTokens =
         lightSourceTokenGuids.stream()
             .map(zone::getToken)
             .filter(Objects::nonNull)
+            // No need to recalculate for tokens already contributing.
+            .filter(token -> !illuminationModel.hasToken(token.getId()))
             .collect(Collectors.toUnmodifiableSet());
 
-    // For each light source, extract all normal and darkness lights.
+    // For each light source, extract all normal and darkness lights, adding them to the model.
     for (final var lightSourceToken : lightSourceTokens) {
-      final var litAreas = calculateLitAreas(lightSourceToken, illuminationKey.multiplier());
-      for (final var litArea : litAreas) {
-        illuminator.add(litArea.litArea());
-        contributingTokens
-            .computeIfAbsent(lightSourceToken.getId(), id -> new ArrayList<>())
-            .add(litArea);
-      }
+      final var contributions = calculateLitAreas(lightSourceToken, illuminationKey.multiplier());
+      illuminationModel.addToken(lightSourceToken.getId(), contributions);
     }
 
-    return illuminator;
+    return illuminationModel;
   }
 
   private List<ContributedLight> calculateLitAreas(Token lightSourceToken, double multiplier) {
@@ -321,7 +276,7 @@ public class ZoneView {
 
     for (final var attachedLightSource : lightSourceToken.getLightSources()) {
       LightSource lightSource =
-          MapTool.getCampaign().getLightSource(attachedLightSource.getLightSourceId());
+          attachedLightSource.resolve(lightSourceToken, MapTool.getCampaign());
       if (lightSource == null) {
         continue;
       }
@@ -342,59 +297,36 @@ public class ZoneView {
 
     final var p = FogUtil.calculateVisionCenter(lightSourceToken, zone);
     final var translateTransform = AffineTransform.getTranslateInstance(p.x, p.y);
-    final var magnifyTransform = AffineTransform.getScaleInstance(multiplier, multiplier);
 
-    final var lightSourceArea = lightSource.getArea(lightSourceToken, zone);
     // Calculate exposed area
-    // Jamz: OK, let not have lowlight vision type multiply darkness radius
-    if (multiplier != 1 && lightSource.getType() == LightSource.Type.NORMAL) {
-      lightSourceArea.transform(magnifyTransform);
-    }
+    final var lightSourceArea = lightSource.getArea(lightSourceToken, zone, multiplier);
     lightSourceArea.transform(translateTransform);
 
-    final var lightSourceVisibleArea =
-        FogUtil.calculateVisibility(
-            p,
-            lightSourceArea,
-            getTopologyTree(Zone.TopologyType.WALL_VBL),
-            getTopologyTree(Zone.TopologyType.HILL_VBL),
-            getTopologyTree(Zone.TopologyType.PIT_VBL));
-    if (lightSourceVisibleArea == null) {
+    Area lightSourceVisibleArea = lightSourceArea;
+
+    if (!lightSource.isIgnoresVBL()) {
+      lightSourceVisibleArea =
+          FogUtil.calculateVisibility(
+              VisibilityType.Light, p, lightSourceArea, prepareNodedTopology());
+    }
+    if (lightSourceVisibleArea.isEmpty()) {
       // Nothing illuminated for this source.
       return Collections.emptyList();
     }
 
     final var litAreas = new ArrayList<ContributedLight>();
 
-    // Tracks the cummulative inner ranges of light sources so that we can cut them out of the
-    // outer ranges and end up with disjoint sets, even when magnifying.
-    // Note that this "hole punching" has nothing to do with lumen strength, it's just a way of
-    // making smaller ranges act as lower bounds for larger ranges.
-    final var cummulativeNotTransformedArea = new Area();
-    for (final var light : lightSource.getLightList()) {
-      final var notScaledLightArea =
-          light.getArea(lightSourceToken, zone, lightSource.isScaleWithToken());
-      if (notScaledLightArea == null) {
-        continue;
-      }
-      final var lightArea = new Area(notScaledLightArea);
+    for (final var lightArea : lightSource.getLightAreas(lightSourceToken, zone, multiplier)) {
+      var area = lightArea.area();
+      var light = lightArea.light();
 
-      // Lowlight vision does not magnify darkness.
-      if (multiplier != 1
-          && lightSource.getType() == LightSource.Type.NORMAL
-          && light.getLumens() >= 0) {
-        lightArea.transform(magnifyTransform);
-      }
-
-      lightArea.subtract(cummulativeNotTransformedArea);
-      lightArea.transform(translateTransform);
-      lightArea.intersect(lightSourceVisibleArea);
+      area.transform(translateTransform);
+      area.intersect(lightSourceVisibleArea);
 
       litAreas.add(
           new ContributedLight(
-              new LitArea(light.getLumens(), lightArea), new LightInfo(lightSource, light)));
-
-      cummulativeNotTransformedArea.add(notScaledLightArea);
+              new LitArea(light.getLumens(), area),
+              new LightInfo(lightSource, light, lightSourceToken)));
     }
 
     // Magnification can cause different ranges for a single light source to overlap. This is not
@@ -442,7 +374,10 @@ public class ZoneView {
         view.isUsingTokenView()
             ? view.getTokens()
             : zone.getTokensFiltered(
-                t -> t.isToken() && t.getHasSight() && (isGMview || t.isVisible()));
+                t ->
+                    t.getLayer().supportsVision()
+                        && t.getHasSight()
+                        && (isGMview || t.isVisible()));
 
     return tokenList.stream()
         .filter(
@@ -474,10 +409,13 @@ public class ZoneView {
   private ZoneView.IlluminationKey illuminationKeyFromView(PlayerView view) {
     // The maximum range is generally a good option for rendering.
     return new ZoneView.IlluminationKey(
+        view.getRole(),
         view.isUsingTokenView()
             ? view.getTokens().stream()
+                .filter(Token::getHasSight)
                 .map(Token::getSightType)
                 .map(sightName -> MapTool.getCampaign().getSightType(sightName))
+                .filter(Objects::nonNull)
                 .map(SightType::getMultiplier)
                 .max(Double::compare)
                 .orElse(1.0)
@@ -485,8 +423,11 @@ public class ZoneView {
   }
 
   private Illumination getIllumination(IlluminationKey illuminationKey) {
-    return illuminationCache.computeIfAbsent(
-        illuminationKey, key -> getUpToDateIlluminator(key).getIllumination());
+    return getIlluminationModel(illuminationKey).getIllumination();
+  }
+
+  private @Nonnull ContributedLight createDaylightContribution(Area visibleArea) {
+    return new ContributedLight(new Illuminator.LitArea(0, visibleArea), null);
   }
 
   /**
@@ -496,7 +437,8 @@ public class ZoneView {
    * @param token
    * @return All extra light contributions to be made for this token.
    */
-  private @Nonnull List<ContributedLight> getPersonalTokenContributions(Token token) {
+  private @Nonnull List<ContributedLight> getPersonalTokenContributions(
+      Player.Role role, Token token) {
     if (!token.getHasSight()) {
       return Collections.emptyList();
     }
@@ -514,19 +456,17 @@ public class ZoneView {
 
       if (zone.getVisionType() != Zone.VisionType.NIGHT) {
         // Treat the entire visible area like a light source of minimal lumens.
-        final var contributedLight = ContributedLight.forDaylight(tokenVisibleArea);
+        final var contributedLight = createDaylightContribution(tokenVisibleArea);
         personalLights.add(contributedLight);
       }
 
       if (token.hasLightSources()
-          && !lightSourceMap
-              .getOrDefault(LightSource.Type.NORMAL, Collections.emptySet())
-              .contains(token.getId())) {
+          && !getLightSources(role, LightSource.Type.NORMAL).contains(token.getId())) {
         // This accounts for temporary tokens (such as during an Expose Last Path)
         personalLights.addAll(calculateLitAreas(token, sight.getMultiplier()));
       }
 
-      if (sight.hasPersonalLightSource()) {
+      if (sight.getPersonalLightSource() != null) {
         // Calculate the personal light area here.
         // Note that a personal light is affected by its own sight's magnification, but that's it.
         // Since each token is only aware of its own personal light, of course we don't want a
@@ -543,67 +483,40 @@ public class ZoneView {
     return personalLights;
   }
 
-  private Illumination getIllumination(PlayerView view) {
+  public Illumination getIllumination(PlayerView view) {
     var illumination = illuminationsPerView.get(view);
     if (illumination == null) {
       // Not yet calculated. Do so now.
       final var illuminationKey = illuminationKeyFromView(view);
       final var baseIllumination = getIllumination(illuminationKey);
 
-      final var extraLights = new ArrayList<ContributedLight>();
+      final var extraLights = new ArrayList<LitArea>();
       getTokensForView(view)
           .forEach(
               token -> {
-                final var personalLights = getPersonalTokenContributions(token);
-                extraLights.addAll(personalLights);
+                final var personalLights = getPersonalTokenContributions(view.getRole(), token);
+                extraLights.addAll(Lists.transform(personalLights, ContributedLight::litArea));
               });
 
-      // Now fold the extra lights into the lumens levels.
-      final var lumensLevels =
-          new ArrayList<>(
-              baseIllumination.getLumensLevels().stream()
-                  .map(
-                      ll ->
-                          new LumensLevel(
-                              ll.lumensStrength(),
-                              new Area(ll.lightArea()),
-                              new Area(ll.darknessArea())))
-                  .toList());
-      for (final var extraLitArea : extraLights) {
-        final var isDarkness = extraLitArea.litArea().lumens() < 0;
-        final var lumensStrength = Math.abs(extraLitArea.litArea().lumens());
-        final var area = extraLitArea.litArea().area();
-
-        final var index =
-            Collections.binarySearch(
-                Lists.transform(lumensLevels, LumensLevel::lumensStrength), lumensStrength);
-        final LumensLevel level;
-        if (index >= 0) {
-          // Already a lumens level. Add onto it.
-          level = lumensLevels.get(index);
-        } else {
-          final var insertionPoint = -index - 1;
-          level = new LumensLevel(lumensStrength, new Area(), new Area());
-          lumensLevels.add(insertionPoint, level);
-        }
-        (isDarkness ? level.darknessArea() : level.lightArea()).add(area);
-      }
-
-      illumination = new Illumination(lumensLevels);
+      illumination = baseIllumination.withExtraLights(extraLights);
       illuminationsPerView.put(view, illumination);
     }
-
     return illumination;
   }
 
   /**
-   * Gets the various areas associated with each level of lumens.
+   * Gets the areas dominated by each level of lumens.
    *
-   * @return The areas associated with each lumens value, arranged from weak to strong.
+   * <p>The various levels have completely disjoint areas. If an area is covered by both strong and
+   * weak lumens, only the strong lumens will be represented in the result.
+   *
+   * @param view
+   * @return The various lumens levels, with any stronger lumens areas being subtracted from weaker
+   *     lumens areas and ordered from strong to weak lumens.
    */
-  public List<LumensLevel> getLumensLevels(PlayerView view) {
+  public List<LumensLevel> getDisjointObscuredLumensLevels(PlayerView view) {
     final var illumination = getIllumination(view);
-    return illumination.getLumensLevels();
+    return illumination.getDisjointObscuredLumensLevels();
   }
 
   /**
@@ -635,18 +548,10 @@ public class ZoneView {
       Area visibleArea = sight.getVisionShape(token, zone);
       visibleArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
       tokenVisibleArea =
-          FogUtil.calculateVisibility(
-              p,
-              visibleArea,
-              getTopologyTree(Zone.TopologyType.WALL_VBL),
-              getTopologyTree(Zone.TopologyType.HILL_VBL),
-              getTopologyTree(Zone.TopologyType.PIT_VBL));
-      // Can be null if no visibility.
-      tokenVisibleArea = Objects.requireNonNullElse(tokenVisibleArea, new Area());
+          FogUtil.calculateVisibility(VisibilityType.Sight, p, visibleArea, prepareNodedTopology());
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
 
-    // TODO Instead of a defensive copy, we could include a very stern warning to not modify.
     return new Area(tokenVisibleArea);
   }
 
@@ -656,12 +561,7 @@ public class ZoneView {
    * @param token the token to get the visible area of.
    * @return the visible area of a token, including the effect of other lights.
    */
-  public Area getVisibleArea(Token token, PlayerView view) {
-    // Sanity
-    if (token == null) {
-      return null;
-    }
-
+  public Area getVisibleArea(@Nonnull Token token, PlayerView view) {
     // Cache ?
     Map<GUID, Area> tokenVisionCache =
         tokenVisionCachePerView.computeIfAbsent(view, v -> new HashMap<>());
@@ -677,14 +577,12 @@ public class ZoneView {
     // perspective.
     final var singleTokenView = new PlayerView(view.getRole(), Collections.singletonList(token));
     final var illumination = getIllumination(singleTokenView);
-    final var visibleArea = illumination.getVisibleArea();
-    visibleArea.intersect(tokenVisibleArea);
+    final var litArea = illumination.getLitArea();
+    litArea.intersect(tokenVisibleArea);
 
-    tokenVisionCache.put(token.getId(), visibleArea);
+    tokenVisionCache.put(token.getId(), litArea);
 
-    // log.info("getVisibleArea: \t\t" + stopwatch);
-
-    return visibleArea;
+    return litArea;
   }
 
   /**
@@ -692,142 +590,140 @@ public class ZoneView {
    *
    * @return the list of drawable auras.
    */
-  public List<DrawableLight> getDrawableAuras() {
-    List<DrawableLight> lightList = new LinkedList<DrawableLight>();
-    final var auraTokenGUIDs = lightSourceMap.get(LightSource.Type.AURA);
-    if (auraTokenGUIDs != null) {
-      for (GUID lightSourceToken : auraTokenGUIDs) {
-        Token token = zone.getToken(lightSourceToken);
-        if (token == null) {
-          continue;
-        }
-        Point p = FogUtil.calculateVisionCenter(token, zone);
+  public List<DrawableLight> getDrawableAuras(PlayerView view) {
+    return Collections.unmodifiableList(
+        drawableAuras.computeIfAbsent(
+            view,
+            view2 -> {
+              List<DrawableLight> lightList = new LinkedList<DrawableLight>();
+              for (GUID lightSourceToken :
+                  getLightSources(view2.getRole(), LightSource.Type.AURA)) {
+                Token token = zone.getToken(lightSourceToken);
+                if (token == null) {
+                  continue;
+                }
+                if ((!token.isVisible()) && !view2.isGMView()) {
+                  continue;
+                }
+                if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
+                  continue;
+                }
+                boolean isOwner = token.isOwner(MapTool.getPlayer().getName());
+                Point p = FogUtil.calculateVisionCenter(token, zone);
 
-        for (AttachedLightSource als : token.getLightSources()) {
-          LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-          if (lightSource == null) {
-            continue;
-          }
-          // Token can also have non-auras lights, we don't want those.
-          if (lightSource.getType() != LightSource.Type.AURA) {
-            continue;
-          }
+                for (AttachedLightSource als : token.getLightSources()) {
+                  LightSource lightSource = als.resolve(token, MapTool.getCampaign());
+                  if (lightSource == null) {
+                    continue;
+                  }
+                  // Token can also have non-auras lights, we don't want those.
+                  if (lightSource.getType() != LightSource.Type.AURA) {
+                    continue;
+                  }
 
-          Area lightSourceArea = lightSource.getArea(token, zone);
-          lightSourceArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
-          Area visibleArea =
-              FogUtil.calculateVisibility(
-                  p,
-                  lightSourceArea,
-                  getTopologyTree(Zone.TopologyType.WALL_VBL),
-                  getTopologyTree(Zone.TopologyType.HILL_VBL),
-                  getTopologyTree(Zone.TopologyType.PIT_VBL));
+                  Area lightSourceArea = lightSource.getArea(token, zone);
+                  lightSourceArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
+                  Area visibleArea = lightSourceArea;
 
-          // This needs to be cached somehow
-          for (Light light : lightSource.getLightList()) {
-            // If there is no paint, it's a "bright aura" that just shows whatever is beneath it and
-            //  doesn't need to be rendered.
-            if (light.getPaint() == null) {
-              continue;
-            }
-            boolean isOwner = token.getOwners().contains(MapTool.getPlayer().getName());
-            if ((light.isGM() && !MapTool.getPlayer().isEffectiveGM())) {
-              continue;
-            }
-            if ((!token.isVisible()) && !MapTool.getPlayer().isEffectiveGM()) {
-              continue;
-            }
-            if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
-              continue;
-            }
-            if (light.isOwnerOnly() && !isOwner && !MapTool.getPlayer().isEffectiveGM()) {
-              continue;
-            }
+                  if (!lightSource.isIgnoresVBL()) {
+                    visibleArea =
+                        FogUtil.calculateVisibility(
+                            VisibilityType.Aura, p, lightSourceArea, prepareNodedTopology());
+                  }
 
-            // Calculate the area covered by this particular range.
-            Area lightArea = lightSource.getArea(token, zone, light);
-            lightArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
-            lightArea.intersect(visibleArea);
-            lightList.add(new DrawableLight(light.getPaint(), visibleArea, light.getLumens()));
-          }
-        }
-      }
-    }
-    return lightList;
-  }
+                  // This needs to be cached somehow
+                  for (Light light : lightSource.getLightList()) {
+                    // If there is no paint, it's a "bright aura" that just shows whatever is
+                    // beneath it and doesn't need to be rendered.
+                    if (light.getPaint() == null) {
+                      continue;
+                    }
+                    if (light.isGM() && !view2.isGMView()) {
+                      continue;
+                    }
+                    if (light.isOwnerOnly() && !isOwner && !view2.isGMView()) {
+                      continue;
+                    }
 
-  /**
-   * Find the light sources from all appropriate tokens, and store them in {@link #lightSourceMap}.
-   */
-  private void findLightSources() {
-    lightSourceMap.clear();
-
-    for (Token token : zone.getAllTokens()) {
-      if (token.hasLightSources() && token.isVisible()) {
-        if (!token.isVisibleOnlyToOwner() || AppUtil.playerOwns(token)) {
-          for (AttachedLightSource als : token.getLightSources()) {
-            LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-            if (lightSource == null) {
-              continue;
-            }
-            Set<GUID> lightSet =
-                lightSourceMap.computeIfAbsent(lightSource.getType(), k -> new HashSet<>());
-            lightSet.add(token.getId());
-          }
-        }
-      }
-    }
+                    // Calculate the area covered by this particular range.
+                    Area lightArea = lightSource.getArea(token, zone, light);
+                    lightArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
+                    lightArea.intersect(visibleArea);
+                    lightList.add(
+                        new DrawableLight(light.getPaint(), lightArea, light.getLumens()));
+                  }
+                }
+              }
+              return lightList;
+            }));
   }
 
   public Collection<DrawableLight> getDrawableLights(PlayerView view) {
-    final var illuminationKey = illuminationKeyFromView(view);
-    final var contributions =
-        contributedLightsByToken.getOrDefault(illuminationKey, Collections.emptyMap());
+    return Collections.unmodifiableList(
+        drawableLights.computeIfAbsent(
+            view,
+            view2 -> {
+              final var lightingStyle = zone.getLightingStyle();
 
-    final var personalContributions =
-        getTokensForView(view)
-            .filter(token -> contributedPersonalLightsByToken.containsKey(token.getId()))
-            .collect(
-                Collectors.toMap(
-                    Token::getId, token -> contributedPersonalLightsByToken.get(token.getId())));
+              final var illuminationKey = illuminationKeyFromView(view2);
+              final var illuminationModel = getIlluminationModel(illuminationKey);
 
-    if (contributions.isEmpty() && personalContributions.isEmpty()) {
-      // Optimization to not build an illumination if not needed.
-      return Collections.emptyList();
-    }
+              final Stream<ContributedLight> contributions = illuminationModel.getContributions();
+              final Stream<ContributedLight> personalContributions =
+                  getTokensForView(view2)
+                      .filter(token -> contributedPersonalLightsByToken.containsKey(token.getId()))
+                      .map(token -> contributedPersonalLightsByToken.get(token.getId()))
+                      .flatMap(Collection::stream);
 
-    final var illumination = getIllumination(view);
-    return Stream.of(contributions.values().stream(), personalContributions.values().stream())
-        .flatMap(Function.identity())
-        .flatMap(Collection::stream)
-        .filter(laud -> laud.lightInfo() != null)
-        .map(
-            laud -> {
-              // Make sure each drawable light is restricted to the area it covers, accounting for
-              // darkness effects.
-              final var obscuredArea = new Area(laud.litArea().area());
-              final var lumensLevel =
-                  illumination.getObscuredLumensLevel(Math.abs(laud.litArea().lumens()));
-              // Should always be present based on construction, but just in case.
-              if (lumensLevel.isEmpty()) {
-                return null;
-              }
+              final var illumination = getIllumination(view2);
+              return Stream.of(contributions, personalContributions)
+                  .flatMap(Function.identity())
+                  .filter(laud -> laud.lightInfo() != null)
+                  .map(
+                      (ContributedLight laud) -> {
+                        var isDarkness = laud.litArea().lumens() < 0;
+                        if (isDarkness && !view.isGMView()) {
+                          // Non-GM players do not render the light aspect of darkness.
+                          return null;
+                        }
 
-              obscuredArea.intersect(
-                  laud.litArea().lumens() < 0
-                      ? lumensLevel.get().darknessArea()
-                      : lumensLevel.get().lightArea());
-              return new DrawableLight(
-                  laud.lightInfo().light().getPaint(), obscuredArea, laud.litArea.lumens());
-            })
-        .filter(Objects::nonNull)
-        .toList();
+                        // Lights without a colour are "clear" and should not be rendered.
+                        var paint = laud.lightInfo().light().getPaint();
+                        if (paint == null) {
+                          return null;
+                        }
+
+                        // Make sure each drawable light is restricted to the area it covers,
+                        // accounting for darkness effects.
+                        final var obscuredArea = new Area(laud.litArea().area());
+
+                        final var lumensStrength = Math.abs(laud.litArea().lumens());
+                        final var lumensLevel =
+                            switch (lightingStyle) {
+                              case ENVIRONMENTAL ->
+                                  illumination.getObscuredLumensLevel(lumensStrength);
+                              case OVERTOP ->
+                                  illumination.getDisjointObscuredLumensLevel(lumensStrength);
+                            };
+                        // Should always be present based on construction, but just in case...
+                        if (lumensLevel.isEmpty()) {
+                          return null;
+                        }
+
+                        obscuredArea.intersect(
+                            isDarkness
+                                ? lumensLevel.get().darknessArea()
+                                : lumensLevel.get().lightArea());
+                        return new DrawableLight(paint, obscuredArea, laud.litArea().lumens());
+                      })
+                  .filter(Objects::nonNull)
+                  .toList();
+            }));
   }
 
   /**
    * Clear the vision caches (@link #tokenVisionCachePerView}, {@link #visibleAreaMap}), fog cache
-   * ({@link #exposedAreaMap}), and illumination caches ({@link #contributedLightsByToken}, {@link
-   * #illuminators}).
+   * ({@link #exposedAreaMap}), and illumination caches ({@link #illuminationModels}.
    *
    * <p>Needs to be called whenever topology changes, fog is edited, or map vision settings are
    * changed. These are all external factors that directly affect vision and illumination. In the
@@ -835,27 +731,33 @@ public class ZoneView {
    * explicit flush should go away or at least be reduced.
    */
   public void flush() {
-    contributedLightsByToken.clear();
+    // Recalculate everything.
+    illuminationModels.clear();
+
     contributedPersonalLightsByToken.clear();
     tokenVisibleAreaCache.clear();
-    illuminators.clear();
 
     tokenVisionCachePerView.clear();
     illuminationsPerView.clear();
     exposedAreaMap.clear();
     visibleAreaMap.clear();
-    illuminationCache.clear();
+
+    flushLights();
   }
 
   public void flushFog() {
     exposedAreaMap.clear();
   }
 
+  private void flushLights() {
+    drawableLights.clear();
+    drawableAuras.clear();
+  }
+
   /**
-   * Flush the ZoneView cache of the token. Remove token from {@link #tokenVisionCachePerView},
-   * {@link #contributedLightsByToken}, and {@link #illuminators}. Can clear {@link
-   * #tokenVisionCachePerView}, {@link #visibleAreaMap}, and {@link #exposedAreaMap} depending on
-   * the token.
+   * Flush the ZoneView cache of the token. Remove token from {@link #tokenVisionCachePerView}, and
+   * {@link #illuminationModels}. Can clear {@link #tokenVisionCachePerView}, {@link
+   * #visibleAreaMap}, and {@link #exposedAreaMap} depending on the token.
    *
    * @param token the token to flush.
    */
@@ -865,77 +767,75 @@ public class ZoneView {
     }
     tokenVisibleAreaCache.remove(token.getId());
 
-    // TODO Split logic for light and sight, since the sight portion is entirely duplicated.
-    var hadLightSource =
-        contributedLightsByToken.values().stream().anyMatch(map -> map.containsKey(token.getId()));
-    if (hadLightSource || token.hasLightSources()) {
-      // Have to recalculate all token vision
+    final var modelsWithToken =
+        illuminationModels.values().stream()
+            .filter(model -> model.hasToken(token.getId()))
+            .toList();
+    if (!modelsWithToken.isEmpty() || token.hasLightSources()) {
+      modelsWithToken.forEach(model -> model.removeToken(token.getId()));
       contributedPersonalLightsByToken.remove(token.getId());
-      for (final var entry : contributedLightsByToken.entrySet()) {
-        final var illuminator = illuminators.get(entry.getKey());
-        if (illuminator == null) {
-          continue;
-        }
-        for (final var litArea :
-            entry.getValue().getOrDefault(token.getId(), Collections.emptyList())) {
-          illuminator.remove(litArea.litArea());
-        }
-        entry.getValue().remove(token.getId());
-      }
-
       tokenVisionCachePerView.clear();
       illuminationsPerView.clear();
       exposedAreaMap.clear();
       visibleAreaMap.clear();
-      illuminationCache.clear();
+      drawableLights.clear();
     } else if (token.getHasSight()) {
       contributedPersonalLightsByToken.remove(token.getId());
-      // TODO Could we instead only clear those views that include the token?
       illuminationsPerView.clear();
       exposedAreaMap.clear();
       visibleAreaMap.clear();
-      illuminationCache.clear();
+      drawableLights.clear();
+    }
+
+    // If the token had auras as well, we'll need to recompute them. This could be more precise
+    // (i.e., only do the ones for this token) but that's more complicated than it's worth for now.
+    final var tokenNowHasAuras = token.hasLightSourceType(LightSource.Type.AURA);
+    for (var role : Player.Role.values()) {
+      if (tokenNowHasAuras
+          || getLightSources(role, LightSource.Type.AURA).contains(token.getId())) {
+        drawableAuras.clear();
+      }
     }
   }
 
-  /**
-   * Construct the {@link #visibleAreaMap} entry for a player view.
-   *
-   * @param view the player view.
-   */
-  private void calculateVisibleArea(PlayerView view) {
-    if (visibleAreaMap.get(view) != null && !visibleAreaMap.get(view).visibleArea.isEmpty()) {
-      return;
-    }
-    // Cache it
-    final var illumination = getIllumination(view);
-    // We _could_ instead union up all the individual token's areas, but we already have the same
-    // result via the view's illumination.
-    VisibleAreaMeta meta = new VisibleAreaMeta();
-    meta.visibleArea = illumination.getVisibleArea();
-    visibleAreaMap.put(view, meta);
+  private void onTopologyChanged() {
+    flush();
+    nodedTopology = null;
   }
 
   @Subscribe
-  private void onTopologyChanged(TopologyChanged event) {
+  private void onTopologyChanged(WallTopologyChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    onTopologyChanged();
+  }
+
+  @Subscribe
+  private void onTopologyChanged(MaskTopologyChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    onTopologyChanged();
+  }
+
+  @Subscribe
+  private void onZoneLightingChanged(ZoneLightingChanged event) {
     if (event.zone() != this.zone) {
       return;
     }
 
-    flush();
-    topologyAreas.clear();
-    topologyTrees.clear();
+    flushLights();
   }
 
   private boolean flushExistingTokens(List<Token> tokens) {
     boolean tokenChangedTopology = false;
     for (Token token : tokens) {
-      if (token.hasAnyTopology()) tokenChangedTopology = true;
+      if (token.hasAnyMaskTopology()) {
+        tokenChangedTopology = true;
+      }
       flush(token);
     }
-    // Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are
-    // cleared on another token, changes aren't pushed to client?
-    // tokenVisionCache.clear();
     return tokenChangedTopology;
   }
 
@@ -945,16 +845,7 @@ public class ZoneView {
       return;
     }
 
-    boolean tokenChangedTopology = processTokenAddChangeEvent(event.tokens());
-
-    // Moved this event to the bottom so we can check the other events
-    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
-    // it should also trip a Topology change
-    if (tokenChangedTopology) {
-      flush();
-      topologyAreas.clear();
-      topologyTrees.clear();
-    }
+    processTokenAddChangeEvent(event.tokens());
   }
 
   @Subscribe
@@ -963,29 +854,21 @@ public class ZoneView {
       return;
     }
 
-    boolean tokenChangedTopology = flushExistingTokens(event.tokens());
-
-    for (Token token : event.tokens()) {
-      if (token.hasAnyTopology()) tokenChangedTopology = true;
-      for (AttachedLightSource als : token.getLightSources()) {
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-        if (lightSource == null) {
-          continue;
-        }
-        Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
-        if (lightSet != null) {
-          lightSet.remove(token.getId());
-        }
+    // The tokens don't exist anymore, so they should not be considered light sources.
+    boolean anyLightingChanges = false;
+    for (var lightSet : lightSourceMap.values()) {
+      for (var token : event.tokens()) {
+        anyLightingChanges |= lightSet.remove(token.getId());
       }
     }
 
-    // Moved this event to the bottom so we can check the other events
-    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
-    // it should also trip a Topology change
-    if (tokenChangedTopology) {
+    if (anyLightingChanges) {
+      flushLights();
+    }
+
+    if (event.tokens().stream().anyMatch(Token::hasAnyMaskTopology)) {
       flush();
-      topologyAreas.clear();
-      topologyTrees.clear();
+      nodedTopology = null;
     }
   }
 
@@ -996,17 +879,7 @@ public class ZoneView {
     }
 
     flushExistingTokens(event.tokens());
-
-    boolean tokenChangedTopology = processTokenAddChangeEvent(event.tokens());
-
-    // Moved this event to the bottom so we can check the other events
-    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
-    // it should also trip a Topology change
-    if (tokenChangedTopology) {
-      flush();
-      topologyAreas.clear();
-      topologyTrees.clear();
-    }
+    processTokenAddChangeEvent(event.tokens());
   }
 
   /**
@@ -1014,45 +887,47 @@ public class ZoneView {
    * #visibleAreaMap} and {@link #exposedAreaMap} if one of the tokens has sight.
    *
    * @param tokens the list of tokens
-   * @return if one of the token has topology or not
    */
-  private boolean processTokenAddChangeEvent(List<Token> tokens) {
-    boolean hasSight = false;
-    boolean hasTopology = false;
-    Campaign c = MapTool.getCampaign();
+  private void processTokenAddChangeEvent(List<Token> tokens) {
+    updateLightSourcesFromTokens(tokens);
 
-    for (Token token : tokens) {
-      boolean hasLightSource =
-          token.hasLightSources() && (token.isVisible() || MapTool.getPlayer().isEffectiveGM());
-      if (token.hasAnyTopology()) hasTopology = true;
-      for (AttachedLightSource als : token.getLightSources()) {
-        LightSource lightSource = c.getLightSource(als.getLightSourceId());
-        if (lightSource != null) {
-          Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
-          if (hasLightSource) {
-            if (lightSet == null) {
-              lightSet = new HashSet<GUID>();
-              lightSourceMap.put(lightSource.getType(), lightSet);
-            }
-            lightSet.add(token.getId());
-          } else if (lightSet != null) lightSet.remove(token.getId());
-        }
-      }
-      hasSight |= token.getHasSight();
-    }
-
-    if (hasSight) {
+    if (tokens.stream().anyMatch(Token::getHasSight)) {
       exposedAreaMap.clear();
       visibleAreaMap.clear();
-      // Not sure, let's do it for now.
-      illuminationCache.clear();
     }
 
-    return hasTopology;
+    if (tokens.stream().anyMatch(Token::hasAnyMaskTopology)) {
+      flush();
+      nodedTopology = null;
+    }
   }
 
-  /** Has a single field: the visibleArea area */
-  private static class VisibleAreaMeta {
-    Area visibleArea;
+  private void updateLightSourcesFromTokens(Iterable<Token> tokens) {
+    boolean anyLightingChanges = false;
+
+    for (Token token : tokens) {
+      // Temporarily remove the token. If it has light sources, it will be added back in below.
+      for (var lightSet : lightSourceMap.values()) {
+        anyLightingChanges |= lightSet.remove(token.getId());
+      }
+      anyLightingChanges |= token.hasLightSources();
+
+      var includeForRoles = EnumSet.noneOf(Player.Role.class);
+      if (MapTool.getPlayer().isGM()) {
+        includeForRoles.add(Player.Role.GM);
+      }
+      if (token.isVisible()) {
+        includeForRoles.add(Player.Role.PLAYER);
+      }
+      if (includeForRoles.isEmpty()) {
+        continue;
+      }
+
+      addLightSourceToken(token, includeForRoles);
+    }
+
+    if (anyLightingChanges) {
+      flushLights();
+    }
   }
 }

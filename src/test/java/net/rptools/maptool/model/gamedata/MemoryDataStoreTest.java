@@ -1096,4 +1096,31 @@ class MemoryDataStoreTest {
                 DataType.UNDEFINED,
                 mds.getPropertyDataType("testType2", "testNamespace3", "invalid").get()));
   }
+
+  @Test
+  void emptyValueCanBeUpdated() throws ExecutionException, InterruptedException {
+    final String PROPERTY_TYPE = "pt";
+    final String NAMESPACE = "ns";
+    final String PROPERTY_NAME = "a";
+
+    var mdsWithUndefined = new MemoryDataStore();
+    mdsWithUndefined
+        .createNamespaceWithTypes(
+            PROPERTY_TYPE, NAMESPACE, Map.of(PROPERTY_NAME, DataType.UNDEFINED))
+        .get();
+    assertEquals(
+        DataType.UNDEFINED,
+        mdsWithUndefined.getProperty(PROPERTY_TYPE, NAMESPACE, PROPERTY_NAME).get().getDataType());
+
+    mdsWithUndefined
+        .setProperty(PROPERTY_TYPE, NAMESPACE, DataValueFactory.fromString(PROPERTY_NAME, "1"))
+        .get();
+
+    assertEquals(
+        DataType.STRING,
+        mdsWithUndefined.getProperty(PROPERTY_TYPE, NAMESPACE, PROPERTY_NAME).get().getDataType());
+    assertEquals(
+        "1",
+        mdsWithUndefined.getProperty(PROPERTY_TYPE, NAMESPACE, PROPERTY_NAME).get().asString());
+  }
 }

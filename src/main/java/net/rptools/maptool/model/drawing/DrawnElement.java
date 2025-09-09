@@ -27,8 +27,16 @@ public class DrawnElement {
     this.pen = pen;
   }
 
+  public DrawnElement(DrawnElement other) {
+    this(other.drawable.copy(), new Pen(other.pen));
+  }
+
   public Drawable getDrawable() {
     return drawable;
+  }
+
+  public void setDrawable(Drawable drawable) {
+    this.drawable = drawable;
   }
 
   public Pen getPen() {

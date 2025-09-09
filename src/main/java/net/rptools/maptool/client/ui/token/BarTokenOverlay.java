@@ -51,7 +51,9 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * Constructors
    *-------------------------------------------------------------------------------------------*/
 
-  /** @param name Name of the new bar. */
+  /**
+   * @param name Name of the new bar.
+   */
   public BarTokenOverlay(String name) {
     super(name);
   }
@@ -60,12 +62,16 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @return Getter for increments */
+  /**
+   * @return Getter for increments
+   */
   public int getIncrements() {
     return increments;
   }
 
-  /** @param increments Setter for increments */
+  /**
+   * @param increments Setter for increments
+   */
   public void setIncrements(int increments) {
     this.increments = increments;
   }
@@ -98,12 +104,16 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
     return (int) Math.ceil(value * (increments - 1));
   }
 
-  /** @return Getter for side */
+  /**
+   * @return Getter for side
+   */
   public Side getSide() {
     return side;
   }
 
-  /** @param side Setter for side */
+  /**
+   * @param side Setter for side
+   */
   public void setSide(Side side) {
     this.side = side;
   }
@@ -174,30 +184,6 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
     /** Draw the bar on the right side of the token */
     RIGHT;
   }
-
-  // /*---------------------------------------------------------------------------------------------
-  // * Class Methods
-  // *-------------------------------------------------------------------------------------------*/
-  //
-  // /**
-  // * Scale an asset.
-  // *
-  // * @param assetId Scale this asset
-  // * @param d To fit here.
-  // * @return The scaled asset.
-  // */
-  // public static BufferedImage getScaledImage(MD5Key assetId, Dimension d) {
-  // Asset asset = AssetManager.getAsset(assetId);
-  // if (asset == null) {
-  // LOGGER.warning("Unable to locate and asset with ID: " + assetId);
-  // return null;
-  // } // endif
-  // BufferedImage image = ImageManager.getImageAndWait(asset);
-  // Dimension size = new Dimension(image.getWidth(), image.getHeight());
-  // SwingUtil.constrainTo(size, d.width, d.height);
-  // image = ImageUtil.createCompatibleImage(image, size.width, size.height, null);
-  // return image;
-  // }
 
   public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
     var bar =

@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.Set;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import net.rptools.lib.AwtUtil;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.PaintChooser;
@@ -48,7 +50,6 @@ import net.rptools.maptool.model.SquareGrid;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
 
 public class MapPropertiesDialog extends JDialog {
   private static final int AUTO_REPEAT_THRESHOLD = 200;
@@ -140,7 +141,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new AbeillePanel(new MapPropertiesDialogView().$$$getRootComponent$$$());
+    formPanel = new AbeillePanel(new MapPropertiesDialogView().getRootComponent());
 
     initDistanceTextField();
 
@@ -158,6 +159,7 @@ public class MapPropertiesDialog extends JDialog {
     initPixelsPerCellTextField();
     initDefaultVisionTextField();
     initVisionTypeCombo();
+    initLightingStyleCombo();
     initAStarRoundingOptionsComboBox();
 
     initIsometricRadio();
@@ -184,7 +186,7 @@ public class MapPropertiesDialog extends JDialog {
     // Color picker
     paintChooser = new PaintChooser();
     AssetPanelModel model = new AssetPanelModel();
-    Set<File> assetRootList = AppPreferences.getAssetRoots();
+    Set<File> assetRootList = AppStatePersisted.getAssetRoots();
     for (File file : assetRootList) {
       model.addRootGroup(new AssetDirectory(file, AppConstants.IMAGE_FILE_FILTER));
     }
@@ -192,7 +194,6 @@ public class MapPropertiesDialog extends JDialog {
     TextureChooserPanel textureChooserPanel =
         new TextureChooserPanel(paintChooser, model, "mapPropertiesTextureChooser");
     paintChooser.addPaintChooser(textureChooserPanel);
-    paintChooser.setPreferredSize(new Dimension(450, 400));
     mapSelectorDialog = new MapSelectorDialog();
     getRootPane().setDefaultButton(getOKButton());
   }
@@ -269,6 +270,14 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getComboBox("visionType");
   }
 
+  public JComboBox<Zone.LightingStyle> getLightingStyleCombo() {
+    return formPanel.getComboBox("lightingStyle");
+  }
+
+  public JCheckBox getIsLandingMapCheckBox() {
+    return formPanel.getCheckBox("isLandingMap");
+  }
+
   public JComboBox getAStarRoundingOptionsComboBox() {
     return formPanel.getComboBox("aStarRoundingOptionsComboBox");
   }
@@ -279,6 +288,8 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   private void copyZoneToUI() {
+    var campaign = MapTool.getClient().getCampaign();
+
     getNameTextField().setText(zone.getName());
     getPlayerAliasTextField().setText(zone.getPlayerAlias());
     // Localizes units per cell, using the proper separator. Fixes #507.
@@ -291,7 +302,9 @@ public class MapPropertiesDialog extends JDialog {
     getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);
     getNoGridRadio().setSelected(zone.getGrid() instanceof GridlessGrid);
     getVisionTypeCombo().setSelectedItem(zone.getVisionType());
+    getLightingStyleCombo().setSelectedItem(zone.getLightingStyle());
     getAStarRoundingOptionsComboBox().setSelectedItem(zone.getAStarRounding());
+    getIsLandingMapCheckBox().setSelected(zone.getId().equals(campaign.getLandingMapId()));
 
     gridOffsetX = zone.getGrid().getOffsetX();
     gridOffsetY = zone.getGrid().getOffsetY();
@@ -312,39 +325,47 @@ public class MapPropertiesDialog extends JDialog {
             getDefaultVisionTextField().getText(), zone.getTokenVisionDistance()));
 
     zone.setVisionType((Zone.VisionType) getVisionTypeCombo().getSelectedItem());
+    zone.setLightingStyle((Zone.LightingStyle) getLightingStyleCombo().getSelectedItem());
     zone.setAStarRounding(
         (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
 
     zone.setFogPaint(fogPaint);
     zone.setBackgroundPaint(backgroundPaint);
     zone.setMapAsset(mapAsset != null ? mapAsset.getMD5Key() : null);
-    // TODO: Handle grid type changes
+
+    var campaign = MapTool.getClient().getCampaign();
+    if (getIsLandingMapCheckBox().isSelected()) {
+      campaign.setLandingMapId(zone.getId());
+    } else if (zone.getId().equals(campaign.getLandingMapId())) {
+      // This zone was the landing map but got toggled off.
+      campaign.setLandingMapId(null);
+    }
   }
 
   private void initIsometricRadio() {
-    getIsometricRadio().setSelected(GridFactory.isIsometric(AppPreferences.getDefaultGridType()));
+    getIsometricRadio().setSelected(GridFactory.isIsometric(AppPreferences.defaultGridType.get()));
     getIsometricIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_ISOMETRIC));
   }
 
   private void initHexHoriRadio() {
     getHexHorizontalRadio()
-        .setSelected(GridFactory.isHexHorizontal(AppPreferences.getDefaultGridType()));
+        .setSelected(GridFactory.isHexHorizontal(AppPreferences.defaultGridType.get()));
     getHexHorizontalIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_HEX_HORIZONTAL));
   }
 
   private void initHexVertRadio() {
     getHexVerticalRadio()
-        .setSelected(GridFactory.isHexVertical(AppPreferences.getDefaultGridType()));
+        .setSelected(GridFactory.isHexVertical(AppPreferences.defaultGridType.get()));
     getHexVerticalIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_HEX_VERTICAL));
   }
 
   private void initSquareRadio() {
-    getSquareRadio().setSelected(GridFactory.isSquare(AppPreferences.getDefaultGridType()));
+    getSquareRadio().setSelected(GridFactory.isSquare(AppPreferences.defaultGridType.get()));
     getSquareIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_SQUARE));
   }
 
   private void initNoGridRadio() {
-    getNoGridRadio().setSelected(GridFactory.isNone(AppPreferences.getDefaultGridType()));
+    getNoGridRadio().setSelected(GridFactory.isNone(AppPreferences.defaultGridType.get()));
     getNoGridIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_NONE));
   }
 
@@ -423,6 +444,7 @@ public class MapPropertiesDialog extends JDialog {
     getMapButton()
         .addActionListener(
             e -> {
+              mapSelectorDialog.pack();
               Asset asset = mapSelectorDialog.chooseAsset();
               if (asset == null) {
                 return;
@@ -501,7 +523,7 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   private void initPixelsPerCellTextField() {
-    getPixelsPerCellTextField().setText(Integer.toString(AppPreferences.getDefaultGridSize()));
+    getPixelsPerCellTextField().setText(Integer.toString(AppPreferences.defaultGridSize.get()));
   }
 
   public JTextField getDefaultVisionTextField() {
@@ -510,7 +532,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initDefaultVisionTextField() {
     this.getDefaultVisionTextField()
-        .setText(Integer.toString(AppPreferences.getDefaultVisionDistance()));
+        .setText(Integer.toString(AppPreferences.defaultVisionDistance.get()));
   }
 
   private void initVisionTypeCombo() {
@@ -518,7 +540,7 @@ public class MapPropertiesDialog extends JDialog {
     for (Zone.VisionType vt : Zone.VisionType.values()) {
       model.addElement(vt);
     }
-    model.setSelectedItem(AppPreferences.getDefaultVisionType());
+    model.setSelectedItem(AppPreferences.defaultVisionType.get());
     getVisionTypeCombo().setModel(model);
   }
 
@@ -527,13 +549,21 @@ public class MapPropertiesDialog extends JDialog {
         .setModel(new DefaultComboBoxModel<>(Zone.AStarRoundingOptions.values()));
   }
 
+  private void initLightingStyleCombo() {
+    DefaultComboBoxModel<Zone.LightingStyle> model = new DefaultComboBoxModel<>();
+    for (Zone.LightingStyle vt : Zone.LightingStyle.values()) {
+      model.addElement(vt);
+    }
+    model.setSelectedItem(Zone.LightingStyle.OVERTOP);
+    getLightingStyleCombo().setModel(model);
+  }
+
   public String getZoneName() {
     return getNameTextField().getText();
   }
 
   public int getZoneDistancePerCell() {
     try {
-      // TODO: Handle this in validation
       return Integer.parseInt(getDistanceTextField().getText());
     } catch (NumberFormatException nfe) {
       return 0;
@@ -543,24 +573,16 @@ public class MapPropertiesDialog extends JDialog {
   private Grid createZoneGrid() {
     Grid grid = null;
     if (getHexHorizontalRadio().isSelected()) {
-      grid =
-          GridFactory.createGrid(
-              GridFactory.HEX_HORI, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+      grid = GridFactory.createGrid(GridFactory.HEX_HORI);
     }
     if (getHexVerticalRadio().isSelected()) {
-      grid =
-          GridFactory.createGrid(
-              GridFactory.HEX_VERT, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+      grid = GridFactory.createGrid(GridFactory.HEX_VERT);
     }
     if (getSquareRadio().isSelected()) {
-      grid =
-          GridFactory.createGrid(
-              GridFactory.SQUARE, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+      grid = GridFactory.createGrid(GridFactory.SQUARE);
     }
     if (getIsometricRadio().isSelected()) {
-      grid =
-          GridFactory.createGrid(
-              GridFactory.ISOMETRIC, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+      grid = GridFactory.createGrid(GridFactory.ISOMETRIC);
     }
     if (getNoGridRadio().isSelected()) {
       grid = GridFactory.createGrid(GridFactory.NONE);
@@ -584,7 +606,6 @@ public class MapPropertiesDialog extends JDialog {
       add(BorderLayout.CENTER, createImageExplorerPanel());
       add(BorderLayout.SOUTH, createButtonBar());
       this.setTitle(I18N.getText("MapPropertiesDialog.label.image"));
-      setSize(500, 400);
     }
 
     @Override
@@ -662,7 +683,7 @@ public class MapPropertiesDialog extends JDialog {
 
     private JComponent createImageExplorerPanel() {
       AssetPanelModel model = new AssetPanelModel();
-      Set<File> assetRootList = AppPreferences.getAssetRoots();
+      Set<File> assetRootList = AppStatePersisted.getAssetRoots();
       for (File file : assetRootList) {
         model.addRootGroup(new AssetDirectory(file, AppConstants.IMAGE_FILE_FILTER));
       }
@@ -677,10 +698,6 @@ public class MapPropertiesDialog extends JDialog {
             }
             Integer imageIndex = (Integer) selectedList.get(0);
 
-            // if (getBackgroundAsset() != null) {
-            // // Tighten memory usage
-            // ImageManager.flushImage(getBackgroundAsset());
-            // }
             selectedAsset = assetPanel.getAsset(imageIndex);
 
             // Store for later use
@@ -743,7 +760,7 @@ public class MapPropertiesDialog extends JDialog {
       if (mapAsset != null) {
         BufferedImage image = ImageManager.getImageAndWait(mapAsset.getMD5Key());
         Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-        SwingUtil.constrainTo(imgSize, size.width - 10 * 4, size.height - 10 * 4);
+        AwtUtil.constrainTo(imgSize, size.width - 10 * 4, size.height - 10 * 4);
 
         int x = (size.width - imgSize.width) / 2;
         int y = (size.height - imgSize.height) / 2;

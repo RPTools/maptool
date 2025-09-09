@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.script.javascript;
 
+import com.google.gson.*;
 import java.util.*;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.*;
@@ -25,6 +26,7 @@ import net.rptools.parser.function.AbstractFunction;
 import org.graalvm.polyglot.*;
 
 public class JSMacro extends AbstractFunction {
+  private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
   private static JSMacro instance = new JSMacro();
   private static HashMap<String, JSAPIRegisteredMacro> macros = new HashMap<>();
 
@@ -60,7 +62,11 @@ public class JSMacro extends AbstractFunction {
       if (ret instanceof Value val) {
         return MacroJavaScriptBridge.getInstance().ValueToMTScriptType(val, new ArrayList());
       }
-      return MacroJavaScriptBridge.getInstance().HostObjectToMTScriptType(ret, new ArrayList());
+      Object r = MacroJavaScriptBridge.getInstance().HostObjectToMTScriptType(ret, new ArrayList());
+      if (r instanceof List || r instanceof AbstractMap) {
+        return gson.toJson(r);
+      }
+      return r;
     }
     return "";
   }

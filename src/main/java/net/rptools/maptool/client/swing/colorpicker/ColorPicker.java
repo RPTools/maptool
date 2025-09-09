@@ -28,8 +28,11 @@ import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.PaintChooser;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ColorPicker extends JPanel {
+  private static final Logger log = LogManager.getLogger(ColorPicker.class);
   private final JFrame owner;
 
   private final ColorWell foregroundColor;
@@ -72,7 +75,7 @@ public class ColorPicker extends JPanel {
     paintChooser = new PaintChooser();
     paintChooser.setPreferredSize(new Dimension(450, 400));
 
-    AbeillePanel panel = new AbeillePanel(new ColorPanelView().$$$getRootComponent$$$());
+    AbeillePanel panel = new AbeillePanel(new ColorPanelView().getRootComponent());
 
     ColorWellListener listener = new ColorWellListener(1);
 
@@ -113,7 +116,7 @@ public class ColorPicker extends JPanel {
           try {
             penWidthSpinner.commitEdit();
           } catch (ParseException pe) {
-            pe.printStackTrace();
+            log.error("Error while committing pen width", pe);
           }
         });
 
@@ -124,7 +127,7 @@ public class ColorPicker extends JPanel {
           try {
             transparencySpinner.commitEdit();
           } catch (ParseException pe) {
-            pe.printStackTrace();
+            log.error("Error while committing transparency", pe);
           }
         });
     initialize();

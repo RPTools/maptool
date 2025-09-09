@@ -31,11 +31,12 @@ public class CampaignPropertiesDialogTest {
   public void importPredefinedButton() throws InterruptedException, InvocationTargetException {
     SwingUtilities.invokeAndWait(
         () -> {
-          CampaignPropertiesDialog cpd = new CampaignPropertiesDialog(null);
+          CampaignPropertiesDialog cpd = new CampaignPropertiesDialog();
 
           JButton button = cpd.getImportPredefinedButton();
 
-          assertEquals(button.getText(), I18N.getText("CampaignPropertiesDialog.button.import"));
+          assertEquals(
+              button.getText(), I18N.getText("CampaignPropertiesDialog.button.importPredefined"));
         });
   }
 
@@ -45,7 +46,7 @@ public class CampaignPropertiesDialogTest {
     SwingUtilities.invokeAndWait(
         () -> {
           CampaignPropertiesDialog cpd =
-              new CampaignPropertiesDialog(null) {
+              new CampaignPropertiesDialog() {
                 @Override
                 protected File[] getPredefinedPropertyFiles(File propertyDir) {
                   return null;
@@ -67,7 +68,7 @@ public class CampaignPropertiesDialogTest {
           String two = new String("b" + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
 
           CampaignPropertiesDialog cpd =
-              new CampaignPropertiesDialog(null) {
+              new CampaignPropertiesDialog() {
                 @Override
                 protected File[] getPredefinedPropertyFiles(File propertyDir) {
 

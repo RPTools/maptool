@@ -163,8 +163,9 @@ public class DataFunctions extends AbstractFunction {
           }
           return new MTScriptDataConversion().convertToMTScriptDereferenceType(dataValue);
         }
-        default -> throw new ParserException(
-            I18N.getText("macro.function.general.unknownFunction", functionName));
+        default ->
+            throw new ParserException(
+                I18N.getText("macro.function.general.unknownFunction", functionName));
       }
     } catch (InterruptedException | ExecutionException e) {
       throw new ParserException(e);
@@ -190,8 +191,9 @@ public class DataFunctions extends AbstractFunction {
                     case BOOLEAN -> jobj.addProperty("value", data.asBoolean());
                     case JSON_OBJECT -> jobj.add("value", data.asJsonObject());
                     case JSON_ARRAY -> jobj.add("value", data.asJsonArray());
-                    case ASSET -> jobj.addProperty(
-                        "value", "asset://" + data.asAsset().getMD5Key().toString());
+                    case ASSET ->
+                        jobj.addProperty(
+                            "value", "asset://" + data.asAsset().getMD5Key().toString());
                   }
                   jarray.add(jobj);
                 }

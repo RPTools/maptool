@@ -15,10 +15,10 @@
 package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineSegment;
 
 /**
  * Represents a vertex used in the visibility sweep.
@@ -29,50 +29,71 @@ import org.locationtech.jts.geom.LineSegment;
  */
 public final class VisibilitySweepEndpoint {
   private final Coordinate point;
-  private final double pseudoangle;
-  private final double distance;
-  private final List<LineSegment> startsWalls = new ArrayList<>();
-  private final List<LineSegment> endsWalls = new ArrayList<>();
+  private final List<VisibilitySweepEndpoint> startsWalls = new ArrayList<>();
+  private final List<VisibilitySweepEndpoint> endsWalls = new ArrayList<>();
 
-  public VisibilitySweepEndpoint(Coordinate point, Coordinate origin) {
+  public VisibilitySweepEndpoint(Coordinate point) {
     this.point = point;
-
-    final var dx = point.getX() - origin.getX();
-    final var dy = point.getY() - origin.getY();
-    final var p = dx / (Math.abs(dx) + Math.abs(dy)); // -1 .. 1 increasing with x
-    this.pseudoangle =
-        (dy <= 0)
-            ? p - 1 // -2 .. 0 increasing with x
-            : 1 - p; // 0 .. 2 decreasing with x
-    this.distance = point.distance(origin);
   }
 
   public Coordinate getPoint() {
     return point;
   }
 
-  public List<LineSegment> getStartsWalls() {
-    return Collections.unmodifiableList(startsWalls);
+  public Collection<VisibilitySweepEndpoint> getStartsWalls() {
+    return Collections.unmodifiableCollection(startsWalls);
   }
 
-  public List<LineSegment> getEndsWalls() {
-    return Collections.unmodifiableList(endsWalls);
+  public Collection<VisibilitySweepEndpoint> getEndsWalls() {
+    return Collections.unmodifiableCollection(endsWalls);
   }
 
-  public void startsWall(LineSegment wall) {
-    startsWalls.add(wall);
+  public void startsWall(VisibilitySweepEndpoint end) {
+    startsWalls.add(end);
   }
 
-  public void endsWall(LineSegment wall) {
-    endsWalls.add(wall);
+  public boolean removeStartedWall(VisibilitySweepEndpoint start) {
+    return startsWalls.remove(start);
   }
 
-  public double getPseudoangle() {
-    return pseudoangle;
+  public void endsWall(VisibilitySweepEndpoint start) {
+    endsWalls.add(start);
   }
 
-  public double getDistance() {
-    return distance;
+  public boolean removeEndedWall(VisibilitySweepEndpoint start) {
+    return endsWalls.remove(start);
+  }
+
+  /**
+   * Adds the walls from {@code duplicate} into {@code this}.
+   *
+   * @param duplicate The duplicate endpoint to merge into {@code this}.
+   */
+  public void mergeDuplicate(VisibilitySweepEndpoint duplicate) {
+    startsWalls.addAll(duplicate.startsWalls);
+    endsWalls.addAll(duplicate.endsWalls);
+
+    // Need to replace all references to `duplicate` with references to `this.
+    for (final var otherEndpoint : duplicate.startsWalls) {
+      final var index = otherEndpoint.endsWalls.indexOf(duplicate);
+      assert index >= 0 : "Endpoint wall is invalid";
+      otherEndpoint.endsWalls.set(index, this);
+    }
+    for (final var otherEndpoint : duplicate.endsWalls) {
+      final var index = otherEndpoint.startsWalls.indexOf(duplicate);
+      assert index >= 0 : "Endpoint wall is invalid";
+      otherEndpoint.startsWalls.set(index, this);
+    }
+  }
+
+  /** Don't actually call this, it is for testing / development purposes. */
+  public void verify() {
+    for (var otherEndpoint : this.startsWalls) {
+      assert otherEndpoint.endsWalls.contains(this);
+    }
+    for (var otherEndpoint : this.endsWalls) {
+      assert otherEndpoint.startsWalls.contains(this);
+    }
   }
 
   @Override

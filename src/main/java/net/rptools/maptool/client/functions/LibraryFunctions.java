@@ -85,8 +85,9 @@ public class LibraryFunctions extends AbstractFunction {
           }
         }
 
-        default -> throw new ParserException(
-            I18N.getText("macro.function.general.unknownFunction", functionName));
+        default ->
+            throw new ParserException(
+                I18N.getText("macro.function.general.unknownFunction", functionName));
       }
     } catch (InterruptedException | ExecutionException e) {
       throw new ParserException(e);
@@ -101,7 +102,8 @@ public class LibraryFunctions extends AbstractFunction {
         .thenAccept(
             l -> {
               l.forEach(json::add);
-            });
+            })
+        .get();
 
     return json;
   }

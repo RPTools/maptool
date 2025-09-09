@@ -16,7 +16,7 @@ package net.rptools.maptool.model;
 
 import net.rptools.maptool.server.proto.drawing.IntPointDto;
 
-public abstract class AbstractPoint implements Cloneable {
+public abstract sealed class AbstractPoint implements Cloneable permits ZonePoint, CellPoint {
 
   public int x;
   public int y;

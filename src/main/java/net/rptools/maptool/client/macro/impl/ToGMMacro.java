@@ -36,7 +36,7 @@ public class ToGMMacro extends AbstractRollMacro {
               MapTool.getPlayer().getName(),
               MapTool.getParser().isMacroPathTrusted(),
               executionContext.getName(),
-              executionContext.getSource());
+              executionContext.getSource().getCallableLocation());
     } else {
       toGmMsg =
           MessageUtil.getFormattedToGmRecipient(

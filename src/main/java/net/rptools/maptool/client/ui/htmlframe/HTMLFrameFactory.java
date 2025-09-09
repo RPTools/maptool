@@ -15,9 +15,11 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import com.google.common.eventbus.Subscribe;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
+import net.rptools.maptool.client.ui.zone.SelectionModel;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -43,11 +45,11 @@ public class HTMLFrameFactory {
    * @param frameType The type of the frame.
    * @param isHTML5 Does it use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param properties The properties that determine the attributes of the frame or dialog.
-   * @param html The html contents of frame or dialog.
+   * @param htmlContent The html contents of frame or dialog.
    * @throws ParserException if zorder is not numerical
    */
   public static void show(
-      String name, FrameType frameType, boolean isHTML5, String properties, String html)
+      String name, FrameType frameType, boolean isHTML5, String properties, HTMLContent htmlContent)
       throws ParserException {
     if (listener == null) {
       listener = new HTMLFrameFactory.Listener();
@@ -57,6 +59,7 @@ public class HTMLFrameFactory {
     int width = -1;
     int height = -1;
     int zOrder = 0;
+    boolean locked = false;
     String title = name;
     String tabTitle = null;
     Object frameValue = null;
@@ -112,6 +115,15 @@ public class HTMLFrameFactory {
             String msg = I18N.getText("macro.function.general.argumentKeyTypeI", funcName, keyLC);
             throw new ParserException(msg);
           }
+        } else if (keyLC.equals("locked")) {
+          try {
+            int v = Integer.parseInt(value);
+            if (v != 0) {
+              locked = true;
+            }
+          } catch (NumberFormatException e) {
+            // Ignoring the value; shouldn't we warn the user?
+          }
         } else if (keyLC.equals("title")) {
           title = value;
         } else if (keyLC.equals("noframe")) {
@@ -147,7 +159,16 @@ public class HTMLFrameFactory {
     if (tabTitle == null) tabTitle = title; // if tabTitle not set, make it same as title
     if (frameType == FrameType.FRAME) {
       HTMLFrame.showFrame(
-          name, title, tabTitle, width, height, temporary, scrollReset, isHTML5, frameValue, html);
+          name,
+          title,
+          tabTitle,
+          width,
+          height,
+          temporary,
+          scrollReset,
+          isHTML5,
+          frameValue,
+          htmlContent);
     } else if (frameType == FrameType.DIALOG) {
       HTMLDialog.showDialog(
           name,
@@ -161,9 +182,11 @@ public class HTMLFrameFactory {
           scrollReset,
           isHTML5,
           frameValue,
-          html);
+          htmlContent);
     } else if (frameType == FrameType.OVERLAY) {
-      MapTool.getFrame().getOverlayPanel().showOverlay(name, zOrder, html, frameValue);
+      MapTool.getFrame()
+          .getOverlayPanel()
+          .showOverlay(name, zOrder, locked, htmlContent, frameValue);
     }
   }
 
@@ -198,6 +221,15 @@ public class HTMLFrameFactory {
     public Listener() {
       new MapToolEventBus().getMainEventBus().register(this);
       currentZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    }
+
+    @Subscribe
+    private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+      if (event.zone() != currentZone) {
+        return;
+      }
+
+      selectedListChanged();
     }
 
     @Subscribe
@@ -249,5 +281,20 @@ public class HTMLFrameFactory {
     } else {
       HTMLDialog.close(name);
     }
+  }
+
+  /**
+   * Returns if the specified name is reserved for internal MapTool frames/dialogs/overlays.
+   *
+   * @param name the name to check.
+   * @return <code>true</code> if this name is reserved.
+   */
+  public static boolean isInternalOnly(String name) {
+    if (name == null || name.length() < AppConstants.INTERNAL_FRAME_PREFIX.length()) {
+      return false;
+    }
+
+    return name.substring(0, AppConstants.INTERNAL_FRAME_PREFIX.length())
+        .equalsIgnoreCase(AppConstants.INTERNAL_FRAME_PREFIX);
   }
 }

@@ -19,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import net.rptools.common.expression.Result;
+import net.rptools.dicelib.expression.Result;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
+import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
@@ -53,7 +55,8 @@ public class MapToolLineParserTest {
 
   private String parseLine(String line, Token tokenInContext, MapToolVariableResolver resolver)
       throws ParserException {
-    MapToolMacroContext ctx = new MapToolMacroContext("test", line, true);
+    var loc = MacroLocationFactory.getInstance().createChatLocation();
+    MapToolMacroContext ctx = new MapToolMacroContext("test", loc, true);
     return parser.parseLine(
         resolver == null ? new MapToolVariableResolver(tokenInContext) : resolver,
         tokenInContext,
@@ -74,7 +77,8 @@ public class MapToolLineParserTest {
     assertEquals(
         "a d10 roll is always a No Critical Hit",
         parseLine(
-            "a d10 roll[h: d20roll = 1d10] is always a [r,if(d20roll == 20): output = \"Critical Hit\"; output = \"No Critical Hit\"]",
+            "a d10 roll[h: d20roll = 1d10] is always a [r,if(d20roll == 20): output = \"Critical"
+                + " Hit\"; output = \"No Critical Hit\"]",
             null,
             null));
     assertEquals(
@@ -116,6 +120,8 @@ public class MapToolLineParserTest {
 
   @Test
   public void testMacroChangesTokenProperty() throws ParserException {
+    // We need the campaign to have the "Strength" property defined.
+    MapTool.getClient().setCampaign(CampaignFactory.createBasicCampaign());
 
     Token token = new Token();
     token.setProperty("Strength", "1");

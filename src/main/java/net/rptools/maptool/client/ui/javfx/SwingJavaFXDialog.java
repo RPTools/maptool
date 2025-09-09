@@ -188,6 +188,7 @@ public class SwingJavaFXDialog extends JDialog {
       SwingUtilities.invokeLater(this::positionInitialViewEDT);
     }
   }
+
   /**
    * Centers the dialog over the parent.
    *
@@ -212,6 +213,7 @@ public class SwingJavaFXDialog extends JDialog {
     }
     setVisible(true);
   }
+
   /**
    * Displays the dialog.
    *

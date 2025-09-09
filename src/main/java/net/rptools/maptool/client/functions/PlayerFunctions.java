@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.PlayerInfo;
 import net.rptools.maptool.model.player.Players;
@@ -48,7 +49,7 @@ public class PlayerFunctions extends AbstractFunction {
       throws ParserException {
 
     try {
-      Players players = new Players();
+      Players players = new Players(MapTool.getClient().getPlayerDatabase());
       return switch (functionName) {
         case "player.getName" -> players.getPlayer().get().name();
         case "player.getInfo" -> {
@@ -72,8 +73,9 @@ public class PlayerFunctions extends AbstractFunction {
           FunctionUtil.blockUntrustedMacro(functionName);
           yield players.getDatabasePlayers().thenApply(this::playersAsJson).get();
         }
-        default -> throw new ParserException(
-            I18N.getText("macro.function.general.unknownFunction", functionName));
+        default ->
+            throw new ParserException(
+                I18N.getText("macro.function.general.unknownFunction", functionName));
       };
     } catch (InterruptedException | ExecutionException e) {
       throw new ParserException(e);

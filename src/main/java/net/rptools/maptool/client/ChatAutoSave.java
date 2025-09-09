@@ -20,49 +20,49 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author frank */
+/**
+ * @author frank
+ */
 public class ChatAutoSave {
-  private static Logger log = LogManager.getLogger(ChatAutoSave.class);
-  private static final ChatAutoSave self = new ChatAutoSave();
+  private static final Logger log = LogManager.getLogger(ChatAutoSave.class);
 
   private final Timer countdown;
   private TimerTask task;
   private long delay;
-  private static String chatlog = null;
+  private String chatlog = null;
 
-  private ChatAutoSave() {
+  public ChatAutoSave() {
     log.debug("Creating chat log autosave timer"); // $NON-NLS-1$
     // Only way to set the delay is to call changeTimeout()
-    delay = 0;
+    this.delay = 0;
     countdown = new Timer();
   }
 
-  private static TimerTask createTimer(final long timeout) {
+  private TimerTask createTimer(final long timeout) {
     TimerTask t =
         new TimerTask() {
           @Override
           public void run() {
-            if (log.isDebugEnabled())
-              log.debug("Chat log autosave countdown complete from " + timeout); // $NON-NLS-1$
+            log.info("Running the task");
+
+            log.debug("Chat log autosave countdown complete from {}", timeout); // $NON-NLS-1$
             if (chatlog == null) {
-              String filename = AppPreferences.getChatFilenameFormat();
-              // FJE Ugly kludge to replace older default entry with newer default
-              // TODO This is going into 1.3.b77 so remove it in 3-4 builds
+              String filename = AppPreferences.chatFilenameFormat.get();
               if ("chatlog.html".equals(filename)) { // $NON-NLS-1$
-                AppPreferences.clearChatFilenameFormat();
-                filename = AppPreferences.getChatFilenameFormat();
+                AppPreferences.chatFilenameFormat.remove();
+                filename = AppPreferences.chatFilenameFormat.get();
               }
               chatlog = String.format(filename, new Date()).replace(':', '-');
             }
             File chatFile =
                 new File(AppUtil.getAppHome("autosave").toString(), chatlog); // $NON-NLS-1$
-            if (log.isInfoEnabled())
-              log.info("Saving log to '" + chatFile + "'"); // $NON-NLS-1$ //$NON-NLS-2$
+            log.info("Saving log to '{}'", chatFile); // $NON-NLS-1$ //$NON-NLS-2$
 
             CommandPanel chat = MapTool.getFrame().getCommandPanel();
             String old = MapTool.getFrame().getStatusMessage();
@@ -73,7 +73,7 @@ public class ChatAutoSave {
               try (FileWriter writer = new FileWriter(chatFile)) {
                 writer.write(chat.getMessageHistory());
               }
-              if (log.isInfoEnabled()) log.info("Log saved"); // $NON-NLS-1$
+              log.info("Log saved"); // $NON-NLS-1$
             } catch (IOException e) {
               // If this happens should we track it and turn off the autosave? Perhaps
               // after a certain number of consecutive failures? Or maybe just lengthen
@@ -89,13 +89,9 @@ public class ChatAutoSave {
     return t;
   }
 
-  private static ChatAutoSave getInstance() {
-    return self;
-  }
-
-  public static void changeTimeout(int timeout) {
-    getInstance().delay = timeout * 1000 * 60;
-    getInstance().start();
+  public void setTimeout(int timeout) {
+    delay = TimeUnit.MINUTES.toMillis(timeout);
+    start();
   }
 
   private void stop() {
@@ -106,6 +102,8 @@ public class ChatAutoSave {
   }
 
   private void start() {
+    log.info("Starting the countdown again");
+
     if (delay > 0) {
       stop();
       task = createTimer(delay);

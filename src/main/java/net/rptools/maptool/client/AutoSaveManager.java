@@ -48,8 +48,7 @@ public class AutoSaveManager {
     if (autoSaveTimer == null) {
       autoSaveTimer = new Timer(1000, (Object) -> execute());
       autoSaveTimer.setRepeats(false);
-      if (log.isDebugEnabled())
-        log.debug("Logging level of 'DEBUG' sets timeout to seconds"); // $NON-NLS-1$
+      log.debug("Logging level of 'DEBUG' sets timeout to seconds"); // $NON-NLS-1$
       next(true);
     }
   }
@@ -66,7 +65,9 @@ public class AutoSaveManager {
   private boolean executeAndContinue() {
 
     int interval =
-        AppPreferences.getAutoSaveIncrement() * (log.isDebugEnabled() ? 1000 : 60 * 1000);
+        AppPreferences.autoSaveIncrement.get()
+            * 1000
+            * (DeveloperOptions.Toggle.AutoSaveMeasuredInSeconds.get() ? 1 : 60);
 
     // auto-save is turned off with <= 0
     if (interval <= 0) {
@@ -125,7 +126,7 @@ public class AutoSaveManager {
       try {
         long startSave = System.currentTimeMillis();
         log.info("Starting autosave..."); // $NON-NLS-1$
-        PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE, null);
+        PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE);
         String msg =
             I18N.getText(
                 "AutoSaveManager.status.autoSaveComplete", System.currentTimeMillis() - startSave);
@@ -169,13 +170,15 @@ public class AutoSaveManager {
   }
 
   /** Check to see if autosave recovery is necessary. */
-  public void check() {
+  public boolean check() {
     if (AUTOSAVE_FILE.exists()) {
       boolean okay;
       okay = MapTool.confirm("msg.confirm.recoverAutosave", AUTOSAVE_FILE.lastModified());
       if (okay) {
         AppActions.loadCampaign(AUTOSAVE_FILE);
+        return true;
       }
     }
+    return false;
   }
 }

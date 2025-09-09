@@ -16,26 +16,25 @@ package net.rptools.maptool.model;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarHorizHexEuclideanWalker;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
 /*
@@ -49,38 +48,14 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  * @formatter:on
  */
 public class HexGridHorizontal extends HexGrid {
-
-  private static final int[] ALL_ANGLES =
-      new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       (originPoint, offsetPoint) -> {
         if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
           offsetPoint.x++;
         }
       };
-  /*
-   * Facings are set when a new map is created with a particular grid and these facings affect all maps with the same grid. Other maps with different grids will remain the same.
-   *
-   * Facings are set when maps are loaded to the current preferences.
-   */
-  private static int[]
-      FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
-  private static List<TokenFootprint> footprintList;
-  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
-  public HexGridHorizontal() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-  }
-
-  public HexGridHorizontal(boolean faceEdges, boolean faceVertices) {
-    super();
-    setFacings(faceEdges, faceVertices);
-  }
+  private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   @Override
   public boolean isHexHorizontal() {
@@ -88,27 +63,85 @@ public class HexGridHorizontal extends HexGrid {
   }
 
   @Override
+  protected List<TokenFootprint> createFootprints() {
+    // Horizontal Hex Grid - Flipped x <> y from Vert grid
+    return List.of(
+        new TokenFootprint(new GUID("C0A80F0E0CB9FB560100000040A8090C"), "1/6", false, .408),
+        new TokenFootprint(new GUID("C0A80F0E0CB9FB560200000040A8090C"), "1/4", false, .500),
+        new TokenFootprint(new GUID("C0A80F0E0CB9FB560300000040A8090C"), "1/3", false, .577),
+        new TokenFootprint(new GUID("C0A80F0E0CB9FB560400000040A8090C"), "1/2", false, .707),
+        new TokenFootprint(new GUID("C0A80F0E0CB9FB560500000040A8090C"), "2/3", false, .816),
+        new TokenFootprint(
+            new GUID("7F00010109655C380100000038000101"),
+            "Medium",
+            I18N.getString("TokenFootprint.name.medium"),
+            true,
+            1.0),
+        new TokenFootprint(
+            new GUID("7F00010109655C380200000038000101"),
+            "Large",
+            I18N.getString("TokenFootprint.name.large"),
+            new Point(1, 0),
+            new Point(0, 1)),
+        new TokenFootprint(
+            new GUID("7F00010109655C380300000038000101"),
+            "Huge",
+            I18N.getString("TokenFootprint.name.huge"),
+            new Point(0, 1),
+            new Point(1, 0),
+            new Point(-1, 0),
+            new Point(-1, -1),
+            new Point(0, -1),
+            new Point(-1, 1)),
+        new TokenFootprint(
+            new GUID("C0A80F464BAAC1B10900000080800A42"),
+            "Humongous",
+            I18N.getString("TokenFootprint.name.humongous"),
+            new Point(-1, -2),
+            new Point(0, -2),
+            new Point(1, -2),
+            new Point(-2, -1),
+            new Point(-1, -1),
+            new Point(0, -1),
+            new Point(1, -1),
+            new Point(-2, 0),
+            new Point(-1, 0),
+            new Point(1, 0),
+            new Point(2, 0),
+            new Point(-2, 1),
+            new Point(-1, 1),
+            new Point(0, 1),
+            new Point(1, 1),
+            new Point(-1, 2),
+            new Point(0, 2),
+            new Point(1, 2)));
+  }
+
+  @Override
   protected synchronized Map<Integer, Area> getGridShapeCache() {
     return gridShapeCache;
   }
 
-  /**
-   * Set available facings based on the passed parameters.
-   *
-   * @param faceEdges - Tokens can face cell faces if true.
-   * @param faceVertices - Tokens can face cell vertices if true.
-   */
-  @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
-    if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-150, -90, -30, 30, 90, 150};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-120, -60, 0, 60, 120, 180};
-    } else {
-      FACING_ANGLES = new int[] {90};
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
+
+    if (!faceEdges && !faceVertices) {
+      // Facing not support. Return a default answer.
+      return 90;
     }
+
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = (faceEdges && faceVertices) ? 30 : 60;
+    /* The position of the first standard facing CCW from zero. */
+    int base = (!faceEdges && faceVertices) ? 30 : 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override
@@ -126,16 +159,6 @@ public class HexGridHorizontal extends HexGrid {
     } else {
       return Math.max(Math.abs(dx), Math.abs(dy));
     }
-  }
-
-  @Override
-  public int[] getFacingAngles() {
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-    return FACING_ANGLES;
   }
 
   /*
@@ -156,30 +179,20 @@ public class HexGridHorizontal extends HexGrid {
       movementKeys = new HashMap<KeyStroke, Action>(12); // parameter is 9/0.75 (load factor)
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, 0), new MovementKey(callback, -1, -1));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), new
-      // MovementKey(callback, 0, -1));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(callback, 1, -1));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(callback, -1, 0));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new
-      // MovementKey(callback, 0, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(callback, 1, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0), new MovementKey(callback, -1, 1));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), new
-      // MovementKey(callback, 0, 1));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, 0), new MovementKey(callback, 1, 1));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new MovementKey(callback, -1, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new MovementKey(callback, 1, 0));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new MovementKey(callback, 0,
-      // -1));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new MovementKey(callback,
-      // 0, 1));
     }
     actionMap.putAll(movementKeys);
   }
@@ -191,20 +204,6 @@ public class HexGridHorizontal extends HexGrid {
         actionMap.remove(key);
       }
     }
-  }
-
-  @Override
-  public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList =
-            loadFootprints(
-                "net/rptools/maptool/model/hexGridHorizFootprints.xml", getOffsetTranslator());
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load Hex Grid footprints", ioe);
-      }
-    }
-    return footprintList;
   }
 
   @Override
@@ -234,7 +233,7 @@ public class HexGridHorizontal extends HexGrid {
   }
 
   @Override
-  protected Dimension setCellOffset() {
+  public Dimension getCellOffset() {
     return new Dimension((int) getCellOffsetV(), (int) getCellOffsetU());
   }
 
@@ -253,22 +252,22 @@ public class HexGridHorizontal extends HexGrid {
   }
 
   @Override
-  protected double getRendererSizeV(ZoneRenderer renderer) {
+  public double getRendererSizeV(ZoneRenderer renderer) {
     return renderer.getSize().getWidth();
   }
 
   @Override
-  protected double getRendererSizeU(ZoneRenderer renderer) {
+  public double getRendererSizeU(ZoneRenderer renderer) {
     return renderer.getSize().getHeight();
   }
 
   @Override
-  protected int getOffV(ZoneRenderer renderer) {
+  public int getOffV(ZoneRenderer renderer) {
     return (int) (renderer.getViewOffsetX() + getOffsetX() * renderer.getScale());
   }
 
   @Override
-  protected int getOffU(ZoneRenderer renderer) {
+  public int getOffU(ZoneRenderer renderer) {
     return (int) (renderer.getViewOffsetY() + getOffsetY() * renderer.getScale());
   }
 
@@ -320,22 +319,14 @@ public class HexGridHorizontal extends HexGrid {
   protected AffineTransform getGridOffset(Token token) {
     // Adjust to grid if token is an even number of grid cells
     double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
-    double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
-    double shortFootprintSide = Math.min(footprintWidth, footprintHeight);
 
     final AffineTransform at = new AffineTransform();
-    final double coordinateOffsetX;
-    final double coordinateOffsetY;
 
-    if ((shortFootprintSide / getSize()) % 2 != 0) {
-      coordinateOffsetX = -getCellWidth();
-      coordinateOffsetY = getCellOffsetU() * 2;
-    } else {
-      coordinateOffsetX = getCellWidth() * -1.5;
-      coordinateOffsetY = getCellHeight() * -1.375;
+    if ((footprintWidth / getSize()) % 2 == 0) {
+      double coordinateOffsetV = getCellOffsetV();
+      double coordinateOffsetU = -0.5 * (edgeProjection + edgeLength);
+      at.translate(coordinateOffsetV, coordinateOffsetU);
     }
-
-    at.translate(coordinateOffsetX, coordinateOffsetY);
 
     return at;
   }

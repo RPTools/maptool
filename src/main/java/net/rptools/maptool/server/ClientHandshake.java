@@ -24,19 +24,23 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil.Key;
+import net.rptools.lib.cipher.PublicPrivateKeyStore;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolClient;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -45,49 +49,27 @@ import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
-import net.rptools.maptool.model.player.LocalPlayer;
-import net.rptools.maptool.model.player.LocalPlayerDatabase;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
-import net.rptools.maptool.server.proto.AuthTypeEnum;
-import net.rptools.maptool.server.proto.ClientAuthMsg;
-import net.rptools.maptool.server.proto.ClientInitMsg;
-import net.rptools.maptool.server.proto.ConnectionSuccessfulMsg;
-import net.rptools.maptool.server.proto.HandshakeMsg;
+import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.HandshakeMsg.MessageTypeCase;
-import net.rptools.maptool.server.proto.HandshakeResponseCodeMsg;
-import net.rptools.maptool.server.proto.PublicKeyAddedMsg;
-import net.rptools.maptool.server.proto.PublicKeyUploadMsg;
-import net.rptools.maptool.server.proto.RequestPublicKeyMsg;
-import net.rptools.maptool.server.proto.RoleDto;
-import net.rptools.maptool.server.proto.UseAuthTypeMsg;
-import net.rptools.maptool.util.cipher.CipherUtil;
-import net.rptools.maptool.util.cipher.CipherUtil.Key;
-import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Class that implements the client side of the handshake. */
-public class ClientHandshake implements Handshake, MessageHandler {
+public class ClientHandshake implements Handshake<Void>, MessageHandler {
 
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(ClientHandshake.class);
 
-  /** The index in the array for the GM handshake challenge, only used for role based auth */
-  private static final int GM_CHALLENGE = 0;
-  /** The index in the array for the Player handshake challenge, only used for role based auth */
-  private static final int PLAYER_CHALLENGE = 1;
+  private final CompletableFuture<Void> future = new CompletableFuture<>();
+  private CompletionStage<Void> stage = future;
+
+  private final MapToolClient client;
 
   /** The connection for the handshake. */
-  private final ClientConnection connection;
-  /** The player for the client. */
-  private final LocalPlayer player;
-  /** Observers that want to be notified when the status changes. */
-  private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
-  /** Message for any error that has occurred, {@code null} if no error has occurred. */
-  private String errorMessage;
+  private final Connection connection;
+
+  private final PublicPrivateKeyStore keyStore;
 
   /** PIN for sending public key to client */
   private String pin;
@@ -96,18 +78,38 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
   private WindowListener easyConnectWindowListener;
 
-  /**
-   * Any exception that occurred that causes an error, {@code null} if no exception which causes an
-   * error has occurred.
-   */
-  private Exception exception;
-
   /** The current state of the handshake process. */
   private State currentState = State.AwaitingUseAuthType;
 
-  public ClientHandshake(ClientConnection connection, LocalPlayer player) {
+  public ClientHandshake(
+      MapToolClient client, Connection connection, PublicPrivateKeyStore keyStore) {
+    this.client = client;
     this.connection = connection;
-    this.player = player;
+    this.keyStore = keyStore;
+
+    whenComplete(
+        (result, error) -> {
+          connection.removeMessageHandler(this);
+          SwingUtilities.invokeLater(this::closeEasyConnectDialog);
+        });
+  }
+
+  @Override
+  public void whenComplete(BiConsumer<? super Void, ? super Throwable> callback) {
+    stage =
+        stage.whenComplete(
+            (result, error) -> {
+              // Hand back the original exception, not the wrapped one.
+              if (error instanceof CompletionException e) {
+                error = e.getCause();
+              }
+              callback.accept(result, error);
+            });
+  }
+
+  private void setCurrentState(State state) {
+    log.debug("Transitioning from {} to {}", currentState, state);
+    currentState = state;
   }
 
   private synchronized JDialog getEasyConnectDialog() {
@@ -127,22 +129,37 @@ public class ClientHandshake implements Handshake, MessageHandler {
   }
 
   @Override
-  public void startHandshake() throws ExecutionException, InterruptedException {
-    var md5key = CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().publicKey());
+  public void startHandshake() {
+    connection.addMessageHandler(this);
+    startHandshakeInternal();
+  }
+
+  private void startHandshakeInternal() {
+    MD5Key md5key;
+    try {
+      md5key = CipherUtil.publicKeyMD5(keyStore.getKeys().get().publicKey());
+    } catch (ExecutionException | InterruptedException e) {
+      // Report the error the same way as any other handshake error.
+      var errorMessage = I18N.getText("Handshake.msg.failedToGetPublicKey");
+      setCurrentState(State.Error);
+      future.completeExceptionally(new Failure(errorMessage, e));
+      return;
+    }
+
     var clientInitMsg =
         ClientInitMsg.newBuilder()
-            .setPlayerName(player.getName())
+            .setPlayerName(client.getPlayer().getName())
             .setVersion(MapTool.getVersion())
             .setPublicKeyMd5(md5key.toString());
     var handshakeMsg = HandshakeMsg.newBuilder().setClientInitMsg(clientInitMsg).build();
-
-    sendMessage(handshakeMsg);
-    currentState = State.AwaitingUseAuthType;
+    sendMessage(State.AwaitingUseAuthType, handshakeMsg);
   }
 
-  private void sendMessage(HandshakeMsg message) {
+  private void sendMessage(State newState, HandshakeMsg message) {
+    setCurrentState(newState);
+
     var msgType = message.getMessageTypeCase();
-    log.info(connection.getId() + " sent: " + msgType);
+    log.debug("{} sent: {}", connection.getId(), msgType);
     connection.sendMessage(message.toByteArray());
   }
 
@@ -152,10 +169,11 @@ public class ClientHandshake implements Handshake, MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
 
-      log.info(id + " got: " + msgType);
+      log.debug("{} got: {}", id, msgType);
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();
+        String errorMessage;
         if (code.equals(HandshakeResponseCodeMsg.INVALID_PASSWORD)) {
           errorMessage = I18N.getText("Handshake.msg.incorrectPassword");
         } else if (code.equals(HandshakeResponseCodeMsg.INVALID_PUBLIC_KEY)) {
@@ -169,7 +187,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
         } else {
           errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
         }
-        notifyObservers();
+        future.completeExceptionally(new Failure(errorMessage));
         return;
       }
 
@@ -180,58 +198,56 @@ public class ClientHandshake implements Handshake, MessageHandler {
           } else if (msgType == MessageTypeCase.USE_AUTH_TYPE_MSG) {
             handle(handshakeMsg.getUseAuthTypeMsg());
           } else if (msgType == MessageTypeCase.PLAYER_BLOCKED_MSG) {
-            errorMessage =
+            var errorMessage =
                 I18N.getText(
                     "Handshake.msg.playerBlocked", handshakeMsg.getPlayerBlockedMsg().getReason());
-            notifyObservers();
+            future.completeExceptionally(new Failure(errorMessage));
           } else {
-            errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
-            currentState = State.Error;
-            notifyObservers();
+            var errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
+            setCurrentState(State.Error);
+            future.completeExceptionally(new Failure(errorMessage));
           }
           break;
         case AwaitingPublicKeyAddition:
           if (msgType == MessageTypeCase.PUBLIC_KEY_ADDED_MSG) {
             handle(handshakeMsg.getPublicKeyAddedMsg());
           } else {
-            errorMessage = I18N.getText("Handshake.msg.gmDeniedRequest");
-            currentState = State.Error;
-            notifyObservers();
+            var errorMessage = I18N.getText("Handshake.msg.gmDeniedRequest");
+            setCurrentState(State.Error);
+            future.completeExceptionally(new Failure(errorMessage));
           }
           break;
         case AwaitingConnectionSuccessful:
           if (msgType == MessageTypeCase.CONNECTION_SUCCESSFUL_MSG) {
             handle(handshakeMsg.getConnectionSuccessfulMsg());
           } else {
-            errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
-            currentState = State.Error;
-            notifyObservers();
+            var errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
+            setCurrentState(State.Error);
+            future.completeExceptionally(new Failure(errorMessage));
           }
           break;
       }
 
     } catch (Exception e) {
-      log.warn(e.toString());
-      exception = e;
-      currentState = State.Error;
-      errorMessage = I18N.getText("Handshake.msg.incorrectPassword");
-      notifyObservers();
+      log.warn("Unexpected exception during client handshake", e);
+      setCurrentState(State.Error);
+      future.completeExceptionally(new Failure("Handshake.msg.unexpectedError", e));
     }
   }
 
-  private void handle(PublicKeyAddedMsg publicKeyAddedMsg)
-      throws ExecutionException, InterruptedException {
+  private void handle(PublicKeyAddedMsg publicKeyAddedMsg) {
     SwingUtilities.invokeLater(this::closeEasyConnectDialog);
-    startHandshake();
+    startHandshakeInternal();
   }
 
   private void handle(RequestPublicKeyMsg requestPublicKeyMsg) {
     pin = requestPublicKeyMsg.getPin();
-    var publicKey = new PublicPrivateKeyStore().getKeys().join();
+    var publicKey = keyStore.getKeys().join();
     var publicKeyUploadBuilder = PublicKeyUploadMsg.newBuilder();
     publicKeyUploadBuilder.setPublicKey(publicKey.getEncodedPublicKeyText());
-    sendMessage(HandshakeMsg.newBuilder().setPublicKeyUploadMsg(publicKeyUploadBuilder).build());
-    currentState = State.AwaitingPublicKeyAddition;
+    sendMessage(
+        State.AwaitingPublicKeyAddition,
+        HandshakeMsg.newBuilder().setPublicKeyUploadMsg(publicKeyUploadBuilder).build());
     SwingUtilities.invokeLater(
         () -> {
           JOptionPane pane = new JOptionPane();
@@ -252,7 +268,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
                       HandshakeMsg.newBuilder()
                           .setHandshakeResponseCodeMsg(HandshakeResponseCodeMsg.INVALID_PUBLIC_KEY)
                           .build();
-                  sendMessage(msg);
+                  sendMessage(State.Error, msg);
                 }
               };
           dialog.addWindowListener(windowListener);
@@ -262,17 +278,25 @@ public class ClientHandshake implements Handshake, MessageHandler {
   }
 
   private void handle(UseAuthTypeMsg useAuthTypeMsg)
-      throws ExecutionException, InterruptedException, IllegalBlockSizeException,
-          BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException,
-          InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+      throws ExecutionException,
+          InterruptedException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          InvalidKeySpecException,
+          InvalidAlgorithmParameterException {
 
     var clientAuthMsg = ClientAuthMsg.newBuilder();
 
     if (useAuthTypeMsg.getAuthType() == AuthTypeEnum.ASYMMETRIC_KEY) {
-      CipherUtil.Key publicKey = new PublicPrivateKeyStore().getKeys().get();
+      CipherUtil.Key publicKey = keyStore.getKeys().get();
       var handshakeChallenge =
           HandshakeChallenge.fromAsymmetricChallengeBytes(
-              player.getName(), useAuthTypeMsg.getChallenge(0).toByteArray(), publicKey);
+              client.getPlayer().getName(),
+              useAuthTypeMsg.getChallenge(0).toByteArray(),
+              publicKey);
       var expectedResponse = handshakeChallenge.getExpectedResponse();
       clientAuthMsg = clientAuthMsg.setChallengeResponse(ByteString.copyFrom(expectedResponse));
     } else {
@@ -280,15 +304,17 @@ public class ClientHandshake implements Handshake, MessageHandler {
       byte[] responseIv = new byte[CipherUtil.CIPHER_BLOCK_SIZE];
       rnd.nextBytes(responseIv);
 
-      player.setPasswordSalt(useAuthTypeMsg.getSalt().toByteArray());
+      client.getPlayer().setPasswordSalt(useAuthTypeMsg.getSalt().toByteArray());
       var iv = useAuthTypeMsg.getIv().toByteArray();
       for (int i = 0; i < useAuthTypeMsg.getChallengeCount(); i++) {
         try {
-          Key key = player.getPassword();
-          // Key key = playerDatabase.getPlayerPassword(player.getName()).get();
+          Key key = client.getPlayer().getPassword();
           var handshakeChallenge =
               HandshakeChallenge.fromSymmetricChallengeBytes(
-                  player.getName(), useAuthTypeMsg.getChallenge(i).toByteArray(), key, iv);
+                  client.getPlayer().getName(),
+                  useAuthTypeMsg.getChallenge(i).toByteArray(),
+                  key,
+                  iv);
           var expectedResponse = handshakeChallenge.getExpectedResponse(responseIv);
           clientAuthMsg =
               clientAuthMsg
@@ -305,27 +331,25 @@ public class ClientHandshake implements Handshake, MessageHandler {
     }
 
     var handshakeMsg = HandshakeMsg.newBuilder().setClientAuthMessage(clientAuthMsg).build();
-    sendMessage(handshakeMsg);
-    currentState = State.AwaitingConnectionSuccessful;
+    sendMessage(State.AwaitingConnectionSuccessful, handshakeMsg);
   }
 
   private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg) throws IOException {
     var policy = ServerPolicy.fromDto(connectionSuccessfulMsg.getServerPolicyDto());
-    MapTool.setServerPolicy(policy);
-    player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
+    client.setServerPolicy(policy);
+    client
+        .getPlayer()
+        .setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
     MapTool.getFrame()
         .getToolbarPanel()
         .getMapselect()
-        .setVisible((!policy.getMapSelectUIHidden()) || MapTool.getPlayer().isGM());
-    if ((!policy.getDisablePlayerAssetPanel()) || MapTool.getPlayer().isGM()) {
+        .setVisible((!policy.getMapSelectUIHidden()) || client.getPlayer().isGM());
+    if ((!policy.getDisablePlayerAssetPanel()) || client.getPlayer().isGM()) {
       MapTool.getFrame().getAssetPanel().enableAssets();
     } else {
       MapTool.getFrame().getAssetPanel().disableAssets();
     }
     if (!MapTool.isHostingServer()) {
-      PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
-      var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
-      playerDb.setLocalPlayer(player);
       if (!MapTool.isPersonalServer()) {
         new CampaignManager().clearCampaignData();
         if (connectionSuccessfulMsg.hasGameDataDto()) {
@@ -336,6 +360,10 @@ public class ClientHandshake implements Handshake, MessageHandler {
             log.error(I18N.getText("data.error.importGameData"), e);
             throw new IOException(e.getCause());
           }
+        }
+        if (!policy.isUseIndividualViews()) {
+          MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(false);
+          log.info("No individual views, disabling FoW buttons");
         }
         var libraryManager = new LibraryManager();
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
@@ -360,51 +388,8 @@ public class ClientHandshake implements Handshake, MessageHandler {
         }
       }
     }
-    currentState = State.Success;
-    notifyObservers();
-  }
-
-  @Override
-  public void addObserver(HandshakeObserver observer) {
-    observerList.add(observer);
-  }
-
-  @Override
-  public void removeObserver(HandshakeObserver observer) {
-    observerList.remove(observer);
-  }
-
-  /** Notifies observers that the handshake has completed or errored out.. */
-  private void notifyObservers() {
-    SwingUtilities.invokeLater(this::closeEasyConnectDialog);
-    for (var observer : observerList) {
-      observer.onCompleted(this);
-    }
-  }
-
-  @Override
-  public boolean isSuccessful() {
-    return currentState == State.Success;
-  }
-
-  @Override
-  public String getErrorMessage() {
-    return errorMessage;
-  }
-
-  @Override
-  public ClientConnection getConnection() {
-    return connection;
-  }
-
-  @Override
-  public Exception getException() {
-    return exception;
-  }
-
-  @Override
-  public Player getPlayer() {
-    return player;
+    setCurrentState(State.Success);
+    future.complete(null);
   }
 
   private void closeEasyConnectDialog() {

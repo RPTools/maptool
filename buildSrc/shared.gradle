@@ -1,0 +1,54 @@
+// In this section you declare where to find the dependencies of your project
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = 'https://maptool.craigs-stuff.net/repo/' }
+    maven { url = 'https://jitpack.io' }
+    maven { url = "https://www.jetbrains.com/intellij-repository/releases" }
+    maven { url = "https://cache-redirector.jetbrains.com/intellij-dependencies" }
+    maven { url = "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url = "https://jogamp.org/deployment/maven" }
+}
+
+apply from: rootProject.file('buildSrc/java-version.gradle')
+
+
+spotless {
+    java {
+        target project.fileTree(project.projectDir) {
+            include 'src/**/*.java'
+        }
+        licenseHeaderFile rootProject.file('spotless.license.java')
+        toggleOffOn()
+        // Now using the Google Java style guide
+        googleJavaFormat("1.24.0")
+    }
+
+    format 'misc', {
+        target '**/*.gradle', '**/.gitignore'
+
+        // spotless has built-in rules for most basic formatting tasks
+        trimTrailingWhitespace()
+        // or spaces. Takes an integer argument if you don't like 4
+        indentWithSpaces(4)
+    }
+}
+
+configurations {
+    mockitoAgent
+}
+
+dependencies {
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testRuntimeOnly(libs.junit.engine)
+    testImplementation(libs.bundles.junit)
+    testImplementation(libs.mockito.core)
+    mockitoAgent(libs.mockito.core) {
+        transitive = false
+    }
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+}

@@ -90,7 +90,6 @@ public class MacroButtonPrefs {
     // etc.)
     String paddedIndex = String.format(FORMAT_STRING, index);
 
-    // prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/macros/" + paddedIndex);
     Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/macros");
 
     try {
@@ -145,13 +144,6 @@ public class MacroButtonPrefs {
       for (String buttonNode : prefsRoot.childrenNames()) {
         Preferences buttonPref = prefsRoot.node(buttonNode);
 
-        // not elegant by any definition but works using already existing system
-        // the downside is the number of buttons the user can create is limited with
-        // Integer.MAX_VALUE
-        // after 2.147.. billion button creation the program will explode. if you were to create a
-        // new button
-        // every second it would take 63 years for this to overflow :)
-        // TODO: change this if you like
         int index = Integer.parseInt(buttonNode);
         if (index > maxIndex) {
           maxIndex = index;
@@ -202,7 +194,7 @@ public class MacroButtonPrefs {
               String maxWidth = buttonPref.get(PREF_MAX_WIDTH, "");
               boolean allowPlayerEdits =
                   buttonPref.getBoolean(
-                      PREF_ALLOW_PLAYER_EDITS, AppPreferences.getAllowPlayerMacroEditsDefault());
+                      PREF_ALLOW_PLAYER_EDITS, AppPreferences.allowPlayerMacroEditsDefault.get());
               String toolTip = buttonPref.get(PREF_TOOLTIP, "");
               boolean displayHotKey = buttonPref.getBoolean(PREF_DISPLAY_HOT_KEY, true);
 
@@ -245,7 +237,7 @@ public class MacroButtonPrefs {
         String maxWidth = buttonPref.get(PREF_MAX_WIDTH, "");
         boolean allowPlayerEdits =
             buttonPref.getBoolean(
-                PREF_ALLOW_PLAYER_EDITS, AppPreferences.getAllowPlayerMacroEditsDefault());
+                PREF_ALLOW_PLAYER_EDITS, AppPreferences.allowPlayerMacroEditsDefault.get());
         String hotKey = buttonPref.get(PREF_HOTKEY_KEY, MacroButtonHotKeyManager.HOTKEYS[0]);
         String toolTip = buttonPref.get(PREF_TOOLTIP, "");
         boolean displayHotKey = buttonPref.getBoolean(PREF_DISPLAY_HOT_KEY, true);

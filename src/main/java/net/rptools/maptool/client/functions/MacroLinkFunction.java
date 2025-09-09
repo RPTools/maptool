@@ -27,13 +27,15 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.exceptions.AbortFunctionException;
 import net.rptools.maptool.client.functions.exceptions.AssertFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
@@ -43,7 +45,6 @@ import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.MessageUtil;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -72,12 +73,17 @@ public class MacroLinkFunction extends AbstractFunction {
 
   static final Pattern TOOLTIP_PATTERN =
       Pattern.compile("([^:]*)://(.*)/([^/]*)/([^?]*)(?:\\?(.*))?");
+
   /** Pattern to distinguish a link (group 1) from its data (group 2). */
   public static final Pattern LINK_DATA_PATTERN =
       Pattern.compile("((?s)[^:]*://.*/[^/]*/[^?]*\\?)(.*)?");
 
   static final Pattern MACROLINK_PATTERN =
       Pattern.compile("(?s)([^:]*)://(.*)/([^/]*)/([^?]*)(?:\\?(.*))?");
+
+  /** The factory for creating macro locations. */
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   /**
    * Gets and instance of the MacroLinkFunction class.
@@ -144,7 +150,9 @@ public class MacroLinkFunction extends AbstractFunction {
         jsonTargets = JSONMacroFunctions.getInstance().asJsonElement(strTargets).getAsJsonArray();
       else {
         jsonTargets = new JsonArray();
-        for (String t : strTargets.split(delim)) jsonTargets.add(t.trim());
+        for (String t : StringUtil.split(strTargets, delim)) {
+          jsonTargets.add(t.trim());
+        }
       }
       if (jsonTargets.size() == 0) {
         return ""; // dont send to empty lists
@@ -233,7 +241,8 @@ public class MacroLinkFunction extends AbstractFunction {
   public String createMacroText(String macroName, String who, String target, String args) {
     if (macroName.toLowerCase().endsWith("@this")) {
       macroName =
-          macroName.substring(0, macroName.length() - 4) + MapTool.getParser().getMacroSource();
+          macroName.substring(0, macroName.length() - 4)
+              + MapTool.getParser().getMacroSource().getCallableLocation();
     }
     return "macro://" + macroName + "/" + who + "/" + target + "?" + encode(args);
   }
@@ -487,14 +496,27 @@ public class MacroLinkFunction extends AbstractFunction {
       Token token, OutputTo outputTo, String macroName, String args, Set<String> playerList)
       throws ParserException {
 
+    var loc = macroLocationFactory.createMacroLinkLocation(macroName);
+    if (MapTool.getParser().isMacroTrusted()) {
+      MapTool.getParser().enterTrustedContext(macroName, loc);
+    } else {
+      MapTool.getParser().enterUntrustedContext(macroName, loc);
+    }
+
+    String line = "";
     // Execute the macro
-    MapToolVariableResolver resolver = new MapToolVariableResolver(token);
-    String line = MapTool.getParser().runMacro(resolver, token, macroName, args);
+    try {
+      MapToolVariableResolver resolver = new MapToolVariableResolver(token);
+      line = MapTool.getParser().runMacro(resolver, token, macroName, args);
+    } finally {
+      MapTool.getParser().exitContext();
+    }
 
     // Don't output blank messages. Fixes #1867.
     if ("".equals(line)) {
       return;
     }
+
     /*
      * First we check our player list to make sure we are not sending things out multiple times or the wrong way. This looks a little ugly, but all it is doing is searching for the strings "say",
      * "gm", or "gmself", and if it contains no other strings changes it to a more appropriate for such as /togm, /self, etc. If it contains other names then gm, self etc will be replaced with
@@ -547,7 +569,7 @@ public class MacroLinkFunction extends AbstractFunction {
         break;
       case SELF_AND_GM:
         MapTool.addLocalMessage(MessageUtil.getFormattedToGmSender(line));
-        // Intentionally falls through
+      // Intentionally falls through
       case GM:
         MapTool.addMessage(
             TextMessage.gm(
@@ -596,7 +618,7 @@ public class MacroLinkFunction extends AbstractFunction {
     playerName = (!playerNameMatch.equals("")) ? playerNameMatch : playerName;
 
     // Validate
-    if (!MapTool.isPlayerConnected(playerName)) {
+    if (!MapTool.getClient().isPlayerConnected(playerName)) {
       MapTool.addLocalMessage(I18N.getText("msg.error.playerNotConnected", playerName));
       return;
     }

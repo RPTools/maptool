@@ -27,9 +27,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
+import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,19 +35,20 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.GeometryUtil;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 
 /** */
 public class GraphicsUtil {
+
   public static final int BOX_PADDINGX = 10;
   public static final int BOX_PADDINGY = 2;
 
-  // TODO: Make this configurable
   public static final ImageLabel GREY_LABEL =
       new ImageLabel(RessourceManager.getImage(Images.BOX_GRAY), 4, 4);
   public static final ImageLabel BLUE_LABEL =
@@ -86,7 +85,6 @@ public class GraphicsUtil {
     if (string == null) {
       string = "";
     }
-    // TODO: expand to work for variable width fonts.
     Font oldFont = g.getFont();
     Font fixedWidthFont = new Font("Courier New", 0, 12);
     g.setFont(fixedWidthFont);
@@ -221,12 +219,13 @@ public class GraphicsUtil {
 
   /**
    * @param c the color to lighten up
-   * @return a lighter color, as opposed to a brighter color as in Color.brighter(). This prevents
+   * @return a lighten color, as opposed to a brighter color as in Color.brighter(). This prevents
    *     light colors from getting bleached out.
    */
-  public static Color lighter(Color c) {
-    if (c == null) return null;
-    else {
+  public static Color lighten(Color c) {
+    if (c == null) {
+      return null;
+    } else {
       int r = c.getRed();
       int g = c.getGreen();
       int b = c.getBlue();
@@ -236,6 +235,28 @@ public class GraphicsUtil {
       b += 64 * (255 - b) / 255;
 
       return new Color(r, g, b);
+    }
+  }
+
+  /**
+   * For a given {@link Color}, determine whether black or white is best as a contrasting color and
+   * return that color.
+   *
+   * @param c The color to contrast.
+   * @return A black or white {@link Color}.
+   * @see <a
+   *     href="https://stackoverflow.com/questions/946544/good-text-foreground-color-for-a-given-background-color">https://stackoverflow.com/questions/946544/good-text-foreground-color-for-a-given-background-color</a>
+   */
+  public static Color contrast(Color c) {
+    if (c == null) {
+      return null;
+    } else {
+      int r = c.getRed();
+      int g = c.getGreen();
+      int b = c.getBlue();
+
+      double brightness = (r * 0.299 + g * 0.587 + b * 0.114);
+      return brightness > 186 ? new Color(0, 0, 0) : new Color(255, 255, 255);
     }
   }
 
@@ -304,6 +325,11 @@ public class GraphicsUtil {
 
   public static Area createLineSegmentEllipse(
       double x1, double y1, double x2, double y2, int steps) {
+    return new Area(createLineSegmentEllipsePath(x1, y1, x2, y2, steps));
+  }
+
+  public static Path2D createLineSegmentEllipsePath(
+      double x1, double y1, double x2, double y2, int steps) {
     double x = Math.min(x1, x2);
     double y = Math.min(y1, y2);
 
@@ -322,21 +348,19 @@ public class GraphicsUtil {
     double a = w / 2;
     double b = h / 2;
 
-    boolean firstMove = true;
     for (double t = -Math.PI; t <= Math.PI; t += (2 * Math.PI / steps)) {
       int px = (int) Math.round(x + a * Math.cos(t));
       int py = (int) Math.round(y + b * Math.sin(t));
 
-      if (firstMove) {
+      if (path.getCurrentPoint() == null) {
         path.moveTo(px, py);
-        firstMove = false;
       } else {
         path.lineTo(px, py);
       }
     }
 
     path.closePath();
-    return new Area(path);
+    return path;
   }
 
   public static void renderSoftClipping(Graphics2D g, Shape shape, int width, double initialAlpha) {
@@ -354,14 +378,9 @@ public class GraphicsUtil {
         RenderingHints.KEY_ANTIALIASING,
         RenderingHints.VALUE_ANTIALIAS_OFF); // Faster without antialiasing, and looks just as good
 
-    // float alpha = (float)initialAlpha / width / 6;
     float alpha = .04f;
     g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
     for (int i = 1; i < width; i += 2) {
-      // if (alpha * i < .2) {
-      // // Too faded to see anyway, don't waste cycles on it
-      // continue;
-      // }
       g2.setStroke(new BasicStroke(i));
       g2.draw(shape);
     }
@@ -372,8 +391,8 @@ public class GraphicsUtil {
     if (points.length < 2) {
       throw new IllegalArgumentException("Must supply at least two points");
     }
-    List<Point2D> bottomList = new ArrayList<Point2D>(points.length);
-    List<Point2D> topList = new ArrayList<Point2D>(points.length);
+    List<Point2D> bottomList = new ArrayList<>(points.length);
+    List<Point2D> topList = new ArrayList<>(points.length);
 
     for (int i = 0; i < points.length; i++) {
       double angle =
@@ -392,17 +411,13 @@ public class GraphicsUtil {
 
       double bottomAngle = (angle + delta / 2) % 360;
       double topAngle = bottomAngle + 180;
-      // System.out.println(angle + " - " + delta + " - " + bottomAngle + " - " + topAngle);
-
-      bottomList.add(getPoint(points[i], bottomAngle, width));
-      topList.add(getPoint(points[i], topAngle, width));
+      bottomList.add(getPointAtVector(points[i], bottomAngle, width));
+      topList.add(getPointAtVector(points[i], topAngle, width));
     }
-    // System.out.println(bottomList);
-    // System.out.println(topList);
     Collections.reverse(topList);
 
     GeneralPath path = new GeneralPath();
-    Point2D initialPoint = bottomList.remove(0);
+    Point2D initialPoint = bottomList.removeFirst();
     path.moveTo((float) initialPoint.getX(), (float) initialPoint.getY());
 
     for (Point2D point : bottomList) {
@@ -415,13 +430,9 @@ public class GraphicsUtil {
     return new Area(path);
   }
 
-  private static Point2D getPoint(Point2D point, double angle, double length) {
+  private static Point2D getPointAtVector(Point2D point, double angle, double length) {
     double x = point.getX() + length * Math.cos(Math.toRadians(angle));
     double y = point.getY() - length * Math.sin(Math.toRadians(angle));
-
-    // System.out.println(point + " - " + angle + " - " + x + "x" + y + " - " +
-    // Math.cos(Math.toRadians(angle)) + " - " + Math.sin(Math.toRadians(angle)) + " - " +
-    // Math.toRadians(angle));
     return new Point2D.Double(x, y);
   }
 
@@ -430,8 +441,6 @@ public class GraphicsUtil {
         new Point2D[] {
           new Point(20, 20), new Point(50, 50), new Point(80, 20), new Point(100, 100)
         };
-    // final Point2D[] points = new Point2D[]{new Point(50, 50), new Point(20, 20), new Point(20,
-    // 100), new Point(50,75)};
     final Area line = createLine(10, points);
 
     JFrame f = new JFrame();
@@ -457,6 +466,5 @@ public class GraphicsUtil {
         };
     f.add(p);
     f.setVisible(true);
-    // System.out.println(area.equals(area2));
   }
 }

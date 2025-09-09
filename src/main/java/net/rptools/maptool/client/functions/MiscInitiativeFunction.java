@@ -52,12 +52,16 @@ public class MiscInitiativeFunction extends AbstractFunction {
   /** singleton instance of this function */
   private static final MiscInitiativeFunction instance = new MiscInitiativeFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static MiscInitiativeFunction getInstance() {
     return instance;
   }
 
-  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
+  /**
+   * @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List)
+   */
   @Override
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
