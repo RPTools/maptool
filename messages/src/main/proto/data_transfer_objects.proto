@@ -294,6 +294,32 @@ message TokenDto {
     SQUARE = 2;
     FIGURE = 3;
   }
+  enum HaloShape {
+    GRID_SHAPE = 0;
+    TOKEN_SHAPE = 1;
+    CIRCLE_SHAPE = 2;
+    DIAMOND_SHAPE = 3;
+    SQUARE_SHAPE = 4;
+    TOPOLOGY_SHAPE = 5;
+  }
+  enum HaloStyle {
+    SOLID = 0;
+    SPOTTED = 1;
+    DASHED = 2;
+    DOTTED = 3;
+    DASHED_DOTTED = 4;
+    SPIKED = 5;
+    NUBBED_1 = 6;
+    NUBBED_2 = 7;
+    NUBBED_3 = 8;
+    NUBBED_4 = 9;
+    NUBBED_5 = 10;
+    NUBBED_6 = 11;
+    NUBBED_7 = 12;
+    NUBBED_8 = 13;
+    NUBBED_9 = 14;
+    NUBBED_10 = 15;
+  }
   string id = 1;
   bool being_impersonated = 2;
   string exposed_area_guid = 3;
@@ -366,6 +392,8 @@ message TokenDto {
   string notes_type = 68;
   string gm_notes_type = 69;
   StatSheetPropertiesDto stat_sheet_properties = 70;
+  string halo_shape = 73;
+  string halo_style = 74;
 }
 
 message PathDto {
@@ -658,6 +686,8 @@ enum TokenUpdateDto {
     flipIso = 55;
     setSpeechName = 56;
     removeFacing = 57;
+    setHaloShape = 58;
+    setHaloStyle = 59;
 }
 
 message AssetTransferHeaderDto {

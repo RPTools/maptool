@@ -146,6 +146,66 @@ public class Token implements Cloneable {
     }
   }
 
+  /**
+   * HaloShape Enumerator:
+   *
+   * <p>>GRID, TOKEN, CIRCLE, DIAMOND, SQUARE, TOPOLOGY.
+   */
+  public enum HaloShape {
+    GRID(), // Derive from the map grid cell shape
+    TOKEN(), // Derive from the token's shape attribute,
+    CIRCLE(), // Use a circle
+    DIAMOND(), // Use a diamond
+    SQUARE(), // Use a square
+    TOPOLOGY(); // Derive from the token's area topology
+
+    private final String displayName;
+
+    HaloShape() {
+      displayName = I18N.getString("Token.HaloShape." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
+  }
+
+  /**
+   * HaloStyle Enumerator:
+   *
+   * <p>SOLID, SPOTTED, DASHED, DOTTED, DASHED_DOTTED, SPIKED, NUBBED_1, NUBBED_2, ... NUBBED_10.
+   */
+  public enum HaloStyle {
+    SOLID(), // a solid line
+    SPOTTED(), // cropped circles (not alien related ;)
+    DASHED(), // a dashed line
+    DOTTED(), // a dotted line
+    DASHED_DOTTED(), // a line with a dash and a dot
+    SPIKED(), // effectively very short dashes
+    NUBBED_1(), // a solid line with a number of nubs
+    NUBBED_2(), // ditto
+    NUBBED_3(), // ditto
+    NUBBED_4(), // ditto
+    NUBBED_5(), // ditto
+    NUBBED_6(), // ditto
+    NUBBED_7(), // ditto
+    NUBBED_8(), // ditto
+    NUBBED_9(), // ditto
+    NUBBED_10(); // ditto
+
+    private final String displayName;
+
+    HaloStyle() {
+      displayName = I18N.getString("Token.HaloStyle." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
+  }
+
   /** Type of character: PC or NPC. */
   public enum Type {
     PC(),
@@ -220,7 +280,9 @@ public class Token implements Cloneable {
     flipY,
     flipIso,
     setSpeechName,
-    removeFacing
+    removeFacing,
+    setHaloShape,
+    setHaloStyle
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -283,6 +345,9 @@ public class Token implements Cloneable {
 
   private Integer haloColorValue;
   private transient Color haloColor;
+
+  private String haloShape = HaloShape.GRID.toString();
+  private String haloStyle = HaloStyle.SOLID.toString();
 
   private Integer visionOverlayColorValue;
   private transient Color visionOverlayColor;
@@ -411,6 +476,8 @@ public class Token implements Cloneable {
     tokenShape = token.tokenShape;
     tokenType = token.tokenType;
     haloColorValue = token.haloColorValue;
+    haloShape = token.haloShape;
+    haloStyle = token.haloStyle;
 
     snapToGrid = token.snapToGrid;
     isVisible = token.isVisible;
@@ -676,6 +743,48 @@ public class Token implements Cloneable {
     }
 
     return haloColor;
+  }
+
+  /**
+   * @return The token's halo shape.
+   */
+  public HaloShape getHaloShape() {
+    try {
+      return HaloShape.valueOf(haloShape);
+    } catch (IllegalArgumentException | NullPointerException e) {
+      haloShape = HaloShape.GRID.name();
+      return HaloShape.GRID;
+    }
+  }
+
+  /**
+   * Sets the token's halo shape.
+   *
+   * @param haloShape The new halo shape
+   */
+  public void setHaloShape(HaloShape haloShape) {
+    this.haloShape = haloShape.name();
+  }
+
+  /**
+   * @return The token's halo style.
+   */
+  public HaloStyle getHaloStyle() {
+    try {
+      return HaloStyle.valueOf(haloStyle);
+    } catch (IllegalArgumentException | NullPointerException e) {
+      haloStyle = HaloStyle.SOLID.name();
+      return HaloStyle.SOLID;
+    }
+  }
+
+  /**
+   * Sets the token's halo style.
+   *
+   * @param haloStyle The new halo style
+   */
+  public void setHaloStyle(HaloStyle haloStyle) {
+    this.haloStyle = haloStyle.name();
   }
 
   /**
@@ -2807,6 +2916,12 @@ public class Token implements Cloneable {
         setHaloColor(
             parameters.size() > 0 ? new Color(parameters.get(0).getIntValue(), true) : null);
         break;
+      case setHaloShape:
+        setHaloShape(HaloShape.valueOf(parameters.get(0).getStringValue()));
+        break;
+      case setHaloStyle:
+        setHaloStyle(HaloStyle.valueOf(parameters.get(0).getStringValue()));
+        break;
       case setLabel:
         setLabel(parameters.get(0).getStringValue());
         break;
@@ -3000,6 +3115,8 @@ public class Token implements Cloneable {
     token.layer = dto.getLayer();
     token.propertyType = dto.getPropertyType();
     token.haloColorValue = dto.hasHaloColor() ? dto.getHaloColor().getValue() : null;
+    token.haloShape = dto.getHaloShape();
+    token.haloStyle = dto.getHaloStyle();
     token.visionOverlayColorValue =
         dto.hasVisionOverlayColor() ? dto.getVisionOverlayColor().getValue() : null;
     token.tokenOpacity = dto.getTokenOpacity();
@@ -3127,6 +3244,12 @@ public class Token implements Cloneable {
 
     if (haloColorValue != null) {
       dto.setHaloColor(Int32Value.of(haloColorValue));
+    }
+    if (haloShape != null) {
+      dto.setHaloShape(haloShape);
+    }
+    if (haloStyle != null) {
+      dto.setHaloStyle(haloStyle);
     }
     if (visionOverlayColorValue != null) {
       dto.setVisionOverlayColor(Int32Value.of(visionOverlayColorValue));
