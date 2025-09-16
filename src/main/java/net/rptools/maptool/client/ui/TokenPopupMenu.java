@@ -316,18 +316,22 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   }
 
   protected JMenu createHaloMenu() {
-    return createColorAreaMenu(
+    return createHaloOptionsMenu(
         "token.popup.menu.halo",
         getTokenUnderMouse().getHaloColor(),
         SetHaloAction.class,
-        SetColorChooserAction.class);
+        SetColorChooserAction.class,
+        SetHaloShapeAction.class,
+        SetHaloStyleAction.class);
   }
 
-  private JMenu createColorAreaMenu(
+  private JMenu createHaloOptionsMenu(
       String title,
       Color selectedColor,
       Class<SetHaloAction> standardColorActionClass,
-      Class<SetColorChooserAction> customColorActionClass) {
+      Class<SetColorChooserAction> customColorActionClass,
+      Class<SetHaloShapeAction> haloShapeActionClass,
+      Class<SetHaloStyleAction> haloStyleActionClass) {
     JMenu haloMenu = new JMenu(I18N.getText(title));
     try {
       Constructor<SetHaloAction> standardColorActionConstructor =
@@ -336,6 +340,12 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       Constructor<SetColorChooserAction> customColorActionConstructor =
           customColorActionClass.getConstructor(
               TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class);
+      Constructor<SetHaloShapeAction> haloShapeActionConstructor =
+          haloShapeActionClass.getConstructor(
+              TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class, String.class);
+      Constructor<SetHaloStyleAction> haloStyleActionConstructor =
+          haloStyleActionClass.getConstructor(
+              TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class, String.class);
 
       JCheckBoxMenuItem noneMenu =
           new JCheckBoxMenuItem(
@@ -352,8 +362,44 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         customMenu.setSelected(true);
       }
       haloMenu.add(noneMenu);
-      haloMenu.add(customMenu);
+
       haloMenu.add(new JSeparator());
+      for (Token.HaloShape haloShape : Token.HaloShape.values()) {
+        String haloShapeName = haloShape.name();
+        JCheckBoxMenuItem item =
+            new JCheckBoxMenuItem(
+                haloShapeActionConstructor.newInstance(
+                    this,
+                    getRenderer(),
+                    selectedTokenSet,
+                    haloShapeName,
+                    I18N.getString("Token.HaloShape.".concat(haloShapeName))));
+        if (haloShape.equals(getTokenUnderMouse().getHaloShape())) {
+          item.setSelected(true);
+        }
+        haloMenu.add(item);
+      }
+
+      haloMenu.add(new JSeparator());
+
+      for (Token.HaloStyle haloStyle : Token.HaloStyle.values()) {
+        String haloStyleName = haloStyle.name();
+        JCheckBoxMenuItem item =
+            new JCheckBoxMenuItem(
+                haloStyleActionConstructor.newInstance(
+                    this,
+                    getRenderer(),
+                    selectedTokenSet,
+                    haloStyleName,
+                    I18N.getString("Token.HaloStyle.".concat(haloStyleName))));
+        if (haloStyle.equals(getTokenUnderMouse().getHaloStyle())) {
+          item.setSelected(true);
+        }
+        haloMenu.add(item);
+      }
+
+      haloMenu.add(new JSeparator());
+      haloMenu.add(customMenu);
 
       Set<String> colorNames = MapToolUtil.getColorNames();
       for (String name : colorNames) {
@@ -375,7 +421,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         haloMenu.add(item);
       }
     } catch (Exception e) {
-      log.error("Error while building halo color selection menu");
+      log.error("Error while building halo color selection menu: {}", e.getMessage());
     }
     return haloMenu;
   }
@@ -622,6 +668,80 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 
     protected void updateToken(Token token, Color color) {
       token.setHaloColor(color);
+    }
+  }
+
+  private class SetHaloShapeAction extends AbstractAction {
+    private static final long serialVersionUID = 6719152945051956518L;
+
+    protected String haloShape;
+    protected Set<GUID> tokenSet;
+    protected ZoneRenderer renderer;
+
+    public SetHaloShapeAction(
+        ZoneRenderer renderer, Set<GUID> tokenSet, String haloShape, String name) {
+      this.haloShape = haloShape;
+      this.tokenSet = tokenSet;
+      this.renderer = renderer;
+
+      putValue(Action.NAME, name);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      Zone zone = renderer.getZone();
+      for (GUID guid : tokenSet) {
+        Token token = zone.getToken(guid);
+
+        if (!AppUtil.playerOwns(token)) {
+          continue;
+        }
+        updateToken(token, haloShape);
+        MapTool.serverCommand().putToken(zone.getId(), token);
+      }
+      MapTool.getFrame().updateTokenTree();
+      renderer.repaint();
+    }
+
+    protected void updateToken(Token token, String haloShape) {
+      token.setHaloShape(Token.HaloShape.valueOf(haloShape));
+    }
+  }
+
+  private class SetHaloStyleAction extends AbstractAction {
+    private static final long serialVersionUID = -6913610148784002289L;
+
+    protected String haloStyle;
+    protected Set<GUID> tokenSet;
+    protected ZoneRenderer renderer;
+
+    public SetHaloStyleAction(
+        ZoneRenderer renderer, Set<GUID> tokenSet, String haloStyle, String name) {
+      this.haloStyle = haloStyle;
+      this.tokenSet = tokenSet;
+      this.renderer = renderer;
+
+      putValue(Action.NAME, name);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      Zone zone = renderer.getZone();
+      for (GUID guid : tokenSet) {
+        Token token = zone.getToken(guid);
+
+        if (!AppUtil.playerOwns(token)) {
+          continue;
+        }
+        updateToken(token, haloStyle);
+        MapTool.serverCommand().putToken(zone.getId(), token);
+      }
+      MapTool.getFrame().updateTokenTree();
+      renderer.repaint();
+    }
+
+    protected void updateToken(Token token, String haloStyle) {
+      token.setHaloStyle(Token.HaloStyle.valueOf(haloStyle));
     }
   }
 
