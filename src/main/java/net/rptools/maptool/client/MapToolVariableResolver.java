@@ -215,7 +215,7 @@ public class MapToolVariableResolver implements VariableResolver {
         // We don't want this evaluated as the # format is more useful to us then the
         // evaluated
         // format.
-        return TokenHaloFunction.getHalo(tokenInContext).toString();
+        return TokenHaloFunctions.getHaloColor(tokenInContext).toString();
       } else if (name.equals(TOKEN_NAME)) {
         // Don't evaluate return value.
         return TokenNameFunction.getName(tokenInContext);
@@ -370,7 +370,7 @@ public class MapToolVariableResolver implements VariableResolver {
       TokenBarFunction.setValue(tokenInContext, barName, value);
       return;
     } else if (varname.equals(TOKEN_HALO)) {
-      TokenHaloFunction.setHalo(tokenInContext, value);
+      TokenHaloFunctions.setHaloColor(tokenInContext, value);
       return;
     } else if (varname.equals(TOKEN_NAME)) {
       if (value.toString().equals("")) {
