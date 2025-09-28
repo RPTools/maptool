@@ -128,6 +128,16 @@ public class BlastTemplate extends ConeTemplate {
   }
 
   /**
+   * Directly set the blast control cell offsets. Useful for applying changes directly to a blast
+   * template from a copy which has already used <code>setControlCellRelative</code> to calculate
+   * valid offsets.
+   */
+  public void setControlCellOffset(int controlCellOffsetX, int controlCellOffsetY) {
+    offsetX = controlCellOffsetX;
+    offsetY = controlCellOffsetY;
+  }
+
+  /**
    * @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int)
    */
   @Override

@@ -229,9 +229,7 @@ public class LibraryTokenManager {
     return new ThreadExecutionHelper<Library>()
         .runOnSwingThread(
             () -> {
-              var libNamespace =
-                  namespace.toLowerCase().startsWith("lib:") ? namespace : "lib:" + namespace;
-              var tokenList = getTokensWithName(libNamespace);
+              var tokenList = getTokensWithName("lib:" + namespace);
               if (tokenList.isEmpty()) {
                 return null;
               } else {

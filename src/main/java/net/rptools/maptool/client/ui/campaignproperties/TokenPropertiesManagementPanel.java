@@ -446,7 +446,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 getTypeDuplicateButton().setEnabled(false);
                 getTokenTypeName().setEditable(false);
                 getStatSheetComboBox().setEnabled(false);
-                getStatSheetLocationComboBox().setEnabled(false);
                 getTypeSetAsDefault().setEnabled(false);
               } else {
                 bind((String) getTokenTypeList().getSelectedValue());
@@ -460,7 +459,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                   getTypeDeleteButton().setEnabled(true);
                 }
                 getStatSheetComboBox().setEnabled(true);
-                getStatSheetLocationComboBox().setEnabled(true);
                 populateStatSheetComboBoxes(propertyType);
                 if (!propertyType.equals(defaultPropertyType)) {
                   getTypeSetAsDefault().setEnabled(true);
@@ -477,24 +475,17 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     var combo = getStatSheetComboBox();
     combo.removeAllItems();
     var ssManager = new StatSheetManager();
-    ssManager.getStatSheets(propertyType).stream()
-        .sorted(Comparator.comparing(StatSheet::description))
-        .forEach(ss -> combo.addItem(ss));
+    ssManager.getOrderedStatSheets(propertyType).forEach(ss -> combo.addItem(ss));
     var statSheetProperty = tokenTypeStatSheetMap.get(propertyType);
     String id;
     if (statSheetProperty == null) {
       id = ssManager.getDefaultStatSheetId();
       tokenTypeStatSheetMap.put(
-          propertyType,
-          new StatSheetProperties(
-              ssManager.getDefaultStatSheetId(), StatSheetLocation.BOTTOM_LEFT));
+          propertyType, new StatSheetProperties(ssManager.getDefaultStatSheetId(), null));
     } else {
       id = statSheetProperty.id();
     }
     combo.setSelectedItem(ssManager.getStatSheet(id));
-
-    var locationCombo = getStatSheetLocationComboBox();
-    locationCombo.setSelectedItem(tokenTypeStatSheetMap.get(propertyType).location());
   }
 
   public void initStatSheetDetails() {
@@ -516,10 +507,11 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     var combo = getStatSheetComboBox();
     combo.setEnabled(false);
     combo.setRenderer(new StatSheetComboBoxRenderer());
+    final var ssManager = new StatSheetManager();
     combo.addActionListener(
         l -> {
+          var ss = (StatSheet) combo.getSelectedItem();
           if (getStatSheetComboBox().hasFocus()) { // Only if user has made change
-            var ss = (StatSheet) combo.getSelectedItem();
             var tokenType = (String) getTokenTypeList().getSelectedValue();
             if (ss != null && tokenType != null) {
               var id = new StatSheetManager().getId(ss);
@@ -527,6 +519,12 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
               tokenTypeStatSheetMap.put(tokenType, new StatSheetProperties(id, location));
               getStatSheetLocationComboBox().setSelectedItem(location);
             }
+          }
+          if (ssManager.isLocationUserSettable(ss)) {
+            getStatSheetLocationComboBox().setEnabled(true);
+          } else {
+            getStatSheetLocationComboBox().setEnabled(false);
+            getStatSheetLocationComboBox().setSelectedItem(null);
           }
         });
   }

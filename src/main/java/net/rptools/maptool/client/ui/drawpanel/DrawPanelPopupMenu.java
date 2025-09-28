@@ -92,6 +92,9 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     add(new SetPropertiesAction());
     add(new SetDrawingName());
     add(new GetDrawingId());
+    if (isDrawnElementTemplate(elementUnderMouse)) {
+      add(new DuplicateDrawingAction(selectedDrawSet));
+    }
     addGMItem(new JSeparator());
     add(createPathVblMenu());
     add(createShapeVblMenu());
@@ -169,6 +172,55 @@ public class DrawPanelPopupMenu extends JPopupMenu {
         MapTool.serverCommand().undoDraw(renderer.getZone().getId(), id);
       }
       selectedDrawings.clear();
+      renderer.repaint();
+      MapTool.getFrame().updateDrawTree();
+      MapTool.getFrame().refresh();
+    }
+  }
+
+  /**
+   * Duplicates selected drawings...
+   *
+   * <p>... but currently limited to templates only as we can drag and manipulate those
+   */
+  public static class DuplicateDrawingAction extends AbstractAction {
+
+    public DuplicateDrawingAction() {
+      super(I18N.getString("DrawPanelPopupMenu.menu.duplicate"));
+    }
+
+    public DuplicateDrawingAction(Set<GUID> selectedDrawings) {
+      super(I18N.getString("DrawPanelPopupMenu.menu.duplicate"));
+      this.selectedDrawings = selectedDrawings;
+    }
+
+    private Set<GUID> selectedDrawings;
+
+    public void setSelectedDrawings(Set<GUID> selectedDrawings) {
+      this.selectedDrawings = selectedDrawings;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      var frame = MapTool.getFrame();
+      var renderer = frame.getCurrentZoneRenderer();
+
+      if (selectedDrawings.isEmpty()) {
+        return;
+      }
+
+      // check to see if this is the required action
+      for (GUID id : selectedDrawings) {
+        DrawnElement de = renderer.getZone().getDrawnElement(id);
+        Drawable d = de.getDrawable();
+        if (de.getDrawable() instanceof AbstractTemplate) {
+          AbstractTemplate at = (AbstractTemplate) d.copy();
+          at.setId(new GUID());
+          // Draw it
+          MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), at);
+          // Allow it to be undone
+          renderer.getZone().addDrawable(de.getPen(), at);
+        }
+      }
       renderer.repaint();
       MapTool.getFrame().updateDrawTree();
       MapTool.getFrame().refresh();

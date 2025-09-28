@@ -35,6 +35,10 @@ public class DrawnElement {
     return drawable;
   }
 
+  public void setDrawable(Drawable drawable) {
+    this.drawable = drawable;
+  }
+
   public Pen getPen() {
     return pen;
   }

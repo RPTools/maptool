@@ -624,24 +624,6 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   /**
-   * Returns the parameter list as a list of {@link JsonArray}s.
-   *
-   * @param functionName The name of the MT Script function that was called.
-   * @param params The parameters to extract as {@link JsonArray}s.
-   * @return The list of {@link JsonArray}s.
-   * @throws ParserException if the parameters can not be converted to {@link JsonArray}s.
-   */
-  private List<JsonArray> paramsAsJsonArrays(String functionName, List<Object> params)
-      throws ParserException {
-    List<JsonArray> arrays = new ArrayList<>();
-    for (int i = 0; i < params.size(); i++) {
-      arrays.add(FunctionUtil.paramAsJsonArray(functionName, params, i));
-    }
-
-    return arrays;
-  }
-
-  /**
    * Returns the parameter list as a list of {@link JsonArray}s. If the parameter is not a json
    * object/array and is an empty string it will result in a 0 sized JsonArray, otherwise the value
    * will result in a JsonArray containing that value.
@@ -677,24 +659,6 @@ public class JSONMacroFunctions extends AbstractFunction {
     }
 
     return objects;
-  }
-
-  /**
-   * Returns the parameter list as a list of {@link JsonElement}s.
-   *
-   * @param functionName The name of the MT Script function that was called.
-   * @param params The parameters to extract as {@link JsonElement}s.
-   * @return The list of {@link JsonElement}s.
-   * @throws ParserException if the parameters can not be converted to {@link JsonElement}s.
-   */
-  private List<JsonElement> paramsAsJsonElements(String functionName, List<Object> params)
-      throws ParserException {
-    List<JsonElement> elements = new ArrayList<>();
-    for (int i = 0; i < params.size(); i++) {
-      elements.add(FunctionUtil.paramAsJson(functionName, params, i));
-    }
-
-    return elements;
   }
 
   /**

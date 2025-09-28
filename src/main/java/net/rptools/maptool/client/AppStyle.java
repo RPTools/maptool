@@ -35,6 +35,7 @@ public class AppStyle {
   public static Font labelFont = Font.decode("serif-NORMAL-12");
   public static Color selectionBoxOutline = Color.black;
   public static Color selectionBoxFill = Color.blue;
+  public static Color drawingSelectionBoxFill = Color.red;
   public static Color resizeBoxOutline = Color.red;
   public static Color resizeBoxFill = Color.yellow;
   public static Color wallTopologyColor = new Color(255, 182, 0, 255);

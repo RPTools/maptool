@@ -15,8 +15,11 @@
 package net.rptools.maptool.model.sheet.stats;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
@@ -34,6 +37,12 @@ public class StatSheetManager {
   /** The namespace of the legacy stat sheet. */
   private static final String LEGACY_STATSHEET_NAMESPACE = "net.rptools.maptool";
 
+  /** The namespace used for no stat sheet. */
+  private static final String NO_STATSHEET_NAMESPACE = "net.rptools.maptool";
+
+  /** The name used for no stat sheet. */
+  private static final String NO_STATSHEET_NAME = "no-statsheet";
+
   /** The id of the legacy stat sheet. */
   public static final String LEGACY_STATSHEET_ID =
       LEGACY_STATSHEET_NAMESPACE + "." + LEGACY_STATSHEET_NAME;
@@ -47,12 +56,24 @@ public class StatSheetManager {
           Set.of(),
           LEGACY_STATSHEET_NAMESPACE);
 
+  public static final StatSheet NO_STATSHEET =
+      new StatSheet(
+          NO_STATSHEET_NAME,
+          I18N.getText("token.statSheet.noStatSheetDescription"),
+          null,
+          Set.of(),
+          NO_STATSHEET_NAMESPACE);
+
+  /** The internal stat sheets that are always available. */
+  private static final Set<StatSheet> internalStatSheets = Set.of(LEGACY_STATSHEET, NO_STATSHEET);
+
   /** The stat sheets that are available to the system. */
   private static final Map<StatSheet, String> statSheets = new ConcurrentHashMap<>();
 
-  /** adds the legacy stat sheet to the list of stat sheets. */
+  /** Adds the legacy and "no" stat sheet to the list of stat sheets. */
   static {
     statSheets.put(LEGACY_STATSHEET, "");
+    statSheets.put(NO_STATSHEET, "");
   }
 
   /**
@@ -71,6 +92,24 @@ public class StatSheetManager {
    */
   public String getDefaultStatSheetId() {
     return getId(LEGACY_STATSHEET);
+  }
+
+  /**
+   * Returns the "no" stat sheet.
+   *
+   * @return the "no" stat sheet.
+   */
+  public StatSheet getNoStatSheet() {
+    return NO_STATSHEET;
+  }
+
+  /**
+   * Returns the id of the "no" stat sheet.
+   *
+   * @return the id of the "no" stat sheet.
+   */
+  public String getNoStatSheetId() {
+    return getId(NO_STATSHEET);
   }
 
   /**
@@ -103,6 +142,49 @@ public class StatSheetManager {
    */
   public boolean isLegacyStatSheet(StatSheet statSheet) {
     return statSheet == null || LEGACY_STATSHEET.equals(statSheet);
+  }
+
+  /**
+   * Returns true if the stat sheet is the "no" stat sheet.
+   *
+   * @param sheet the stat sheet to check.
+   * @return true if the stat sheet is the "no" stat sheet.
+   */
+  public boolean isNoStatSheet(StatSheetProperties sheet) {
+    return isNoStatSheet(getStatSheet(sheet.id()));
+  }
+
+  /**
+   * Returns true if the stat sheet is the "no" stat sheet.
+   *
+   * @param statSheet the stat sheet to check.
+   * @return true if the stat sheet is the "no" stat sheet.
+   */
+  public boolean isNoStatSheet(StatSheet statSheet) {
+    return NO_STATSHEET.equals(statSheet);
+  }
+
+  /**
+   * Returns true if the location of the stat sheet can be set by the user.
+   *
+   * @param sheet the stat sheet to check.
+   * @return true if the location of the stat sheet can be set by the user.
+   */
+  public boolean isLocationUserSettable(StatSheet sheet) {
+    return sheet != null
+        && !isLegacyStatSheet(sheet)
+        && !isNoStatSheet(sheet)
+        && sheet.namespace() != null;
+  }
+
+  /**
+   * Returns true if the location of the stat sheet can be set by the user.
+   *
+   * @param sheet the stat sheet to check.
+   * @return true if the location of the stat sheet can be set by the user.
+   */
+  public boolean isLocationUserSettable(StatSheetProperties sheet) {
+    return isLocationUserSettable(getStatSheet(sheet.id()));
   }
 
   /**
@@ -140,6 +222,20 @@ public class StatSheetManager {
     return statSheets.keySet().stream()
         .filter(s -> s.propertyTypes().isEmpty() || s.propertyTypes().contains((propertyType)))
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns the stat sheets ordered by internal vs non-internal and then alphabetically by
+   * description.
+   *
+   * @param propertyType the property type of the stat sheet.
+   * @return the id of the stat sheet.
+   */
+  public SortedSet<StatSheet> getOrderedStatSheets(String propertyType) {
+    TreeSet<StatSheet> sheets =
+        new TreeSet<StatSheet>((s1, s2) -> StatSheetManager.compareStatSheets(s1, s2));
+    sheets.addAll(getStatSheets(propertyType));
+    return sheets;
   }
 
   /**
@@ -214,5 +310,31 @@ public class StatSheetManager {
    */
   public String getId(StatSheet ss) {
     return getId(ss.namespace(), ss.name());
+  }
+
+  /**
+   * Compares two stat sheets. Internal stat sheets (null, legacy, and no stat sheet) come before
+   * non-internal stat sheets. Among internal stat sheets, null (default) comes first, then legacy,
+   * then no stat sheet. Non-internal stat sheets are sorted alphabetically by description.
+   *
+   * @param ss1 the first stat sheet.
+   * @param ss2 the second stat sheet.
+   * @return a negative integer, zero, or a positive integer as the first argument is less than,
+   *     equal to, or greater than the second.
+   */
+  private static int compareStatSheets(StatSheet ss1, StatSheet ss2) {
+    if (internalStatSheets.contains(ss1)) {
+      if (internalStatSheets.contains(ss2)) {
+        return Comparator.comparing((StatSheet ss) -> ss == null)
+            .thenComparing(ss -> ss.description())
+            .compare(ss1, ss2);
+      } else {
+        return -1; // Internal stat sheets come before non-internal stat sheets
+      }
+    } else if (internalStatSheets.contains(ss2)) {
+      return 1; // Non-internal stat sheets come after internal stat sheets
+    } else {
+      return Comparator.comparing((StatSheet ss) -> ss.description()).compare(ss1, ss2);
+    }
   }
 }

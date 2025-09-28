@@ -157,6 +157,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_DRAW_OFF, IMAGE_DIR + "tool/draw-blue-off.png");
           put(Icons.TOOLBAR_DRAW_ON, IMAGE_DIR + "tool/draw-blue.png");
           put(Icons.TOOLBAR_DRAW_OVAL, IMAGE_DIR + "tool/draw-blue-circle.png");
+          put(Icons.TOOLBAR_DRAW_POINTER, IMAGE_DIR + "tool/pointer-red.png");
           put(Icons.TOOLBAR_DRAW_TEXT, IMAGE_DIR + "tool/text-blue.png");
           put(Icons.TOOLBAR_FOG_EXPOSE_BOX, IMAGE_DIR + "tool/fog-blue-rect.png");
           put(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, IMAGE_DIR + "tool/fog-blue-diamond.png");
@@ -183,6 +184,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TEMPLATE_LINE_CELL, IMAGE_DIR + "tool/temp-blue-cell-line.png");
           put(Icons.TOOLBAR_TEMPLATE_OFF, IMAGE_DIR + "tool/temp-blue-off.png");
           put(Icons.TOOLBAR_TEMPLATE_ON, IMAGE_DIR + "tool/temp-blue.png");
+          put(Icons.TOOLBAR_TEMPLATE_POINTER, IMAGE_DIR + "tool/pointer-red.png");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS, IMAGE_DIR + "tool/temp-blue-vertex-radius.png");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS_CELL, IMAGE_DIR + "tool/temp-blue-cell-radius.png");
           put(Icons.TOOLBAR_TEMPLATE_WALL, IMAGE_DIR + "tool/temp-blue-wall.png");
@@ -397,6 +399,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_DRAW_OFF, ROD_ICONS + "ribbon/Drawing Tools.svg");
           put(Icons.TOOLBAR_DRAW_ON, ROD_ICONS + "ribbon/Drawing Tools.svg");
           put(Icons.TOOLBAR_DRAW_OVAL, ROD_ICONS + "ribbon/Draw Oval_2.svg");
+          put(Icons.TOOLBAR_DRAW_POINTER, ROD_ICONS + "ribbon/Drawing Pointer Tool.svg");
           put(Icons.TOOLBAR_DRAW_TEXT, ROD_ICONS + "ribbon/Add Text Label to Map.svg");
           put(Icons.TOOLBAR_FOG_EXPOSE_BOX, ROD_ICONS + "ribbon/Draw Rectangle.svg");
           put(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, ROD_ICONS + "ribbon/Draw Diamond.svg");
@@ -428,6 +431,7 @@ public class RessourceManager {
               ROD_ICONS + "ribbon/Line Template Centered on Grid.svg");
           put(Icons.TOOLBAR_TEMPLATE_OFF, ROD_ICONS + "ribbon/Cone Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_ON, ROD_ICONS + "ribbon/Cone Template.svg");
+          put(Icons.TOOLBAR_TEMPLATE_POINTER, ROD_ICONS + "ribbon/Template Pointer Tool.svg");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS, ROD_ICONS + "ribbon/Radius Template.svg");
           put(
               Icons.TOOLBAR_TEMPLATE_RADIUS_CELL,

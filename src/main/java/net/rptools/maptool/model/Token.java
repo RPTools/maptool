@@ -28,7 +28,6 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Transparency;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -43,7 +42,6 @@ import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
-import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
@@ -1357,8 +1355,8 @@ public class Token implements Cloneable {
    * @param topologyType The type of topology to transform.
    * @return the transformed topology for the token
    */
-  public Area getTransformedMaskTopology(Zone.TopologyType topologyType) {
-    return getTransformedMaskTopology(getMaskTopology(topologyType));
+  public Area getTransformedMaskTopology(Zone zone, Zone.TopologyType topologyType) {
+    return getTransformedMaskTopology(zone, getMaskTopology(topologyType));
   }
 
   /**
@@ -1416,73 +1414,17 @@ public class Token implements Cloneable {
    * @author Jamz
    * @since 1.4.1.5
    */
-  public Area getTransformedMaskTopology(Area areaToTransform) {
+  public Area getTransformedMaskTopology(Zone zone, Area areaToTransform) {
     if (areaToTransform == null) {
       return null;
     }
 
-    Rectangle footprintBounds = getBounds(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+    Rectangle footprintBounds = getFootprintBounds(zone);
     Dimension imgSize = new Dimension(getWidth(), getHeight());
-    AwtUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
-    // Lets account for ISO images
-    double iso_ho = 0;
-    if (getShape() == TokenShape.FIGURE) {
-      double th = getHeight() * (double) footprintBounds.width / getWidth();
-      iso_ho = footprintBounds.height - th;
-      footprintBounds =
-          new Rectangle(
-              footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
-    }
+    var imageTransform = TokenUtil.getRenderTransform(zone, this, imgSize, footprintBounds);
 
-    // Lets figure in offset if image is not free size/native size aka snapToScale
-    int offsetx = 0;
-    int offsety = 0;
-    if (isSnapToScale()) {
-      offsetx =
-          imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 : 0;
-      offsety =
-          imgSize.height < footprintBounds.height
-              ? (footprintBounds.height - imgSize.height) / 2
-              : 0;
-    }
-    double tx = footprintBounds.x + offsetx;
-    double ty = footprintBounds.y + offsety + iso_ho;
-
-    // Apply the coordinate translation
-    AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
-
-    double scalerX = isSnapToScale() ? ((double) imgSize.width) / getWidth() : scaleX;
-    double scalerY = isSnapToScale() ? ((double) imgSize.height) / getHeight() : scaleY;
-
-    // Apply the rotation transformation...
-    if (getShape() == Token.TokenShape.TOP_DOWN && hasFacing()) {
-      // Find the center x,y coords of the rectangle
-      double rx = getWidth() / 2.0 * scalerX - getAnchor().getX();
-      double ry = getHeight() / 2.0 * scalerY - getAnchor().getY();
-
-      atArea.concatenate(
-          AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-    }
-    // Apply the scale transformation
-    atArea.concatenate(AffineTransform.getScaleInstance(scalerX, scalerY));
-
-    // Lets account for flipped images...
-    if (isFlippedX) {
-      atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
-      atArea.concatenate(AffineTransform.getTranslateInstance(-getWidth(), 0));
-    }
-
-    if (isFlippedY) {
-      atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
-      atArea.concatenate(AffineTransform.getTranslateInstance(0, -getHeight()));
-    }
-
-    if (getIsFlippedIso()) {
-      return new Area(atArea.createTransformedShape(IsometricGrid.isoArea(areaToTransform)));
-    }
-
-    return new Area(atArea.createTransformedShape(areaToTransform));
+    return new Area(imageTransform.createTransformedShape(areaToTransform));
   }
 
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
@@ -1497,7 +1439,7 @@ public class Token implements Cloneable {
     return name;
   }
 
-  public Rectangle getBounds(Zone zone) {
+  public Rectangle getFootprintBounds(Zone zone) {
     Grid grid = zone.getGrid();
     TokenFootprint footprint = getFootprint(grid);
     Rectangle footprintBounds =
@@ -1535,6 +1477,48 @@ public class Token implements Cloneable {
     return footprintBounds;
   }
 
+  public Rectangle getImageBounds(Zone zone) {
+    Grid grid = zone.getGrid();
+    TokenFootprint footprint = getFootprint(grid);
+    Rectangle footprintBounds =
+        footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
+
+    double w;
+    double h;
+
+    // Sizing
+    if (!isSnapToScale()) {
+      w = getWidth() * scaleX;
+      h = getHeight() * scaleY;
+      if (grid.isIsometric() && getShape() == Token.TokenShape.FIGURE) {
+        // Native size figure tokens need to follow iso rules
+        h = (w / 2);
+      }
+    } else {
+      w = footprintBounds.width * footprint.getScale() * sizeScale;
+      h = footprintBounds.height * footprint.getScale() * sizeScale;
+    }
+    // Positioning
+    if (!isSnapToGrid()) {
+      footprintBounds.x = getX();
+      footprintBounds.y = getY();
+    } else {
+      if (getLayer().isSnapToGridAtCenter()) {
+        // Center it on the footprint
+        footprintBounds.x -= (int) ((w - footprintBounds.width) / 2d);
+        footprintBounds.y -= (int) ((h - footprintBounds.height) / 2d);
+      }
+    }
+    footprintBounds.width = (int) w; // perhaps make this a double
+    footprintBounds.height = (int) h;
+
+    // Offset
+    footprintBounds.x += anchorX;
+    footprintBounds.y += anchorY;
+
+    return footprintBounds;
+  }
+
   /**
    * Return the drag anchor of the token.
    *
@@ -1555,7 +1539,7 @@ public class Token implements Cloneable {
         dragAnchorY = getY() + (int) centerOffset.y;
       } else {
         // Anchor at the layout center.
-        Rectangle tokenBounds = getBounds(zone);
+        Rectangle tokenBounds = getFootprintBounds(zone);
         dragAnchorX = tokenBounds.x + tokenBounds.width / 2 - anchorX;
         dragAnchorY = tokenBounds.y + tokenBounds.height / 2 - anchorY;
       }
@@ -1580,23 +1564,6 @@ public class Token implements Cloneable {
 
     setX(newDragAnchorPosition.x - offsetX);
     setY(newDragAnchorPosition.y - offsetY);
-  }
-
-  /**
-   * Like {@link #getDragAnchor(Zone)}, but assume the token is in cell {@code cellPoint}.
-   *
-   * @param zone The zone that the token lives in.
-   * @param cellPoint The cell in which the token should pretend to be located.
-   * @return The drag anchor the token would have if located at {@code cellPoint}.
-   */
-  public ZonePoint getDragAnchorAsIfLocatedInCell(Zone zone, CellPoint cellPoint) {
-    ZonePoint anchor = getDragAnchor(zone);
-    ZonePoint nearestGridCellVertex = zone.getGrid().convert(zone.getGrid().convert(anchor));
-    ZonePoint targetCellVertex = zone.getGrid().convert(cellPoint);
-
-    return new ZonePoint(
-        targetCellVertex.x + (anchor.x - nearestGridCellVertex.x),
-        targetCellVertex.y + (anchor.y - nearestGridCellVertex.y));
   }
 
   /**
@@ -1644,7 +1611,7 @@ public class Token implements Cloneable {
    */
   private Point2D.Double getSnapToUnsnapOffset(Zone zone) {
     double offsetX, offsetY;
-    Rectangle tokenBounds = getBounds(zone);
+    Rectangle tokenBounds = getFootprintBounds(zone);
     Grid grid = zone.getGrid();
     if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().isSnapToGridAtCenter()) {
       if (!getLayer().isSnapToGridAtCenter() || isSnapToScale()) {

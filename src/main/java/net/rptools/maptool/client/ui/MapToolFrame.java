@@ -14,13 +14,10 @@
  */
 package net.rptools.maptool.client.ui;
 
-import com.badlogic.gdx.backends.jogamp.JoglAwtApplicationConfiguration;
-import com.badlogic.gdx.backends.jogamp.JoglSwingCanvas;
 import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import com.jidesoft.docking.DockingManager;
-import com.jogamp.opengl.awt.GLJPanel;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -97,7 +94,6 @@ import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
 import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
-import net.rptools.maptool.client.ui.zone.gdx.GdxRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
@@ -159,8 +155,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   /** Contains the zoneRenderer, as well as all overlays. */
   private final JPanel zoneRendererPanel;
-
-  private GLJPanel gdxPanel;
 
   private JPanel currentRenderPanel;
 
@@ -417,11 +411,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     zoneRendererPanel = new JPanel(new PositionalLayout(5));
     zoneRendererPanel.setBackground(Color.black);
     currentRenderPanel = zoneRendererPanel;
-    initGdx();
 
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
-    zoneRendererPanel.add(gdxPanel, PositionalLayout.Position.CENTER);
 
     commandPanel = new CommandPanel();
 
@@ -471,37 +463,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     chatTyperTimers = new ChatNotificationTimers();
     chatTimer = getChatTimer();
     setChatTypingLabelColor(AppPreferences.chatNotificationColor.get());
-  }
-
-  private void initGdx() {
-    var config = new JoglAwtApplicationConfiguration();
-    // config.foregroundFPS = 300;
-    // config.backgroundFPS = 10;
-    // config.title = "maptool";
-    // config.width = 640;
-    // config.height = 480;
-    // config.samples = 1;
-    // var config = new LwjglApplicationConfiguration();
-    config.foregroundFPS = 10000;
-    config.vSyncEnabled = false;
-
-    var joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), config);
-    // var joglSwingCanvas = new LwjglAWTCanvas(GdxRenderer.getInstance(), config);
-
-    gdxPanel = joglSwingCanvas.getGLCanvas();
-    gdxPanel.setVisible(false);
-    gdxPanel.setOpaque(false);
-    // gdxPanel.setLayout(new PositionalLayout(5));
-  }
-
-  public void switchRenderers() {
-    var isVisible = gdxPanel.isVisible();
-    gdxPanel.setVisible(!isVisible);
-    // currentRenderer.setVisible(isVisible);
-  }
-
-  public GLJPanel getGdxPanel() {
-    return gdxPanel;
   }
 
   public ChatNotificationTimers getChatNotificationTimers() {

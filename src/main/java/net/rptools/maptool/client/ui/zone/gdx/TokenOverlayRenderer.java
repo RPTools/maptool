@@ -81,7 +81,7 @@ public class TokenOverlayRenderer {
       float stateTime, MultipleImageBarTokenOverlay overlay, Token token, double barValue) {
     int increment = overlay.findIncrement(barValue);
 
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
 
@@ -111,7 +111,7 @@ public class TokenOverlayRenderer {
 
   private void renderTokenOverlay(
       float stateTime, SingleImageBarTokenOverlay overlay, Token token, double barValue) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
 
@@ -167,7 +167,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, double barValue) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -208,7 +208,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, double barValue) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -263,7 +263,7 @@ public class TokenOverlayRenderer {
 
   private void renderTokenOverlay(
       float stateTime, TwoImageBarTokenOverlay overlay, Token token, double barValue) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
 
@@ -358,7 +358,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(ShadedTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -371,7 +371,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(float stateTime, ImageTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y;
 
@@ -402,7 +402,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(XTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -422,7 +422,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(FlowColorDotTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
 
     var color = overlay.getColor();
     Color.argb8888ToColor(tmpColor, color.getRGB());
@@ -436,7 +436,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(YieldTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -462,7 +462,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(OTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -495,7 +495,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(ColorDotTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -532,7 +532,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(DiamondTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -559,7 +559,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(TriangleTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;
@@ -586,7 +586,7 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(CrossTokenOverlay overlay, Token token) {
-    var bounds = token.getBounds(zoneCache.getZone());
+    var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
     var w = bounds.width;

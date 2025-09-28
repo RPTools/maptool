@@ -1,6 +1,6 @@
 [versions]
 log4j = "2.25.1"
-junit = "5.13.3"
+junit = "5.13.4"
 imageio = "3.12.0"
 sentry = "7.22.5"
 jide = "3.7.9"
@@ -171,7 +171,7 @@ rptools-maptool-addons = { group = "com.github.RPTools", name = "maptool-builtin
 rptools-dice-roller = { group = "com.github.RPTools", name = "advanced-dice-roller", version = "1.0.3" }
 
 # Test only
-junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.13.3" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.13.4" }
 junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
 junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
@@ -221,4 +221,4 @@ javafx = { id = "org.openjfx.javafxplugin", version = "0.0.14" }
 jpackage-runtime = { id = "org.beryx.runtime", version = "1.13.1" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-spotless = { id = "com.diffplug.spotless", version = "7.1.0" }
+spotless = { id = "com.diffplug.spotless", version = "7.2.1" }

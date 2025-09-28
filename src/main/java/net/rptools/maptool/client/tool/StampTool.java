@@ -378,6 +378,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    final boolean isDraggingMap = isDraggingMap();
+
     super.mouseReleased(e);
 
     if (isShowingTokenStackPopup) {
@@ -447,7 +449,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       return;
     }
     // POPUP MENU
-    if (SwingUtilities.isRightMouseButton(e) && tokenDragOp == null && !isDraggingMap()) {
+    if (SwingUtilities.isRightMouseButton(e) && tokenDragOp == null && !isDraggingMap) {
       final var selectionModel = renderer.getSelectionModel();
       if (tokenUnderMouse != null && !selectionModel.isSelected(tokenUnderMouse.getId())) {
         if (!SwingUtil.isShiftDown(e)) {
@@ -470,7 +472,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         return;
       }
     }
-    super.mouseReleased(e);
   }
 
   // //
@@ -1000,7 +1001,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         // Resize
         if (!token.isSnapToScale()) {
           double scale = renderer.getScale();
-          Rectangle footprintBounds = token.getBounds(renderer.getZone());
+          Rectangle footprintBounds = token.getFootprintBounds(renderer.getZone());
 
           double scaledWidth = (footprintBounds.width * scale);
           double scaledHeight = (footprintBounds.height * scale);
@@ -1195,7 +1196,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         zp.x += snapOffsetX;
         zp.y += snapOffsetY;
       } else {
-        Rectangle tokenSize = tokenBeingDragged.getBounds(renderer.getZone());
+        Rectangle tokenSize = tokenBeingDragged.getFootprintBounds(renderer.getZone());
         int x = tokenDragCurrent.x + (micro ? dx : (tokenSize.width * dx));
         int y = tokenDragCurrent.y + (micro ? dy : (tokenSize.height * dy));
         zp = new ZonePoint(x, y);

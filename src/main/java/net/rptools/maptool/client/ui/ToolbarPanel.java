@@ -18,7 +18,6 @@ import java.awt.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.swing.*;
-import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -167,8 +166,6 @@ public class ToolbarPanel extends JToolBar {
     tokenSelectionButtonAll.setSelected(true);
     // Jamz: End panel
 
-    add(createGdxButton(Icons.TOOLBAR_LIBGDX));
-
     // the "Select Map" button
     mapselect = createZoneSelectionButton();
     add(mapselect);
@@ -264,6 +261,11 @@ public class ToolbarPanel extends JToolBar {
 
   private OptionPanel createDrawPanel() {
     OptionPanel panel = new OptionPanel();
+
+    panel
+        .add(DrawingPointerTool.class)
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_POINTER));
+
     panel
         .add(DeleteDrawingTool.class)
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DELETE));
@@ -287,18 +289,24 @@ public class ToolbarPanel extends JToolBar {
         .addTool(
             new DrawingTool<>("tool.oval.instructions", "tool.oval.tooltip", new OvalStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_OVAL));
-    panel.add(TextTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_TEXT));
     panel
         .addTool(
             new DrawingTool<>(
                 "tool.rect.instructions", "tool.isorectangle.tooltip", new IsoRectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DIAMOND));
 
+    addSeparator(panel, 11);
+
+    panel.add(TextTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_TEXT));
+
     return panel;
   }
 
   private OptionPanel createTemplatePanel() {
     OptionPanel panel = new OptionPanel();
+    panel
+        .add(TemplatePointerTool.class)
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TEMPLATE_POINTER));
     panel
         .add(RadiusTemplateTool.class)
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TEMPLATE_RADIUS));
@@ -537,20 +545,6 @@ public class ToolbarPanel extends JToolBar {
     if (MediaPlayerAdapter.getGlobalMute()) {
       button.doClick();
     }
-
-    return button;
-  }
-
-  private JToggleButton createGdxButton(final Icons icon) {
-    final JToggleButton button = new JToggleButton();
-    button.addActionListener(
-        e -> {
-          MapTool.getFrame().switchRenderers();
-        });
-
-    button.setIcon(RessourceManager.getBigIcon(icon));
-    button.setVisible(DeveloperOptions.Toggle.EnableLibGdxRendererToggleButton.get());
-    DeveloperOptions.Toggle.EnableLibGdxRendererToggleButton.onChange(button::setVisible);
 
     return button;
   }

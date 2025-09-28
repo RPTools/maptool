@@ -65,7 +65,7 @@ public class TokenLabelRenderer implements ItemRenderer {
 
     float labelHeight = textRenderer.getFont().getLineHeight() + GraphicsUtil.BOX_PADDINGY * 2;
 
-    java.awt.Rectangle r = token.getBounds(zone);
+    java.awt.Rectangle r = token.getFootprintBounds(zone);
     tmpWorldCoord.x = r.x + r.width / 2;
     tmpWorldCoord.y = (r.y + r.height + offset + labelHeight * zoom / 2) * -1;
     tmpWorldCoord.z = 0;

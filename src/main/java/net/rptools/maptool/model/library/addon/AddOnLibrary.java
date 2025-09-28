@@ -360,6 +360,13 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoForUriPath(
+      String macroPath) {
+    // For add-ons, the path and the macro name are the same.
+    return getMTScriptMacroInfo(macroPath);
+  }
+
+  @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
     var macro = mtsFunctionAssetMap.get(MTSCRIPT_PUBLIC_DIR + macroName);
     if (macro == null) {

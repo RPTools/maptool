@@ -42,14 +42,17 @@ public class StatSheetListener {
     if (AppPreferences.showStatSheet.get()
         && AppPreferences.showStatSheetRequiresModifierKey.get() == event.shiftDown()) {
       var ssManager = new StatSheetManager();
-      if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getStatSheet())) {
+      var ssProperties = event.token().getStatSheet();
+      if (ssManager.isNoStatSheet(ssProperties)) {
+        return; // No stat sheet to show
+      }
+      if (statSheet == null && !ssManager.isLegacyStatSheet(ssProperties)) {
         /*
          * We have to hide the control panel as we don't know how big the stat sheet is going
          * to be, and we don't want to obscure it.
          */
         MapTool.getFrame().hideControlPanel();
         statSheet = new StatSheet();
-        var ssProperties = event.token().getStatSheet();
         var ssId = ssProperties.id();
         var ssRecord = ssManager.getStatSheet(ssId);
         var token = event.token();

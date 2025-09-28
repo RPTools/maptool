@@ -30,6 +30,7 @@ import net.rptools.maptool.client.ui.zone.renderer.RenderHelper;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.ImageSupport;
+import net.rptools.maptool.util.TokenUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -46,7 +47,7 @@ public class TokenRenderer {
     this.zone = zone;
   }
 
-  public void renderToken(Token token, TokenPosition position, Graphics2D g2d, float opacity) {
+  public void renderToken(Token token, TokenPosition position, Graphics2D g2d, float extraOpacity) {
     var timer = CodeTimer.get();
     timer.increment("TokenRenderer-renderToken");
     timer.start("TokenRenderer-renderToken");
@@ -59,7 +60,7 @@ public class TokenRenderer {
 
     timer.start("TokenRenderer-paintTokenImage");
     renderHelper.render(
-        g2d, worldG -> paintTokenImage(worldG, position, opacity * token.getTokenOpacity()));
+        g2d, worldG -> paintTokenImage(worldG, position, extraOpacity * token.getTokenOpacity()));
     timer.stop("TokenRenderer-paintTokenImage");
     timer.stop("TokenRenderer-renderToken");
   }
@@ -95,68 +96,12 @@ public class TokenRenderer {
       return;
     }
 
-    var isoFigure =
-        zone.getGrid().isIsometric()
-            && !token.getIsFlippedIso()
-            && token.getShape() == Token.TokenShape.FIGURE;
-
-    // centre image
-    double imageCx = -renderImage.getWidth() / 2d;
-    double imageCy =
-        isoFigure
-            ? -renderImage.getHeight() + renderImage.getWidth() / 4d
-            : -renderImage.getHeight() / 2d;
-
-    // Compose a transformation to draw the token image at the correct place.
-    // Because the last transform applies first, read these steps backwards for a better
-    // understanding.
-    AffineTransform imageTransform = new AffineTransform();
-    {
-      // Now move the image back to its actual location.
-      imageTransform.translate(
-          position.footprintBounds().getCenterX(), position.footprintBounds().getCenterY());
-
-      // Rotate around the anchor.
-      if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
-        imageTransform.rotate(Math.toRadians(token.getFacingInDegrees()));
-      }
-
-      // Rotation applies around the anchor, so nudge the token first.
-      imageTransform.translate(token.getAnchorX(), token.getAnchorY());
-
-      // Size image to footprint.
-      // For snap-to-scale, fit to footprint, then scale according to layout.
-      // For others, the X/Y scale is already incorporated into the footprint, so just fill the
-      // footprint.
-      if (token.isSnapToScale()) {
-        var scale =
-            isoFigure
-                // Fit width
-                ? position.footprintBounds().getWidth() / renderImage.getWidth()
-                // Scale to fit
-                : Math.min(
-                    position.footprintBounds().getWidth() / renderImage.getWidth(),
-                    position.footprintBounds().getHeight() / renderImage.getHeight());
-        scale *= token.getSizeScale();
-        imageTransform.scale(scale, scale);
-      } else {
-        var scaleX = position.footprintBounds().getWidth() / renderImage.getWidth();
-        var scaleY = position.footprintBounds().getHeight() / renderImage.getHeight();
-        imageTransform.scale(scaleX, scaleY);
-      }
-
-      // Iso flip
-      if (token.getIsFlippedIso() && zone.getGrid().isIsometric()) {
-        imageTransform.scale(Math.sqrt(2), 1 / Math.sqrt(2));
-        imageTransform.rotate(Math.toRadians(45));
-      }
-
-      // Cartesian flip.
-      imageTransform.scale(token.isFlippedX() ? -1 : 1, token.isFlippedY() ? -1 : 1);
-
-      // Move the image center to (0, 0) so rotations and scales can be easily applied.
-      imageTransform.translate(imageCx, imageCy);
-    }
+    var imageTransform =
+        TokenUtil.getRenderTransform(
+            zone,
+            token,
+            new Dimension(renderImage.getWidth(), renderImage.getHeight()),
+            position.footprintBounds());
 
     if (opacity < 1.0f) {
       g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));

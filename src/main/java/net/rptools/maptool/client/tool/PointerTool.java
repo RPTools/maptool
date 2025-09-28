@@ -480,6 +480,8 @@ public class PointerTool extends DefaultTool {
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    final boolean isDraggingMap = isDraggingMap();
+
     super.mouseReleased(e);
 
     mouseButtonDown = false;
@@ -565,7 +567,7 @@ public class PointerTool extends DefaultTool {
     }
 
     // POPUP MENU
-    if (SwingUtilities.isRightMouseButton(e) && tokenDragOp == null && !isDraggingMap()) {
+    if (SwingUtilities.isRightMouseButton(e) && tokenDragOp == null && !isDraggingMap) {
       final var selectionModel = renderer.getSelectionModel();
       if (tokenUnderMouse != null && !selectionModel.isSelected(tokenUnderMouse.getId())) {
         if (!SwingUtil.isShiftDown(e)) {
@@ -587,7 +589,6 @@ public class PointerTool extends DefaultTool {
         return;
       }
     }
-    super.mouseReleased(e);
   }
 
   // //
@@ -1957,7 +1958,7 @@ public class PointerTool extends DefaultTool {
             }
           }
 
-          Rectangle tokenSize = token.getBounds(zone);
+          Rectangle tokenSize = token.getFootprintBounds(zone);
           Rectangle destination =
               new Rectangle(
                   tokenSize.x + deltaX, tokenSize.y + deltaY, tokenSize.width, tokenSize.height);
@@ -1992,7 +1993,7 @@ public class PointerTool extends DefaultTool {
           int x = token.getX() + deltaX;
           int y = token.getY() + deltaY;
 
-          Rectangle tokenSize = token.getBounds(zone);
+          Rectangle tokenSize = token.getFootprintBounds(zone);
           /*
            * Perhaps create a counter and count the number of times that the contains() check returns true? There are currently 9 rectangular areas checked by this code (note the "/3" in the two
            * 'interval' variables) so checking for 5 or more would mean more than 55%+ of the destination was visible...

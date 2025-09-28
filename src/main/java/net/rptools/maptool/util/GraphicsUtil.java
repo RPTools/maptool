@@ -238,6 +238,28 @@ public class GraphicsUtil {
     }
   }
 
+  /**
+   * For a given {@link Color}, determine whether black or white is best as a contrasting color and
+   * return that color.
+   *
+   * @param c The color to contrast.
+   * @return A black or white {@link Color}.
+   * @see <a
+   *     href="https://stackoverflow.com/questions/946544/good-text-foreground-color-for-a-given-background-color">https://stackoverflow.com/questions/946544/good-text-foreground-color-for-a-given-background-color</a>
+   */
+  public static Color contrast(Color c) {
+    if (c == null) {
+      return null;
+    } else {
+      int r = c.getRed();
+      int g = c.getGreen();
+      int b = c.getBlue();
+
+      double brightness = (r * 0.299 + g * 0.587 + b * 0.114);
+      return brightness > 186 ? new Color(0, 0, 0) : new Color(255, 255, 255);
+    }
+  }
+
   public static Area createAreaBetween(Point a, Point b, int width) {
     // Find the angle that is perpendicular to the slope of the points
     double rise = b.y - a.y;

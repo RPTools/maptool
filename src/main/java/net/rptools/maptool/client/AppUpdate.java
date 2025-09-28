@@ -35,10 +35,7 @@ import org.apache.logging.log4j.Logger;
 public class AppUpdate {
   private static final Logger log = LogManager.getLogger(AppUpdate.class);
 
-  private static final String GIT_HUB_RELEASES = "github.api.releases";
   private static final String GIT_HUB_LATEST_RELEASE = "github.api.releases.latest";
-  private static final String GIT_HUB_OAUTH_TOKEN =
-      "github.api.oauth.token"; // Grants read-only access to public information
 
   /**
    * Look for a newer version of MapTool. If a newer release is found and the AppPreferences tell us
@@ -110,28 +107,6 @@ public class AppUpdate {
     }
 
     return false;
-  }
-
-  /**
-   * Get the String containing the list of the releases and pre-releases from github.
-   *
-   * @return the String with the list of releases, or null if IOException
-   */
-  private static String getReleases() {
-    String strURL = getProperty(GIT_HUB_RELEASES);
-    String strRequest = strURL + getProperty(GIT_HUB_OAUTH_TOKEN);
-    try {
-      Request request = new Request.Builder().url(strRequest).build();
-      Response response = new OkHttpClient().newCall(request).execute();
-      if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-      String responseBody = response.body().string();
-      log.debug("GitHub API Response: " + responseBody);
-      return responseBody;
-    } catch (IOException e) {
-      log.error("Unable to reach " + strURL, e.getLocalizedMessage());
-      return null;
-    }
   }
 
   /**

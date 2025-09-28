@@ -17,6 +17,7 @@ dependencies {
 
     implementation(libs.bundles.imageio)
     implementation(libs.batik)
+    implementation(libs.jsvg)
 
     implementation(libs.apache.commons.io)
 

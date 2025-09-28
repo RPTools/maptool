@@ -923,7 +923,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // Note: order doesn't matter, so don't need to go back-to-front.
     for (Token element :
         zone.getTokensForLayers(layer -> view.isGMView() || layer.isVisibleToPlayers())) {
-      Rectangle drawnBounds = element.getBounds(zone);
+      Rectangle drawnBounds = element.getImageBounds(zone);
       if (element.hasFacing()) {
         // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
         // reason

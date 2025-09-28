@@ -55,7 +55,6 @@ import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.dialog.create.NewTokenDialog;
 import net.rptools.maptool.client.ui.zone.*;
-import net.rptools.maptool.client.ui.zone.gdx.GdxRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.tokenRender.FacingArrowRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.tokenRender.TokenRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -428,7 +427,15 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
               var lastPoint = tokenPath.getWayPointList().getLast();
               var endPoint =
                   switch (lastPoint) {
-                    case CellPoint cp -> token.getDragAnchorAsIfLocatedInCell(zone, cp);
+                    case CellPoint cp -> {
+                      // Anchor at the cell center.
+                      var grid = zone.getGrid();
+                      var zp = grid.convert(cp);
+                      var centerOffset = grid.getCenterOffset();
+                      zp.x += (int) centerOffset.x;
+                      zp.y += (int) centerOffset.y;
+                      yield zp;
+                    }
                     case ZonePoint zp -> zp;
                   };
               token.moveDragAnchorTo(zone, endPoint);
@@ -527,7 +534,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
   protected void setViewOffset(int x, int y) {
     zoneScale.setOffset(x, y);
-    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void centerOn(ZonePoint point) {
@@ -560,7 +566,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     visibleScreenArea = null;
 
     zoneView.flush(token);
-    GdxRenderer.getInstance().flushFog();
   }
 
   /**
@@ -601,7 +606,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
   public void flushFog() {
     visibleScreenArea = null;
     repaintDebouncer.dispatch();
-    GdxRenderer.getInstance().flushFog();
   }
 
   /**
@@ -640,19 +644,16 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
   public void zoomReset(int x, int y) {
     zoneScale.zoomReset(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
-    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void zoomIn(int x, int y) {
     zoneScale.zoomIn(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
-    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void zoomOut(int x, int y) {
     zoneScale.zoomOut(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
-    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void enforceView(int x, int y, double scale, int gmWidth, int gmHeight) {
@@ -672,7 +673,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
     setScale(scale);
     centerOn(new ZonePoint(x, y));
-    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void restoreView() {
@@ -681,7 +681,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
     centerOn(previousZonePoint);
     setScale(previousScale);
-    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void forcePlayersView() {
@@ -707,7 +706,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         timer -> {
           timer.setThreshold(10);
 
-          if (!MapTool.getFrame().getGdxPanel().isVisible()) {
+          if (!viewModel.isUsingGdxRenderer()) {
             timer.start("paintComponent");
             Graphics2D g2d = (Graphics2D) g;
 
@@ -1305,7 +1304,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         return false;
       }
       final var lastPoint = path.getCellPath().getLast();
-      Rectangle tokBounds = token.getBounds(zone);
+      Rectangle tokBounds = token.getFootprintBounds(zone);
       tokenRectangle = new Rectangle();
       tokenRectangle.setBounds(
           lastPoint.x, lastPoint.y, (int) tokBounds.getWidth(), (int) tokBounds.getHeight());
@@ -1773,10 +1772,12 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       if (isTokenInNeedOfClipping(token, position.transformedBounds(), isGMView)) {
         tokenG = (Graphics2D) clippedG.create();
         if (token.getShape() == Token.TokenShape.FIGURE || token.isAlwaysVisible()) {
+          Area cellVisibleArea = new Area(visibleScreenArea);
           Area cb =
               zone.getGrid()
                   .getTokenCellArea(zoneScale.toScreenSpace(position.transformedBounds()));
-          tokenG.clip(cb);
+          cellVisibleArea.intersect(cb);
+          tokenG.clip(cellVisibleArea);
         }
       } else {
         tokenG = (Graphics2D) g.create();
@@ -1806,21 +1807,14 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       // Render Halo
       haloRenderer.renderHalo(tokenG, token, position);
 
-      // Calculate alpha Transparency from token and use opacity to indicate that token is moving
-      float opacity = token.getTokenOpacity();
-      if (viewModel.isTokenMoving(token.getId())) {
-        opacity = opacity / 2.0f;
-      }
+      // Use opacity to indicate that token is moving
+      float opacity = viewModel.isTokenMoving(token.getId()) ? 0.5f : 1f;
+
       // Finally render the token image
       timer.start("token-list-7");
       // Clipping is handled in the isTokenInNeedOfClipping() call far above.
       tokenRenderer.renderToken(token, position, tokenG, opacity);
       timer.stop("token-list-7");
-
-      timer.start("token-list-8");
-      // Facing
-      facingArrowRenderer.paintArrow(tokenG, position);
-      timer.stop("token-list-8");
 
       timer.start("token-list-9");
       // Set up the graphics so that the overlay can just be painted.
@@ -1866,6 +1860,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       }
       locG.dispose();
       timer.stop("token-list-10");
+
+      timer.start("token-list-8");
+      // Facing
+      facingArrowRenderer.paintArrow(tokenG, position);
+      timer.stop("token-list-8");
 
       timer.start("token-list-11");
       // Keep track of which tokens have been drawn for post-processing on them later
@@ -2378,7 +2377,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       }
 
       // Token type
-      Rectangle size = token.getBounds(zone);
+      Rectangle size = token.getFootprintBounds(zone);
       switch (getActiveLayer()) {
         case TOKEN:
           // Players can't drop invisible tokens

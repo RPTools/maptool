@@ -95,7 +95,7 @@ public class FogRenderer {
     worldG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f : 1f));
     var bounds = originalClip.getBounds();
     worldG.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-    timer.start("renderFog-hardFow");
+    timer.stop("renderFog-hardFow");
 
     timer.start("renderFog-softFow");
     if (!softFogArea.isEmpty()) {

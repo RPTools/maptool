@@ -68,7 +68,7 @@ public class ZoneViewModel {
    */
   public record TokenPosition(Token token, Rectangle2D footprintBounds, Area transformedBounds) {
     public static TokenPosition fromToken(Token token, Zone zone) {
-      Rectangle2D footprintBounds = token.getBounds(zone);
+      Rectangle2D footprintBounds = token.getFootprintBounds(zone);
 
       final Area transformedBounds = new Area(footprintBounds);
       if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
@@ -108,7 +108,6 @@ public class ZoneViewModel {
   private final Rectangle2D viewport = new Rectangle2D.Double();
   private Area visibleArea = new Area();
 
-  private final List<Token> selectedTokenList = new ArrayList<>();
   private final Set<GUID> movingTokens = new HashSet<>();
 
   private final Map<GUID, TokenPosition> tokenPositions = new HashMap<>();
@@ -222,7 +221,14 @@ public class ZoneViewModel {
   }
 
   public List<Token> getSelectedTokenList() {
-    return Collections.unmodifiableList(selectedTokenList);
+    var tokens = new ArrayList<Token>();
+    for (GUID g : selectionModel.getSelectedTokenIds()) {
+      final var token = zone.getToken(g);
+      if (token != null) {
+        tokens.add(token);
+      }
+    }
+    return tokens;
   }
 
   public Set<GUID> getVisibleTokens(Zone.Layer layer) {
@@ -252,7 +258,6 @@ public class ZoneViewModel {
     updateViewport();
     updatePlayerView();
     updateVisibleArea();
-    updateSelectedTokensList();
     updateMovingTokens();
     updateTokenPositions();
     updateMarkerPositions();
@@ -261,15 +266,16 @@ public class ZoneViewModel {
     updateLightPosition();
   }
 
-  private void updateIsUsingGdxRenderer() {
-    isUsingGdxRenderer = MapTool.getFrame().getGdxPanel().isVisible();
-  }
-
   // What follows are "systems".
 
+  /** Updates {@link #isUsingGdxRenderer}. */
+  private void updateIsUsingGdxRenderer() {
+    isUsingGdxRenderer = false;
+  }
+
   /**
-   * If the zone is not already loaded, updates the loading status and emits {@link ZoneLoaded} if
-   * it becomes loaded.
+   * If the zone is not already loaded, updates the {@link #loadingProgress} and emits {@link
+   * ZoneLoaded} if it becomes loaded.
    */
   private void updateIsLoading() {
     if (loadingProgress == null) {
@@ -324,6 +330,7 @@ public class ZoneViewModel {
     }
   }
 
+  /** Updates {@link #zoneScale} and {@link #viewport}. */
   private void updateViewport() {
     var renderer = MapTool.getFrame().getZoneRenderer(this.zone);
     if (renderer == null) {
@@ -338,21 +345,12 @@ public class ZoneViewModel {
     viewport.setFrame(zoneScale.toWorldSpace(screenBounds));
   }
 
+  /** Updates {@link #visibleArea} based on {@link #playerView}. */
   private void updateVisibleArea() {
     visibleArea = zoneView.getVisibleArea(playerView);
   }
 
-  private void updateSelectedTokensList() {
-    selectedTokenList.clear();
-
-    for (GUID g : selectionModel.getSelectedTokenIds()) {
-      final var token = zone.getToken(g);
-      if (token != null) {
-        selectedTokenList.add(token);
-      }
-    }
-  }
-
+  /** Updates {@link #playerView}. */
   private void updatePlayerView() {
     playerView = makePlayerView(MapTool.getPlayer().getEffectiveRole(), true);
   }
@@ -384,7 +382,10 @@ public class ZoneViewModel {
     }
   }
 
+  /** Updates {@link #markerList} based on {@link #tokenPositionsByLayer}. */
   private void updateMarkerPositions() {
+    markerList.clear();
+
     for (var list : tokenPositionsByLayer.values()) {
       for (var tokenPosition : list) {
         var token = tokenPosition.token();
@@ -397,6 +398,7 @@ public class ZoneViewModel {
     }
   }
 
+  /** Updates {@link #tokenStackMap} based on {@link #tokenPositionsByLayer}. */
   private void updateTokenStacks() {
     tokenStackMap.clear();
     var tokenPositions = tokenPositionsByLayer.get(Zone.Layer.TOKEN);
@@ -432,6 +434,10 @@ public class ZoneViewModel {
     }
   }
 
+  /**
+   * Updates {@link #onScreenTokens} and {@link #visibleTokensByLayer} based on {@link
+   * #tokenPositionsByLayer}, {@link #viewport}, {@link #playerView}, and {@link #visibleArea}.
+   */
   private void updateVisibleTokens() {
     double scale = 1;
     var renderer = MapTool.getFrame().getZoneRenderer(this.zone);
@@ -472,6 +478,7 @@ public class ZoneViewModel {
     }
   }
 
+  /** Updates {@link #movingTokens}. */
   private void updateMovingTokens() {
     movingTokens.clear();
 
@@ -485,6 +492,10 @@ public class ZoneViewModel {
     }
   }
 
+  /**
+   * Updates {@link #lightPositions} based on {@link #playerView}, {@link #tokenPositions}, and
+   * {@link #onScreenTokens}.
+   */
   private void updateLightPosition() {
     lightPositions.clear();
 

@@ -20,7 +20,6 @@ import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Set;
 import javax.swing.*;
 import net.rptools.lib.AwtUtil;
@@ -235,9 +234,7 @@ public class NewTokenDialog extends AbeillePanel<Token> {
       var defaultSS =
           new StatSheet(null, I18N.getText("token.statSheet.useDefault"), null, Set.of(), null);
       combo.addItem(defaultSS);
-      ssManager.getStatSheets(propertyType).stream()
-          .sorted(Comparator.comparing(StatSheet::description))
-          .forEach(ss -> combo.addItem(ss));
+      ssManager.getOrderedStatSheets(propertyType).forEach(ss -> combo.addItem(ss));
       combo.setSelectedItem(defaultSS);
 
       combo.setEnabled(true);
@@ -247,14 +244,12 @@ public class NewTokenDialog extends AbeillePanel<Token> {
     } else {
       var ss =
           MapTool.getCampaign().getCampaignProperties().getTokenTypeDefaultStatSheet(propertyType);
-      boolean isLegacy = ssManager.isLegacyStatSheet(statSheet);
-      boolean isDefault = statSheet.name() == null && statSheet.namespace() == null;
-      if (isLegacy || isDefault) {
-        locationCombo.setEnabled(false);
-        locationCombo.setSelectedItem(null);
-      } else {
+      if (ssManager.isLocationUserSettable(statSheet)) {
         locationCombo.setEnabled(true);
         locationCombo.setSelectedItem(ss.location());
+      } else {
+        locationCombo.setEnabled(false);
+        locationCombo.setSelectedItem(null);
       }
     }
   }
@@ -276,28 +271,6 @@ public class NewTokenDialog extends AbeillePanel<Token> {
     populateStatSheetComboBoxes((String) getPropertyTypeComboBox().getSelectedItem(), null);
   }
 
-  // /**
-  // * Update the token to match the state of the dialog
-  // */
-  // public void updateToken() {
-  //
-  // token.setName(getNameTextField().getText());
-  // token.setGMName(getGMNameTextField().getText());
-  // if (getNPCTypeRadio().isSelected()) {
-  // token.setType(Token.Type.NPC);
-  // }
-  // if (getPCTypeRadio().isSelected()) {
-  // token.setType(Token.Type.PC);
-  // }
-  // if (getMarkerTypeRadio().isSelected()) {
-  // token.setType(Token.Type.NPC);
-  // token.setLayer(Zone.Layer.OBJECT);
-  // token.setGMNote("Marker"); // In order for it to be recognized as a marker, it needs something
-  // in the notes field
-  // token.setVisible(false);
-  // }
-  // }
-  //
   /**
    * Get and icon from the asset manager and scale it properly.
    *

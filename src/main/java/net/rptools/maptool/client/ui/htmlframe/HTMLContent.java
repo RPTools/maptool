@@ -141,9 +141,8 @@ public class HTMLContent {
       document.outputSettings().charset(StandardCharsets.US_ASCII);
     }
 
-    public HtmlDocumentContent(
-        String str, boolean isJavaBridgeInjected, boolean isBaseUrlInjected) {
-      this(Jsoup.parse(str), isJavaBridgeInjected, isBaseUrlInjected);
+    public HtmlDocumentContent(String str) {
+      this(Jsoup.parse(HTMLPanelInterface.fixHTML(str)), false, false);
     }
 
     public String str() {
@@ -176,7 +175,7 @@ public class HTMLContent {
    * @return an HTMLContent object
    */
   public static HTMLContent htmlFromString(@Nonnull String html) {
-    return new HTMLContent(new HtmlDocumentContent(html, false, false));
+    return new HTMLContent(new HtmlDocumentContent(html));
   }
 
   /**
@@ -333,7 +332,7 @@ public class HTMLContent {
           var assetType = Asset.Type.fromMediaType(mediaType);
 
           if (assetType == Asset.Type.HTML) {
-            return new HTMLContent(new HtmlDocumentContent(html, false, false));
+            return new HTMLContent(new HtmlDocumentContent(html));
           }
           return new HTMLContent(new StringContent(html));
         }
@@ -343,7 +342,7 @@ public class HTMLContent {
       if (asset != null) {
         if (asset.isStringAsset()) {
           if (asset.getType() == Asset.Type.HTML) {
-            return new HTMLContent(new HtmlDocumentContent(asset.getDataAsString(), false, false));
+            return new HTMLContent(new HtmlDocumentContent(asset.getDataAsString()));
           }
           return new HTMLContent(new StringContent(asset.getDataAsString()));
         } else {

@@ -134,7 +134,7 @@ public class ImageSupport {
         }
       }
     } else {
-      Rectangle b = token.getBounds(grid.getZone());
+      Rectangle b = token.getImageBounds(grid.getZone());
       try {
         return ImageUtil.scaleBufferedImage(
             img, (int) Math.ceil(b.width * zoom), (int) Math.ceil(b.height * zoom), renderQuality);

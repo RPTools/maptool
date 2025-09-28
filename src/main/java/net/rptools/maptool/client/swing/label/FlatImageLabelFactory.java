@@ -21,6 +21,8 @@ import net.rptools.maptool.client.swing.label.FlatImageLabel.Justification;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
+import net.rptools.maptool.model.drawing.AbstractTemplate;
+import net.rptools.maptool.model.drawing.DrawnElement;
 
 /**
  * The FlatImageLabelFactory class is responsible for creating instances of FlatImageLabel objects.
@@ -37,6 +39,12 @@ public class FlatImageLabelFactory {
   /** The singleton instance of the FlatImageLabelFactory class for non-visible token labels */
   private final FlatImageLabel nonVisibleImageLabel;
 
+  /** The singleton instance of the FlatImageLabelFactory class for drawing labels */
+  private final FlatImageLabel drawingImageLabel;
+
+  /** The singleton instance of the FlatImageLabelFactory class for template labels */
+  private final FlatImageLabel templateImageLabel;
+
   /** Creates a new instance of the FlatImageLabelFactory class. */
   public FlatImageLabelFactory() {
     var npcBackground = AppPreferences.npcMapLabelBackground.get();
@@ -48,6 +56,12 @@ public class FlatImageLabelFactory {
     var nonVisBackground = AppPreferences.nonVisibleTokenMapLabelBackground.get();
     var nonVisForeground = AppPreferences.nonVisibleTokenMapLabelForeground.get();
     var nonVisBorder = AppPreferences.nonVisibleTokenMapLabelBorder.get();
+    var drawingMapLabelForeground = AppPreferences.drawingMapLabelForegroundColor.get();
+    var drawingMapLabelBackground = AppPreferences.drawingMapLabelBackgroundColor.get();
+    var drawingMapLabelBorder = AppPreferences.drawingMapLabelBorderColor.get();
+    var templateMapLabelForeground = AppPreferences.templateMapLabelForegroundColor.get();
+    var templateMapLabelBackground = AppPreferences.templateMapLabelBackgroundColor.get();
+    var templateMapLabelBorder = AppPreferences.templateMapLabelBorderColor.get();
     int fontSize = AppPreferences.mapLabelFontSize.get();
     var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), fontSize);
     boolean showBorder = AppPreferences.mapLabelShowBorder.get();
@@ -83,6 +97,28 @@ public class FlatImageLabelFactory {
             nonVisForeground,
             nonVisBackground,
             nonVisBorder,
+            font,
+            Justification.Center,
+            borderWidth,
+            borderArc);
+    drawingImageLabel =
+        new FlatImageLabel(
+            4,
+            4,
+            drawingMapLabelForeground,
+            drawingMapLabelBackground,
+            drawingMapLabelBorder,
+            font,
+            Justification.Center,
+            borderWidth,
+            borderArc);
+    templateImageLabel =
+        new FlatImageLabel(
+            4,
+            4,
+            templateMapLabelForeground,
+            templateMapLabelBackground,
+            templateMapLabelBorder,
             font,
             Justification.Center,
             borderWidth,
@@ -125,5 +161,19 @@ public class FlatImageLabelFactory {
         Justification.Center,
         borderSize,
         label.getBorderArc());
+  }
+
+  /**
+   * Retrieves the map image label based on the provided {@link DrawnElement}.
+   *
+   * @param drawnElement The DrawnElement representing the entity on the map.
+   * @return The map image label corresponding to the DrawnElement's Drawable.
+   */
+  public FlatImageLabel getMapImageLabel(DrawnElement drawnElement) {
+    if (drawnElement.getDrawable() instanceof AbstractTemplate) {
+      return templateImageLabel;
+    } else {
+      return drawingImageLabel;
+    }
   }
 }

@@ -241,7 +241,7 @@ public class TokenLocationFunctions extends AbstractFunction {
   private TokenLocation getTokenLocation(boolean useDistancePerCell, Token token) {
     TokenLocation loc = new TokenLocation();
     if (useDistancePerCell) {
-      Rectangle tokenBounds = token.getBounds(token.getZoneRenderer().getZone());
+      Rectangle tokenBounds = token.getImageBounds(token.getZoneRenderer().getZone());
       loc.x = tokenBounds.x;
       loc.y = tokenBounds.y;
     } else {
@@ -337,10 +337,10 @@ public class TokenLocationFunctions extends AbstractFunction {
       }
     } else {
       // take distance between center of the two tokens
-      Rectangle sourceBounds = source.getBounds(zone);
+      Rectangle sourceBounds = source.getImageBounds(zone);
       double sourceCenterX = sourceBounds.x + sourceBounds.width / 2.0;
       double sourceCenterY = sourceBounds.y + sourceBounds.height / 2.0;
-      Rectangle targetBounds = target.getBounds(zone);
+      Rectangle targetBounds = target.getImageBounds(zone);
       double targetCenterX = targetBounds.x + targetBounds.width / 2.0;
       double targetCenterY = targetBounds.y + targetBounds.height / 2.0;
 
@@ -418,7 +418,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       }
 
       // get the pixel coords for the center of the token
-      Rectangle sourceBounds = source.getBounds(zone);
+      Rectangle sourceBounds = source.getImageBounds(zone);
       double sourceCenterX = sourceBounds.x + sourceBounds.width / 2.0;
       double sourceCenterY = sourceBounds.y + sourceBounds.height / 2.0;
       double a = (int) (sourceCenterX - targetX);
@@ -452,7 +452,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         }
       }
     } else {
-      Rectangle bounds = token.getBounds(zone);
+      Rectangle bounds = token.getImageBounds(zone);
       for (Point point : points) {
         if (bounds.contains(point)) return true;
       }
