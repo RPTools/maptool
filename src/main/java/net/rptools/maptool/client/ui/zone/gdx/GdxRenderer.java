@@ -184,95 +184,120 @@ public class GdxRenderer extends ApplicationAdapter {
 
   @Override
   public void create() {
-    // with jogl create is called every time we change the parent frame of the GLJPanel
-    // e.g. change from fullcreen to window or the other way around. Reinit everthing in this case.
-    if (initialized) {
-      initialized = false;
-      dispose();
+    try {
 
-      atlas = null;
-      normalFont = null;
-      boldFont = null;
+      // with jogl create is called every time we change the parent frame of the GLJPanel
+      // e.g. change from fullcreen to window or the other way around. Reinit everthing in this
+      // case.
+      if (initialized) {
+        initialized = false;
+        dispose();
+
+        atlas = null;
+        normalFont = null;
+        boldFont = null;
+      }
+
+      environmentalLightingShader =
+          new ShaderProgram(
+              Gdx.files.classpath(
+                  "net/rptools/maptool/client/ui/zone/gdx/environmentalLighting.vsh"),
+              Gdx.files.classpath(
+                  "net/rptools/maptool/client/ui/zone/gdx/environmentalLighting.fsh"));
+
+      batch = new PolygonSpriteBatch();
+      batch.enableBlending();
+
+      manager = new com.badlogic.gdx.assets.AssetManager();
+      {
+        loadAssets();
+
+        var resolver = new InternalFileHandleResolver();
+        manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
+        manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
+
+        manager.finishLoading();
+
+        atlas = manager.get(ATLAS, TextureAtlas.class);
+
+        normalFont = manager.get(FONT_NORMAL, BitmapFont.class);
+        textRenderer = new TextRenderer(atlas, batch, normalFont);
+        hudTextRenderer = new TextRenderer(atlas, batch, normalFont, false);
+      }
+
+      width = Gdx.graphics.getWidth();
+      height = Gdx.graphics.getHeight();
+
+      // Cam for 3D-Models
+      cam3d = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+      cam3d.lookAt(0, 0, 0);
+
+      cam = new OrthographicCamera();
+      cam.setToOrtho(false);
+
+      hudCam = new OrthographicCamera();
+      hudCam.setToOrtho(false);
+
+      updateCam();
+
+      backBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+      resultsBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+      spareBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+
+      // TODO: Add it to the texture atlas
+      Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+      pixmap.setColor(Color.WHITE);
+      pixmap.drawPixel(0, 0);
+      onePixel = new Texture(pixmap);
+      pixmap.dispose();
+      TextureRegion region = new TextureRegion(onePixel, 0, 0, 1, 1);
+      drawer = new ShapeDrawer(batch, region);
+
+      areaRenderer = new AreaRenderer(drawer);
+      drawnElementRenderer = new DrawnElementRenderer(areaRenderer);
+      tokenOverlayRenderer = new TokenOverlayRenderer(areaRenderer);
+      gridRenderer = new GridRenderer(areaRenderer, hudCam);
+
+      initialized = true;
+    } catch (Exception e) {
+      log.error("Unhandled exception in GdxRenderer::create()", e);
     }
-
-    environmentalLightingShader =
-        new ShaderProgram(
-            Gdx.files.classpath("net/rptools/maptool/client/ui/zone/gdx/environmentalLighting.vsh"),
-            Gdx.files.classpath(
-                "net/rptools/maptool/client/ui/zone/gdx/environmentalLighting.fsh"));
-
-    manager = new com.badlogic.gdx.assets.AssetManager();
-    loadAssets();
-
-    var resolver = new InternalFileHandleResolver();
-    manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
-    manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
-
-    width = Gdx.graphics.getWidth();
-    height = Gdx.graphics.getHeight();
-
-    // Cam for 3D-Models
-    cam3d = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-    cam3d.lookAt(0, 0, 0);
-
-    cam = new OrthographicCamera();
-    cam.setToOrtho(false);
-
-    hudCam = new OrthographicCamera();
-    hudCam.setToOrtho(false);
-
-    updateCam();
-
-    batch = new PolygonSpriteBatch();
-    batch.enableBlending();
-
-    backBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
-    resultsBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
-    spareBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
-
-    // TODO: Add it to the texture atlas
-    Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-    pixmap.setColor(Color.WHITE);
-    pixmap.drawPixel(0, 0);
-    onePixel = new Texture(pixmap);
-    pixmap.dispose();
-    TextureRegion region = new TextureRegion(onePixel, 0, 0, 1, 1);
-    drawer = new ShapeDrawer(batch, region);
-
-    areaRenderer = new AreaRenderer(drawer);
-    drawnElementRenderer = new DrawnElementRenderer(areaRenderer);
-    tokenOverlayRenderer = new TokenOverlayRenderer(areaRenderer);
-    gridRenderer = new GridRenderer(areaRenderer, hudCam);
-
-    initialized = true;
   }
 
   @Override
   public void dispose() {
-    environmentalLightingShader.dispose();
-    manager.dispose();
-    batch.dispose();
-    if (zoneCache != null) {
-      zoneCache.dispose();
+    try {
+      environmentalLightingShader.dispose();
+      manager.dispose();
+      batch.dispose();
+      if (zoneCache != null) {
+        zoneCache.dispose();
+      }
+      onePixel.dispose();
+    } catch (Exception e) {
+      log.error("Unhandled exception in GdxRenderer::dispose()", e);
     }
-    onePixel.dispose();
   }
 
   @Override
   public void resize(int width, int height) {
-    this.width = width;
-    this.height = height;
+    try {
+      this.width = width;
+      this.height = height;
 
-    backBuffer.dispose();
-    backBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+      backBuffer.dispose();
+      backBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
 
-    resultsBuffer.dispose();
-    resultsBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+      resultsBuffer.dispose();
+      resultsBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
 
-    spareBuffer.dispose();
-    spareBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+      spareBuffer.dispose();
+      spareBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
 
-    updateCam();
+      updateCam();
+    } catch (Exception e) {
+      log.error("Unhandled exception in GdxRenderer::resize()", e);
+    }
   }
 
   private void drawBackBuffer(BlendFunction blendDown) {
@@ -347,26 +372,6 @@ public class GdxRenderer extends ApplicationAdapter {
 
   @Override
   public void render() {
-    viewModel.update();
-
-    // System.out.println("FPS:   " + Gdx.graphics.getFramesPerSecond());
-    var delta = Gdx.graphics.getDeltaTime();
-    stateTime += delta;
-    manager.finishLoading();
-
-    if (atlas == null) {
-      atlas = manager.get(ATLAS, TextureAtlas.class);
-      zoneCache.setSharedAtlas(atlas);
-    }
-
-    if (normalFont == null) {
-      normalFont = manager.get(FONT_NORMAL, BitmapFont.class);
-      textRenderer = new TextRenderer(atlas, batch, normalFont);
-      hudTextRenderer = new TextRenderer(atlas, batch, normalFont, false);
-    }
-
-    ensureTtfFont();
-    ScreenUtils.clear(Color.BLACK);
     try {
       CodeTimer.using(
           "GdxRenderer.renderZone",
@@ -374,10 +379,27 @@ public class GdxRenderer extends ApplicationAdapter {
             timer.setThreshold(10);
             timer.setThreshold(1, TimeUnit.MICROSECONDS);
             timer.setReportingUnit(TimeUnit.MICROSECONDS);
+
+            ScreenUtils.clear(Color.BLACK);
+
+            if (viewModel == null) {
+              // Nothing to render.
+              return;
+            }
+
+            viewModel.update();
+
+            // System.out.println("FPS:   " + Gdx.graphics.getFramesPerSecond());
+            var delta = Gdx.graphics.getDeltaTime();
+            stateTime += delta;
+
+            ensureTtfFont();
+            ScreenUtils.clear(Color.BLACK);
+
             doRendering();
           });
-    } catch (Exception ex) {
-      log.warn("Error while rendering", ex);
+    } catch (Exception e) {
+      log.error("Unhandled exception in GdxRenderer::render()", e);
     }
   }
 
