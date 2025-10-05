@@ -45,6 +45,12 @@ import org.apache.logging.log4j.Logger;
  * @param <T> The type of the bean to apply the template to.
  */
 public class HandlebarsUtil<T> {
+  public static boolean isAssetFileHandlebars(String filename) {
+    if (filename == null) {
+      return false;
+    }
+    return filename.endsWith(".hbs");
+  }
 
   /** The compiled template. */
   private final Template template;
