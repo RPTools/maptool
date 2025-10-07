@@ -691,14 +691,23 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         hide.setSelected(true);
         slider.setEnabled(false);
         slider.setValue(100);
+        Object hiddenValue = getTokenUnderMouse().getState(name + TokenBarFunction.hidenBarSuffix);
+        if (hiddenValue != null) {
+          slider.setValue(
+              (int) (TokenBarFunction.getBigDecimalValue(hiddenValue).doubleValue() * 100));
+        } else {
+          slider.setValue(100);
+        }
       } else {
         hide.setSelected(false);
         slider.setEnabled(true);
-        slider.setValue(
-            (int)
-                (TokenBarFunction.getBigDecimalValue(getTokenUnderMouse().getState(name))
-                        .doubleValue()
-                    * 100));
+        Object hiddenValue = getTokenUnderMouse().getState(name + TokenBarFunction.hidenBarSuffix);
+        if (hiddenValue != null) {
+          slider.setValue(
+              (int) (TokenBarFunction.getBigDecimalValue(hiddenValue).doubleValue() * 100));
+        } else {
+          slider.setValue(100);
+        }
       }
 
       JPanel barPanel = new JPanel(new MigLayout("wrap 2"));
@@ -721,6 +730,9 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
           Token token = zone.getToken(tokenGUID);
           BigDecimal val = hide.isSelected() ? null : new BigDecimal(slider.getValue() / 100.0);
           token.setState(name, val);
+          if (val != null) {
+            token.setState(name + TokenBarFunction.hidenBarSuffix, val);
+          }
           MapTool.serverCommand().putToken(zone.getId(), token);
         }
       }

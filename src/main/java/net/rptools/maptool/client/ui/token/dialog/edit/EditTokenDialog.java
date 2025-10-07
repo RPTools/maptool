@@ -346,7 +346,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       if (token.getState(bar.getName()) == null) {
         cb.setSelected(true);
         bar.setEnabled(false);
-        bar.setValue(100);
+        Object hiddenValue = token.getState(bar.getName() + TokenBarFunction.hidenBarSuffix);
+        if (hiddenValue != null) {
+          bar.setValue(
+              (int) (TokenBarFunction.getBigDecimalValue(hiddenValue).doubleValue() * 100));
+        } else {
+          bar.setValue(100);
+        }
       } else {
         cb.setSelected(false);
         bar.setEnabled(true);
@@ -878,6 +884,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       BigDecimal value =
           cb.isSelected() ? null : new BigDecimal(bar.getValue()).divide(new BigDecimal(100));
       token.setState(bar.getName(), value);
+      if (value != null) {
+        token.setState(bar.getName() + TokenBarFunction.hidenBarSuffix, value);
+      }
       bar.setValue(
           (int)
               (TokenBarFunction.getBigDecimalValue(token.getState(bar.getName())).doubleValue()
