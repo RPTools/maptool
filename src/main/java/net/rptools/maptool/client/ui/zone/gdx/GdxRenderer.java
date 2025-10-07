@@ -2306,11 +2306,18 @@ public class GdxRenderer extends ApplicationAdapter {
           renderZone = false;
 
           var newZone = event.zone();
-          zoneCache = new ZoneCache(newZone, atlas);
-          viewModel = zoneCache.getZoneRenderer().getViewModel();
+          var renderer = MapTool.getFrame().getZoneRenderer(newZone.getId());
+          if (renderer == null) {
+            log.warn("Failed to find Swing renderer for zone {}", newZone.getId());
+            return;
+          }
+
+          zoneCache = new ZoneCache(renderer, atlas);
+          viewModel = renderer.getViewModel();
           drawnElementRenderer.setZoneCache(zoneCache);
           tokenOverlayRenderer.setZoneCache(zoneCache);
           gridRenderer.setZoneCache(zoneCache);
+
           renderZone = true;
         });
   }
