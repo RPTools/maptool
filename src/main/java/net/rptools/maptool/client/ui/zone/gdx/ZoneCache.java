@@ -27,7 +27,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -87,10 +86,10 @@ public class ZoneCache implements Disposable {
     BROKEN_SPRITE = new Sprite(sharedAtlas.findRegion("broken"));
   }
 
-  public ZoneCache(@Nonnull Zone zone, @Nonnull TextureAtlas sharedAtlas) {
-    this.zone = zone;
+  public ZoneCache(@Nonnull ZoneRenderer zoneRenderer, @Nonnull TextureAtlas sharedAtlas) {
+    this.zone = zoneRenderer.getZone();
+    this.zoneRenderer = zoneRenderer;
     setSharedAtlas(sharedAtlas);
-    zoneRenderer = MapTool.getFrame().getZoneRenderer(zone);
 
     Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
     pixmap.setColor(Color.WHITE);
