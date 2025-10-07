@@ -31,6 +31,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
@@ -454,12 +455,23 @@ public class TokenStatesController
             || formPanel.getCheckBox(SHOW_OTHERS).isSelected();
     BooleanTokenOverlay selectedState =
         (BooleanTokenOverlay) formPanel.getList(STATES).getSelectedValue();
+    var namesToCheck = new ArrayList<String>();
+    // We need to check for both the name and the name with the hidden value suffix
+    if (selectedState != null) {
+      for (String name : getNames()) {
+        namesToCheck.add(name+TokenBarFunction.hidenBarSuffix);
+        namesToCheck.add(name);
+        if (name.endsWith(TokenBarFunction.hidenBarSuffix)) {
+          namesToCheck.add(name.substring(0, name.length() - TokenBarFunction.hidenBarSuffix.length()));
+        }
+      }
+    }
     boolean hasUniqueUpdateName = false;
     if (selectedState != null)
-      hasUniqueUpdateName = selectedState.getName().equals(text) || !getNames().contains(text);
+      hasUniqueUpdateName = selectedState.getName().equals(text) || !namesToCheck.contains(text);
     formPanel
         .getButton(ADD)
-        .setEnabled(hasName && !getNames().contains(text) && hasImage && hasShow);
+        .setEnabled(hasName && !namesToCheck.contains(text) && hasImage && hasShow);
     formPanel
         .getButton(UPDATE)
         .setEnabled(hasName && hasUniqueUpdateName && selectedState != null && hasShow);
