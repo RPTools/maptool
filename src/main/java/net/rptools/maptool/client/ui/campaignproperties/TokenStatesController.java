@@ -459,10 +459,11 @@ public class TokenStatesController
     // We need to check for both the name and the name with the hidden value suffix
     if (selectedState != null) {
       for (String name : getNames()) {
-        namesToCheck.add(name+TokenBarFunction.hidenBarSuffix);
+        namesToCheck.add(name + TokenBarFunction.hidenBarSuffix);
         namesToCheck.add(name);
         if (name.endsWith(TokenBarFunction.hidenBarSuffix)) {
-          namesToCheck.add(name.substring(0, name.length() - TokenBarFunction.hidenBarSuffix.length()));
+          namesToCheck.add(
+              name.substring(0, name.length() - TokenBarFunction.hidenBarSuffix.length()));
         }
       }
     }
