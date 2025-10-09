@@ -57,6 +57,7 @@ import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.dialog.create.NewTokenDialog;
 import net.rptools.maptool.client.ui.zone.*;
+import net.rptools.maptool.client.ui.zone.gdx.GdxRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.tokenRender.FacingArrowRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.tokenRender.TokenRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -528,6 +529,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     visibleScreenArea = null;
 
     zoneView.flush(token);
+    GdxRenderer.getInstance().flushFog();
   }
 
   /**
@@ -568,6 +570,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
   public void flushFog() {
     visibleScreenArea = null;
     repaintDebouncer.dispatch();
+    GdxRenderer.getInstance().flushFog();
   }
 
   /**
@@ -699,9 +702,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
               g2d.drawImage(buffer, null, 0, 0);
               timer.stop("paintComponent:renderBuffer");
             }
+            timer.stop("paintComponent");
           }
-
-          timer.stop("paintComponent");
         });
   }
 

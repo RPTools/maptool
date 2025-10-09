@@ -18,6 +18,7 @@ import java.awt.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.swing.*;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -165,6 +166,8 @@ public class ToolbarPanel extends JToolBar {
 
     tokenSelectionButtonAll.setSelected(true);
     // Jamz: End panel
+
+    add(createGdxButton(Icons.TOOLBAR_LIBGDX));
 
     // the "Select Map" button
     mapselect = createZoneSelectionButton();
@@ -545,6 +548,20 @@ public class ToolbarPanel extends JToolBar {
     if (MediaPlayerAdapter.getGlobalMute()) {
       button.doClick();
     }
+
+    return button;
+  }
+
+  private JToggleButton createGdxButton(final Icons icon) {
+    final JToggleButton button = new JToggleButton();
+    button.addActionListener(
+        e -> {
+          MapTool.getFrame().switchRenderers();
+        });
+
+    button.setIcon(RessourceManager.getBigIcon(icon));
+    button.setVisible(DeveloperOptions.Toggle.EnableLibGdxRendererToggleButton.get());
+    DeveloperOptions.Toggle.EnableLibGdxRendererToggleButton.onChange(button::setVisible);
 
     return button;
   }

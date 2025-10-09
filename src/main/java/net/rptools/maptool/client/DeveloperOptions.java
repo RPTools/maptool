@@ -55,6 +55,12 @@ public class DeveloperOptions {
             "Preferences.developer.debugTokenDragging.label",
             "Preferences.developer.debugTokenDragging.tooltip",
             false);
+    public static final Preference<Boolean> EnableLibGdxRendererToggleButton =
+        store.defineBoolean(
+            "enableLibGDXRendererToggleButton",
+            "Preferences.developer.enableLibGDXRendererToggleButton.label",
+            "Preferences.developer.enableLibGDXRendererToggleButton.tooltip",
+            false);
 
     public static List<Preference<Boolean>> getOptions() {
       return store.getDefinedPreferences().stream()
