@@ -293,7 +293,7 @@ public class ZoneViewModel {
 
   /** Updates {@link #isUsingGdxRenderer}. */
   private void updateIsUsingGdxRenderer() {
-    isUsingGdxRenderer = false;
+    isUsingGdxRenderer = MapTool.getFrame().getGdxPanel().isVisible();
   }
 
   /**
