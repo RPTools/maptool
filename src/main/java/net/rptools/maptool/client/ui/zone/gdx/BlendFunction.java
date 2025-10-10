@@ -27,9 +27,9 @@ public record BlendFunction(
           GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
   public static final BlendFunction SCREEN =
-      new BlendFunction(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_COLOR, GL20.GL_ONE, GL20.GL_NONE);
+      new BlendFunction(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_COLOR, GL20.GL_ONE, GL20.GL_ZERO);
 
-  public static final BlendFunction SRC_ONLY = new BlendFunction(GL20.GL_ONE, GL20.GL_NONE);
+  public static final BlendFunction SRC_ONLY = new BlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
 
   public static BlendFunction readFromBatch(Batch batch) {
     return new BlendFunction(
