@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.zone.gdx;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -145,16 +146,23 @@ public class ZoneCache implements Disposable {
   */
 
   private void imageToSprite(MD5Key key, BufferedImage image) {
-    byte[] bytes;
+    var name = key.toString();
 
-    try {
-      bytes = ImageUtil.imageToBytes(image, "png");
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    var pixmap = new Pixmap(image.getWidth(), image.getHeight(), packer.getPageFormat());
+    pixmap.setBlending(Pixmap.Blending.None);
+
+    Color gdxColor = new Color(Color.CLEAR);
+    for (var y = 0; y < image.getHeight(); ++y) {
+      for (var x = 0; x < image.getWidth(); ++x) {
+        var awtColor = image.getRGB(x, y);
+        Color.argb8888ToColor(gdxColor, awtColor);
+        gdxColor.premultiplyAlpha();
+
+        pixmap.setColor(gdxColor);
+        pixmap.drawPixel(x, y);
+      }
     }
 
-    var name = key.toString();
-    var pixmap = new Pixmap(bytes, 0, bytes.length);
     try {
       synchronized (packer) {
         if (packer.getRect(name) == null) {
