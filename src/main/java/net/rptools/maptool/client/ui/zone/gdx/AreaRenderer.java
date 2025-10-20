@@ -20,8 +20,13 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.ShortArray;
+import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -100,19 +105,11 @@ public class AreaRenderer {
         }
       }
 
-      var indices = Earcut.earcut(tmpFloat.toArray(), holeIndices, (short) 2);
-      result.add(new TriangledPolygon(tmpFloat.toArray(), indices.toArray()));
+      var vertices = tmpFloat.toArray();
+      var indices = Earcut.earcut(vertices, holeIndices, (short) 2);
+      result.add(new TriangledPolygon(vertices, indices.toArray()));
     }
     return result;
-  }
-
-  public List<TriangledPolygon> triangulate(Area area) {
-    if (area == null || area.isEmpty()) {
-      return List.of();
-    }
-
-    var jts = GeometryUtil.toJtsPolygons(area);
-    return triangulate(jts);
   }
 
   public void fill(PolygonSpriteBatch batch, List<TriangledPolygon> polygons) {
@@ -122,25 +119,52 @@ public class AreaRenderer {
     }
   }
 
-  public void fillArea(PolygonSpriteBatch batch, Area area) {
-    if (area == null || area.isEmpty()) {
-      return;
-    }
-    for (var poly : triangulate(area)) {
-      var polyRegion = new PolygonRegion(textureRegion, poly.vertices, poly.indices);
-      paintRegion(batch, polyRegion);
+  public void fillArea(PolygonSpriteBatch batch, Shape shape) {
+    switch (shape) {
+      case Line2D line2D -> {
+        /*Not a filled shape, nothing to do*/
+      }
+      case Ellipse2D ellipse2D -> {
+        drawer.setColor(color);
+        drawer.filledEllipse(
+            (float) ellipse2D.getCenterX(),
+            -(float) ellipse2D.getCenterY(),
+            (float) ellipse2D.getWidth() / 2,
+            (float) ellipse2D.getHeight() / 2);
+        drawer.setColor(Color.WHITE);
+      }
+      case Rectangle2D rectangle2D -> {
+        drawer.setColor(color);
+        drawer.filledRectangle(
+            (float) rectangle2D.getMinX(), -(float) rectangle2D.getMaxY(),
+            (float) rectangle2D.getWidth(), (float) rectangle2D.getHeight());
+        drawer.setColor(Color.WHITE);
+      }
+      default -> {
+        // Handles Path2D and Area in particular.
+        if (!(shape instanceof Area)) {
+          shape = new Area(shape);
+        }
+
+        for (var poly : triangulate(GeometryUtil.toJtsPolygons(shape))) {
+          var polyRegion = new PolygonRegion(textureRegion, poly.vertices, poly.indices);
+          paintRegion(batch, polyRegion);
+        }
+      }
     }
   }
 
-  public void drawArea(PolygonSpriteBatch batch, Area area, boolean rounded, float thickness) {
-    if (area == null || area.isEmpty()) return;
+  public void drawArea(PolygonSpriteBatch batch, Shape shape, boolean rounded, float thickness) {
+    if (shape == null) {
+      return;
+    }
 
-    pathToFloatArray(area.getPathIterator(null));
+    pathToFloatArray(shape.getPathIterator(null));
 
     if (segmentIndicies.size == 1) {
       removeStartFromEnd(); // start and end vertices are equal. we don't want this
       var polygon =
-          drawPathWithJoin(tmpFloat, thickness, rounded ? JoinType.Round : JoinType.Pointy, false);
+          drawPathWithJoin(tmpFloat, thickness, rounded ? JoinType.Round : JoinType.Pointy, true);
       paintPolygon(batch, polygon);
     } else {
       var floats = tmpFloat.toArray();
@@ -154,8 +178,7 @@ public class AreaRenderer {
         tmpFloat.setSize(2 * vertexCount);
         removeStartFromEnd();
         var polygon =
-            drawPathWithJoin(
-                tmpFloat, thickness, rounded ? JoinType.Round : JoinType.Pointy, false);
+            drawPathWithJoin(tmpFloat, thickness, rounded ? JoinType.Round : JoinType.Pointy, true);
         paintPolygon(batch, polygon);
         lastSegmentIndex = idx;
       }
@@ -194,27 +217,26 @@ public class AreaRenderer {
     tmpFloat.clear();
     segmentIndicies.clear();
 
+    Point2D.Float lastMoveTo = null;
+
     var index = 0;
     for (; !it.isDone(); it.next()) {
       int type = it.currentSegment(floatsFromArea);
 
       switch (type) {
         case PathIterator.SEG_MOVETO:
-          //                   System.out.println("Move to: ( " + floatsFromArea[0] + ", " +
-          // floatsFromArea[1] + ")");
           tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
+          lastMoveTo = new Point2D.Float(floatsFromArea[0], -floatsFromArea[1]);
           segmentIndicies.add(index);
           index += 1;
           break;
         case PathIterator.SEG_CLOSE:
-          //                   System.out.println("Close");
-
+          if (lastMoveTo != null) {
+            tmpFloat.add(lastMoveTo.x, lastMoveTo.y);
+            lastMoveTo = null;
+          }
           break;
-        // return tmpFloat;
         case PathIterator.SEG_LINETO:
-          //                  System.out.println("Line to: ( " + floatsFromArea[0] + ", " +
-          // floatsFromArea[1] + ")");
-
           if (tmpFloat.get(tmpFloat.size - 2) != floatsFromArea[0]
               || tmpFloat.get(tmpFloat.size - 1) != -floatsFromArea[1]) {
             tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
@@ -222,10 +244,6 @@ public class AreaRenderer {
           }
           break;
         case PathIterator.SEG_QUADTO:
-          //                  System.out.println("quadratic bezier with: ( " + floatsFromArea[0] +
-          // ", " + floatsFromArea[1] +
-          //                          "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] + ")");
-
           tmpVector0.set(tmpFloat.get(tmpFloat.size - 2), tmpFloat.get(tmpFloat.size - 1));
           tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
           tmpVector2.set(floatsFromArea[2], -floatsFromArea[3]);
@@ -242,12 +260,6 @@ public class AreaRenderer {
           }
           break;
         case PathIterator.SEG_CUBICTO:
-          //                    System.out.println("cubic bezier with: ( " + floatsFromArea[0] + ",
-          // " + floatsFromArea[1] +
-          //                            "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] +
-          //                            "), (" + floatsFromArea[4] + ", " + floatsFromArea[5] +
-          // ")");
-
           tmpVector0.set(tmpFloat.get(tmpFloat.size - 2), tmpFloat.get(tmpFloat.size - 1));
           tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
           tmpVector2.set(floatsFromArea[2], -floatsFromArea[3]);
