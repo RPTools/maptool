@@ -19,14 +19,19 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.utils.FloatArray;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.ui.zone.gdx.AreaRenderer;
+import net.rptools.maptool.client.ui.zone.gdx.GdxPaint;
 import net.rptools.maptool.client.ui.zone.gdx.ZoneCache;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.*;
 
 public abstract class AbstractDrawingDrawer {
+  public interface PaintResolver {
+    GdxPaint apply(DrawablePaint paint);
+  }
 
   protected Float alpha = null;
   protected AreaRenderer areaRenderer;
+  private final PaintResolver paintResolver;
 
   protected ZoneCache zoneCache;
 
@@ -34,7 +39,8 @@ public abstract class AbstractDrawingDrawer {
     this.zoneCache = zoneCache;
   }
 
-  public AbstractDrawingDrawer(AreaRenderer areaRenderer) {
+  public AbstractDrawingDrawer(AreaRenderer areaRenderer, PaintResolver paintResolver) {
+    this.paintResolver = paintResolver;
     this.areaRenderer = areaRenderer;
   }
 
@@ -47,7 +53,7 @@ public abstract class AbstractDrawingDrawer {
   }
 
   protected void applyColor(DrawablePaint paint, boolean applyAlpha) {
-    var gdxPaint = zoneCache.getPaint(paint);
+    var gdxPaint = paintResolver.apply(paint);
     var color = gdxPaint.color();
     var c2 = new Color().set(color);
     if (alpha != null && applyAlpha) {

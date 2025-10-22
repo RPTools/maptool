@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.ui.zone.gdx;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -30,18 +29,14 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
-import net.rptools.maptool.model.drawing.DrawablePaint;
-import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ZoneCache implements Disposable {
-
-  public record GdxPaint(Color color, TextureRegion textureRegion) {}
 
   private static final Logger log = LogManager.getLogger(ZoneCache.class);
   private final Zone zone;
@@ -57,8 +52,6 @@ public class ZoneCache implements Disposable {
   private final Map<String, TextureRegion> fetchedRegions = new HashMap<>();
   private final Map<MD5Key, Sprite> bigSprites = new HashMap<>();
   private final Map<MD5Key, Texture> paintTextures = new HashMap<>();
-  private final Texture whitePixel;
-  private final TextureRegion whitePixelRegion;
 
   public Zone getZone() {
     return zone;
@@ -90,13 +83,6 @@ public class ZoneCache implements Disposable {
     this.zone = zoneRenderer.getZone();
     this.zoneRenderer = zoneRenderer;
     setSharedAtlas(sharedAtlas);
-
-    Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-    pixmap.setColor(Color.WHITE);
-    pixmap.drawPixel(0, 0);
-    whitePixel = new Texture(pixmap);
-    pixmap.dispose();
-    whitePixelRegion = new TextureRegion(whitePixel, 0, 0, 1, 1);
   }
 
   /*
@@ -280,26 +266,18 @@ public class ZoneCache implements Disposable {
     return getSprite(key.toString());
   }
 
-  public GdxPaint getPaint(DrawablePaint paint) {
-
-    if (paint instanceof DrawableColorPaint) {
-      var color = new Color();
-      Color.argb8888ToColor(color, ((DrawableColorPaint) paint).getColor());
-      color.premultiplyAlpha();
-      return new GdxPaint(color, whitePixelRegion);
-    }
-
-    var texturePaint = (DrawableTexturePaint) paint;
-    var asset = texturePaint.getAsset();
-    if (!paintTextures.containsKey(asset.getMD5Key())) {
-      var image = asset.getData();
-      var pix = new Pixmap(image, 0, image.length);
-      var texture = new Texture(pix);
-      texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-      pix.dispose();
-      paintTextures.put(asset.getMD5Key(), texture);
-    }
-    return new GdxPaint(Color.WHITE, new TextureRegion(paintTextures.get(asset.getMD5Key())));
+  public Texture getPaintTexture(MD5Key assetId) {
+    return paintTextures.computeIfAbsent(
+        assetId,
+        key -> {
+          var asset = AssetManager.getAsset(key);
+          var image = asset.getData();
+          var pix = new Pixmap(image, 0, image.length);
+          var texture = new Texture(pix);
+          texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+          pix.dispose();
+          return texture;
+        });
   }
 
   @Override
@@ -311,7 +289,6 @@ public class ZoneCache implements Disposable {
         () -> {
           packer.dispose();
           tokenAtlas.dispose();
-          whitePixel.dispose();
 
           for (var sprite : isoSprites.values()) {
             sprite.getTexture().dispose();

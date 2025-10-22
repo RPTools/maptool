@@ -27,7 +27,8 @@ import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class DrawablePaint implements Serializable {
+public abstract sealed class DrawablePaint implements Serializable
+    permits DrawableColorPaint, DrawableTexturePaint {
   private static final Logger log = LogManager.getLogger(DrawablePaint.class);
 
   public abstract Paint getPaint(ImageObserver... observers);

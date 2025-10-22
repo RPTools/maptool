@@ -23,8 +23,8 @@ import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 public class ShapeDrawableDrawer extends AbstractDrawingDrawer {
 
-  public ShapeDrawableDrawer(AreaRenderer renderer) {
-    super(renderer);
+  public ShapeDrawableDrawer(AreaRenderer renderer, PaintResolver paintResolver) {
+    super(renderer, paintResolver);
   }
 
   @Override

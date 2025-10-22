@@ -24,8 +24,8 @@ import net.rptools.maptool.model.drawing.Pen;
 
 public class BlastTemplateDrawer extends AbstractDrawingDrawer {
 
-  public BlastTemplateDrawer(AreaRenderer renderer) {
-    super(renderer);
+  public BlastTemplateDrawer(AreaRenderer renderer, PaintResolver paintResolver) {
+    super(renderer, paintResolver);
   }
 
   @Override

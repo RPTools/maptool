@@ -23,8 +23,8 @@ import net.rptools.maptool.model.drawing.Pen;
 
 public class RadiusCellTemplateDrawer extends AbstractTemplateDrawer {
 
-  public RadiusCellTemplateDrawer(AreaRenderer renderer) {
-    super(renderer);
+  public RadiusCellTemplateDrawer(AreaRenderer renderer, PaintResolver paintResolver) {
+    super(renderer, paintResolver);
   }
 
   @Override

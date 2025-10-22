@@ -69,6 +69,9 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Path;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.drawing.DrawablePaint;
+import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
@@ -250,11 +253,11 @@ public class GdxRenderer extends ApplicationAdapter {
       pixmap.drawPixel(0, 0);
       onePixel = new Texture(pixmap);
       pixmap.dispose();
-      TextureRegion region = new TextureRegion(onePixel, 0, 0, 1, 1);
-      drawer = new ShapeDrawer(batch, region);
+
+      drawer = new ShapeDrawer(batch, new TextureRegion(onePixel));
 
       areaRenderer = new AreaRenderer(drawer);
-      drawnElementRenderer = new DrawnElementRenderer(areaRenderer);
+      drawnElementRenderer = new DrawnElementRenderer(areaRenderer, this::getPaint);
       tokenOverlayRenderer = new TokenOverlayRenderer(areaRenderer);
       gridRenderer = new GridRenderer(areaRenderer, hudCam);
 
@@ -485,6 +488,25 @@ public class GdxRenderer extends ApplicationAdapter {
     hudTextRenderer.drawString("Draws: " + batch.renderCalls, width - 30, 16);
 
     batch.end();
+  }
+
+  private GdxPaint getPaint(DrawablePaint paint) {
+    var color = new Color();
+    Texture texture;
+    switch (paint) {
+      case DrawableColorPaint colorPaint -> {
+        Color.argb8888ToColor(color, colorPaint.getColor());
+        color.premultiplyAlpha();
+
+        texture = onePixel;
+      }
+      case DrawableTexturePaint texturePaint -> {
+        color.set(Color.WHITE);
+        texture = zoneCache.getPaintTexture(texturePaint.getAssetId());
+      }
+    }
+
+    return new GdxPaint(color, new TextureRegion(texture));
   }
 
   public void invalidateCurrentViewCache() {
@@ -893,13 +915,9 @@ public class GdxRenderer extends ApplicationAdapter {
     // Fill
     batch.setColor(Color.WHITE);
     var paint = zoneCache.getZone().getFogPaint();
-    var fogPaint = zoneCache.getPaint(paint);
-    var fogColor = fogPaint.color();
-    fogPaint
-        .color()
-        .set(fogColor.r, fogColor.g, fogColor.b, view.isGMView() ? .6f : 1f)
-        .premultiplyAlpha();
-    fillViewportWith(fogPaint);
+    var fogPaint = getPaint(paint);
+    fillViewportWith(
+        tmpColor.set(fogPaint.color()).mul(view.isGMView() ? .6f : 1f), fogPaint.textureRegion());
     timer.stop("renderFog-hardFow");
 
     timer.start("renderFog-softFow");
@@ -1361,8 +1379,8 @@ public class GdxRenderer extends ApplicationAdapter {
   private void renderBoard() {
     if (!zoneCache.getZone().drawBoard()) return;
 
-    var paint = zoneCache.getZone().getBackgroundPaint();
-    fillViewportWith(zoneCache.getPaint(paint));
+    var paint = getPaint(zoneCache.getZone().getBackgroundPaint());
+    fillViewportWith(paint.color(), paint.textureRegion());
 
     var map = zoneCache.getSprite(zoneCache.getZone().getMapAssetId());
     if (map != null) {
@@ -1379,7 +1397,7 @@ public class GdxRenderer extends ApplicationAdapter {
     timer.stop("drawableBackground");
   }
 
-  private void fillViewportWith(ZoneCache.GdxPaint paint) {
+  private void fillViewportWith(Color tint, TextureRegion region) {
     var w = cam.viewportWidth * zoom;
     var h = cam.viewportHeight * zoom;
     var startX = (cam.position.x - cam.viewportWidth * zoom / 2);
@@ -1392,8 +1410,8 @@ public class GdxRenderer extends ApplicationAdapter {
 
     var indices = new short[] {1, 0, 3, 3, 2, 1};
 
-    var polySprite = new PolygonSprite(new PolygonRegion(paint.textureRegion(), vertices, indices));
-    polySprite.setColor(paint.color());
+    var polySprite = new PolygonSprite(new PolygonRegion(region, vertices, indices));
+    polySprite.setColor(tint);
     polySprite.draw(batch);
   }
 
