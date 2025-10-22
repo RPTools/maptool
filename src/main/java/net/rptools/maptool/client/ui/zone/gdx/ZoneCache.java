@@ -20,9 +20,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.video.VideoPlayer;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +31,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
@@ -57,7 +54,6 @@ public class ZoneCache implements Disposable {
   // this atlas is shared by all zones and must not be disposed here.
   private TextureAtlas sharedAtlas;
   private final Map<MD5Key, Animation<TextureRegion>> animationMap = new HashMap<>();
-  private final Map<MD5Key, VideoPlayer> videoPlayerMap = new HashMap<>();
   private final Map<String, Sprite> fetchedSprites = new HashMap<>();
   private final Map<MD5Key, Sprite> isoSprites = new HashMap<>();
   private final Map<String, TextureRegion> fetchedRegions = new HashMap<>();
@@ -276,33 +272,6 @@ public class ZoneCache implements Disposable {
 
   public Sprite getSprite(MD5Key key, float stateTime) {
     if (key == null) return null;
-
-    var videoPlayer = videoPlayerMap.get(key);
-    if (videoPlayer != null) {
-      boolean skip = false;
-      if (!videoPlayer.isPlaying()) {
-        try {
-          var file = AssetManager.getAssetCacheFile(key);
-          if (file.exists()) {
-            videoPlayer.play(Gdx.files.absolute(file.getAbsolutePath()));
-            videoPlayer.setVolume(0);
-          } else skip = true;
-
-        } catch (FileNotFoundException ex) {
-          log.warn(ex.toString());
-          skip = true;
-        }
-      }
-      if (!skip) {
-        videoPlayer.update();
-        var texture = videoPlayer.getTexture();
-        if (texture != null) {
-          var sprite = new Sprite(texture);
-          sprite.setSize(texture.getWidth(), texture.getHeight());
-          return sprite;
-        }
-      }
-    }
 
     var animation = animationMap.get(key);
     if (animation != null) {
