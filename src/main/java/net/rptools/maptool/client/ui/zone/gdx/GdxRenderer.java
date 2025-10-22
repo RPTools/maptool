@@ -153,7 +153,6 @@ public class GdxRenderer extends ApplicationAdapter {
 
   private com.badlogic.gdx.assets.AssetManager manager;
   private TextureAtlas atlas;
-  private Texture onePixel;
   private ShapeDrawer drawer;
   private final GlyphLayout glyphLayout = new GlyphLayout();
   private TextRenderer textRenderer;
@@ -162,6 +161,9 @@ public class GdxRenderer extends ApplicationAdapter {
   private DrawnElementRenderer drawnElementRenderer;
   private TokenOverlayRenderer tokenOverlayRenderer;
   private GridRenderer gridRenderer;
+
+  private Texture whitePixel;
+  private Texture clearPixel;
 
   // temorary objects. Stored here to avoid garbage collection;
   private final Vector3 tmpWorldCoord = new Vector3();
@@ -208,6 +210,21 @@ public class GdxRenderer extends ApplicationAdapter {
               Gdx.files.classpath(
                   "net/rptools/maptool/client/ui/zone/gdx/environmentalLighting.fsh"));
 
+      Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+      try {
+        pixmap.setBlending(Pixmap.Blending.None);
+
+        pixmap.setColor(Color.WHITE);
+        pixmap.drawPixel(0, 0);
+        whitePixel = new Texture(pixmap);
+
+        pixmap.setColor(Color.CLEAR);
+        pixmap.drawPixel(0, 0);
+        clearPixel = new Texture(pixmap);
+      } finally {
+        pixmap.dispose();
+      }
+
       batch = new PolygonSpriteBatch();
       batch.enableBlending();
 
@@ -247,14 +264,7 @@ public class GdxRenderer extends ApplicationAdapter {
       resultsBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
       spareBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
 
-      // TODO: Add it to the texture atlas
-      Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-      pixmap.setColor(Color.WHITE);
-      pixmap.drawPixel(0, 0);
-      onePixel = new Texture(pixmap);
-      pixmap.dispose();
-
-      drawer = new ShapeDrawer(batch, new TextureRegion(onePixel));
+      drawer = new ShapeDrawer(batch, new TextureRegion(whitePixel));
 
       areaRenderer = new AreaRenderer(drawer);
       drawnElementRenderer = new DrawnElementRenderer(areaRenderer, this::getPaint);
@@ -276,7 +286,7 @@ public class GdxRenderer extends ApplicationAdapter {
       if (zoneCache != null) {
         zoneCache.dispose();
       }
-      onePixel.dispose();
+      whitePixel.dispose();
     } catch (Exception e) {
       log.error("Unhandled exception in GdxRenderer::dispose()", e);
     }
@@ -507,7 +517,7 @@ public class GdxRenderer extends ApplicationAdapter {
         Color.argb8888ToColor(color, colorPaint.getColor());
         color.premultiplyAlpha();
 
-        texture = onePixel;
+        texture = whitePixel;
       }
       case DrawableTexturePaint texturePaint -> {
         color.set(Color.WHITE);
