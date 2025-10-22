@@ -22,8 +22,8 @@ import net.rptools.maptool.model.drawing.Pen;
 
 public class ConeTemplateDrawer extends RadiusTemplateDrawer {
 
-  public ConeTemplateDrawer(AreaRenderer renderer) {
-    super(renderer);
+  public ConeTemplateDrawer(AreaRenderer renderer, PaintResolver paintResolver) {
+    super(renderer, paintResolver);
   }
 
   @Override

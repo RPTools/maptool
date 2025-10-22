@@ -23,8 +23,8 @@ import net.rptools.maptool.model.drawing.Pen;
 
 public abstract class AbstractTemplateDrawer extends AbstractDrawingDrawer {
 
-  public AbstractTemplateDrawer(AreaRenderer renderer) {
-    super(renderer);
+  public AbstractTemplateDrawer(AreaRenderer renderer, PaintResolver paintResolver) {
+    super(renderer, paintResolver);
   }
 
   @Override

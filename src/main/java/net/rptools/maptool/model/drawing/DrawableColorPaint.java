@@ -21,7 +21,7 @@ import java.io.Serializable;
 import net.rptools.maptool.server.proto.drawing.DrawableColorPaintDto;
 import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
 
-public class DrawableColorPaint extends DrawablePaint implements Serializable {
+public final class DrawableColorPaint extends DrawablePaint implements Serializable {
   private int color;
   private transient Color colorCache;
 

@@ -24,8 +24,8 @@ import net.rptools.maptool.model.drawing.LineTemplate;
 import net.rptools.maptool.model.drawing.Pen;
 
 public class LineTemplateDrawer extends AbstractTemplateDrawer {
-  public LineTemplateDrawer(AreaRenderer renderer) {
-    super(renderer);
+  public LineTemplateDrawer(AreaRenderer renderer, PaintResolver paintResolver) {
+    super(renderer, paintResolver);
   }
 
   @Override

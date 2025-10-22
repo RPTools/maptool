@@ -21,8 +21,8 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.RadiusTemplate;
 
 public class RadiusTemplateDrawer extends AbstractTemplateDrawer {
-  public RadiusTemplateDrawer(AreaRenderer renderer) {
-    super(renderer);
+  public RadiusTemplateDrawer(AreaRenderer renderer, PaintResolver paintResolver) {
+    super(renderer, paintResolver);
   }
 
   @Override

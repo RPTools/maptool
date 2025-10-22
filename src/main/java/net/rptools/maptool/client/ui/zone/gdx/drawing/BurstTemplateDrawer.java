@@ -25,8 +25,8 @@ import net.rptools.maptool.model.drawing.Pen;
 
 public class BurstTemplateDrawer extends AbstractDrawingDrawer {
 
-  public BurstTemplateDrawer(AreaRenderer renderer) {
-    super(renderer);
+  public BurstTemplateDrawer(AreaRenderer renderer, PaintResolver paintResolver) {
+    super(renderer, paintResolver);
   }
 
   @Override

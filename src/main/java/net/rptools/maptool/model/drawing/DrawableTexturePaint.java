@@ -27,7 +27,7 @@ import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
 import net.rptools.maptool.server.proto.drawing.DrawableTexturePaintDto;
 import net.rptools.maptool.util.ImageManager;
 
-public class DrawableTexturePaint extends DrawablePaint implements Serializable {
+public final class DrawableTexturePaint extends DrawablePaint implements Serializable {
   private MD5Key assetId;
   private double scale;
   private transient BufferedImage image;

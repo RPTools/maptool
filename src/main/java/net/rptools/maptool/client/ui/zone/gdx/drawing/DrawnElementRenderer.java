@@ -31,15 +31,16 @@ public class DrawnElementRenderer {
   private final RadiusCellTemplateDrawer radiusCellTemplateDrawer;
   private final ShapeDrawableDrawer shapeDrawableDrawer;
 
-  public DrawnElementRenderer(AreaRenderer areaRenderer) {
-    lineTemplateDrawer = new LineTemplateDrawer(areaRenderer);
-    lineCellTemplateDrawer = new LineCellTemplateDrawer(areaRenderer);
-    radiusTemplateDrawer = new RadiusTemplateDrawer(areaRenderer);
-    burstTemplateDrawer = new BurstTemplateDrawer(areaRenderer);
-    coneTemplateDrawer = new ConeTemplateDrawer(areaRenderer);
-    blastTemplateDrawer = new BlastTemplateDrawer(areaRenderer);
-    radiusCellTemplateDrawer = new RadiusCellTemplateDrawer(areaRenderer);
-    shapeDrawableDrawer = new ShapeDrawableDrawer(areaRenderer);
+  public DrawnElementRenderer(
+      AreaRenderer areaRenderer, AbstractDrawingDrawer.PaintResolver paintResolver) {
+    lineTemplateDrawer = new LineTemplateDrawer(areaRenderer, paintResolver);
+    lineCellTemplateDrawer = new LineCellTemplateDrawer(areaRenderer, paintResolver);
+    radiusTemplateDrawer = new RadiusTemplateDrawer(areaRenderer, paintResolver);
+    burstTemplateDrawer = new BurstTemplateDrawer(areaRenderer, paintResolver);
+    coneTemplateDrawer = new ConeTemplateDrawer(areaRenderer, paintResolver);
+    blastTemplateDrawer = new BlastTemplateDrawer(areaRenderer, paintResolver);
+    radiusCellTemplateDrawer = new RadiusCellTemplateDrawer(areaRenderer, paintResolver);
+    shapeDrawableDrawer = new ShapeDrawableDrawer(areaRenderer, paintResolver);
   }
 
   public void render(PolygonSpriteBatch batch, Zone zone, List<DrawnElement> drawables) {
