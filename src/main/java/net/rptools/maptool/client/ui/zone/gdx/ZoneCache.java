@@ -53,7 +53,6 @@ public class ZoneCache implements Disposable {
 
   // this atlas is shared by all zones and must not be disposed here.
   private TextureAtlas sharedAtlas;
-  private final Map<MD5Key, Animation<TextureRegion>> animationMap = new HashMap<>();
   private final Map<String, Sprite> fetchedSprites = new HashMap<>();
   private final Map<MD5Key, Sprite> isoSprites = new HashMap<>();
   private final Map<String, TextureRegion> fetchedRegions = new HashMap<>();
@@ -270,16 +269,8 @@ public class ZoneCache implements Disposable {
     return image;
   }
 
-  public Sprite getSprite(MD5Key key, float stateTime) {
+  public Sprite getSprite(MD5Key key) {
     if (key == null) return null;
-
-    var animation = animationMap.get(key);
-    if (animation != null) {
-      var currentFrame = animation.getKeyFrame(stateTime, true);
-      var sprite = new Sprite(currentFrame);
-      sprite.setSize(currentFrame.getRegionWidth(), currentFrame.getRegionHeight());
-      return sprite;
-    }
 
     var sprite = bigSprites.get(key);
     if (sprite != null) {
@@ -315,7 +306,6 @@ public class ZoneCache implements Disposable {
   @Override
   public void dispose() {
     fetchedRegions.clear();
-    animationMap.clear();
     fetchedSprites.clear();
 
     Gdx.app.postRunnable(
