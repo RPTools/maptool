@@ -43,15 +43,14 @@ public class TokenOverlayRenderer {
     this.zoneCache = zoneCache;
   }
 
-  public void render(float stateTime, AbstractTokenOverlay overlay, Token token, Object value) {
+  public void render(AbstractTokenOverlay overlay, Token token, Object value) {
     if (overlay instanceof BarTokenOverlay barTokenOverlay)
-      renderBarTokenOverlay(stateTime, barTokenOverlay, token, value);
+      renderBarTokenOverlay(barTokenOverlay, token, value);
     else if (overlay instanceof BooleanTokenOverlay booleanTokenOverlay)
-      renderTokenOverlay(stateTime, booleanTokenOverlay, token, value);
+      renderTokenOverlay(booleanTokenOverlay, token, value);
   }
 
-  private void renderBarTokenOverlay(
-      float stateTime, BarTokenOverlay overlay, Token token, Object value) {
+  private void renderBarTokenOverlay(BarTokenOverlay overlay, Token token, Object value) {
     if (value == null) return;
     double val;
     if (value instanceof Number) {
@@ -67,19 +66,19 @@ public class TokenOverlayRenderer {
     if (val > 1) val = 1;
 
     if (overlay instanceof MultipleImageBarTokenOverlay actualOverlay)
-      renderTokenOverlay(stateTime, actualOverlay, token, val);
+      renderTokenOverlay(actualOverlay, token, val);
     else if (overlay instanceof SingleImageBarTokenOverlay actualOverlay)
-      renderTokenOverlay(stateTime, actualOverlay, token, val);
+      renderTokenOverlay(actualOverlay, token, val);
     else if (overlay instanceof TwoToneBarTokenOverlay actualOverlay)
       renderTokenOverlay(actualOverlay, token, val);
     else if (overlay instanceof DrawnBarTokenOverlay actualOverlay)
       renderTokenOverlay(actualOverlay, token, val);
     else if (overlay instanceof TwoImageBarTokenOverlay actualOverlay)
-      renderTokenOverlay(stateTime, actualOverlay, token, val);
+      renderTokenOverlay(actualOverlay, token, val);
   }
 
   private void renderTokenOverlay(
-      float stateTime, MultipleImageBarTokenOverlay overlay, Token token, double barValue) {
+      MultipleImageBarTokenOverlay overlay, Token token, double barValue) {
     int increment = overlay.findIncrement(barValue);
 
     var bounds = token.getFootprintBounds(zoneCache.getZone());
@@ -87,7 +86,7 @@ public class TokenOverlayRenderer {
     var y = -bounds.y - bounds.height;
 
     // Get the images
-    var image = zoneCache.getSprite(overlay.getAssetIds()[increment], stateTime);
+    var image = zoneCache.getSprite(overlay.getAssetIds()[increment]);
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
@@ -111,13 +110,13 @@ public class TokenOverlayRenderer {
   }
 
   private void renderTokenOverlay(
-      float stateTime, SingleImageBarTokenOverlay overlay, Token token, double barValue) {
+      SingleImageBarTokenOverlay overlay, Token token, double barValue) {
     var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
 
     // Get the images
-    var image = zoneCache.getSprite(overlay.getAssetId(), stateTime);
+    var image = zoneCache.getSprite(overlay.getAssetId());
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
@@ -262,15 +261,14 @@ public class TokenOverlayRenderer {
     drawer.filledRectangle(x, y, width, height, tmpColor);
   }
 
-  private void renderTokenOverlay(
-      float stateTime, TwoImageBarTokenOverlay overlay, Token token, double barValue) {
+  private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, double barValue) {
     var bounds = token.getFootprintBounds(zoneCache.getZone());
     var x = bounds.x;
     var y = -bounds.y - bounds.height;
 
     // Get the images
-    var topImage = zoneCache.getSprite(overlay.getTopAssetId(), stateTime);
-    var bottomImage = zoneCache.getSprite(overlay.getBottomAssetId(), stateTime);
+    var topImage = zoneCache.getSprite(overlay.getTopAssetId());
+    var bottomImage = zoneCache.getSprite(overlay.getBottomAssetId());
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) topImage.getWidth(), (int) topImage.getHeight());
@@ -332,12 +330,11 @@ public class TokenOverlayRenderer {
     topImage.setV2(v2);
   }
 
-  private void renderTokenOverlay(
-      float stateTime, BooleanTokenOverlay overlay, Token token, Object value) {
+  private void renderTokenOverlay(BooleanTokenOverlay overlay, Token token, Object value) {
     if (!FunctionUtil.getBooleanValue(value)) return;
 
     if (overlay instanceof ImageTokenOverlay actualOverlay)
-      renderTokenOverlay(stateTime, actualOverlay, token);
+      renderTokenOverlay(actualOverlay, token);
     else if (overlay instanceof FlowColorDotTokenOverlay actualOverlay)
       renderTokenOverlay(actualOverlay, token);
     else if (overlay instanceof YieldTokenOverlay actualOverlay)
@@ -371,10 +368,10 @@ public class TokenOverlayRenderer {
     drawer.setColor(Color.WHITE);
   }
 
-  private void renderTokenOverlay(float stateTime, ImageTokenOverlay overlay, Token token) {
+  private void renderTokenOverlay(ImageTokenOverlay overlay, Token token) {
     var bounds = token.getFootprintBounds(zoneCache.getZone());
 
-    var image = zoneCache.getSprite(overlay.getAssetId(), stateTime);
+    var image = zoneCache.getSprite(overlay.getAssetId());
     Rectangle2D imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
     AwtUtil.fitInto(imageBounds, bounds);
 
@@ -388,10 +385,10 @@ public class TokenOverlayRenderer {
     image.draw(batch, overlay.getOpacity() / 100f);
   }
 
-  private void renderTokenOverlay(float stateTime, CornerImageTokenOverlay overlay, Token token) {
+  private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token) {
     var bounds = token.getFootprintBounds(zoneCache.getZone());
 
-    var image = zoneCache.getSprite(overlay.getAssetId(), stateTime);
+    var image = zoneCache.getSprite(overlay.getAssetId());
     Rectangle2D imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
     AwtUtil.fitInto(imageBounds, bounds);
     imageBounds = overlay.getBounds(imageBounds);

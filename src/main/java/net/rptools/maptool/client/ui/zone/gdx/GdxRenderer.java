@@ -996,7 +996,7 @@ public class GdxRenderer extends ApplicationAdapter {
         java.awt.Rectangle footprintBounds = token.getFootprintBounds(zoneCache.getZone());
 
         // get token image, using image table if present
-        Sprite image = zoneCache.getSprite(token.getImageAssetId(), stateTime);
+        Sprite image = zoneCache.getSprite(token.getImageAssetId());
         if (image == null) continue;
 
         // Vision visibility
@@ -1342,7 +1342,7 @@ public class GdxRenderer extends ApplicationAdapter {
     var paint = zoneCache.getZone().getBackgroundPaint();
     fillViewportWith(zoneCache.getPaint(paint));
 
-    var map = zoneCache.getSprite(zoneCache.getZone().getMapAssetId(), stateTime);
+    var map = zoneCache.getSprite(zoneCache.getZone().getMapAssetId());
     if (map != null) {
       map.setPosition(
           zoneCache.getZone().getBoardX(), zoneCache.getZone().getBoardY() - map.getHeight());
@@ -1450,7 +1450,7 @@ public class GdxRenderer extends ApplicationAdapter {
 
       // get token image sprite, using image table if present
       var imageKey = token.getTokenImageAssetId();
-      Sprite image = zoneCache.getSprite(imageKey, stateTime);
+      Sprite image = zoneCache.getSprite(imageKey);
 
       prepareTokenSprite(image, token, footprintBounds);
 
@@ -1653,7 +1653,7 @@ public class GdxRenderer extends ApplicationAdapter {
             || !overlay.showPlayer(token, MapTool.getPlayer())) {
           continue;
         }
-        tokenOverlayRenderer.render(stateTime, overlay, token, stateValue);
+        tokenOverlayRenderer.render(overlay, token, stateValue);
       }
       timer.stop("tokenlist-9");
 
@@ -1667,8 +1667,8 @@ public class GdxRenderer extends ApplicationAdapter {
             || !overlay.showPlayer(token, MapTool.getPlayer())) {
           continue;
         }
-        tokenOverlayRenderer.render(stateTime, overlay, token, barValue);
-      } // endfor
+        tokenOverlayRenderer.render(overlay, token, barValue);
+      }
       timer.stop("tokenlist-10");
 
       timer.start("tokenlist-11");
