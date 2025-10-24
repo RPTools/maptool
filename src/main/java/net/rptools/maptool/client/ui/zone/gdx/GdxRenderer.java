@@ -285,6 +285,15 @@ public class GdxRenderer extends ApplicationAdapter {
   @Override
   public void resize(int width, int height) {
     try {
+      /*
+       * We have to look up the width and height ourselves because `JoglGraphicsBase` divides by the
+       * back buffer scale instead of multiplying by it. This means the `width` and `height`
+       * parameters here are neither the back buffer size nor the client area, and thus we can't use
+       * them.
+       */
+      width = Gdx.graphics.getWidth();
+      height = Gdx.graphics.getHeight();
+
       this.width = width;
       this.height = height;
 
