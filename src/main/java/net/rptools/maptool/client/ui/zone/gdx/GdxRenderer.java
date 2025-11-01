@@ -51,6 +51,7 @@ import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.WallTopologyTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.theme.Borders;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
@@ -93,6 +94,16 @@ public class GdxRenderer extends ApplicationAdapter {
 
   public static final float POINTS_PER_BEZIER = 10f;
   private static GdxRenderer _instance;
+
+  private record RegionBorder(
+      TextureRegion topRight,
+      TextureRegion top,
+      TextureRegion topLeft,
+      TextureRegion left,
+      TextureRegion bottomLeft,
+      TextureRegion bottom,
+      TextureRegion bottomRight,
+      TextureRegion right) {}
 
   // renderFog
   private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
@@ -152,7 +163,11 @@ public class GdxRenderer extends ApplicationAdapter {
   private FrameBuffer spareBuffer;
 
   private com.badlogic.gdx.assets.AssetManager manager;
+
   private TextureAtlas atlas;
+  private final Map<Images, TextureRegion> cachedImageResources = new HashMap<>();
+  private final Map<String, RegionBorder> cachedBorders = new HashMap<>();
+
   private ShapeDrawer drawer;
   private final GlyphLayout glyphLayout = new GlyphLayout();
   private TextRenderer textRenderer;
@@ -161,6 +176,14 @@ public class GdxRenderer extends ApplicationAdapter {
   private DrawnElementRenderer drawnElementRenderer;
   private TokenOverlayRenderer tokenOverlayRenderer;
   private GridRenderer gridRenderer;
+
+  private TextureRegion transferringAsset;
+  private TextureRegion brokenAsset;
+  // Same as transferring asset and brokenAsset, but used for paints that require an actual Texture
+  // to support repeating patterns. These are less efficient than transferringAsset and brokenAsset,
+  // so don't use them unless necessary!
+  private Texture transferringAssetTexture;
+  private Texture brokenAssetTexture;
 
   private Texture whitePixel;
   private Texture clearPixel;
@@ -240,6 +263,12 @@ public class GdxRenderer extends ApplicationAdapter {
 
         atlas = manager.get(ATLAS, TextureAtlas.class);
 
+        transferringAsset = atlas.findRegion("unknown");
+        brokenAsset = atlas.findRegion("broken");
+
+        transferringAssetTexture = newTextureFromRegion(transferringAsset);
+        brokenAssetTexture = newTextureFromRegion(brokenAsset);
+
         normalFont = manager.get(FONT_NORMAL, BitmapFont.class);
         textRenderer = new TextRenderer(atlas, batch, normalFont);
         hudTextRenderer = new TextRenderer(atlas, batch, normalFont, false);
@@ -268,7 +297,9 @@ public class GdxRenderer extends ApplicationAdapter {
 
       areaRenderer = new AreaRenderer(drawer, whitePixel);
       drawnElementRenderer = new DrawnElementRenderer(areaRenderer, this::getPaint);
-      tokenOverlayRenderer = new TokenOverlayRenderer(areaRenderer);
+      tokenOverlayRenderer =
+          new TokenOverlayRenderer(
+              areaRenderer, key -> zoneCache.getImageAsset(key, transferringAsset, brokenAsset));
       gridRenderer = new GridRenderer(areaRenderer, hudCam);
 
       initialized = true;
@@ -362,6 +393,53 @@ public class GdxRenderer extends ApplicationAdapter {
     }
 
     setProjectionMatrix(cam.combined);
+  }
+
+  private TextureRegion fetchImageResource(Images resource) {
+    return cachedImageResources.computeIfAbsent(
+        resource,
+        key -> {
+          var name =
+              switch (key) {
+                case LIGHT_SOURCE -> "lightbulb";
+                case ZONE_RENDERER_STACK_IMAGE -> "stack";
+                case GRID_BORDER_SQUARE -> "whiteBorder";
+                case GRID_BORDER_ISOMETRIC -> "isoBorder";
+                case GRID_BORDER_HEX -> "hexBorder";
+                case ZONE_RENDERER_CELL_WAYPOINT -> "redDot";
+                case ZONE_RENDERER_BLOCK_MOVE -> "block_move";
+                default -> null;
+              };
+          return name == null ? null : atlas.findRegion(name);
+        });
+  }
+
+  private Texture newTextureFromRegion(TextureRegion region) {
+    Texture originalTexture = region.getTexture();
+    if (!originalTexture.getTextureData().isPrepared()) {
+      originalTexture.getTextureData().prepare();
+    }
+    Pixmap originalPixmap = originalTexture.getTextureData().consumePixmap();
+    try {
+      Pixmap newPixmap =
+          new Pixmap(region.getRegionWidth(), region.getRegionHeight(), originalPixmap.getFormat());
+      try {
+        newPixmap.drawPixmap(
+            originalPixmap,
+            0,
+            0,
+            region.getRegionX(),
+            region.getRegionY(),
+            region.getRegionWidth(),
+            region.getRegionHeight());
+
+        return new Texture(newPixmap);
+      } finally {
+        newPixmap.dispose();
+      }
+    } finally {
+      originalPixmap.dispose();
+    }
   }
 
   private void updateCam() {
@@ -521,7 +599,9 @@ public class GdxRenderer extends ApplicationAdapter {
       }
       case DrawableTexturePaint texturePaint -> {
         color.set(Color.WHITE);
-        texture = zoneCache.getPaintTexture(texturePaint.getAssetId());
+        texture =
+            zoneCache.getPaintTexture(
+                texturePaint.getAssetId(), transferringAssetTexture, brokenAssetTexture);
       }
     }
 
@@ -826,7 +906,7 @@ public class GdxRenderer extends ApplicationAdapter {
       return;
     }
 
-    TextureRegion lightbulb = zoneCache.fetch("lightbulb");
+    TextureRegion lightbulb = fetchImageResource(Images.LIGHT_SOURCE);
     for (var point : viewModel.getLightPositions()) {
       var x = point.getX() - lightbulb.getRegionWidth() / 2.;
       var y = -point.getY() - lightbulb.getRegionHeight() / 2.;
@@ -1055,8 +1135,9 @@ public class GdxRenderer extends ApplicationAdapter {
         java.awt.Rectangle footprintBounds = token.getFootprintBounds(zoneCache.getZone());
 
         // get token image, using image table if present
-        Sprite image = zoneCache.getSprite(token.getImageAssetId());
-        if (image == null) continue;
+        Sprite image =
+            new Sprite(
+                zoneCache.getImageAsset(token.getImageAssetId(), transferringAsset, brokenAsset));
 
         // Vision visibility
         boolean isOwner = view.isGMView() || AppUtil.playerOwns(token); // ||
@@ -1096,7 +1177,7 @@ public class GdxRenderer extends ApplicationAdapter {
               ZonePoint zp =
                   zoneCache.getZoneRenderer().getZone().getGrid().midZonePoint(point, position);
               double r = (zp.x - 1) * 45;
-              showBlockedMoves(zp, r, zoneCache.getSprite("block_move"), 1.0f);
+              showBlockedMoves(zp, r, fetchImageResource(Images.ZONE_RENDERER_BLOCK_MOVE), 1.0f);
             }
           }
         }
@@ -1212,19 +1293,21 @@ public class GdxRenderer extends ApplicationAdapter {
     }
   }
 
-  private void showBlockedMoves(ZonePoint zp, double angle, Sprite image, float size) {
+  private void showBlockedMoves(ZonePoint zp, double angle, TextureRegion image, float size) {
+    var sprite = new Sprite(image);
+
     // Resize image to size of 1/4 size of grid
     var resizeWidth =
-        (float) zoneCache.getZone().getGrid().getCellWidth() / image.getWidth() * .25f;
+        (float) zoneCache.getZone().getGrid().getCellWidth() / sprite.getWidth() * .25f;
     var resizeHeight =
-        (float) zoneCache.getZone().getGrid().getCellHeight() / image.getHeight() * .25f;
+        (float) zoneCache.getZone().getGrid().getCellHeight() / sprite.getHeight() * .25f;
 
-    var w = image.getWidth() * resizeWidth * size;
-    var h = image.getHeight() * resizeHeight * size;
+    var w = sprite.getWidth() * resizeWidth * size;
+    var h = sprite.getHeight() * resizeHeight * size;
 
-    image.setSize(w, h);
-    image.setPosition(zp.x - w / 2f, -(zp.y - h / 2f));
-    image.draw(batch);
+    sprite.setSize(w, h);
+    sprite.setPosition(zp.x - w / 2f, -(zp.y - h / 2f));
+    sprite.draw(batch);
   }
 
   private void renderLumensOverlay(PlayerView view, float overlayAlpha) {
@@ -1401,8 +1484,9 @@ public class GdxRenderer extends ApplicationAdapter {
     var paint = getPaint(zoneCache.getZone().getBackgroundPaint());
     fillViewportWith(paint.color(), paint.texture());
 
-    var map = zoneCache.getSprite(zoneCache.getZone().getMapAssetId());
-    if (map != null) {
+    var assetId = zoneCache.getZone().getMapAssetId();
+    if (assetId != null) {
+      var map = new Sprite(zoneCache.getImageAsset(assetId, transferringAsset, brokenAsset));
       map.setPosition(
           zoneCache.getZone().getBoardX(), zoneCache.getZone().getBoardY() - map.getHeight());
       map.draw(batch);
@@ -1509,8 +1593,10 @@ public class GdxRenderer extends ApplicationAdapter {
       timer.stop("renderTokens:ShowPath");
 
       // get token image sprite, using image table if present
-      var imageKey = token.getTokenImageAssetId();
-      Sprite image = zoneCache.getSprite(imageKey);
+      Sprite image =
+          new Sprite(
+              zoneCache.getImageAsset(
+                  token.getTokenImageAssetId(), transferringAsset, brokenAsset));
 
       prepareTokenSprite(image, token, footprintBounds);
 
@@ -1835,7 +1921,7 @@ public class GdxRenderer extends ApplicationAdapter {
           && !hideTSI) { // FIXME Needed to prevent NPE but how can it be null?
         for (Token token : tokenStackMap.keySet()) {
           var tokenRectangle = token.getFootprintBounds(zoneCache.getZone());
-          var stackImage = zoneCache.fetch("stack");
+          var stackImage = fetchImageResource(Images.ZONE_RENDERER_STACK_IMAGE);
           batch.draw(
               stackImage,
               tokenRectangle.x + tokenRectangle.width - stackImage.getRegionWidth() + 2,
@@ -1865,7 +1951,10 @@ public class GdxRenderer extends ApplicationAdapter {
 
     timer.start("tokenlist-5a");
     if (token.getIsFlippedIso()) {
-      image = zoneCache.getIsoSprite(token.getImageAssetId());
+      image =
+          new Sprite(
+              zoneCache.getIsoImage(
+                  token.getImageAssetId(), transferringAssetTexture, brokenAssetTexture));
       token.setHeight((int) image.getHeight());
       token.setWidth((int) image.getWidth());
       footprintBounds = token.getFootprintBounds(zoneCache.getZone());
@@ -1936,25 +2025,34 @@ public class GdxRenderer extends ApplicationAdapter {
     timer.stop("tokenlist-6");
   }
 
-  private void renderImageBorderAround(ImageBorder border, Rectangle bounds) {
-    var imagePath = border.getImagePath();
+  private RegionBorder fetchBorder(ImageBorder imageBorder) {
+    var imagePath = imageBorder.getImagePath();
     var index = imagePath.indexOf("border/");
-    var bordername = imagePath.substring(index);
+    var borderName = imagePath.substring(index);
 
-    var topRight = zoneCache.fetch(bordername + "/tr");
-    var top = zoneCache.fetch(bordername + "/top");
-    var topLeft = zoneCache.fetch(bordername + "/tl");
-    var left = zoneCache.fetch(bordername + "/left");
-    var bottomLeft = zoneCache.fetch(bordername + "/bl");
-    var bottom = zoneCache.fetch(bordername + "/bottom");
-    var bottomRight = zoneCache.fetch(bordername + "/br");
-    var right = zoneCache.fetch(bordername + "/right");
+    return cachedBorders.computeIfAbsent(
+        borderName,
+        name -> {
+          return new RegionBorder(
+              atlas.findRegion(name + "/tr"),
+              atlas.findRegion(name + "/top"),
+              atlas.findRegion(name + "/tl"),
+              atlas.findRegion(name + "/left"),
+              atlas.findRegion(name + "/bl"),
+              atlas.findRegion(name + "/bottom"),
+              atlas.findRegion(name + "/br"),
+              atlas.findRegion(name + "/right"));
+        });
+  }
+
+  private void renderImageBorderAround(ImageBorder imageBorder, Rectangle bounds) {
+    var border = fetchBorder(imageBorder);
 
     // x,y is bottom left of the rectangle
-    var leftMargin = border.getLeftMargin();
-    var rightMargin = border.getRightMargin();
-    var topMargin = border.getTopMargin();
-    var bottomMargin = border.getBottomMargin();
+    var leftMargin = imageBorder.getLeftMargin();
+    var rightMargin = imageBorder.getRightMargin();
+    var topMargin = imageBorder.getTopMargin();
+    var bottomMargin = imageBorder.getBottomMargin();
 
     var x = bounds.x - leftMargin;
     var y = bounds.y - bottomMargin;
@@ -1965,43 +2063,49 @@ public class GdxRenderer extends ApplicationAdapter {
     // Draw Corners
 
     batch.draw(
-        bottomLeft,
-        x + leftMargin - bottomLeft.getRegionWidth(),
-        y + topMargin - bottomLeft.getRegionHeight());
-    batch.draw(bottomRight, x + width - rightMargin, y + topMargin - bottomRight.getRegionHeight());
-    batch.draw(topLeft, x + leftMargin - topLeft.getRegionWidth(), y + height - bottomMargin);
-    batch.draw(topRight, x + width - rightMargin, y + height - bottomMargin);
+        border.bottomLeft(),
+        x + leftMargin - border.bottomLeft().getRegionWidth(),
+        y + topMargin - border.bottomLeft().getRegionHeight());
+    batch.draw(
+        border.bottomRight(),
+        x + width - rightMargin,
+        y + topMargin - border.bottomRight().getRegionHeight());
+    batch.draw(
+        border.topLeft(),
+        x + leftMargin - border.topLeft().getRegionWidth(),
+        y + height - bottomMargin);
+    batch.draw(border.topRight(), x + width - rightMargin, y + height - bottomMargin);
 
-    tmpTile.setRegion(top);
+    tmpTile.setRegion(border.top());
     tmpTile.draw(
         batch,
         x + leftMargin,
         y + height - bottomMargin,
         width - leftMargin - rightMargin,
-        top.getRegionHeight());
+        border.top().getRegionHeight());
 
-    tmpTile.setRegion(bottom);
+    tmpTile.setRegion(border.bottom());
     tmpTile.draw(
         batch,
         x + leftMargin,
-        y + topMargin - bottom.getRegionHeight(),
+        y + topMargin - border.bottom().getRegionHeight(),
         width - leftMargin - rightMargin,
-        bottom.getRegionHeight());
+        border.bottom().getRegionHeight());
 
-    tmpTile.setRegion(left);
+    tmpTile.setRegion(border.left());
     tmpTile.draw(
         batch,
-        x + leftMargin - left.getRegionWidth(),
+        x + leftMargin - border.left().getRegionWidth(),
         y + topMargin,
-        left.getRegionWidth(),
+        border.left().getRegionWidth(),
         height - topMargin - bottomMargin);
 
-    tmpTile.setRegion(right);
+    tmpTile.setRegion(border.right());
     tmpTile.draw(
         batch,
         x + width - rightMargin,
         y + topMargin,
-        right.getRegionWidth(),
+        border.right().getRegionWidth(),
         height - topMargin - bottomMargin);
   }
 
@@ -2167,7 +2271,7 @@ public class GdxRenderer extends ApplicationAdapter {
       int w = 0;
       for (ZonePoint p : waypointList) {
         ZonePoint zp = new ZonePoint(p.x + cellOffset.width, p.y + cellOffset.height);
-        highlightCell(zp, zoneCache.fetch("redDot"), .333f);
+        highlightCell(zp, fetchImageResource(Images.ZONE_RENDERER_CELL_WAYPOINT), .333f);
       }
 
       // Line path
@@ -2298,16 +2402,22 @@ public class GdxRenderer extends ApplicationAdapter {
         p =
             new ZonePoint(
                 (p.x + (footprintBounds.width / 2)), (p.y + (footprintBounds.height / 2)));
-        highlightCell(p, zoneCache.fetch("redDot"), .333f);
+        highlightCell(p, fetchImageResource(Images.ZONE_RENDERER_CELL_WAYPOINT), .333f);
       }
       timer.stop("renderPath-3");
     }
   }
 
   private TextureRegion getCellHighlight() {
-    if (zoneCache.getZone().getGrid() instanceof SquareGrid) return zoneCache.fetch("whiteBorder");
-    if (zoneCache.getZone().getGrid() instanceof HexGrid) return zoneCache.fetch("hexBorder");
-    if (zoneCache.getZone().getGrid() instanceof IsometricGrid) return zoneCache.fetch("isoBorder");
+    if (zoneCache.getZone().getGrid() instanceof SquareGrid) {
+      return fetchImageResource(Images.GRID_BORDER_SQUARE);
+    }
+    if (zoneCache.getZone().getGrid() instanceof HexGrid) {
+      return fetchImageResource(Images.GRID_BORDER_HEX);
+    }
+    if (zoneCache.getZone().getGrid() instanceof IsometricGrid) {
+      return fetchImageResource(Images.GRID_BORDER_ISOMETRIC);
+    }
 
     return null;
   }
@@ -2372,7 +2482,7 @@ public class GdxRenderer extends ApplicationAdapter {
             return;
           }
 
-          zoneCache = new ZoneCache(renderer, atlas);
+          zoneCache = new ZoneCache(renderer);
           viewModel = renderer.getViewModel();
           drawnElementRenderer.setZoneCache(zoneCache);
           tokenOverlayRenderer.setZoneCache(zoneCache);

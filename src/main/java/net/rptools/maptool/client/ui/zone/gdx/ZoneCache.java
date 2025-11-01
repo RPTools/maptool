@@ -20,17 +20,15 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
@@ -46,12 +44,10 @@ public class ZoneCache implements Disposable {
       new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 2, false);
   private final TextureAtlas tokenAtlas = new TextureAtlas();
 
-  // this atlas is shared by all zones and must not be disposed here.
-  private TextureAtlas sharedAtlas;
-  private final Map<String, Sprite> fetchedSprites = new HashMap<>();
-  private final Map<MD5Key, Sprite> isoSprites = new HashMap<>();
-  private final Map<String, TextureRegion> fetchedRegions = new HashMap<>();
-  private final Map<MD5Key, Sprite> bigSprites = new HashMap<>();
+  private final Map<MD5Key, TextureRegion> tokenAtlasAssetRegions = new HashMap<>();
+  private final Map<MD5Key, Texture> largeAssets = new HashMap<>();
+
+  private final Map<MD5Key, Texture> isoTextures = new HashMap<>();
   private final Map<MD5Key, Texture> paintTextures = new HashMap<>();
 
   public Zone getZone() {
@@ -70,29 +66,23 @@ public class ZoneCache implements Disposable {
     return zoneRenderer.getZoneView();
   }
 
-  private Sprite TRANSFERING_SPRITE;
-  private Sprite BROKEN_SPRITE;
-
-  public void setSharedAtlas(TextureAtlas atlas) {
-    sharedAtlas = atlas;
-    if (atlas == null) return;
-    TRANSFERING_SPRITE = new Sprite(sharedAtlas.findRegion("unknown"));
-    BROKEN_SPRITE = new Sprite(sharedAtlas.findRegion("broken"));
-  }
-
-  public ZoneCache(@Nonnull ZoneRenderer zoneRenderer, @Nonnull TextureAtlas sharedAtlas) {
+  public ZoneCache(@Nonnull ZoneRenderer zoneRenderer) {
     this.zone = zoneRenderer.getZone();
     this.zoneRenderer = zoneRenderer;
-    setSharedAtlas(sharedAtlas);
   }
 
-  private void imageToSprite(MD5Key key, BufferedImage image) {
-    var name = key.toString();
-
+  /**
+   * Converts a {@link BufferedImage} to a {@link Pixmap} in ARGB8888 format with premultiplied
+   * alpha.
+   *
+   * @param image The image asset to convert.
+   * @return A premultiplied ARGB888 pixmap equivalent of {@code image}.
+   */
+  private Pixmap assetToPixmap(BufferedImage image) {
     var pixmap = new Pixmap(image.getWidth(), image.getHeight(), packer.getPageFormat());
     pixmap.setBlending(Pixmap.Blending.None);
 
-    Color gdxColor = new Color(Color.CLEAR);
+    Color gdxColor = new Color();
     for (var y = 0; y < image.getHeight(); ++y) {
       for (var x = 0; x < image.getWidth(); ++x) {
         var awtColor = image.getRGB(x, y);
@@ -104,155 +94,156 @@ public class ZoneCache implements Disposable {
       }
     }
 
-    try {
-      synchronized (packer) {
-        if (packer.getRect(name) == null) {
-          packer.pack(name, pixmap);
-        }
+    return pixmap;
+  }
+
+  public @Nonnull TextureRegion getImageAsset(
+      @Nonnull MD5Key key, TextureRegion transferringAsset, TextureRegion brokenAsset) {
+    // We have two levels of cache:
+    // 1. `largeAssets`, for images too large to fit in one of the pages in `tokenAtlas`.
+    // 2. `tokenAtlasAssetRegions`, for images that have been packed into `tokenAtlas`.
+
+    var regionName = key.toString();
+
+    Texture knownLargeAsset = largeAssets.get(key);
+    if (knownLargeAsset != null) {
+      return new TextureRegion(knownLargeAsset);
+    }
+
+    TextureRegion knownRegion = tokenAtlasAssetRegions.get(key);
+    if (knownRegion != null) {
+      return knownRegion;
+    }
+
+    // This asset is not cached. Our atlas cache could have been invalidated, though, so check if
+    // the asset is in the atlas, and cache it if it is.
+    knownRegion = tokenAtlas.findRegion(regionName);
+    if (knownRegion != null) {
+      tokenAtlasAssetRegions.put(key, knownRegion);
+      return knownRegion;
+    }
+
+    // This is a brand new asset. We'll need to resolve it, convert it, and try to pack it.
+
+    var image = ImageManager.getImage(key);
+    // Handle the cases where we could not resolve the image.
+    if (image == ImageManager.TRANSFERING_IMAGE) {
+      return transferringAsset;
+    }
+    if (image == ImageManager.BROKEN_IMAGE) {
+      return brokenAsset;
+    }
+
+    // We're about to convert an image and pack it. But play it safe in case we somehow try to pack
+    // a duplicate.
+    if (packer.getRect(regionName) != null) {
+      log.warn("Asset {} has already been packed, but somehow isn't in the atlas yet.", key);
+    } else {
+      // Convert the image.
+      var pixmap = assetToPixmap(image);
+      try {
+        // Attempt to pack the image.
+        packer.pack(regionName, pixmap);
+      } catch (GdxRuntimeException e) {
+        // Indicates a duplicate or a pixmap that is too large. We checked for duplicates already,
+        // so it must be the latter.
+        var texture = new Texture(pixmap);
+        largeAssets.put(key, texture);
+        return new TextureRegion(texture);
+      } finally {
         pixmap.dispose();
       }
-    } catch (Exception x) {
-      // this means that the pixmap is too big for the atlas.
-
-      synchronized (bigSprites) {
-        if (!bigSprites.containsKey(key)) {
-          bigSprites.put(key, new Sprite(new Texture(pixmap)));
-        }
-      }
-      pixmap.dispose();
     }
+
+    // Rebuild the texture so it has the asset.
+    // This invalidates existing cached texture regions.
     packer.updateTextureAtlas(
         tokenAtlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
+    tokenAtlasAssetRegions.clear();
+
+    var newRegion = tokenAtlas.findRegion(regionName);
+    if (newRegion == null) {
+      log.warn("Asset {} is not available in the atlas after being packed", key);
+      return brokenAsset;
+    }
+    return newRegion;
   }
 
-  public TextureRegion fetch(String regionName) {
-    var region = fetchedRegions.get(regionName);
-    if (region != null) {
-      return region;
+  public @Nonnull Texture getPaintTexture(
+      MD5Key assetId, Texture transferringAsset, Texture brokenAsset) {
+    var texture = paintTextures.get(assetId);
+    if (texture != null) {
+      return texture;
     }
 
-    region = tokenAtlas.findRegion(regionName);
-    if (region == null) {
-      region = sharedAtlas.findRegion(regionName);
+    // We'll have to load, convert, and cache the asset.
+    var image = ImageManager.getImageAndWait(assetId);
+    if (image == ImageManager.TRANSFERING_IMAGE) {
+      return transferringAsset;
+    }
+    if (image == ImageManager.BROKEN_IMAGE) {
+      return brokenAsset;
     }
 
-    if (region != null) {
-      fetchedRegions.put(regionName, region);
-    }
-    return region;
-  }
-
-  public Sprite getSprite(String name) {
-    var sprite = fetchedSprites.get(name);
-    if (sprite != null) {
-      var region = fetchedRegions.get(name);
-      sprite.setSize(region.getRegionWidth(), region.getRegionHeight());
-      return sprite;
-    }
-
-    var region = fetch(name);
-
-    if (region == null) {
-      var key = new MD5Key(name);
-      var image = ImageManager.getImage(key);
-      if (image == ImageManager.TRANSFERING_IMAGE) {
-        return TRANSFERING_SPRITE;
-      }
-
-      if (image == ImageManager.BROKEN_IMAGE) {
-        return BROKEN_SPRITE;
-      }
-
-      imageToSprite(key, image);
-
-      region = fetch(name);
-    }
-
-    if (region == null) {
-      sprite = bigSprites.get(name);
-    } else {
-      sprite = new Sprite(region);
-      sprite.setSize(region.getRegionWidth(), region.getRegionHeight());
-    }
-
-    if (sprite == null) {
-      return BROKEN_SPRITE;
-    }
-
-    fetchedSprites.put(name, sprite);
-    return sprite;
-  }
-
-  public Sprite getIsoSprite(MD5Key key) {
-    if (isoSprites.containsKey(key)) {
-      return isoSprites.get(key);
-    }
-
-    var workImage = IsometricGrid.isoImage(ImageManager.getImage(key));
-
-    byte[] bytes;
+    // Convert the image to a properly formatted pixmap.
+    var pixmap = assetToPixmap(image);
     try {
-      bytes = ImageUtil.imageToBytes(workImage, "png");
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      texture = new Texture(pixmap);
+      texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+      paintTextures.put(assetId, texture);
+      return texture;
+    } finally {
+      pixmap.dispose();
     }
-    var pix = new Pixmap(bytes, 0, bytes.length);
-    var image = new Sprite(new Texture(pix));
-    pix.dispose();
-    isoSprites.put(key, image);
-    return image;
   }
 
-  public Sprite getSprite(MD5Key key) {
-    if (key == null) return null;
-
-    var sprite = bigSprites.get(key);
-    if (sprite != null) {
-      sprite.setSize(sprite.getTexture().getWidth(), sprite.getTexture().getHeight());
-      return sprite;
+  public Texture getIsoImage(MD5Key key, Texture transferringAsset, Texture brokenAsset) {
+    if (isoTextures.containsKey(key)) {
+      return isoTextures.get(key);
     }
 
-    return getSprite(key.toString());
-  }
+    var image = ImageManager.getImage(key);
+    if (image == ImageManager.TRANSFERING_IMAGE) {
+      return transferringAsset;
+    }
+    if (image == ImageManager.BROKEN_IMAGE) {
+      return brokenAsset;
+    }
 
-  public Texture getPaintTexture(MD5Key assetId) {
-    return paintTextures.computeIfAbsent(
-        assetId,
-        key -> {
-          var asset = AssetManager.getAsset(key);
-          var image = asset.getData();
-          var pix = new Pixmap(image, 0, image.length);
-          var texture = new Texture(pix);
-          texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-          pix.dispose();
-          return texture;
-        });
+    var workImage = IsometricGrid.isoImage(image);
+    var pixmap = assetToPixmap(workImage);
+    try {
+      var region = new Texture(pixmap);
+      isoTextures.put(key, region);
+      return region;
+    } finally {
+      pixmap.dispose();
+    }
   }
 
   @Override
   public void dispose() {
-    fetchedRegions.clear();
-    fetchedSprites.clear();
-
     Gdx.app.postRunnable(
         () -> {
-          packer.dispose();
-          tokenAtlas.dispose();
-
-          for (var sprite : isoSprites.values()) {
-            sprite.getTexture().dispose();
+          for (var texture : largeAssets.values()) {
+            texture.dispose();
           }
-          isoSprites.clear();
+          largeAssets.clear();
+
+          tokenAtlasAssetRegions.clear();
 
           for (var texture : paintTextures.values()) {
             texture.dispose();
           }
           paintTextures.clear();
 
-          for (var sprite : bigSprites.values()) {
-            sprite.getTexture().dispose();
+          for (var texture : isoTextures.values()) {
+            texture.dispose();
           }
-          bigSprites.clear();
+          isoTextures.clear();
+
+          packer.dispose();
+          tokenAtlas.dispose();
         });
   }
 }
