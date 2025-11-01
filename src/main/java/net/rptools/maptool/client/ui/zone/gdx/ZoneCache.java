@@ -86,65 +86,6 @@ public class ZoneCache implements Disposable {
     setSharedAtlas(sharedAtlas);
   }
 
-  /*
-    @Override
-    public void assetAvailable(MD5Key key) {
-      var asset = AssetManager.getAsset(key);
-      if (asset.getExtension().equals("gif")) {
-
-        Gdx.app.postRunnable(
-            () -> {
-              // var ass = AssetManager.getAsset(key);
-              var is = new ByteArrayInputStream(asset.getData());
-              var animation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, is);
-              animationMap.put(key, animation);
-            });
-        return;
-      }
-      if (asset.getExtension().equals("data")) {
-        var videoPlayer = VideoPlayerCreator.createVideoPlayer();
-        videoPlayerMap.put(key, videoPlayer);
-        return;
-      }
-      BufferedImage img;
-      byte[] bytes;
-      try {
-        img =
-            ImageUtil.createCompatibleImage(
-                ImageUtil.bytesToImage(asset.getData(), asset.getName()), null);
-        bytes = ImageUtil.imageToBytes(img, "png");
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-      // without ImageUtil there seem to be some issues with transparency  for some images.
-      // (black background instead of transparent)
-      var pix = new Pixmap(bytes, 0, bytes.length);
-
-      try {
-        var name = key.toString();
-        synchronized (packer) {
-          if (packer.getRect(name) == null) packer.pack(name, pix);
-
-          pix.dispose();
-        }
-      } catch (GdxRuntimeException x) {
-        // this means that the pixmap is too big for the atlas.
-        Gdx.app.postRunnable(
-            () -> {
-              synchronized (bigSprites) {
-                if (!bigSprites.containsKey(key)) bigSprites.put(key, new Sprite(new Texture(pix)));
-              }
-              pix.dispose();
-            });
-      }
-      Gdx.app.postRunnable(
-          () -> {
-            packer.updateTextureAtlas(
-                tokenAtlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
-          });
-    }
-  */
-
   private void imageToSprite(MD5Key key, BufferedImage image) {
     var name = key.toString();
 
