@@ -15,6 +15,6 @@
 package net.rptools.maptool.client.ui.zone.gdx;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.Texture;
 
-public record GdxPaint(Color color, TextureRegion textureRegion) {}
+public record GdxPaint(Color color, Texture texture) {}

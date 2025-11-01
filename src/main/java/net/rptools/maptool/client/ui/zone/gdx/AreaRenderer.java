@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.zone.gdx;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.FloatArray;
@@ -44,7 +45,7 @@ public class AreaRenderer {
   public record TriangledPolygon(float[] vertices, short[] indices) {}
 
   private final ShapeDrawer drawer;
-  private final TextureRegion whitePixel;
+  private final Texture whitePixel;
 
   private final FloatArray tmpFloat = new FloatArray();
 
@@ -52,9 +53,9 @@ public class AreaRenderer {
 
   private final Color color = Color.WHITE.cpy();
 
-  public AreaRenderer(ShapeDrawer drawer) {
+  public AreaRenderer(ShapeDrawer drawer, Texture whitePixel) {
     this.drawer = drawer;
-    this.whitePixel = drawer.getRegion();
+    this.whitePixel = whitePixel;
   }
 
   public ShapeDrawer getShapeDrawer() {
@@ -63,7 +64,7 @@ public class AreaRenderer {
 
   public void setColor(Color value) {
     color.set(Objects.requireNonNullElse(value, Color.WHITE));
-    textureRegion = whitePixel;
+    texture = whitePixel;
   }
 
   private final float[] floatsFromArea = new float[6];
@@ -74,14 +75,10 @@ public class AreaRenderer {
   private final Vector2 tmpVector3 = new Vector2();
   private final Vector2 tmpVectorOut = new Vector2();
 
-  private TextureRegion textureRegion = null;
+  private Texture texture = null;
 
-  public TextureRegion getTextureRegion() {
-    return textureRegion;
-  }
-
-  public void setTextureRegion(TextureRegion textureRegion) {
-    this.textureRegion = textureRegion;
+  public void setTexture(Texture texture) {
+    this.texture = texture;
   }
 
   public List<TriangledPolygon> triangulate(Collection<Polygon> jts) {
@@ -114,7 +111,7 @@ public class AreaRenderer {
 
   public void fill(PolygonSpriteBatch batch, List<TriangledPolygon> polygons) {
     for (var poly : polygons) {
-      var polyRegion = new PolygonRegion(textureRegion, poly.vertices, poly.indices);
+      var polyRegion = new PolygonRegion(new TextureRegion(texture), poly.vertices, poly.indices);
       paintRegion(batch, polyRegion);
     }
   }
@@ -147,7 +144,8 @@ public class AreaRenderer {
         }
 
         for (var poly : triangulate(GeometryUtil.toJtsPolygons(shape))) {
-          var polyRegion = new PolygonRegion(textureRegion, poly.vertices, poly.indices);
+          var polyRegion =
+              new PolygonRegion(new TextureRegion(texture), poly.vertices, poly.indices);
           paintRegion(batch, polyRegion);
         }
       }
@@ -196,13 +194,13 @@ public class AreaRenderer {
   }
 
   public void paintPolygon(PolygonSpriteBatch batch, TriangledPolygon polygon) {
-    var polyReg = new PolygonRegion(textureRegion, polygon.vertices, polygon.indices);
+    var polyReg = new PolygonRegion(new TextureRegion(texture), polygon.vertices, polygon.indices);
     paintRegion(batch, polyReg);
   }
 
   public void paintVertices(PolygonSpriteBatch batch, float[] vertices, short[] holeIndices) {
     var indices = Earcut.earcut(vertices, holeIndices, (short) 2).toArray();
-    var polyReg = new PolygonRegion(textureRegion, vertices, indices);
+    var polyReg = new PolygonRegion(new TextureRegion(texture), vertices, indices);
     paintRegion(batch, polyReg);
   }
 
