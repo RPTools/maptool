@@ -266,7 +266,7 @@ public class GdxRenderer extends ApplicationAdapter {
 
       drawer = new ShapeDrawer(batch, new TextureRegion(whitePixel));
 
-      areaRenderer = new AreaRenderer(drawer);
+      areaRenderer = new AreaRenderer(drawer, whitePixel);
       drawnElementRenderer = new DrawnElementRenderer(areaRenderer, this::getPaint);
       tokenOverlayRenderer = new TokenOverlayRenderer(areaRenderer);
       gridRenderer = new GridRenderer(areaRenderer, hudCam);
@@ -525,7 +525,7 @@ public class GdxRenderer extends ApplicationAdapter {
       }
     }
 
-    return new GdxPaint(color, new TextureRegion(texture));
+    return new GdxPaint(color, texture);
   }
 
   public void invalidateCurrentViewCache() {
@@ -936,7 +936,7 @@ public class GdxRenderer extends ApplicationAdapter {
     var paint = zoneCache.getZone().getFogPaint();
     var fogPaint = getPaint(paint);
     fillViewportWith(
-        tmpColor.set(fogPaint.color()).mul(view.isGMView() ? .6f : 1f), fogPaint.textureRegion());
+        tmpColor.set(fogPaint.color()).mul(view.isGMView() ? .6f : 1f), fogPaint.texture());
     timer.stop("renderFog-hardFow");
 
     timer.start("renderFog-softFow");
@@ -1399,7 +1399,7 @@ public class GdxRenderer extends ApplicationAdapter {
     if (!zoneCache.getZone().drawBoard()) return;
 
     var paint = getPaint(zoneCache.getZone().getBackgroundPaint());
-    fillViewportWith(paint.color(), paint.textureRegion());
+    fillViewportWith(paint.color(), paint.texture());
 
     var map = zoneCache.getSprite(zoneCache.getZone().getMapAssetId());
     if (map != null) {
@@ -1416,7 +1416,7 @@ public class GdxRenderer extends ApplicationAdapter {
     timer.stop("drawableBackground");
   }
 
-  private void fillViewportWith(Color tint, TextureRegion region) {
+  private void fillViewportWith(Color tint, Texture texture) {
     var w = cam.viewportWidth * zoom;
     var h = cam.viewportHeight * zoom;
     var startX = (cam.position.x - cam.viewportWidth * zoom / 2);
@@ -1429,7 +1429,8 @@ public class GdxRenderer extends ApplicationAdapter {
 
     var indices = new short[] {1, 0, 3, 3, 2, 1};
 
-    var polySprite = new PolygonSprite(new PolygonRegion(region, vertices, indices));
+    var polySprite =
+        new PolygonSprite(new PolygonRegion(new TextureRegion(texture), vertices, indices));
     polySprite.setColor(tint);
     polySprite.draw(batch);
   }
