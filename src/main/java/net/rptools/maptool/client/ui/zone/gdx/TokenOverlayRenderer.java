@@ -16,10 +16,13 @@ package net.rptools.maptool.client.ui.zone.gdx;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import net.rptools.lib.AwtUtil;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -27,14 +30,21 @@ import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class TokenOverlayRenderer {
+  @FunctionalInterface
+  public interface ImageAssetRetriever {
+    TextureRegion get(MD5Key key);
+  }
+
   private final Color tmpColor = Color.WHITE.cpy();
+  private final ImageAssetRetriever imageAssetRetriever;
   private ZoneCache zoneCache;
   private final AreaRenderer areaRenderer;
   private final ShapeDrawer drawer;
   private final PolygonSpriteBatch batch;
 
-  public TokenOverlayRenderer(AreaRenderer areaRenderer) {
+  public TokenOverlayRenderer(AreaRenderer areaRenderer, ImageAssetRetriever imageAssetRetriever) {
     this.areaRenderer = areaRenderer;
+    this.imageAssetRetriever = imageAssetRetriever;
     drawer = areaRenderer.getShapeDrawer();
     batch = (PolygonSpriteBatch) drawer.getBatch();
   }
@@ -86,7 +96,8 @@ public class TokenOverlayRenderer {
     var y = -bounds.y - bounds.height;
 
     // Get the images
-    var image = zoneCache.getSprite(overlay.getAssetIds()[increment]);
+    var imageId = overlay.getAssetIds()[increment];
+    var image = new Sprite(imageAssetRetriever.get(imageId));
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
@@ -116,7 +127,8 @@ public class TokenOverlayRenderer {
     var y = -bounds.y - bounds.height;
 
     // Get the images
-    var image = zoneCache.getSprite(overlay.getAssetId());
+    var imageId = overlay.getAssetId();
+    var image = new Sprite(imageAssetRetriever.get(imageId));
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
@@ -267,8 +279,10 @@ public class TokenOverlayRenderer {
     var y = -bounds.y - bounds.height;
 
     // Get the images
-    var topImage = zoneCache.getSprite(overlay.getTopAssetId());
-    var bottomImage = zoneCache.getSprite(overlay.getBottomAssetId());
+    var topImageId = overlay.getTopAssetId();
+    var bottomImageId = overlay.getBottomAssetId();
+    var topImage = new Sprite(imageAssetRetriever.get(topImageId));
+    var bottomImage = new Sprite(imageAssetRetriever.get(bottomImageId));
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) topImage.getWidth(), (int) topImage.getHeight());
@@ -371,7 +385,8 @@ public class TokenOverlayRenderer {
   private void renderTokenOverlay(ImageTokenOverlay overlay, Token token) {
     var bounds = token.getFootprintBounds(zoneCache.getZone());
 
-    var image = zoneCache.getSprite(overlay.getAssetId());
+    var imageId = overlay.getAssetId();
+    var image = new Sprite(imageAssetRetriever.get(imageId));
     Rectangle2D imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
     AwtUtil.fitInto(imageBounds, bounds);
 
@@ -388,7 +403,8 @@ public class TokenOverlayRenderer {
   private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token) {
     var bounds = token.getFootprintBounds(zoneCache.getZone());
 
-    var image = zoneCache.getSprite(overlay.getAssetId());
+    var imageId = overlay.getAssetId();
+    var image = new Sprite(imageAssetRetriever.get(imageId));
     Rectangle2D imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
     AwtUtil.fitInto(imageBounds, bounds);
     imageBounds = overlay.getBounds(imageBounds);
