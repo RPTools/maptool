@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macOS-13]
+        os: [windows-latest, ubuntu-latest, macos-15-intel]
         java: [ '21' ]
         distribution: ['temurin']
       fail-fast: false
@@ -187,7 +187,7 @@ jobs:
       #   /_/ /_/ /_/ \__,_/ \___/ \____//____/
       #
     - name: Rename Mac OS Release Files
-      if: matrix.os == 'macOS-13'
+      if: matrix.os == 'macos-15-intel'
       run: |
         mkdir releases/renamed/
         cp releases/MapTool*.dmg releases/renamed/MapTool-${{ github.event.release.tag_name }}.dmg
@@ -197,7 +197,7 @@ jobs:
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
       uses: actions/upload-release-asset@v1
-      if: matrix.os == 'macOS-13'
+      if: matrix.os == 'macos-15-intel'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -208,7 +208,7 @@ jobs:
     - name: Upload Mac PKG Release Asset
       id: upload-release-asset-pkg
       uses: actions/upload-release-asset@v1
-      if: matrix.os == 'macOS-13'
+      if: matrix.os == 'macos-15-intel'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -219,7 +219,7 @@ jobs:
     - name: Upload Mac Image Release Asset
       id: upload-release-asset-mac-image
       uses: actions/upload-release-asset@v1
-      if: matrix.os == 'macOS-13'
+      if: matrix.os == 'macos-15-intel'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
