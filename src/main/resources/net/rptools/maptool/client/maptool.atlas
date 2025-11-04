@@ -6,8 +6,8 @@ block_move
 bounds:2,254,256,256
 blueLabelbox
 bounds:121,185,129,21
-split:10,10,10,10
-pad:10,10,10,10
+split:5,5,5,5
+pad:5,5,5,5
 border/blue/bl
 bounds:383,369,3,3
 border/blue/bottom
@@ -172,12 +172,12 @@ broken
 bounds:260,382,128,128
 darkGreyLabelbox
 bounds:121,231,129,21
-split:10,10,10,10
-pad:10,10,10,10
+split:5,5,5,5
+pad:5,5,5,5
 grayLabelbox
 bounds:121,208,129,21
-split:10,10,10,10
-pad:10,10,10,10
+split:5,5,5,5
+pad:5,5,5,5
 hexBorder
 bounds:390,392,60,52
 isoBorder
