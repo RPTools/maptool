@@ -442,15 +442,15 @@ public class GdxRenderer extends ApplicationAdapter {
 
     cam.viewportWidth = width;
     cam.viewportHeight = height;
-    cam.position.x = zoom * (width / 2f + offsetX);
-    cam.position.y = zoom * (height / 2f * -1 + offsetY);
+    cam.position.x = zoom * (cam.viewportWidth / 2f + offsetX);
+    cam.position.y = zoom * (cam.viewportHeight / 2f * -1 + offsetY);
     cam.zoom = zoom;
     cam.update();
 
     hudCam.viewportWidth = width;
     hudCam.viewportHeight = height;
-    hudCam.position.x = width / 2f;
-    hudCam.position.y = height / 2f;
+    hudCam.position.x = hudCam.viewportWidth / 2f;
+    hudCam.position.y = hudCam.viewportHeight / 2f;
     hudCam.update();
   }
 
