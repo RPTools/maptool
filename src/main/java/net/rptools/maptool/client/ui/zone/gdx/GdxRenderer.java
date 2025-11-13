@@ -133,7 +133,6 @@ public class GdxRenderer extends ApplicationAdapter {
 
   // general resources
   private OrthographicCamera cam;
-  private PerspectiveCamera cam3d;
   private OrthographicCamera hudCam;
   private PolygonSpriteBatch batch;
   private boolean initialized = false;
@@ -276,10 +275,6 @@ public class GdxRenderer extends ApplicationAdapter {
 
       width = Gdx.graphics.getWidth();
       height = Gdx.graphics.getHeight();
-
-      // Cam for 3D-Models
-      cam3d = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-      cam3d.lookAt(0, 0, 0);
 
       cam = new OrthographicCamera();
       cam.setToOrtho(false);
@@ -444,17 +439,6 @@ public class GdxRenderer extends ApplicationAdapter {
 
   private void updateCam() {
     if (cam == null) return;
-
-    cam3d.viewportWidth = width;
-    cam3d.viewportHeight = height;
-
-    cam3d.position.x = zoom * (width / 2f + offsetX);
-    cam3d.position.y = zoom * (height / 2f * -1 + offsetY);
-    cam3d.position.z =
-        (zoom * height) / (2f * (float) Math.tan(Math.toRadians(cam3d.fieldOfView / 2f)));
-    cam3d.far = 1.1f * cam3d.position.z;
-    cam3d.near = 0.1f * cam3d.position.z;
-    cam3d.update();
 
     cam.viewportWidth = width;
     cam.viewportHeight = height;
