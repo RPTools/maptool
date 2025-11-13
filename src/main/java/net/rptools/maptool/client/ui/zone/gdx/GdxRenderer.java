@@ -787,6 +787,7 @@ public class GdxRenderer extends ApplicationAdapter {
     batch.flush();
     resultsBuffer.end();
 
+    Gdx.gl.glViewport(0, 0, width, height);
     setProjectionMatrix(hudCam.combined);
     BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER.applyToBatch(batch);
     batch.draw(resultsBuffer.getColorBufferTexture(), 0, 0, width, height, 0, 0, 1, 1);
