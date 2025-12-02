@@ -170,7 +170,7 @@ public abstract class DefaultTool extends Tool
    * @param x the x coordinate of the drag start
    * @param y the y coordinate of the drag start
    */
-  public void setDragStart(int x, int y) {
+  private void setDragStart(int x, int y) {
     mapDragStart = new Point(x, y);
   }
 
