@@ -312,7 +312,7 @@ public class HTMLOverlayPanel extends JFXPanel {
             SwingUtilities.invokeLater(
                 () -> {
                   if (result == mousePassResult.PASS || !isOpaque(e.getX(), e.getY())) {
-                    passMouseEvent(e);
+                    passMouseEventImmediately(e);
                   }
                 });
           }
@@ -412,7 +412,23 @@ public class HTMLOverlayPanel extends JFXPanel {
    *
    * @param e the mouse event to forward
    */
-  void passMouseEvent(MouseEvent e) {
+  private void passMouseEvent(MouseEvent e) {
+    /*
+     * Important: because mayPassClick() first goes to Platform.runLater(), then
+     * `SwingUtilities.invokeLater()` if permitted, we need to do the same here. Otherwise, events
+     * can end up out of order.
+     */
+
+    Platform.runLater(
+        () -> {
+          SwingUtilities.invokeLater(
+              () -> {
+                passMouseEventImmediately(e);
+              });
+        });
+  }
+
+  private void passMouseEventImmediately(MouseEvent e) {
     Component c = MapTool.getFrame().getCurrentZoneRenderer();
     if (c != null) {
       c.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, c));
