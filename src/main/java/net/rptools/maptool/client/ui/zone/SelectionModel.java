@@ -72,10 +72,20 @@ public class SelectionModel {
       selectionHistory.subList(maxHistoryLength, selectionHistory.size() - 1).clear();
     }
   }
+  private boolean selectionEquals(Set<GUID> a, Set<GUID> b) {
+    return a.size() == b.size() && a.containsAll(b);
+  }
+  private GUID lastSelectionZoneId = null;
 
   /** Fire a SelectionChanged event. */
-  private void selectionChanged() {
-    new MapToolEventBus().getMainEventBus().post(new SelectionChanged(zone));
+  private void selectionChanged(Set<GUID> previousSelection) {
+    boolean selectionDifferent = !selectionEquals(previousSelection, currentSelection) || currentSelection.isEmpty();
+    boolean zoneChanged = !zone.getId().equals(lastSelectionZoneId);
+
+    if (selectionDifferent || zoneChanged) {
+      lastSelectionZoneId = zone.getId();
+      new MapToolEventBus().getMainEventBus().post(new SelectionChanged(zone));
+    }
   }
 
   /**
@@ -147,15 +157,15 @@ public class SelectionModel {
   public void replaceSelection(Collection<GUID> tokens) {
     pushCurrentSelectionIntoHistory();
 
+    Set<GUID> before = new HashSet<>(currentSelection);
     currentSelection.clear();
     for (GUID tokenGUID : tokens) {
-      if (!isSelectable(tokenGUID)) {
-        continue;
+      if (isSelectable(tokenGUID)) {
+        currentSelection.add(tokenGUID);
       }
-      currentSelection.add(tokenGUID);
     }
 
-    selectionChanged();
+    selectionChanged(before);
   }
 
   /**
@@ -168,17 +178,13 @@ public class SelectionModel {
   public void addTokensToSelection(Collection<GUID> tokens) {
     pushCurrentSelectionIntoHistory();
 
-    boolean anyAdded = false;
+    Set<GUID> before = new HashSet<>(currentSelection);
     for (GUID tokenGUID : tokens) {
-      if (!isSelectable(tokenGUID)) {
-        continue;
+      if (isSelectable(tokenGUID)) {
+        currentSelection.add(tokenGUID);
       }
-      currentSelection.add(tokenGUID);
-      anyAdded = true;
     }
-    if (anyAdded) {
-      selectionChanged();
-    }
+    selectionChanged(before);
   }
 
   /**
@@ -188,10 +194,12 @@ public class SelectionModel {
    */
   public void removeTokensFromSelection(Collection<GUID> tokens) {
     pushCurrentSelectionIntoHistory();
-    final var changed = currentSelection.removeAll(tokens);
-    if (changed) {
-      selectionChanged();
-    }
+
+    Set<GUID> before = new HashSet<>(currentSelection);
+
+    currentSelection.removeAll(tokens);
+
+    selectionChanged(before);
   }
 
   /**
@@ -205,27 +213,23 @@ public class SelectionModel {
    *     selection.
    */
   public void undoSelection(Zone.Layer activeLayer) {
+    Set<GUID> before = new HashSet<>(currentSelection);
+
     currentSelection.clear();
     while (!selectionHistory.isEmpty()) {
       currentSelection.addAll(selectionHistory.remove(0));
 
-      // The user may have deleted some of the tokens that are contained in the selection history.
-      // There could also be tokens in another than the current layer which we don't want to go back
-      // to. Find them and filter them otherwise the selection will have orphaned GUIDs.
-      for (final var guid : currentSelection) {
-        final var token = zone.getToken(guid);
-        if (token == null || token.getLayer() != activeLayer) {
-          currentSelection.remove(guid);
-        }
-      }
+      currentSelection.removeIf(
+          guid -> {
+            final var token = zone.getToken(guid);
+            return token == null || token.getLayer() != activeLayer;
+          });
 
-      // It may be that all tokens weren't available anymore. If so, go further back in the history
-      // in the hopes of not landing on an empty result.
       if (!currentSelection.isEmpty()) {
         break;
       }
     }
 
-    selectionChanged();
+    selectionChanged(before);
   }
 }
