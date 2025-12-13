@@ -82,13 +82,10 @@ public class SelectionModel {
   /** Fire a SelectionChanged event. */
   private void selectionChanged(Set<GUID> previousSelection) {
     long now = System.currentTimeMillis();
-
     boolean selectionDifferent =
             !selectionEquals(previousSelection, currentSelection) || currentSelection.isEmpty();
-
     boolean timeElapsed =
             (now - lastSelectionChangedTime) >= SAME_SELECTION_REFIRE_DELAY_MS;
-
     if (selectionDifferent || timeElapsed) {
       lastSelectionChangedTime = now;
       new MapToolEventBus().getMainEventBus().post(new SelectionChanged(zone));
