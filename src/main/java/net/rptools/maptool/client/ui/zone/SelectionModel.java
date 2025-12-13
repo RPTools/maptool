@@ -69,17 +69,20 @@ public class SelectionModel {
 
     // limit the history to a certain size
     if (selectionHistory.size() > maxHistoryLength) {
-      selectionHistory.subList(maxHistoryLength, selectionHistory.size()-1).clear();
+      selectionHistory.subList(maxHistoryLength, selectionHistory.size() - 1).clear();
     }
   }
+
   private boolean selectionEquals(Set<GUID> a, Set<GUID> b) {
     return a.size() == b.size() && a.containsAll(b);
   }
+
   private GUID lastSelectionZoneId = null;
 
   /** Fire a SelectionChanged event. */
   private void selectionChanged(Set<GUID> previousSelection) {
-    boolean selectionDifferent = !selectionEquals(previousSelection, currentSelection) || currentSelection.isEmpty();
+    boolean selectionDifferent =
+        !selectionEquals(previousSelection, currentSelection) || currentSelection.isEmpty();
     boolean zoneChanged = !zone.getId().equals(lastSelectionZoneId);
     if (selectionDifferent || zoneChanged) {
       lastSelectionZoneId = zone.getId();
