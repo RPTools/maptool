@@ -72,9 +72,11 @@ public class SelectionModel {
       selectionHistory.subList(maxHistoryLength, selectionHistory.size() - 1).clear();
     }
   }
-  private static final long SAME_SELECTION_REFIRE_DELAY_MS = 1500;
+
+  private static final long SAME_SELECTION_REFIRE_DELAY_MS = 250;
 
   private long lastSelectionChangedTime = 0L;
+
   private boolean selectionEquals(Set<GUID> a, Set<GUID> b) {
     return a.size() == b.size() && a.containsAll(b);
   }
@@ -82,11 +84,17 @@ public class SelectionModel {
   /** Fire a SelectionChanged event. */
   private void selectionChanged(Set<GUID> previousSelection) {
     long now = System.currentTimeMillis();
+
     boolean selectionDifferent =
-            !selectionEquals(previousSelection, currentSelection) || currentSelection.isEmpty();
-    boolean timeElapsed =
-            (now - lastSelectionChangedTime) >= SAME_SELECTION_REFIRE_DELAY_MS;
-    if (selectionDifferent || timeElapsed) {
+        !selectionEquals(previousSelection, currentSelection) || currentSelection.isEmpty();
+
+    if (selectionDifferent) {
+      lastSelectionChangedTime = now;
+      new MapToolEventBus().getMainEventBus().post(new SelectionChanged(zone));
+      return;
+    }
+
+    if ((now - lastSelectionChangedTime) >= SAME_SELECTION_REFIRE_DELAY_MS) {
       lastSelectionChangedTime = now;
       new MapToolEventBus().getMainEventBus().post(new SelectionChanged(zone));
     }
