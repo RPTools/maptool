@@ -14,20 +14,113 @@
  */
 package net.rptools.maptool.client.swing.walls;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.EnumMap;
+import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.swing.JComboBox;
+import net.rptools.lib.CollectionUtil;
 import net.rptools.maptool.model.topology.VisibilityType;
 import net.rptools.maptool.model.topology.Wall;
 
 public class WallConfigurationController {
+  /**
+   * Like Wall.Data, but mutable, observable, and nullable (in case of multiple selected walls not
+   * agreeing).
+   */
+  public static final class WallData {
+
+    private final @Nullable Wall.Direction direction;
+    private final @Nullable Wall.MovementDirectionModifier movementModifier;
+    // DO NOT MODIFY `modifiers`!
+    private final EnumMap<VisibilityType, Wall.DirectionModifier> modifiers;
+
+    public WallData(
+        @Nullable Wall.Direction direction,
+        @Nullable Wall.MovementDirectionModifier movementModifier,
+        Map<VisibilityType, Wall.DirectionModifier> modifiers) {
+      this.direction = direction;
+      this.movementModifier = movementModifier;
+      this.modifiers = new EnumMap<>(VisibilityType.class);
+      this.modifiers.putAll(modifiers);
+    }
+
+    public WallData(WallData other) {
+      this(other.direction, other.movementModifier, other.modifiers);
+    }
+
+    public WallData(Wall.Data data) {
+      this(
+          data.direction(),
+          data.movementModifier(),
+          CollectionUtil.newFilledEnumMap(VisibilityType.class, data::directionModifier));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof WallData other)) {
+        return false;
+      }
+
+      return this.direction == other.direction
+          && this.movementModifier == other.movementModifier
+          && this.modifiers.equals(other.modifiers);
+    }
+
+    public @Nullable Wall.Direction direction() {
+      return direction;
+    }
+
+    public WallData withDirection(@Nullable Wall.Direction direction) {
+      return new WallData(direction, this.movementModifier, this.modifiers);
+    }
+
+    public @Nullable Wall.MovementDirectionModifier movementModifier() {
+      return movementModifier;
+    }
+
+    public WallData withMovementModifier(
+        @Nullable Wall.MovementDirectionModifier movementModifier) {
+      return new WallData(this.direction, movementModifier, this.modifiers);
+    }
+
+    public @Nullable Wall.DirectionModifier directionModifier(VisibilityType visibilityType) {
+      return this.modifiers.get(visibilityType);
+    }
+
+    public WallData withDirectionModifier(
+        VisibilityType visibilityType, @Nullable Wall.DirectionModifier modifier) {
+      var newModifiers = new EnumMap<>(this.modifiers);
+      if (modifier == null) {
+        newModifiers.remove(visibilityType);
+      } else {
+        newModifiers.put(visibilityType, modifier);
+      }
+      return new WallData(this.direction, this.movementModifier, newModifiers);
+    }
+
+    public Wall.Data toWallData() {
+      return toWallData(new Wall.Data());
+    }
+
+    public Wall.Data toWallData(Wall.Data original) {
+      return new Wall.Data(
+          Objects.requireNonNullElse(direction, original.direction()),
+          Objects.requireNonNullElse(movementModifier, original.movementModifier()),
+          CollectionUtil.newFilledEnumMap(
+              VisibilityType.class,
+              type ->
+                  Objects.requireNonNullElseGet(
+                      modifiers.get(type), () -> original.directionModifier(type))));
+    }
+  }
+
   private final WallConfigurationView view;
   private final PropertyChangeListener changeListener;
-  private @Nonnull Wall.Data wallData = new Wall.Data();
+  private @Nonnull WallData wallData = new WallData(new Wall.Data());
 
   public WallConfigurationController(PropertyChangeListener changeListener) {
     this.view = new WallConfigurationView();
@@ -38,7 +131,7 @@ public class WallConfigurationController {
         e -> {
           var newDirection = directionSelect.getItemAt(directionSelect.getSelectedIndex());
           if (newDirection != null) {
-            updateWall(newDirection, wallData.movementModifier(), wallData.modifiers());
+            updateWall(wallData.withDirection(newDirection));
           }
         });
 
@@ -48,7 +141,7 @@ public class WallConfigurationController {
           var modifier =
               movementModifierSelect.getItemAt(movementModifierSelect.getSelectedIndex());
           if (modifier != null) {
-            updateWall(wallData.direction(), modifier, wallData.modifiers());
+            updateWall(wallData.withMovementModifier(modifier));
           }
         });
 
@@ -58,34 +151,19 @@ public class WallConfigurationController {
           e -> {
             var modifier = input.getItemAt(input.getSelectedIndex());
             if (modifier != null) {
-              var newModifiers =
-                  new EnumMap<VisibilityType, Wall.DirectionModifier>(VisibilityType.class);
-              newModifiers.putAll(wallData.modifiers());
-              newModifiers.put(visibilityType, modifier);
-
-              updateWall(
-                  wallData.direction(),
-                  wallData.movementModifier(),
-                  Maps.immutableEnumMap(newModifiers));
+              updateWall(wallData.withDirectionModifier(visibilityType, modifier));
             }
           });
     }
   }
 
-  private void updateWall(
-      Wall.Direction direction,
-      Wall.MovementDirectionModifier movementModifier,
-      ImmutableMap<VisibilityType, Wall.DirectionModifier> modifiers) {
-    var newWallData = new Wall.Data(direction, movementModifier, modifiers);
-
-    if (wallData.equals(newWallData)) {
-      return;
+  private void updateWall(WallData newWallData) {
+    if (!wallData.equals(newWallData)) {
+      var oldWallData = wallData;
+      wallData = newWallData;
+      changeListener.propertyChange(
+          new PropertyChangeEvent(this, "wallData", oldWallData, wallData));
     }
-
-    var oldWallData = wallData;
-    wallData = newWallData;
-
-    changeListener.propertyChange(new PropertyChangeEvent(this, "wallData", oldWallData, wallData));
   }
 
   public WallConfigurationView getView() {
@@ -101,7 +179,11 @@ public class WallConfigurationController {
   }
 
   public void bind(@Nonnull Wall.Data model) {
-    this.wallData = model;
+    bind(new WallData(model));
+  }
+
+  public void bind(@Nonnull WallData model) {
+    this.wallData = new WallData(model);
 
     this.view.getDirectionSelect().setSelectedItem(this.wallData.direction());
     this.view.getMovementModifier().setSelectedItem(this.wallData.movementModifier());
@@ -111,7 +193,7 @@ public class WallConfigurationController {
     }
   }
 
-  public @Nonnull Wall.Data getModel() {
-    return wallData;
+  public @Nonnull WallData getModel() {
+    return new WallData(wallData);
   }
 }
