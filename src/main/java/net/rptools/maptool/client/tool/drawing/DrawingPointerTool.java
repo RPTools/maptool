@@ -815,7 +815,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
 
   /**
    * Helper method to get the path vertex for the template (for known template types that have
-   * them). *
+   * them).
    *
    * @param at The template.
    * @return The zone point for the path vertex, or <code>null</code>.
@@ -1147,7 +1147,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       int startY = startVertex.y + offsetXY;
       int endX = endVertex.x + offsetXY;
       int endY = endVertex.y + offsetXY;
-      float[] dashingPattern = {9f, 3f};
+      float[] dashingPattern = {pen.getThickness() * 9, pen.getThickness() * 3};
 
       Composite composite = g.getComposite();
       Paint paint;
@@ -1169,7 +1169,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
               BasicStroke.JOIN_MITER,
               1.0f,
               dashingPattern,
-              2.0f));
+              0));
       g.drawLine(startX, startY, endX, endY);
       g.setComposite(composite);
     }
@@ -1397,26 +1397,27 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       // Resize the Template Radius
       CellPoint workingCell = getZone().getGrid().convert(getCellAtMouse(e));
       CellPoint vertexCell = getZone().getGrid().convert(vertex);
-      int x = Math.abs(workingCell.x - vertexCell.x);
-      int y = Math.abs(workingCell.y - vertexCell.y);
-      int dragRadius = at.getDistance(x, y);
+      int x = workingCell.x - vertexCell.x;
+      int y = workingCell.y - vertexCell.y;
+      int dragRadius = at.getDistance(Math.abs(x), Math.abs(y));
       at.setRadius(dragRadius);
 
-      // Move the Template around the Vertex (if applicable)
+      // Move the BlastTemplate around the Vertex
       if (templateType.equals("BlastTemplate")) {
-        ((BlastTemplate) at)
-            .setControlCellRelative(workingCell.x - vertexCell.x, workingCell.y - vertexCell.y);
+        ((BlastTemplate) at).setControlCellRelative(x, y);
       }
-      if (templateType.equals("ConeTemplate")) {
+
+      // Change ConeTemplate direction
+      if (templateType.equals("ConeTemplate") && at instanceof ConeTemplate ct) {
         ZonePoint mouse =
             new ScreenPoint(e.getX(), e.getY())
                 .convertToZone(renderer.getViewModel().getZoneScale());
-        ((ConeTemplate) at)
-            .setDirection(
-                RadiusTemplate.Direction.findDirection(mouse.x, mouse.y, vertex.x, vertex.y));
+        ct.setDirection(
+            RadiusTemplate.Direction.findDirection(mouse.x, mouse.y, vertex.x, vertex.y));
       }
 
-      // ALT -> Change the Path Vertex if only one drawing selected
+      // ALT ->  If only one template selected change the Path Vertex (Line/LineCell), Control
+      // Offset (Blast), or Direction (Cone)
     } else if (selectedDrawableIdSet.size() == 1 && e.isAltDown()) {
 
       // Move just pathVertex (if applicable)
@@ -1425,6 +1426,34 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
         pathVertex.x = pathVertex.x - dragCellOffset.x;
         pathVertex.y = pathVertex.y - dragCellOffset.y;
         setTemplatePathVertex(at, pathVertex);
+      }
+
+      // Move the BlastTemplate about the Vertex (i.e. without changing the radius)
+      // N.B. this ALT behaviour is not available in the BlastTemplateTool
+      if (templateType.equals("BlastTemplate") && at instanceof BlastTemplate bt) {
+        int blastRadius = bt.getRadius();
+        int ox = bt.getOffsetX();
+        int oy = bt.getOffsetY();
+        CellPoint dragCell = getZone().getGrid().convert(dragCellOffset);
+
+        if (dragCell.y != 0 && (ox == -blastRadius || ox == 1)) {
+          // blast is to the left or right of the vertex, so only move up or down
+          oy = Math.min(1, Math.max(-blastRadius, oy - dragCell.y));
+        } else if (dragCell.x != 0 && (oy == -blastRadius || oy == 1)) {
+          // blast is above or below the vertex, so only move left or right
+          ox = Math.min(1, Math.max(-blastRadius, ox - dragCell.x));
+        }
+        bt.setControlCellOffset(ox, oy);
+      }
+
+      // Rotate the ConeTemplate about the Vertex (i.e. change direction without changing the
+      // radius)
+      // N.B. this ALT behaviour is not available in the ConeTemplateTool
+      if (templateType.equals("ConeTemplate") && at instanceof ConeTemplate ct) {
+        ZonePoint mouse =
+            new ScreenPoint(e.getX(), e.getY())
+                .convertToZone(renderer.getViewModel().getZoneScale());
+        ct.setDirection(ConeTemplate.Direction.findDirection(mouse.x, mouse.y, vertex.x, vertex.y));
       }
 
     } else {
@@ -1471,5 +1500,15 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
     } // end for
     draggedDrawnElementSet.clear();
     renderer.repaint();
+  }
+
+  /**
+   * Get an unmodifiable {@link List} of {@link GUID}s for each {@link Drawable} selected by this
+   * tool.
+   *
+   * @return a list of selected drawable guids
+   */
+  public static List<GUID> getSelectedDrawables() {
+    return selectedDrawableIdSet.stream().toList();
   }
 }

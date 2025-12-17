@@ -98,6 +98,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               DrawingSetterFunctions.getInstance(),
               DrawingMiscFunctions.getInstance(),
               ShapeFunctions.getInstance(),
+              TemplateFunctions.getInstance(),
               ExportDataFunctions.getInstance(),
               RESTfulFunctions.getInstance(),
               HeroLabFunctions.getInstance(),
