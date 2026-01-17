@@ -178,7 +178,10 @@ public class ShapeDrawable extends AbstractDrawing {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(super.toString());
+    return toString(true);
+  }
+  public String toString(boolean localised) {
+    StringBuilder sb = new StringBuilder(super.toString(localised));
     sb.append("antiAliasing=").append(getUseAntiAliasing()).append(";");
     sb.append("shapeType=").append(getShapeTypeName()).append(";");
     sb.append("bounds=\"");
