@@ -15,15 +15,20 @@
 package net.rptools.maptool.model.sheet.stats;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
+import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.HTMLUtil;
@@ -139,6 +144,12 @@ public class StatSheetContext {
   /** The properties of the token. */
   private final List<Property> properties = new ArrayList<>();
 
+  /** The bars shown on the token. */
+  private final List<Map<String, Object>> bars = new ArrayList<>();
+
+  /** The states set on the token. */
+  private final List<Map<String, Object>> states = new ArrayList<>();
+
   /** The notes of the token. */
   private final String notes;
 
@@ -168,9 +179,20 @@ public class StatSheetContext {
    * @param location The location of the stat sheet.
    */
   public StatSheetContext(Token token, Player player, StatSheetLocation location) {
-
+    boolean playerOwns = AppUtil.playerOwns(token);
     name = token.getName();
     tokenType = token.getType().name();
+
+    List<String> stateOverlayNames = new ArrayList<>();
+    stateOverlayNames.addAll(MapTool.getCampaign().getTokenBarsMap().keySet());
+    stateOverlayNames.addAll(MapTool.getCampaign().getTokenStatesMap().keySet());
+
+    for (String stateName : stateOverlayNames) {
+      Object stateValue = token.getState(stateName);
+      if (stateValue != null) {
+        addBarState(stateName, stateValue, playerOwns, player);
+      }
+    }
 
     if (player.isGM()) {
       gmName = token.getGMName();
@@ -183,8 +205,8 @@ public class StatSheetContext {
       gmNotesType = null;
       gm = false;
     }
-    notes = AppUtil.playerOwns(token) ? token.getNotes() : null;
-    notesType = AppUtil.playerOwns(token) ? token.getNotesType() : null;
+    notes = playerOwns ? token.getNotes() : null;
+    notesType = playerOwns ? token.getNotesType() : null;
     speechName = token.getSpeechName();
 
     if (AppPreferences.showPortrait.get()) {
@@ -206,7 +228,7 @@ public class StatSheetContext {
                   return;
                 }
 
-                if (tp.isOwnerOnly() && !AppUtil.playerOwns(token)) {
+                if (tp.isOwnerOnly() && !playerOwns) {
                   return;
                 }
 
@@ -253,6 +275,48 @@ public class StatSheetContext {
           case LEFT -> "statSheet-left";
           case RIGHT -> "statSheet-right";
         };
+  }
+
+  private void addBarState(String stateName, Object stateValue, boolean playerOwns, Player player) {
+    AbstractTokenOverlay ato = null;
+    if (MapTool.getCampaign().getTokenBarsMap().containsKey(stateName)) {
+      ato = MapTool.getCampaign().getTokenBarsMap().get(stateName);
+    } else {
+      ato = MapTool.getCampaign().getTokenStatesMap().get(stateName);
+    }
+    if (ato.isShowOthers() || (playerOwns && ato.isShowOwner()) || player.isGM()) {
+      Map<String, Object> featureMap = new HashMap<>();
+      featureMap.put("value", stateValue);
+      featureMap.put("type", ato.getClass().getSimpleName());
+      String mName;
+
+      try {
+        BeanInfo beanInfo = Introspector.getBeanInfo(ato.getClass());
+        PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+          if (!"class".equals(propertyDescriptor.getName())) {
+            if (propertyDescriptor.getReadMethod().canAccess(ato)) {
+              mName = propertyDescriptor.getReadMethod().getName();
+              if (mName.startsWith("is")) {
+                mName = mName.substring(2);
+              } else if (mName.startsWith("get") || mName.startsWith("has")) {
+                mName = mName.substring(3);
+              }
+              featureMap.put(
+                  Introspector.decapitalize(mName), propertyDescriptor.getReadMethod().invoke(ato));
+            }
+          }
+        }
+      } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
+        throw new RuntimeException(e);
+      }
+
+      if (ato instanceof BarTokenOverlay) {
+        bars.add(featureMap);
+      } else {
+        states.add(featureMap);
+      }
+    }
   }
 
   /**
@@ -328,9 +392,9 @@ public class StatSheetContext {
   }
 
   /**
-   * Returns the css class for the location of the stat sheet.
+   * Returns the CSS class for the location of the stat sheet.
    *
-   * @return The css class for the location of the stat sheet.
+   * @return The CSS class for the location of the stat sheet.
    */
   public String getStatSheetLocation() {
     return statSheetLocation;
@@ -387,5 +451,19 @@ public class StatSheetContext {
    */
   public boolean isGm() {
     return gm;
+  }
+
+  /**
+   * @return States set on the token.
+   */
+  public List<Map<String, Object>> getStates() {
+    return states;
+  }
+
+  /**
+   * @return Bars available on the token.
+   */
+  public List<Map<String, Object>> getBars() {
+    return bars;
   }
 }
