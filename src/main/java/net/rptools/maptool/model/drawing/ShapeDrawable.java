@@ -180,6 +180,7 @@ public class ShapeDrawable extends AbstractDrawing {
   public String toString() {
     return toString(true);
   }
+
   public String toString(boolean localised) {
     StringBuilder sb = new StringBuilder(super.toString(localised));
     sb.append("antiAliasing=").append(getUseAntiAliasing()).append(";");
