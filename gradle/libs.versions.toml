@@ -52,7 +52,11 @@ imageio-tiff = { group = "com.twelvemonkeys.imageio", name = "imageio-tiff", ver
 imageio-batik = { group = "com.twelvemonkeys.imageio", name = "imageio-batik", version.ref = "imageio" }
 imageio-tga = { group = "com.twelvemonkeys.imageio", name = "imageio-tga", version.ref = "imageio" }
 imageio-bmp = { group = "com.twelvemonkeys.imageio", name = "imageio-bmp", version.ref = "imageio" }
-batik = { group = "org.apache.xmlgraphics", name = "batik-all", version = "1.19" }
+
+batik-all = { group = "org.apache.xmlgraphics", name = "batik-all", version = "1.19" }
+batik-awt = { group = "org.apache.xmlgraphics", name="batik-awt-util", version = "1.19" }
+batik-transcoder = { group = "org.apache.xmlgraphics", name="batik-transcoder", version = "1.19" }
+
 # PDF image extraction
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version.ref = "pdfbox" }
 pdfbox-tools = { group = "org.apache.pdfbox", name = "pdfbox-tools", version.ref = "pdfbox" }
@@ -191,6 +195,7 @@ imageio = [
   "imageio-tga",
   "imageio-bmp",
 ]
+batik = ["batik-all", "batik-awt", "batik-transcoder"]
 pdfbox = ["pdfbox", "pdfbox-tools"]
 jide = [
   "jide-common",

@@ -576,7 +576,7 @@ public class ShapeFunctions extends AbstractFunction {
         pen.setEraser(penObject.get("eraser").getAsBoolean());
       }
     }
-    DrawnElement drawnElement = new DrawnElement(CACHED_SHAPES.get(shapeName), pen);
+    DrawnElement drawnElement = new DrawnElement(shapeDrawable.copy(), pen);
     drawnElement.setPen(pen);
 
     MapTool.serverCommand()

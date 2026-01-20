@@ -360,7 +360,7 @@ dependencies {
     implementation(libs.okhttp)
 
     implementation(libs.bundles.imageio)
-    implementation(libs.batik)
+    implementation(libs.bundles.batik)
     implementation(libs.bundles.pdfbox)
     implementation(libs.bcmail)
     implementation(libs.bundles.jai.imageio)
