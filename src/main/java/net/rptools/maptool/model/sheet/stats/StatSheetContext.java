@@ -275,27 +275,34 @@ public class StatSheetContext {
         };
   }
 
+  /** Comparator for sorting State Groups */
   private static final Comparator<Map<String, Object>> stateComparator =
       (o1, o2) -> {
-        String _s1 = o1.get("group").toString();
-        String _s2 = o2.get("group").toString();
+        String s1 = o1.get("group").toString();
+        String s2 = o2.get("group").toString();
         // for different groups use natural order by group value
-        int result = Collator.getInstance().compare(_s1, _s2);
+        int result = Collator.getInstance().compare(s1, s2);
         if (result != 0) {
           return result;
         }
         // for the same group, use the "order" value - should always be present
-        if (Objects.equals(_s1, _s2)
-            && o1.get("order") instanceof Integer _i1
-            && o2.get("order") instanceof Integer _i2) {
-          return _i1.compareTo(_i2);
+        if (Objects.equals(s1, s2)
+            && o1.get("order") instanceof Integer i1
+            && o2.get("order") instanceof Integer i2) {
+          return i1.compareTo(i2);
         }
         return 0; // should never reach this point
       };
+
+  /** List of available Bar names */
   private static final List<String> BAR_NAMES =
       new ArrayList<>(MapTool.getCampaign().getTokenBarsMap().keySet());
+
+  /** List of available State names */
   private static final List<String> STATE_NAMES =
       new ArrayList<>(MapTool.getCampaign().getTokenStatesMap().keySet());
+
+  /** Combined list of Bar and State names */
   private static final List<String> OVERLAY_NAMES =
       new ArrayList<>() {
         {
@@ -304,14 +311,22 @@ public class StatSheetContext {
         }
       };
 
+  /**
+   * Method for filtering overlays and adding them to the appropriate data set
+   *
+   * @param overlayName Name of bar or state
+   * @param overlayValue Value attached to bar or state
+   * @param playerOwns Used for filtering what to display
+   * @param playerIsGm Used for filtering what to display
+   */
   private void addBarOrState(
-      String stateName, Object stateValue, boolean playerOwns, boolean playerIsGm) {
+      String overlayName, Object overlayValue, boolean playerOwns, boolean playerIsGm) {
 
     AbstractTokenOverlay ato;
-    if (MapTool.getCampaign().getTokenBarsMap().containsKey(stateName)) {
-      ato = MapTool.getCampaign().getTokenBarsMap().get(stateName);
+    if (MapTool.getCampaign().getTokenBarsMap().containsKey(overlayName)) {
+      ato = MapTool.getCampaign().getTokenBarsMap().get(overlayName);
     } else {
-      ato = MapTool.getCampaign().getTokenStatesMap().get(stateName);
+      ato = MapTool.getCampaign().getTokenStatesMap().get(overlayName);
     }
     if ((ato.isShowOthers() && !playerOwns)
         || (playerOwns && ato.isShowOwner())
@@ -351,9 +366,9 @@ public class StatSheetContext {
       }
       if (ato instanceof BarTokenOverlay) {
         featureMap.put(
-            "value", stateValue instanceof BigDecimal bd ? bd.doubleValue() : stateValue);
-        featureMap.remove("group");
-        featureMap.remove("order");
+            "value", overlayValue instanceof BigDecimal bd ? bd.doubleValue() : overlayValue);
+        featureMap.remove("group"); // does not apply to bars
+        featureMap.remove("order"); // does not apply to bars
         bars.add(featureMap);
       } else {
         states.add(featureMap);
