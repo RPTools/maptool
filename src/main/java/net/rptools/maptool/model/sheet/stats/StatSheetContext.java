@@ -14,13 +14,13 @@
  */
 package net.rptools.maptool.model.sheet.stats;
 
-import java.awt.Dimension;
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.text.Collator;
 import java.util.*;
+import java.util.List;
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
@@ -33,12 +33,14 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.HTMLUtil;
 import net.rptools.maptool.util.ImageManager;
+import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.PropertyUtilsBean;
 
 /** Class that extracts and provides the information needed to render a stat sheet. */
+@SuppressWarnings("unused")
 public class StatSheetContext {
-
   /** Class that represents a token property on a stat sheet. */
-  static class Property {
+  public static class Property {
     /** Name of the property. */
     private final String name;
 
@@ -61,7 +63,7 @@ public class StatSheetContext {
      * @param displayName Display Name of the property.
      * @param value Value of the property.
      * @param gmOnly True if the property is GM only.
-     * @note GM only properties are only extracted if the player is a GM.
+     * @implNote GM only properties are only extracted if the player is a GM.
      */
     Property(String name, String displayName, String shortName, Object value, boolean gmOnly) {
       this.name = name;
@@ -180,21 +182,19 @@ public class StatSheetContext {
    */
   public StatSheetContext(Token token, Player player, StatSheetLocation location) {
     boolean playerOwns = AppUtil.playerOwns(token);
+    boolean playerIsGm = player.isGM();
+
     name = token.getName();
     tokenType = token.getType().name();
 
-    List<String> stateOverlayNames = new ArrayList<>();
-    stateOverlayNames.addAll(MapTool.getCampaign().getTokenBarsMap().keySet());
-    stateOverlayNames.addAll(MapTool.getCampaign().getTokenStatesMap().keySet());
-
-    for (String stateName : stateOverlayNames) {
+    for (String stateName : OVERLAY_NAMES) {
       Object stateValue = token.getState(stateName);
       if (stateValue != null) {
-        addBarState(stateName, stateValue, playerOwns, player);
+        addBarOrState(stateName, stateValue, playerOwns, playerIsGm);
       }
     }
 
-    if (player.isGM()) {
+    if (playerIsGm) {
       gmName = token.getGMName();
       gmNotes = token.getGMNotes();
       gmNotesType = token.getNotesType();
@@ -224,7 +224,7 @@ public class StatSheetContext {
         .forEach(
             tp -> {
               if (tp.isShowOnStatSheet()) {
-                if (tp.isGMOnly() && !MapTool.getPlayer().isGM()) {
+                if (tp.isGMOnly() && !playerIsGm) {
                   return;
                 }
 
@@ -237,10 +237,8 @@ public class StatSheetContext {
                   return;
                 }
 
-                if (value instanceof String svalue) {
-                  if (svalue.isBlank()) {
-                    return;
-                  }
+                if (value instanceof String sValue && sValue.isBlank()) {
+                  return;
                 }
                 properties.add(
                     new Property(
@@ -253,13 +251,13 @@ public class StatSheetContext {
             });
 
     Dimension dim;
+    BufferedImage image;
     if (token.getPortraitImage() != null) {
-      var image = ImageManager.getImage(token.getPortraitImage());
-      dim = new Dimension(image.getWidth(), image.getHeight());
+      image = ImageManager.getImage(token.getPortraitImage());
     } else {
-      var image = ImageManager.getImage(token.getImageAssetId());
-      dim = new Dimension(image.getWidth(), image.getHeight());
+      image = ImageManager.getImage(token.getImageAssetId());
     }
+    dim = new Dimension(image.getWidth(), image.getHeight());
     AwtUtil.constrainTo(dim, AppPreferences.portraitSize.get());
     portraitWidth = dim.width;
     portraitHeight = dim.height;
@@ -277,41 +275,85 @@ public class StatSheetContext {
         };
   }
 
-  private void addBarState(String stateName, Object stateValue, boolean playerOwns, Player player) {
-    AbstractTokenOverlay ato = null;
+  private static final Comparator<Map<String, Object>> stateComparator =
+      (o1, o2) -> {
+        String _s1 = o1.get("group").toString();
+        String _s2 = o2.get("group").toString();
+        // for different groups use natural order by group value
+        int result = Collator.getInstance().compare(_s1, _s2);
+        if (result != 0) {
+          return result;
+        }
+        // for the same group, use the "order" value - should always be present
+        if (Objects.equals(_s1, _s2)
+            && o1.get("order") instanceof Integer _i1
+            && o2.get("order") instanceof Integer _i2) {
+          return _i1.compareTo(_i2);
+        }
+        return 0; // should never reach this point
+      };
+  private static final List<String> BAR_NAMES =
+      new ArrayList<>(MapTool.getCampaign().getTokenBarsMap().keySet());
+  private static final List<String> STATE_NAMES =
+      new ArrayList<>(MapTool.getCampaign().getTokenStatesMap().keySet());
+  private static final List<String> OVERLAY_NAMES =
+      new ArrayList<>() {
+        {
+          addAll(BAR_NAMES);
+          addAll(STATE_NAMES);
+        }
+      };
+
+  private void addBarOrState(
+      String stateName, Object stateValue, boolean playerOwns, boolean playerIsGm) {
+
+    AbstractTokenOverlay ato;
     if (MapTool.getCampaign().getTokenBarsMap().containsKey(stateName)) {
       ato = MapTool.getCampaign().getTokenBarsMap().get(stateName);
     } else {
       ato = MapTool.getCampaign().getTokenStatesMap().get(stateName);
     }
-    if (ato.isShowOthers() || (playerOwns && ato.isShowOwner()) || player.isGM()) {
+    if ((ato.isShowOthers() && !playerOwns)
+        || (playerOwns && ato.isShowOwner())
+        || (playerIsGm && ato.isShowGM())) {
       Map<String, Object> featureMap = new HashMap<>();
-      featureMap.put("value", stateValue);
-      featureMap.put("type", ato.getClass().getSimpleName());
-      String mName;
-
+      featureMap.put(
+          "type",
+          ato.getClass()
+              .getSimpleName()
+              .replaceAll("BarTokenOverlay", "")
+              .replaceAll("TokenOverlay", ""));
       try {
-        BeanInfo beanInfo = Introspector.getBeanInfo(ato.getClass());
-        PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-          if (!"class".equals(propertyDescriptor.getName())) {
-            if (propertyDescriptor.getReadMethod().canAccess(ato)) {
-              mName = propertyDescriptor.getReadMethod().getName();
-              if (mName.startsWith("is")) {
-                mName = mName.substring(2);
-              } else if (mName.startsWith("get") || mName.startsWith("has")) {
-                mName = mName.substring(3);
-              }
-              featureMap.put(
-                  Introspector.decapitalize(mName), propertyDescriptor.getReadMethod().invoke(ato));
-            }
-          }
-        }
-      } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
+        PropertyUtilsBean pub = BeanUtilsBean.getInstance().getPropertyUtils();
+        featureMap.putAll(pub.describe(ato));
+      } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
         throw new RuntimeException(e);
       }
+      String mName;
 
+      for (Map.Entry<String, Object> entry : featureMap.entrySet()) {
+        Object value = entry.getValue();
+        if (value instanceof Color color) {
+          featureMap.put(
+              entry.getKey(),
+              String.format(
+                  "rgba(%d,%d,%d,%#.3f)",
+                  color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 255f));
+        } else if (value instanceof MD5Key id) {
+          featureMap.put(entry.getKey(), String.format("asset://%s", id));
+        } else if (value instanceof MD5Key[] idArray) {
+          String[] strOut = new String[idArray.length];
+          for (int i = 0; i < idArray.length; i++) {
+            strOut[i] = String.format("asset://%s", idArray[i].toString());
+          }
+          featureMap.put(entry.getKey(), strOut);
+        }
+      }
       if (ato instanceof BarTokenOverlay) {
+        featureMap.put(
+            "value", stateValue instanceof BigDecimal bd ? bd.doubleValue() : stateValue);
+        featureMap.remove("group");
+        featureMap.remove("order");
         bars.add(featureMap);
       } else {
         states.add(featureMap);
@@ -457,6 +499,7 @@ public class StatSheetContext {
    * @return States set on the token.
    */
   public List<Map<String, Object>> getStates() {
+    states.sort(stateComparator);
     return states;
   }
 
