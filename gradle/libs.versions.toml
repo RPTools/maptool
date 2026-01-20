@@ -94,6 +94,7 @@ jsvg = { group = "com.github.weisj", name = "jsvg", version = "1.4.0" }
 
 handlebars = { group = "com.github.jknack", name = "handlebars", version.ref = "handlebars" }
 handlebars-helpers = { group = "com.github.jknack", name = "handlebars-helpers", version.ref = "handlebars" }
+handlebars-json = { group = "com.github.jknack", name = "handlebars-jackson2", version = "4.3.1" }
 
 # Apache commons and other utilities
 # parsing of configuration data
@@ -213,7 +214,7 @@ flatlaf = [
   "flatlaf-extras",
   "flatlaf-jide-oss",
 ]
-handlebars = ["handlebars", "handlebars-helpers"]
+handlebars = ["handlebars", "handlebars-helpers", "handlebars-json"]
 junit = ["junit-api", "junit-engine", "junit-params"]
 jai-imageio = ["jai-imageio-core", "jai-imageio-jpeg"]
 graalvm-js = ["graalvm-js", "graalvm-js-scriptengine"]
