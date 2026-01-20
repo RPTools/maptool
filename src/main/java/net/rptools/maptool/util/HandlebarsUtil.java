@@ -49,7 +49,7 @@ import org.apache.logging.log4j.Logger;
  * @param <T> The type of the bean to apply the template to.
  */
 public class HandlebarsUtil<T> {
-  public static Handlebars getHandlebarsInstance(@Nullable TemplateLoader loader) {
+  static Handlebars getHandlebarsInstance(@Nullable TemplateLoader loader) {
     Handlebars handlebars = new Handlebars(loader);
     StringHelpers.register(handlebars);
     Arrays.stream(ConditionalHelpers.values()).forEach(h -> handlebars.registerHelper(h.name(), h));
