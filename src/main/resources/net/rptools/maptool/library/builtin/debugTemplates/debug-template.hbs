@@ -1,0 +1,32 @@
+<html lang="en-AU">
+<head>
+    <title>Sheet Debug</title>
+</head>
+<body>
+    <table>
+        <caption>Handlebars Debug Info</caption>
+        <tr>
+            <th>Sheet</th>
+            <td>{{sheetName}}</td>
+        </tr>
+        <tr>
+            <th>Token Name</th>
+            <td>{{token.name}}</td>
+        </tr>
+        <tr>
+            <th>Token ID</th>
+            <td>{{token.id}}</td>
+        </tr>
+        <tr>
+            <th>Handlebars</th>
+            <td><a href="./{{templateURL}}">link</a></td>
+        </tr>
+        <tr>
+            <th>HTML Result</th>
+            <td><a href="./{{htmlOut}}">link</a></td>
+        </tr>
+    </table>
+    <h2>Passed Data</h2>
+    <pre>{{> _data-as-json}}</pre>
+</body>
+</html>

@@ -14,11 +14,7 @@
  */
 package net.rptools.maptool.util;
 
-import com.github.jknack.handlebars.Context;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
-import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.*;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.helper.StringHelpers;
@@ -40,6 +36,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Base64;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
@@ -52,6 +49,19 @@ import org.apache.logging.log4j.Logger;
  * @param <T> The type of the bean to apply the template to.
  */
 public class HandlebarsUtil<T> {
+  public static Handlebars getHandlebarsInstance(@Nullable TemplateLoader loader) {
+    Handlebars handlebars = new Handlebars(loader);
+    StringHelpers.register(handlebars);
+    Arrays.stream(ConditionalHelpers.values()).forEach(h -> handlebars.registerHelper(h.name(), h));
+    handlebars.registerHelper("json", Jackson2Helper.INSTANCE);
+    NumberHelper.register(handlebars);
+    handlebars.registerHelper(AssignHelper.NAME, AssignHelper.INSTANCE);
+    handlebars.registerHelper(IncludeHelper.NAME, IncludeHelper.INSTANCE);
+    Arrays.stream(MapToolHelpers.values()).forEach(h -> handlebars.registerHelper(h.name(), h));
+
+    return handlebars;
+  }
+
   public static boolean isAssetFileHandlebars(String filename) {
     if (filename == null) {
       return false;
@@ -155,16 +165,8 @@ public class HandlebarsUtil<T> {
    * @throws IOException If there is an error compiling the template.
    */
   private HandlebarsUtil(String stringTemplate, TemplateLoader loader) throws IOException {
+    Handlebars handlebars = getHandlebarsInstance(loader);
     try {
-      Handlebars handlebars = new Handlebars(loader);
-      StringHelpers.register(handlebars);
-      Arrays.stream(ConditionalHelpers.values())
-          .forEach(h -> handlebars.registerHelper(h.name(), h));
-      NumberHelper.register(handlebars);
-      handlebars.registerHelper(AssignHelper.NAME, AssignHelper.INSTANCE);
-      handlebars.registerHelper(IncludeHelper.NAME, IncludeHelper.INSTANCE);
-      Arrays.stream(MapToolHelpers.values()).forEach(h -> handlebars.registerHelper(h.name(), h));
-
       template = handlebars.compileInline(stringTemplate);
     } catch (IOException e) {
       log.error("Handlebars Error: {}", e.getMessage());

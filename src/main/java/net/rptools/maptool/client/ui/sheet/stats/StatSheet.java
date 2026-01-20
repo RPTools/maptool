@@ -14,24 +14,37 @@
  */
 package net.rptools.maptool.client.ui.sheet.stats;
 
+import com.github.jknack.handlebars.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.*;
 import javafx.application.Platform;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLContent;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.sheet.stats.StatSheetContext;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
+import net.rptools.maptool.util.HBDebugUtil;
 import net.rptools.maptool.util.HandlebarsUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class that represents a pop up stat sheet. */
 public class StatSheet {
-
   /** Object for logging messages. */
-  private static final Logger log = LogManager.getLogger(StatSheet.class);
+  private static final Logger log = LoggerFactory.getLogger(StatSheet.class);
+
+  private static final HBDebugUtil HBD;
+
+  static {
+    HBDebugUtil hbd = null;
+    if (DeveloperOptions.Toggle.EnableHandlebarsDebugging.get()) {
+      hbd = new HBDebugUtil();
+    }
+    HBD = hbd;
+  }
 
   /**
    * Sets the content for the stat sheet. The content is a HTML page that is rendered using the
@@ -67,6 +80,10 @@ public class StatSheet {
                       null);
             }
           });
+      if (HBD != null) {
+        Platform.runLater(
+            () -> HBD.publish(statSheetContext, token, content, entry, output.getHtmlString()));
+      }
     } catch (IOException e) {
       MapTool.showError("msg.error.renderingStatSheet", e);
     }

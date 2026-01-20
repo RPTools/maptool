@@ -25,6 +25,12 @@ public class DeveloperOptions {
       new PreferenceStore(Preferences.userRoot().node(AppConstants.APP_NAME + "/dev"));
 
   public static final class Toggle {
+    public static final Preference<Boolean> EnableHandlebarsDebugging =
+        store.defineBoolean(
+            "enableHandlebarsDebugging",
+            "Preferences.developer.enableHandlebarsDebugging.label",
+            "Preferences.developer.enableHandlebarsDebugging.tooltip",
+            false);
     public static final Preference<Boolean> AutoSaveMeasuredInSeconds =
         store.defineBoolean(
             "autoSaveMeasuredInSeconds",
