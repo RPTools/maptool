@@ -22,7 +22,6 @@ import java.text.Collator;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
-
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
@@ -275,10 +274,12 @@ public class StatSheetContext {
         };
   }
 
-  private static final Function<MD5Key, Dimension> getImageDimensions = md5Key -> {
-    BufferedImage image = ImageManager.getImage(md5Key);
-    return new Dimension(image.getWidth(), image.getHeight());
-  };
+  private static final Function<MD5Key, Dimension> getImageDimensions =
+      md5Key -> {
+        BufferedImage image = ImageManager.getImage(md5Key);
+        return new Dimension(image.getWidth(), image.getHeight());
+      };
+
   /** Comparator for sorting State Groups */
   private static final Comparator<Map<String, Object>> stateComparator =
       (o1, o2) -> {
@@ -361,14 +362,14 @@ public class StatSheetContext {
         } else if (value instanceof MD5Key id) {
           featureMap.put(entry.getKey(), String.format("asset://%s", id));
           Dimension dim = getImageDimensions.apply(id);
-          aspectRatioMap.put(entry.getKey() + "AspectRatio", dim.getWidth()/dim.getHeight());
+          aspectRatioMap.put(entry.getKey() + "AspectRatio", dim.getWidth() / dim.getHeight());
         } else if (value instanceof MD5Key[] idArray) {
           String[] strOut = new String[idArray.length];
           double[] arOut = new double[idArray.length];
           for (int i = 0; i < idArray.length; i++) {
             strOut[i] = String.format("asset://%s", idArray[i].toString());
             Dimension dim = getImageDimensions.apply(idArray[i]);
-            arOut[i] = dim.getWidth()/dim.getHeight();
+            arOut[i] = dim.getWidth() / dim.getHeight();
           }
           aspectRatioMap.put(entry.getKey() + "AspectRatio", arOut);
           featureMap.put(entry.getKey(), strOut);
