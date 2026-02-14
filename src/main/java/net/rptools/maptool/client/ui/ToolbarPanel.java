@@ -481,6 +481,10 @@ public class ToolbarPanel extends JToolBar {
                 topologyModeSelectionPanel))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW));
 
+    panel
+        .addTool(new VBLPenTool(topologyModeSelectionPanel))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_FREEHAND));
+
     // Add with separator to separate mode button group from shape button group.
     addSeparator(panel, 11);
 

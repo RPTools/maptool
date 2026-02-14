@@ -67,6 +67,9 @@ public class AppStatePersisted {
   /** Represents the key used to save the paint textures to the preferences. */
   private static final String KEY_SAVED_PAINT_TEXTURES = "savedTextures";
 
+  private static final String KEY_VBL_PEN_RADIUS = "vblPenRadius";
+  private static final int DEFAULT_VBL_PEN_RADIUS = 3;
+
   /** Will be null until read from preferences. */
   private static EnumSet<Zone.TopologyType> topologyTypes = null;
 
@@ -244,5 +247,13 @@ public class AppStatePersisted {
       }
     }
     return savedTextures;
+  }
+
+  public static int getVblPenRadius() {
+    return prefs.getInt(KEY_VBL_PEN_RADIUS, DEFAULT_VBL_PEN_RADIUS);
+  }
+
+  public static void setVblPenRadius(int radius) {
+    prefs.putInt(KEY_VBL_PEN_RADIUS, radius);
   }
 }
