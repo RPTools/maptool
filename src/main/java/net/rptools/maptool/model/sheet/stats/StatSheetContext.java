@@ -22,6 +22,7 @@ import java.text.Collator;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
@@ -188,6 +189,13 @@ public class StatSheetContext {
     name = token.getName();
     tokenType = token.getType().name();
 
+    /* Combined list of Bar and State names */
+    final List<String> OVERLAY_NAMES =
+        Stream.concat(
+                MapTool.getCampaign().getTokenBarsMap().keySet().stream(),
+                MapTool.getCampaign().getTokenStatesMap().keySet().stream())
+            .toList();
+
     for (String stateName : OVERLAY_NAMES) {
       Object stateValue = token.getState(stateName);
       if (stateValue != null) {
@@ -299,23 +307,6 @@ public class StatSheetContext {
         return 0; // should never reach this point
       };
 
-  /** List of available Bar names */
-  private static final List<String> BAR_NAMES =
-      new ArrayList<>(MapTool.getCampaign().getTokenBarsMap().keySet());
-
-  /** List of available State names */
-  private static final List<String> STATE_NAMES =
-      new ArrayList<>(MapTool.getCampaign().getTokenStatesMap().keySet());
-
-  /** Combined list of Bar and State names */
-  private static final List<String> OVERLAY_NAMES =
-      new ArrayList<>() {
-        {
-          addAll(BAR_NAMES);
-          addAll(STATE_NAMES);
-        }
-      };
-
   /**
    * Method for filtering overlays and adding them to the appropriate data set
    *
@@ -332,6 +323,9 @@ public class StatSheetContext {
       ato = MapTool.getCampaign().getTokenBarsMap().get(overlayName);
     } else {
       ato = MapTool.getCampaign().getTokenStatesMap().get(overlayName);
+    }
+    if (ato == null) {
+      return;
     }
     if ((ato.isShowOthers() && !playerOwns)
         || (playerOwns && ato.isShowOwner())

@@ -60,7 +60,7 @@ public class HBDebugUtil {
         Handlebars handlebars =
             HandlebarsUtil.getHandlebarsInstance(loader)
                 .with(cache)
-                .setCharset(StandardCharsets.ISO_8859_1)
+                .setCharset(StandardCharsets.UTF_8)
                 .prettyPrint(true);
 
         for (String fileName : templateNames) {
