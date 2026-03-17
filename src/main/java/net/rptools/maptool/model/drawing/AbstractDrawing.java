@@ -145,27 +145,11 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
 
   @Override
   public String toString() {
-<<<<<<< states_and_bars_on_stat_sheets
-    return toString(true);
-  }
-
-  public String toString(boolean localised) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("name=").append(getName()).append(";");
-    if (localised) {
-      sb.append("layer=").append(getLayer()).append(";");
-    } else {
-      sb.append("layer=").append(getLayer().name()).append(";");
-    }
-    sb.append("id=").append(getId()).append(";");
-    return sb.toString();
-=======
     return "name=" + getName() + ";" + "layer=" + getLayer() + ";" + "id=" + getId() + ";";
   }
 
   public String toNonLocalisedString() {
     return "name=" + getName() + ";" + "layer=" + getLayer().name() + ";" + "id=" + getId() + ";";
->>>>>>> develop
   }
 
   ////
