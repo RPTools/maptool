@@ -145,6 +145,7 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
 
   @Override
   public String toString() {
+<<<<<<< states_and_bars_on_stat_sheets
     return toString(true);
   }
 
@@ -158,6 +159,13 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
     }
     sb.append("id=").append(getId()).append(";");
     return sb.toString();
+=======
+    return "name=" + getName() + ";" + "layer=" + getLayer() + ";" + "id=" + getId() + ";";
+  }
+
+  public String toNonLocalisedString() {
+    return "name=" + getName() + ";" + "layer=" + getLayer().name() + ";" + "id=" + getId() + ";";
+>>>>>>> develop
   }
 
   ////

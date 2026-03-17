@@ -178,6 +178,7 @@ public class ShapeDrawable extends AbstractDrawing {
 
   @Override
   public String toString() {
+<<<<<<< states_and_bars_on_stat_sheets
     return toString(true);
   }
 
@@ -191,6 +192,51 @@ public class ShapeDrawable extends AbstractDrawing {
     sb.append("width=").append(getBounds().width).append(";");
     sb.append("height=").append(getBounds().height).append("\";");
     return sb.toString();
+=======
+    return super.toString()
+        + "antiAliasing="
+        + getUseAntiAliasing()
+        + ";"
+        + "shapeType="
+        + getShapeTypeName()
+        + ";"
+        + "bounds=\""
+        + "x="
+        + getBounds().x
+        + ";"
+        + "y="
+        + getBounds().y
+        + ";"
+        + "width="
+        + getBounds().width
+        + ";"
+        + "height="
+        + getBounds().height
+        + "\";";
+  }
+
+  public String toNonLocalisedString() {
+    return super.toNonLocalisedString()
+        + "antiAliasing="
+        + getUseAntiAliasing()
+        + ";"
+        + "shapeType="
+        + getShapeTypeName()
+        + ";"
+        + "bounds=\""
+        + "x="
+        + getBounds().x
+        + ";"
+        + "y="
+        + getBounds().y
+        + ";"
+        + "width="
+        + getBounds().width
+        + ";"
+        + "height="
+        + getBounds().height
+        + "\";";
+>>>>>>> develop
   }
 
   private void restoreAA(Graphics2D g, Object oldAA) {

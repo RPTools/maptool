@@ -614,7 +614,11 @@ public class ShapeFunctions extends AbstractFunction {
               seg, coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], coords[6]));
       pi.next();
     }
+<<<<<<< states_and_bars_on_stat_sheets
     StringBuilder stringBuilder = new StringBuilder(sd.toString(false));
+=======
+    StringBuilder stringBuilder = new StringBuilder(sd.toNonLocalisedString());
+>>>>>>> develop
     stringBuilder.append("segments=").append(String.join(",", segments)).append(";");
 
     if (delimiter.equalsIgnoreCase("json")) {
