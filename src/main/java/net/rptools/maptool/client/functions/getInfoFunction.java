@@ -33,6 +33,7 @@ import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -201,26 +202,118 @@ public class getInfoFunction extends AbstractFunction {
   }
 
   /**
-   * Retrieves the client side preferences that do not have server over rides as a json object.
+   * Retrieves the client side preferences that do not have server overrides as a json object.
    *
    * @return the client side preferences
    */
   private JsonObject getClientInfo() {
     JsonObject cinfo = new JsonObject();
 
-    cinfo.addProperty(
-        "face edge", FunctionUtil.getDecimalForBoolean(AppPreferences.faceEdge.get()));
-    cinfo.addProperty(
-        "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.faceVertex.get()));
+    // region client preferences/interactions/tokens
     cinfo.addProperty("portrait size", AppPreferences.portraitSize.get());
     cinfo.addProperty("show portrait", AppPreferences.showPortrait.get());
     cinfo.addProperty("show stat sheet", AppPreferences.showStatSheet.get());
-    cinfo.addProperty("file sync directory", AppPreferences.fileSyncPath.get());
+    cinfo.addProperty(
+        "facingArrowBGColour", String.format("%h", AppPreferences.facingArrowBGColour.get()));
+    cinfo.addProperty(
+        "facingArrowBorderColour",
+        String.format("%h", AppPreferences.facingArrowBorderColour.get()));
+    // endregion
+
+    // region client preferences/interactions/chat
     cinfo.addProperty("show avatar in chat", AppPreferences.showAvatarInChat.get());
     cinfo.addProperty(
         "suppress tooltips for macroLinks", AppPreferences.suppressToolTipsForMacroLinks.get());
     cinfo.addProperty(
         "use tooltips for inline rolls", AppPreferences.useToolTipForInlineRoll.get());
+    cinfo.addProperty(
+        "chatNotificationColor", String.format("%h", AppPreferences.chatNotificationColor.get()));
+    cinfo.addProperty(
+        "chatNotificationBackground", AppPreferences.chatNotificationBackground.get());
+    cinfo.addProperty(
+        "trustedPrefixBackground",
+        String.format("%h", AppPreferences.trustedPrefixBackground.get()));
+    cinfo.addProperty(
+        "trustedPrefixForeground",
+        String.format("%h", AppPreferences.trustedPrefixForeground.get()));
+    // endregion
+
+    // region client preferences/interactions/facing
+    cinfo.addProperty(
+        "face edge", FunctionUtil.getDecimalForBoolean(AppPreferences.faceEdge.get()));
+    cinfo.addProperty(
+        "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.faceVertex.get()));
+    // endregion
+
+    // region client preferences/accessibility/labels
+    JsonObject clientLabelInfo = new JsonObject();
+    clientLabelInfo.addProperty(
+        "npcBackground", String.format("%h", AppPreferences.npcMapLabelBackground.get()));
+    clientLabelInfo.addProperty(
+        "npcForeground", String.format("%h", AppPreferences.npcMapLabelForeground.get()));
+    clientLabelInfo.addProperty(
+        "npcBorder", String.format("%h", AppPreferences.npcMapLabelBorder.get()));
+    clientLabelInfo.addProperty(
+        "pcBackground", String.format("%h", AppPreferences.pcMapLabelBackground.get()));
+    clientLabelInfo.addProperty(
+        "pcForeground", String.format("%h", AppPreferences.pcMapLabelForeground.get()));
+    clientLabelInfo.addProperty(
+        "pcBorder", String.format("%h", AppPreferences.pcMapLabelBorder.get()));
+    clientLabelInfo.addProperty(
+        "nonVisibleBackground",
+        String.format("%h", AppPreferences.nonVisibleTokenMapLabelBackground.get()));
+    clientLabelInfo.addProperty(
+        "nonVisibleForeground",
+        String.format("%h", AppPreferences.nonVisibleTokenMapLabelForeground.get()));
+    clientLabelInfo.addProperty(
+        "nonVisibleBorder",
+        String.format("%h", AppPreferences.nonVisibleTokenMapLabelBorder.get()));
+    clientLabelInfo.addProperty(
+        "drawingForeground",
+        String.format("%h", AppPreferences.drawingMapLabelForegroundColor.get()));
+    clientLabelInfo.addProperty(
+        "drawingBackground",
+        String.format("%h", AppPreferences.drawingMapLabelBackgroundColor.get()));
+    clientLabelInfo.addProperty(
+        "drawingBorder", String.format("%h", AppPreferences.drawingMapLabelBorderColor.get()));
+    clientLabelInfo.addProperty(
+        "templateForeground",
+        String.format("%h", AppPreferences.templateMapLabelForegroundColor.get()));
+    clientLabelInfo.addProperty(
+        "templateBackground",
+        String.format("%h", AppPreferences.templateMapLabelBackgroundColor.get()));
+    clientLabelInfo.addProperty(
+        "templateBorder", String.format("%h", AppPreferences.templateMapLabelBorderColor.get()));
+    clientLabelInfo.addProperty("fontSize", AppPreferences.mapLabelFontSize.get());
+    boolean showBorder = AppPreferences.mapLabelShowBorder.get();
+    clientLabelInfo.addProperty("showBorder", showBorder);
+    clientLabelInfo.addProperty(
+        "borderWidth", showBorder ? AppPreferences.mapLabelBorderWidth.get() : 0);
+    clientLabelInfo.addProperty("borderArc", AppPreferences.mapLabelBorderArc.get().toString());
+    cinfo.add("label preferences", clientLabelInfo);
+    // endregion
+
+    // region client preferences/themes
+    JsonObject clientThemeInfo = new JsonObject();
+    clientThemeInfo.addProperty(
+        "defaultMacroEditorTheme", AppPreferences.defaultMacroEditorTheme.get());
+    clientThemeInfo.addProperty("iconTheme", AppPreferences.iconTheme.get());
+    String themeName = ThemeSupport.getThemeName();
+    Boolean isDarkTheme =
+        Arrays.stream(ThemeSupport.THEMES)
+            .filter(t -> t.name().equals(themeName))
+            .findFirst()
+            .map(ThemeSupport.ThemeDetails::dark)
+            .orElse(null);
+    clientThemeInfo.addProperty("themeName", themeName);
+    clientThemeInfo.addProperty("isDarkTheme", isDarkTheme);
+    clientThemeInfo.addProperty(
+        "useThemeColorsForChat", ThemeSupport.shouldUseThemeColorsForChat());
+    cinfo.add("theme preferences", clientThemeInfo);
+    // endregion
+
+    // region other client
+    cinfo.addProperty("file sync directory", AppPreferences.fileSyncPath.get());
     cinfo.addProperty("version", MapTool.getVersion());
     cinfo.addProperty(
         "isFullScreen", FunctionUtil.getDecimalForBoolean(MapTool.getFrame().isFullScreen()));
@@ -268,6 +361,7 @@ public class getInfoFunction extends AbstractFunction {
       cinfo.add("user defined functions", udfList);
       cinfo.addProperty("client id", MapTool.getClientId());
     }
+    // endregion
     return cinfo;
   }
 
