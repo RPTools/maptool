@@ -738,6 +738,13 @@ public class AppPreferences {
           "Preferences.label.macros.permissions.tooltip",
           false);
 
+  public static final Preference<Boolean> trustAllPlayers =
+      store.defineBoolean(
+          "trustAllPlayers",
+          "Preferences.label.macros.trustAllPlayers",
+          "Preferences.label.macros.trustAllPlayers.tooltip",
+          false);
+
   public static final Preference<Boolean> loadMruCampaignAtStart =
       store.defineBoolean(
           "loadMRUCampaignAtStart",

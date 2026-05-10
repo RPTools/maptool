@@ -361,6 +361,9 @@ public class PreferencesDialog extends AbeillePanel {
   private final JCheckBox allowExternalMacroAccessCheckBox =
       getCheckBox("allowExternalMacroAccess");
 
+  /** Checkbox for trusting all players (dev/test convenience). */
+  private final JCheckBox trustAllPlayersCheckBox = getCheckBox("trustAllPlayers");
+
   // Authentication
   /** Text area for displaying the public key for authentication. */
   private final JTextArea publicKeyTextArea = (JTextArea) getComponent("publicKeyTextArea");
@@ -1057,6 +1060,8 @@ public class PreferencesDialog extends AbeillePanel {
         e ->
             AppPreferences.allowExternalMacroAccess.set(
                 allowExternalMacroAccessCheckBox.isSelected()));
+    trustAllPlayersCheckBox.addActionListener(
+        e -> AppPreferences.trustAllPlayers.set(trustAllPlayersCheckBox.isSelected()));
     showDialogOnNewToken.addActionListener(
         e -> AppPreferences.showDialogOnNewToken.set(showDialogOnNewToken.isSelected()));
     autoSaveSpinner.addChangeListener(
@@ -1756,6 +1761,7 @@ public class PreferencesDialog extends AbeillePanel {
     upnpDiscoveryTimeoutTextField.setText(
         Integer.toString(AppPreferences.upnpDiscoveryTimeout.get()));
     allowExternalMacroAccessCheckBox.setSelected(AppPreferences.allowExternalMacroAccess.get());
+    trustAllPlayersCheckBox.setSelected(AppPreferences.trustAllPlayers.get());
     fileSyncPath.setText(AppPreferences.fileSyncPath.get());
 
     // get JVM User Defaults/User override preferences

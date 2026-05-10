@@ -85,6 +85,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               TokenSpeechFunctions.getInstance(),
               TokenStateFunction.getInstance(),
               TokenVisibleFunction.getInstance(),
+              TurnTimerFunction.getInstance(),
               isVisibleFunction.getInstance(),
               getInfoFunction.getInstance(),
               TokenMoveFunctions.getInstance(),

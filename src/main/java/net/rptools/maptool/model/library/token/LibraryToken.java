@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
@@ -326,11 +327,15 @@ class LibraryToken implements Library {
                 }
               }
 
+              boolean trusted =
+                  AppPreferences.trustAllPlayers.get()
+                      || library.isOwnedByNone()
+                      || !buttonProps.getAllowPlayerEdits();
               return Optional.of(
                   new MTScriptMacroInfo(
                       macroName,
                       buttonProps.getCommand(),
-                      library.isOwnedByNone() || !buttonProps.getAllowPlayerEdits(),
+                      trusted,
                       !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute(),
                       buttonProps.getEvaluatedToolTip()));
             });

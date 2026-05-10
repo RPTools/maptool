@@ -1710,6 +1710,9 @@ public class MapToolLineParser {
    * @return if the macro context is trusted or not.
    */
   public boolean isMacroTrusted() {
+    if (AppPreferences.trustAllPlayers.get()) {
+      return true;
+    }
     return !contextStack.isEmpty() && contextStack.peek().isTrusted();
   }
 

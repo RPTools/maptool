@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.TurnTimerFunction;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
@@ -698,6 +699,7 @@ public class InitiativeList implements Serializable {
       int oldRound,
       int newRound,
       InitiativeChangeDirection direction) {
+    TurnTimerFunction.onInitiativeChanged();
     try {
       var libs =
           new LibraryManager()

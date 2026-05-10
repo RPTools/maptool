@@ -24,6 +24,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -74,6 +76,13 @@ import org.fife.ui.rtextarea.SearchResult;
 public class MacroEditorDialog extends JDialog implements SearchListener {
 
   public static final String DEFAULT_COLOR_NAME = "default";
+
+  /**
+   * Matches a "# NAME" directive on the first line. If present at save time, NAME is lifted into
+   * the macro's label and the line is stripped from the command body.
+   */
+  private static final Pattern MACRO_NAME_DIRECTIVE =
+      Pattern.compile("\\A#[ \\t]+([^\\r\\n]+)\\r?\\n?");
 
   private static final long serialVersionUID = 8228617911117087993L;
   private static final Logger log = LogManager.getLogger(MacroEditorDialog.class);
@@ -726,7 +735,30 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
     }
   }
 
+  /**
+   * If the command's first line is a {@code # NAME} directive, lift NAME into the label field and
+   * strip the line from the command. Runs in-place on the dialog's UI so the save path picks up the
+   * rewritten values normally.
+   */
+  private void applyNameDirective() {
+    String command = getCommandTextArea().getText();
+    if (command == null || command.isEmpty()) {
+      return;
+    }
+    Matcher m = MACRO_NAME_DIRECTIVE.matcher(command);
+    if (!m.lookingAt()) {
+      return;
+    }
+    String name = m.group(1).trim();
+    if (name.isEmpty()) {
+      return;
+    }
+    getLabelTextField().setText(name);
+    getCommandTextArea().setText(command.substring(m.end()));
+  }
+
   private void save(boolean closeDialog) {
+    applyNameDirective();
     callback.accept(getCommandTextArea().getText());
     if (properties != null) {
       String hotKey = getHotKeyCombo().getSelectedItem().toString();

@@ -69,6 +69,7 @@ import net.rptools.maptool.client.AppUpdate.ReleaseInfo;
 import net.rptools.maptool.client.MapToolConnection.HandshakeCompletionObserver;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.ServerDisconnected;
+import net.rptools.maptool.client.functions.TurnTimerFunction;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
@@ -921,6 +922,8 @@ public class MapTool {
 
   public static void setCampaign(Campaign campaign, @Nullable GUID defaultZoneId) {
     campaign = Objects.requireNonNullElseGet(campaign, Campaign::new);
+
+    TurnTimerFunction.cancelAll();
 
     // Load up the new
     client.setCampaign(campaign);
