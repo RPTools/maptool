@@ -103,19 +103,28 @@ public sealed interface ServerAddress {
     }
   }
 
-  record Tcp(@Nonnull String address, int port) implements ServerAddress {
+  record Tcp(@Nonnull String address, int port, boolean useSSL) implements ServerAddress {
     @Override
     @Nonnull
     public RemoteServerConfig findServer() {
-      return new RemoteServerConfig.Socket(
-          address(), port() == -1 ? ServerConfig.DEFAULT_PORT : port());
+      var port = port();
+      if (port == -1) {
+        port = ServerConfig.DEFAULT_PORT;
+      }
+
+      if (useSSL) {
+        return new RemoteServerConfig.SSLSocket(address(), port);
+      }
+
+      return new RemoteServerConfig.Socket(address(), port);
     }
 
     @Override
     @Nonnull
     public URI toUri() {
       try {
-        return new URI("rptools-maptool+tcp", null, address(), port(), "/", null, null);
+        var scheme = useSSL() ? "rptools-maptool+tcps" : "rptools-maptool+tcp";
+        return new URI(scheme, null, address(), port(), "/", null, null);
       } catch (URISyntaxException e) {
         throw new AssertionError(
             "Scheme and path are given and the path is absolute and IP address authorities are all valid so this should be infallible",
@@ -173,14 +182,14 @@ public sealed interface ServerAddress {
         return new ServerAddress.Lan(serviceIdentifier);
 
       case "rptools-maptool+tcp":
+      case "rptools-maptool+tcps":
         if (host == null) {
-          throw new IllegalArgumentException("rptools-maptool+tcp URIs must have a host");
+          throw new IllegalArgumentException(scheme + " URIs must have a host");
         }
         if (path != null && !path.isEmpty() && !path.equals("/")) {
-          throw new IllegalArgumentException(
-              "rptools-maptool+tcp URIs must have no path or just /");
+          throw new IllegalArgumentException(scheme + " URIs must have no path or just /");
         }
-        return new ServerAddress.Tcp(host, port);
+        return new ServerAddress.Tcp(host, port, scheme.endsWith("s"));
 
       case null:
       default:

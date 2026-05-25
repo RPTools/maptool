@@ -173,6 +173,19 @@
             <RegistryValue Type="string" Value="&quot;[INSTALLDIR]$(var.JpAppName).exe&quot; &quot;%1&quot;" />
           </RegistryKey>
         </RegistryKey>
+        <RegistryKey Root="HKCR"
+         Key="rptools-maptool+tcps"
+         ForceCreateOnInstall="yes"
+         ForceDeleteOnUninstall="yes">
+          <RegistryValue Type="string" Name="URL Protocol" Value=""/>
+          <RegistryValue Type="string" Value="URL:MapTool SSL connect"/>
+          <RegistryKey Key="DefaultIcon">
+            <RegistryValue Type="string" Value="[INSTALLDIR]$(var.JpAppName).exe" />
+          </RegistryKey>
+          <RegistryKey Key="shell\open\command">
+            <RegistryValue Type="string" Value="&quot;[INSTALLDIR]$(var.JpAppName).exe&quot; &quot;%1&quot;" />
+          </RegistryKey>
+        </RegistryKey>
       <?endif?>
     </Component>
 

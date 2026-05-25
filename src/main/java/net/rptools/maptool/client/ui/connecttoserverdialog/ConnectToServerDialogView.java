@@ -14,11 +14,11 @@
  */
 package net.rptools.maptool.client.ui.connecttoserverdialog;
 
-import java.awt.*;
 import javax.swing.*;
 
 public class ConnectToServerDialogView {
   private JPanel mainPanel;
+  private JCheckBox directUseSSLCheckbox;
 
   public JComponent getRootComponent() {
     return mainPanel;

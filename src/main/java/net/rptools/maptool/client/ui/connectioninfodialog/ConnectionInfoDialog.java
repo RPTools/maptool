@@ -107,7 +107,9 @@ public class ConnectionInfoDialog extends JDialog {
                         return null;
                       }
                       return new ServerAddress.Tcp(
-                          NetUtil.formatAddress(localAddresses.ipv4().get(0)), server.getPort());
+                          NetUtil.formatAddress(localAddresses.ipv4().get(0)),
+                          server.getPort(),
+                          false);
                     });
     Supplier<CompletableFuture<ServerAddress.Tcp>> getLocalV6 =
         () ->
@@ -119,7 +121,9 @@ public class ConnectionInfoDialog extends JDialog {
                         return null;
                       }
                       return new ServerAddress.Tcp(
-                          NetUtil.formatAddress(localAddresses.ipv6().get(0)), server.getPort());
+                          NetUtil.formatAddress(localAddresses.ipv6().get(0)),
+                          server.getPort(),
+                          false);
                     });
     Supplier<CompletableFuture<ServerAddress.Tcp>> getExternal =
         () ->
@@ -131,7 +135,7 @@ public class ConnectionInfoDialog extends JDialog {
                         return null;
                       }
                       return new ServerAddress.Tcp(
-                          NetUtil.formatAddress(address), server.getPort());
+                          NetUtil.formatAddress(address), server.getPort(), false);
                     });
     registerCopyButton(panel, "registryUriCopyButton", getServerName, ServerAddress::toUri);
     registerCopyButton(panel, "registryHttpUrlCopyButton", getServerName, ServerAddress::toHttpUrl);

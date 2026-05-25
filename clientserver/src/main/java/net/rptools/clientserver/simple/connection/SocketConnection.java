@@ -17,6 +17,8 @@ package net.rptools.clientserver.simple.connection;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,35 +26,39 @@ import org.apache.logging.log4j.Logger;
  * @author drice
  */
 public class SocketConnection extends AbstractConnection implements Connection {
+
+  @FunctionalInterface
+  public interface SocketSupplier<T> {
+    public T get() throws IOException;
+  }
+
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(SocketConnection.class);
 
-  private final String id;
-  private SendThread send;
-  private ReceiveThread receive;
-  private Socket socket;
-  private String hostName;
-  private int port;
+  @Nonnull private final String id;
+  @Nullable private SendThread send;
+  @Nullable private ReceiveThread receive;
+  @Nullable private Socket socket;
+  @Nullable private SocketSupplier<Socket> socketSupplier;
 
-  public SocketConnection(String id, String hostName, int port) {
+  public SocketConnection(@Nonnull String id, @Nonnull SocketSupplier<Socket> socketSupplier) {
     this.id = id;
-    this.hostName = hostName;
-    this.port = port;
+    this.socketSupplier = socketSupplier;
   }
 
-  public SocketConnection(String id, Socket socket) {
+  public SocketConnection(@Nonnull String id, @Nonnull Socket socket) {
     this.id = id;
-    this.socket = socket;
 
     initialize(socket);
   }
 
   @Override
+  @Nonnull
   public String getId() {
     return id;
   }
 
-  private void initialize(Socket socket) {
+  private void initialize(@Nonnull Socket socket) {
     this.socket = socket;
     this.send = new SendThread(socket);
     this.receive = new ReceiveThread(socket);
@@ -63,7 +69,10 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
   @Override
   public void open() throws IOException {
-    initialize(new Socket(hostName, port));
+    if (socketSupplier == null) {
+      throw new AssertionError("open should not be called when created with a Socket");
+    }
+    initialize(socketSupplier.get());
   }
 
   @Override

@@ -31,6 +31,7 @@ public class ConnectToServerDialogPreferences {
   private static final String KEY_TAB = "tab";
   private static final String KEY_SERVER_NAME = "serverName";
   private static final String USE_PUBLIC_KEY = "usePublicKey";
+  private static final String USE_SSL = "useSSL";
   private static final String USE_WEB_RTC = "useWebRTC";
 
   @Nonnull
@@ -99,5 +100,13 @@ public class ConnectToServerDialogPreferences {
 
   public void setUseWebRTC(boolean useWebRTC) {
     prefs.putBoolean(USE_WEB_RTC, useWebRTC);
+  }
+
+  public boolean getUseSSL() {
+    return prefs.getBoolean(USE_SSL, false);
+  }
+
+  public void setUseSSL(boolean useSSL) {
+    prefs.putBoolean(USE_SSL, useSSL);
   }
 }
