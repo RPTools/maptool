@@ -1545,9 +1545,6 @@ public class MapTool {
     // Start the update check early. Will be handled after the splash screen goes away.
     var updateFuture = AppUpdate.autoUpdateCheck();
 
-    String versionImplementation = version;
-    String versionOverride = version;
-
     if (OsDetection.MAC_OS_X) {
       // On OSX the menu bar at the top of the screen can be enabled at any time, but the
       // title (ie. name of the application) has to be set before the GUI is initialized (by
@@ -1563,8 +1560,8 @@ public class MapTool {
     }
 
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
-      versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
-      log.info("getting MapTool version from manifest: " + versionImplementation);
+      version = MapTool.class.getPackage().getImplementationVersion().trim();
+      log.info("getting MapTool version from manifest: " + version);
     }
 
     if (MapTool.class.getPackage().getImplementationVendor() != null) {
@@ -1590,7 +1587,7 @@ public class MapTool {
     // -version
     Options cmdOptions = new Options();
     cmdOptions.addOption("d", "debug", false, "turn on System.out enhanced debug output");
-    cmdOptions.addOption("v", "version", true, "override MapTool version");
+    cmdOptions.addOption("v", "version", true, "override MapTool version (defunct)");
     cmdOptions.addOption("m", "monitor", true, "sets which monitor to use");
     cmdOptions.addOption("f", "fullscreen", false, "set to maximize window");
     cmdOptions.addOption("w", "width", true, "override MapTool window width");
@@ -1609,7 +1606,6 @@ public class MapTool {
       cmd = cmdParser.parse(cmdOptions, args);
 
       debug = getCommandLineOption(cmd, "debug");
-      versionOverride = getCommandLineOption(cmd, "version", version);
       graphicsMonitor = getCommandLineOption(cmd, "monitor", graphicsMonitor);
       useFullScreen = getCommandLineOption(cmd, "fullscreen");
 
@@ -1644,13 +1640,10 @@ public class MapTool {
     }
 
     if (cmd.hasOption("version")) {
-      log.info("overriding MapTool version from command line to: " + versionOverride);
-      version = versionOverride;
-    } else {
-      version = versionImplementation;
-      log.info("MapTool version: " + version);
+      log.warn("Found -v on command line, but the option is no longer used and will be ignored.");
     }
 
+    log.info("MapTool version: " + version);
     log.info("MapTool vendor: " + vendor);
 
     if (cmd.getArgs().length != 0) {
@@ -1666,9 +1659,7 @@ public class MapTool {
 
     // Set MapTool version
     Sentry.setTag("os", System.getProperty("os.name"));
-    Sentry.setTag("version", MapTool.getVersion());
-    Sentry.setTag("versionImplementation", versionImplementation);
-    Sentry.setTag("versionOverride", versionOverride);
+    Sentry.setTag("version", version);
 
     if (listMacros) {
       StringBuilder logOutput = new StringBuilder();

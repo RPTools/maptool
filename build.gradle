@@ -137,7 +137,6 @@ javafx {
 }
 
 run {
-    args = ['-v=' + appSemVer]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
 
