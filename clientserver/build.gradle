@@ -20,6 +20,8 @@ dependencies {
     implementation(libs.webrtc)
     if (osdetector.os.is('windows'))
         implementation(variantOf(libs.webrtc) { classifier('windows-x86_64')})
+    else if (osdetector.os.is('osx') && osdetector.arch == 'aarch64')
+        implementation(variantOf(libs.webrtc) { classifier('macos-aarch64')})
     else if (osdetector.os.is('osx'))
         implementation(variantOf(libs.webrtc) { classifier('macos-x86_64')})
     else if (osdetector.os.is('linux'))

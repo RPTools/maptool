@@ -41,9 +41,19 @@ jobs:
     runs-on:  ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-15-intel]
-        java: [ '21' ]
-        distribution: [ 'temurin']
+        include:
+          - os: windows-latest
+            java: '21'
+            distribution: 'temurin'
+          - os: ubuntu-latest
+            java: '21'
+            distribution: 'temurin'
+          - os: macos-15-intel
+            java: '21'
+            distribution: 'temurin'
+          - os: macos-15
+            java: '21'
+            distribution: 'temurin'
       fail-fast: false
     steps:
       - name: Git checkout
