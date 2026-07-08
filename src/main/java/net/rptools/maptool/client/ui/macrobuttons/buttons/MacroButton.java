@@ -204,6 +204,9 @@ public class MacroButton extends JButton implements MouseListener {
         properties.executeMacro();
       }
     } else if (SwingUtilities.isRightMouseButton(event)) {
+      if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isTokenContextLocked()) {
+        return;
+      }
       if (getPanelClass().equals("GlobalPanel")) {
         new MacroButtonPopupMenu(this, panelClass, false).show(this, event.getX(), event.getY());
       } else if (getPanelClass().equals("CampaignPanel")) {

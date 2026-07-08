@@ -27,6 +27,8 @@
             <constraints/>
             <properties>
               <name value="transferTable"/>
+              <showHorizontalLines value="false"/>
+              <showVerticalLines value="false"/>
             </properties>
           </component>
         </children>

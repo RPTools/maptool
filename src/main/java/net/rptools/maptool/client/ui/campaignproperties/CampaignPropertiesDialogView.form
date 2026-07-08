@@ -3,7 +3,7 @@
   <grid id="6db9f" binding="mainPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="1004" height="850"/>
+      <xy x="10" y="10" width="1767" height="1079"/>
     </constraints>
     <properties>
       <name value="mainForm"/>
@@ -120,7 +120,7 @@
             </constraints>
             <properties>
               <name value="sightPanel"/>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -206,6 +206,7 @@
                 </constraints>
                 <properties>
                   <dividerSize value="12"/>
+                  <oneTouchExpandable value="true"/>
                   <orientation value="0"/>
                   <resizeWeight value="0.6"/>
                 </properties>
@@ -278,6 +279,7 @@
                 </constraints>
                 <properties>
                   <dividerSize value="12"/>
+                  <oneTouchExpandable value="true"/>
                   <orientation value="0"/>
                   <resizeWeight value="0.4"/>
                 </properties>
@@ -322,6 +324,90 @@
                           <autoscrolls value="false"/>
                           <contentType value="text/plain"/>
                           <name value="auraPanel"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </scrollpane>
+                </children>
+              </splitpane>
+            </children>
+          </grid>
+          <grid id="68da5" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="CampaignPropertiesDialog.tab.halos"/>
+            </constraints>
+            <properties>
+              <name value="haloPanel"/>
+              <preferredSize width="700" height="600"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <splitpane id="1415f">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="700" height="600"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <dividerLocation value="450"/>
+                  <dividerSize value="12"/>
+                  <oneTouchExpandable value="true"/>
+                  <orientation value="0"/>
+                  <resizeWeight value="0.4"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <scrollpane id="e8cf3">
+                    <constraints>
+                      <splitpane position="right"/>
+                    </constraints>
+                    <properties>
+                      <maximumSize width="-1" height="-1"/>
+                      <minimumSize width="10" height="10"/>
+                      <preferredSize width="10" height="100"/>
+                      <verticalScrollBarPolicy value="22"/>
+                      <visible value="true"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <component id="ea359" class="javax.swing.JEditorPane">
+                        <constraints/>
+                        <properties>
+                          <autoscrolls value="false"/>
+                          <contentType value="text/html"/>
+                          <editable value="false"/>
+                          <maximumSize width="-1" height="-1"/>
+                          <minimumSize width="10" height="10"/>
+                          <name value="haloHelp"/>
+                          <preferredSize width="10" height="100"/>
+                          <selectionEnd value="1"/>
+                          <selectionStart value="1"/>
+                          <text value="&lt;html&gt;&#10;  &lt;head&gt;&#10;    &#10;  &lt;/head&gt;&#10;  &lt;body&gt;&#10;  &lt;/body&gt;&#10;&lt;/html&gt;&#10;"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </scrollpane>
+                  <scrollpane id="369c9">
+                    <constraints>
+                      <splitpane position="left"/>
+                    </constraints>
+                    <properties>
+                      <maximumSize width="-1" height="-1"/>
+                      <visible value="true"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <component id="88316" class="javax.swing.JEditorPane">
+                        <constraints/>
+                        <properties>
+                          <autoscrolls value="false"/>
+                          <contentType value="text/plain"/>
+                          <maximumSize width="-1" height="-1"/>
+                          <minimumSize width="23" height="23"/>
+                          <name value="haloPanel"/>
+                          <preferredSize width="1739" height="50"/>
                           <text value=""/>
                         </properties>
                       </component>

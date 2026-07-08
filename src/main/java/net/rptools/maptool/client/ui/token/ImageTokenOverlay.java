@@ -15,86 +15,43 @@
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import net.rptools.maptool.server.proto.ImageTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * This is a token overlay that shows an image over the entire token
  *
  * @author Jay
  */
-public class ImageTokenOverlay extends BooleanTokenOverlay {
+public final class ImageTokenOverlay extends BooleanTokenOverlay {
 
-  /** If of the image displayed in the overlay. */
+  /** ID of the image displayed in the overlay. */
   private MD5Key assetId;
-
-  /** Logger instance for this class. */
-  private static final Logger LOGGER = LogManager.getLogger(ImageTokenOverlay.class);
-
-  /** Needed for serialization */
-  public ImageTokenOverlay() {
-    this(DEFAULT_STATE_NAME, null);
-  }
 
   /**
    * Create the complete image overlay.
    *
    * @param name Name of the new token overlay
-   * @param anAssetId Id of the image displayed in the new token overlay.
+   * @param assetId ID of the image displayed in the new token overlay.
    */
-  public ImageTokenOverlay(String name, MD5Key anAssetId) {
+  public ImageTokenOverlay(String name, MD5Key assetId) {
     super(name);
-    assetId = anAssetId;
+    this.assetId = assetId;
   }
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
-  @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new ImageTokenOverlay(getName(), assetId);
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
+  public ImageTokenOverlay(ImageTokenOverlay other) {
+    super(other);
+    this.assetId = other.assetId;
   }
 
-  /**
-   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle)
-   */
   @Override
-  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
-
-    // Get the image
-    Rectangle iBounds = getImageBounds(bounds, token);
-    Dimension d = iBounds.getSize();
-
-    BufferedImage image = ImageManager.getImageAndWait(assetId);
-    Dimension size = new Dimension(image.getWidth(), image.getHeight());
-    AwtUtil.constrainTo(size, d.width, d.height);
-
-    // Paint it at the right location
-    int width = size.width;
-    int height = size.height;
-    int x = iBounds.x + (d.width - width) / 2;
-    int y = iBounds.y + (d.height - height) / 2;
-    Composite tempComposite = g.getComposite();
-    if (getOpacity() != 100)
-      g.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
-    g.drawImage(image, x, y, size.width, size.height, null);
-    g.setComposite(tempComposite);
+  public ImageTokenOverlay clone() {
+    return new ImageTokenOverlay(this);
   }
 
   /**
@@ -104,36 +61,30 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
     return assetId;
   }
 
-  /**
-   * Calculate the image bounds from the token bounds
-   *
-   * @param bounds Bounds of the token passed to the overlay.
-   * @param token Token being decorated.
-   * @return The bounds w/in the token where the image is painted.
-   */
-  public Rectangle getImageBounds(Rectangle bounds, Token token) {
-    return bounds;
+  @Override
+  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
+    BufferedImage image = ImageManager.getImageAndWait(assetId);
+
+    var imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
+    AwtUtil.fitInto(imageBounds, bounds);
+
+    // Paint it at the right location
+    int width = (int) imageBounds.getWidth();
+    int height = (int) imageBounds.getHeight();
+    int x = (int) imageBounds.getMinX();
+    int y = (int) imageBounds.getMinY();
+
+    g.drawImage(image, x, y, width, height, null);
   }
 
-  protected void fillFrom(BooleanTokenOverlayDto dto) {
-    fillFrom(dto.getCommon());
-    assetId = new MD5Key(dto.getAssetId());
-  }
-
-  protected BooleanTokenOverlayDto.Builder getDto() {
-    var dto = BooleanTokenOverlayDto.newBuilder();
-    dto.setCommon(getCommonDto());
+  public ImageTokenOverlayDto toImageDto() {
+    var dto = ImageTokenOverlayDto.newBuilder();
     dto.setAssetId(assetId.toString());
-    return dto;
+    return dto.build();
   }
 
-  public static ImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new ImageTokenOverlay();
-    overlay.fillFrom(dto);
-    return overlay;
-  }
-
-  public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.IMAGE).build();
+  public static ImageTokenOverlay fromDto(ImageTokenOverlayDto dto) {
+    var assetId = new MD5Key(dto.getAssetId());
+    return new ImageTokenOverlay(DEFAULT_STATE_NAME, assetId);
   }
 }

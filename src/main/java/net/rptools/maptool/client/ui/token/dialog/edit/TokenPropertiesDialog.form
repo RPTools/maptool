@@ -97,6 +97,7 @@
                             <constraints/>
                             <properties>
                               <name value="speechTable"/>
+                              <rowSelectionAllowed value="false"/>
                             </properties>
                           </component>
                         </children>

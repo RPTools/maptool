@@ -107,7 +107,7 @@ class TokenLayoutPanelHelper {
   private static final UIDefaults UI_DEFAULTS = UIManager.getDefaults();
   private static final double DEFAULT_FONT_SIZE = UI_DEFAULTS.getFont("defaultFont").getSize2D();
   protected Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-  private boolean noGrid = GridFactory.getGridType(grid).equals(GridFactory.NONE);
+  private boolean noGrid = grid.getType().isNone();
   private int gridSize = grid.getSize();
   private double cellHeight = grid.getCellHeight();
   private double cellWidth = grid.getCellWidth();
@@ -387,8 +387,8 @@ class TokenLayoutPanelHelper {
 
   protected void setToken(Token token, boolean useDefaults) {
     grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-    boolean isoGrid = grid.isIsometric();
-    noGrid = GridFactory.getGridType(grid).equals(GridFactory.NONE);
+    boolean isoGrid = grid.getType().isIsometric();
+    noGrid = grid.getType().isNone();
     renderBits = new RenderBits();
     gridSize = grid.getSize();
     cellHeight = grid.getCellHeight();
@@ -855,8 +855,7 @@ class TokenLayoutPanelHelper {
     }
 
     private Shape createGridShape(boolean trueSize) {
-      return Grid.createGridShape(
-          GridFactory.getGridType(grid), (trueSize ? grid.getSize() : grid.getSize() - 8));
+      return Grid.createGridShape(grid.getType(), (trueSize ? grid.getSize() : grid.getSize() - 8));
     }
 
     /** Itty bitty cross to show the dead-centre of the footprint */

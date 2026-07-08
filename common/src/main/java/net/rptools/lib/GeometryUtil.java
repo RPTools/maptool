@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.algorithm.InteriorPointArea;
@@ -33,6 +34,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateArrays;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Location;
@@ -201,31 +203,57 @@ public class GeometryUtil {
       // Build the polygon...
       var polygon = island.toPolygon();
       // ... then make sure it is valid, fixing it if not.
-      Geometry fixedPolygon;
+      Geometry fixedGeometry;
       try {
-        fixedPolygon = GeometryPrecisionReducer.reduce(GeometryFixer.fix(polygon), precisionModel);
+        fixedGeometry = GeometryPrecisionReducer.reduce(GeometryFixer.fix(polygon), precisionModel);
       } catch (Throwable t) {
         log.error("Failure while reducing polygon", t);
         continue;
       }
 
-      switch (fixedPolygon) {
-        case Polygon p -> polygons.add(p);
-        case MultiPolygon mp -> {
-          for (var n = 0; n < mp.getNumGeometries(); ++n) {
-            polygons.add((Polygon) mp.getGeometryN(n));
+      /*
+       * Although `fixedGeometry` is usually a `Polygon` or a `MultiPolygon`, it _could_ be some
+       * other `Geometry` or even an arbitrary `GeometryCollection`. We can only work with polygonal
+       * elements, so we first need to flatten our geometry to a list and then pick out only the
+       * polygons.
+       */
+
+      var flattened = new ArrayList<Geometry>();
+      flatten(fixedGeometry, flattened::add);
+
+      for (var geometry : flattened) {
+        if (geometry instanceof Polygon p) {
+          if (!p.isEmpty()) {
+            polygons.add(p);
           }
+        } else {
+          log.error(
+              "Found unexpected geometry after fixing polygon: {}. Skipping", geometry.getClass());
         }
-        default ->
-            log.error(
-                "Found unexpected geometry after fixing polygon: {}. Skipping",
-                fixedPolygon.getClass());
       }
     }
 
-    polygons.removeIf(Polygon::isEmpty);
-
     return polygons;
+  }
+
+  /**
+   * Recursively flattens a geometry by replacing any collection components with their children.
+   *
+   * <p>Any discovered non-collection geometry is added to {@code output}.
+   *
+   * @param geometry The geometry to flatten. If this is not a collection,
+   * @param output The place to write the non-collection geometries.
+   */
+  public static void flatten(Geometry geometry, Consumer<Geometry> output) {
+    for (var n = 0; n < geometry.getNumGeometries(); ++n) {
+      var child = geometry.getGeometryN(n);
+      if (child instanceof GeometryCollection childCollection) {
+        // Recurse on collections so we get their children.
+        flatten(childCollection, output);
+      } else {
+        output.accept(child);
+      }
+    }
   }
 
   public static Point2D coordinateToPoint2D(Coordinate coordinate) {

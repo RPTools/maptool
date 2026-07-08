@@ -43,7 +43,7 @@ public class TokenUtil {
   public static AffineTransform getRenderTransform(
       Zone zone, Token token, Dimension imageSize, Rectangle2D footprintBounds) {
     var isoFigure =
-        zone.getGrid().isIsometric()
+        zone.getGrid().getType().isIsometric()
             && !token.getIsFlippedIso()
             && token.getShape() == Token.TokenShape.FIGURE;
 
@@ -92,7 +92,7 @@ public class TokenUtil {
       }
 
       // Iso flip
-      if (token.getIsFlippedIso() && zone.getGrid().isIsometric()) {
+      if (token.getIsFlippedIso() && zone.getGrid().getType().isIsometric()) {
         imageTransform.scale(Math.sqrt(2), 1 / Math.sqrt(2));
         imageTransform.rotate(Math.toRadians(45));
       }

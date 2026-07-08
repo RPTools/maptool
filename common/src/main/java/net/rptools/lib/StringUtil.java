@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -27,6 +28,18 @@ import java.util.regex.Pattern;
 public class StringUtil {
   private static NumberFormat nf = NumberFormat.getNumberInstance();
   private static final int MIN_FRACTION_DIGITS = 0;
+
+  public static String formatTimeUnit(TimeUnit unit) {
+    return switch (unit) {
+      case NANOSECONDS -> "ns";
+      case MICROSECONDS -> "μs";
+      case MILLISECONDS -> "ms";
+      case SECONDS -> "s";
+      case MINUTES -> "m";
+      case HOURS -> "h";
+      case DAYS -> "d";
+    };
+  }
 
   public static String formatDecimal(double value) {
     String result1;

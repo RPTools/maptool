@@ -27,6 +27,7 @@ import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
+import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
@@ -42,8 +43,9 @@ public class IsometricGrid extends Grid {
   private static final BufferedImage pathHighlight =
       RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
 
-  public boolean isIsometric() {
-    return true;
+  @Override
+  public GridType getType() {
+    return GridType.Isometric;
   }
 
   @Override
@@ -386,21 +388,22 @@ public class IsometricGrid extends Grid {
 
   @Override
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    double scale = renderer.getScale();
+    var zoneScale = renderer.getViewModel().getZoneScale();
+    double scale = zoneScale.getScale();
     double gridSize = getSize() * scale;
     double isoHeight = getSize() * scale;
     double isoWidth = getSize() * 2 * scale;
     Path2D path = new Path2D.Double();
 
-    int offX = (int) (renderer.getViewOffsetX() % isoWidth + getOffsetX() * scale);
-    int offY = (int) (renderer.getViewOffsetY() % gridSize + getOffsetY() * scale);
+    int offX = (int) (zoneScale.getOffsetX() % isoWidth + getOffsetX() * scale);
+    int offY = (int) (zoneScale.getOffsetY() % gridSize + getOffsetY() * scale);
 
     int startCol = (int) ((int) (bounds.x / isoWidth) * isoWidth);
     int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
 
     for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
       for (double col = startCol; col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
-        path.append(drawHatch(renderer, (int) (col + offX), (int) (row + offY)), false);
+        path.append(drawHatch(zoneScale, (int) (col + offX), (int) (row + offY)), false);
       }
     }
 
@@ -410,14 +413,14 @@ public class IsometricGrid extends Grid {
       for (double col = startCol - (isoWidth / 2);
           col < bounds.x + bounds.width + isoWidth;
           col += isoWidth) {
-        path.append(drawHatch(renderer, (int) (col + offX), (int) (row + offY)), false);
+        path.append(drawHatch(zoneScale, (int) (col + offX), (int) (row + offY)), false);
       }
     }
     GridRenderer.drawGridShape(g, path);
   }
 
-  private Shape drawHatch(ZoneRenderer renderer, int x, int y) {
-    double isoWidth = getSize() * renderer.getScale();
+  private Shape drawHatch(Scale zoneScale, int x, int y) {
+    double isoWidth = getSize() * zoneScale.getScale();
     int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
     Path2D path = new Path2D.Double();
     path.append(

@@ -29,7 +29,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.ZonePoint;
 
 /**
  * The popup menu for initiative tokens.
@@ -93,7 +92,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
     addOwnedItem(createMacroMenu());
     addOwnedItem(createSpeechMenu());
     addOwnedItem(createStateMenu());
-    addOwnedItem(createHaloMenu());
+    addOwnedItem(createHalosMenu());
 
     // Do move up or move down need to be disabled
     InitiativeList list = getRenderer().getZone().getInitiativeList();
@@ -201,8 +200,10 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
         public void actionPerformed(ActionEvent e) {
           Token token = tokenInitiativeUnderMouse.getToken();
           final var renderer = getRenderer();
+          final var viewModel = renderer.getViewModel();
           final var selectionModel = renderer.getSelectionModel();
-          renderer.centerOn(new ZonePoint(token.getX(), token.getY()));
+          viewModel.setZoneScale(
+              viewModel.getZoneScale().centeredOn(token.getX(), token.getY(), renderer.getSize()));
           selectionModel.replaceSelection(Collections.singletonList(token.getId()));
         }
       };

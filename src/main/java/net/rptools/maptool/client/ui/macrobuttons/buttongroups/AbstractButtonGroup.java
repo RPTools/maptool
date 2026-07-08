@@ -185,7 +185,9 @@ public abstract class AbstractButtonGroup extends JPanel
   public void mouseReleased(MouseEvent event) {
     Token token = getToken();
     if (SwingUtilities.isRightMouseButton(event)) {
-      if (getPanelClass().equals("CampaignPanel") && !MapTool.getPlayer().isGM()) {
+      if (!MapTool.getPlayer().isGM()
+          && ("CampaignPanel".equals(getPanelClass())
+              || MapTool.getServerPolicy().isTokenContextLocked())) {
         return;
       }
       // open button group menu
@@ -280,6 +282,9 @@ public abstract class AbstractButtonGroup extends JPanel
             MapTool.getFrame()
                 .showTokenPropertiesDialog(token, MapTool.getFrame().getCurrentZoneRenderer());
           } else if (SwingUtilities.isRightMouseButton(event)) {
+            if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isTokenContextLocked()) {
+              return;
+            }
             // open token popup menu
             Set<GUID> GUIDSet = new HashSet<GUID>();
             GUIDSet.add(tokenId);

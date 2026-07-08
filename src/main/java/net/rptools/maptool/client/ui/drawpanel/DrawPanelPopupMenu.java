@@ -92,9 +92,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     add(new SetPropertiesAction());
     add(new SetDrawingName());
     add(new GetDrawingId());
-    if (isDrawnElementTemplate(elementUnderMouse)) {
-      add(new DuplicateDrawingAction(selectedDrawSet));
-    }
+    add(new DuplicateDrawingAction(selectedDrawSet));
     addGMItem(new JSeparator());
     add(createPathVblMenu());
     add(createShapeVblMenu());
@@ -178,11 +176,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     }
   }
 
-  /**
-   * Duplicates selected drawings...
-   *
-   * <p>... but currently limited to templates only as we can drag and manipulate those
-   */
+  /** Duplicates selected drawings... */
   public static class DuplicateDrawingAction extends AbstractAction {
 
     public DuplicateDrawingAction() {
@@ -208,18 +202,15 @@ public class DrawPanelPopupMenu extends JPopupMenu {
         return;
       }
 
-      // check to see if this is the required action
       for (GUID id : selectedDrawings) {
         DrawnElement de = renderer.getZone().getDrawnElement(id);
         Drawable d = de.getDrawable();
-        if (de.getDrawable() instanceof AbstractTemplate) {
-          AbstractTemplate at = (AbstractTemplate) d.copy();
-          at.setId(new GUID());
-          // Draw it
-          MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), at);
-          // Allow it to be undone
-          renderer.getZone().addDrawable(de.getPen(), at);
-        }
+        AbstractDrawing ad = (AbstractDrawing) d.copy();
+        ad.setId(new GUID());
+        // Draw it
+        MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), ad);
+        // Allow it to be undone
+        renderer.getZone().addDrawable(de.getPen(), ad);
       }
       renderer.repaint();
       MapTool.getFrame().updateDrawTree();
@@ -357,9 +348,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private Pen invertPen(Pen pen) {
     Pen newPen = new Pen(pen);
     newPen.setBackgroundPaint(pen.getPaint());
-    newPen.setBackgroundMode(pen.getForegroundMode());
     newPen.setPaint(pen.getBackgroundPaint());
-    newPen.setForegroundMode(pen.getBackgroundMode());
     return newPen;
   }
 
@@ -422,17 +411,13 @@ public class DrawPanelPopupMenu extends JPopupMenu {
           Pen p = de.getPen();
           if (cp.getForegroundPaint() != null) {
             p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
-            p.setForegroundMode(0);
           } else {
             p.setPaint(null);
-            p.setForegroundMode(1);
           }
           if (cp.getBackgroundPaint() != null) {
             p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
-            p.setBackgroundMode(0);
           } else {
             p.setBackgroundPaint(null);
-            p.setBackgroundMode(1);
           }
           p.setThickness(cp.getStrokeWidth());
           p.setOpacity(cp.getOpacity());

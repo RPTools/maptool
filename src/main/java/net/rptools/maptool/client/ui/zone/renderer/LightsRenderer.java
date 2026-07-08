@@ -40,14 +40,14 @@ public class LightsRenderer {
   private final ZoneView zoneView;
 
   public LightsRenderer(RenderHelper renderHelper, Zone zone, ZoneView zoneView) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("LightsRenderer");
     this.zone = zone;
     this.zoneView = zoneView;
   }
 
   public void renderAuras(Graphics2D g2d, PlayerView view) {
     var timer = CodeTimer.get();
-    timer.start("renderAuras");
+    timer.start("LightsRenderer-renderAuras");
     try {
       final var drawableAuras = zoneView.getDrawableAuras(view);
       if (drawableAuras.isEmpty()) {
@@ -63,13 +63,13 @@ public class LightsRenderer {
           AlphaComposite.SrcOver,
           worldG -> renderWorld(worldG, view, drawableAuras, lightBlending, overlayFillColor));
     } finally {
-      timer.stop("renderAuras");
+      timer.stop("LightsRenderer-renderAuras");
     }
   }
 
   public void renderLights(Graphics2D g2d, PlayerView view) {
     var timer = CodeTimer.get();
-    timer.start("renderLights");
+    timer.start("LightsRenderer-renderLights");
     try {
       if (!AppState.isShowLights()) {
         return;
@@ -99,7 +99,7 @@ public class LightsRenderer {
               renderWorld(
                   worldG, view, drawableLights, LightingComposite.BlendedLights, overlayFillColor));
     } finally {
-      timer.stop("renderLights");
+      timer.stop("LightsRenderer-renderLights");
     }
   }
 
@@ -111,7 +111,7 @@ public class LightsRenderer {
       Color backgroundFill) {
     var timer = CodeTimer.get();
 
-    var visibleArea = zoneView.getVisibleArea(view);
+    var visibleArea = zoneView.getVisibility(view).visibleArea();
 
     var originalClip = worldG.getClip();
     var bounds = originalClip.getBounds();
@@ -120,23 +120,23 @@ public class LightsRenderer {
     worldG.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
     if (!view.isGMView()) {
-      timer.start("renderLightOverlay:setClip");
+      timer.start("LightsRenderer-renderLightOverlay:setClip");
       var clip = new Area(originalClip);
       clip.intersect(visibleArea);
       worldG.setClip(clip);
-      timer.stop("renderLightOverlay:setClip");
+      timer.stop("LightsRenderer-renderLightOverlay:setClip");
     }
 
     worldG.setComposite(lightBlending);
 
     // Draw lights onto the buffer image so the map doesn't affect how they blend
-    timer.start("renderLightOverlay:drawLights");
+    timer.start("LightsRenderer-renderLightOverlay:drawLights");
     for (var light : lights) {
       worldG.setPaint(light.getPaint().getPaint());
-      timer.start("renderLightOverlay:fillLight");
+      timer.start("LightsRenderer-renderLightOverlay:fillLight");
       worldG.fill(light.getArea());
-      timer.stop("renderLightOverlay:fillLight");
+      timer.stop("LightsRenderer-renderLightOverlay:fillLight");
     }
-    timer.stop("renderLightOverlay:drawLights");
+    timer.stop("LightsRenderer-renderLightOverlay:drawLights");
   }
 }

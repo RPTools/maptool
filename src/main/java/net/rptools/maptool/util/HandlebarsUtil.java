@@ -14,76 +14,121 @@
  */
 package net.rptools.maptool.util;
 
-import com.github.jknack.handlebars.Context;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
-import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.*;
+import com.github.jknack.handlebars.cache.HighConcurrencyTemplateCache;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
-import com.github.jknack.handlebars.helper.ConditionalHelpers;
-import com.github.jknack.handlebars.helper.StringHelpers;
-import com.github.jknack.handlebars.helper.ext.AssignHelper;
-import com.github.jknack.handlebars.helper.ext.IncludeHelper;
-import com.github.jknack.handlebars.helper.ext.NumberHelper;
+import com.github.jknack.handlebars.io.AbstractTemplateLoader;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
-import com.github.jknack.handlebars.io.URLTemplateLoader;
-import java.io.File;
+import com.github.jknack.handlebars.io.TemplateSource;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Base64;
-import net.rptools.maptool.model.Token;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * Utility class to apply a Handlebars template given a bean.
  *
- * @param <T> The type of the bean to apply the template to.
+ * @param <T> The Bean type to apply the template to.
  */
 public class HandlebarsUtil<T> {
+  private static final HighConcurrencyTemplateCache HIGH_CONCURRENCY_TEMPLATE_CACHE =
+      new HighConcurrencyTemplateCache();
+
+  /**
+   * Use this to get an instance of Handlebars instead of creating one separately.
+   *
+   * <p>Specify a TemplateLoader if the default ClassPathTemplateLoader is not required.
+   *
+   * <p>Using this ensures the instance returned has a consistent setup with all helpers registered.
+   *
+   * @param loader The TemplateLoader to use. If null, handlebars defaults to
+   *     ClassPathTemplateLoader.
+   * @return A HandleBars instance with appropriate settings and registered helpers
+   */
+  static Handlebars getHandlebarsInstance(@Nullable TemplateLoader loader) {
+    Handlebars handlebars =
+        new Handlebars()
+            .with(HIGH_CONCURRENCY_TEMPLATE_CACHE)
+            .preEvaluatePartialBlocks(false)
+            .parentScopeResolution(false)
+            .setCharset(StandardCharsets.UTF_8);
+    if (loader != null) {
+      handlebars.with(loader);
+    }
+    return HandlebarsHelpers.registerHelpers(handlebars);
+  }
+
+  public static boolean isAssetFileHandlebars(String filename) {
+    if (filename == null) {
+      return false;
+    }
+    return filename.toLowerCase().endsWith(".hbs");
+  }
 
   /** The compiled template. */
   private final Template template;
 
   /** Logging class instance. */
-  private static final Logger log = LogManager.getLogger(Token.class);
+  private static final Logger log = LogManager.getLogger(HandlebarsUtil.class);
+
+  /** Handlebars partial template source that uses Add-On files */
+  private record LibraryTemplateSource(@Nonnull Library library, @Nonnull String filename)
+      implements TemplateSource {
+    @Override
+    public long lastModified() {
+      // No modification time is available.
+      return -1;
+    }
+
+    @Override
+    @Nonnull
+    public String content(@Nonnull final Charset charset) throws IOException {
+      try {
+        // The library API requires a URL even if it only uses the path.
+        var url = new URI("lib", library.getNamespace().join(), filename, null).toURL();
+        try (var is = library.read(url).join()) {
+          return new String(is.readAllBytes(), charset);
+        }
+      } catch (URISyntaxException e) {
+        throw new AssertionError("lib URL of namespace and filename should be valid", e);
+      }
+    }
+  }
 
   /** Handlebars partial template loader that uses Add-On Library URIs */
-  private static class LibraryTemplateLoader extends URLTemplateLoader {
-    /** Path to template being resolved, relative paths are resolved relative to its parent. */
-    Path current;
+  private static class LibraryTemplateLoader extends AbstractTemplateLoader {
+    /** Path to template being resolved, relative paths are resolved against its parent. */
+    @Nonnull final URI current;
 
-    private LibraryTemplateLoader(String current, String prefix, String suffix) {
+    @Nonnull final Library library;
+
+    private LibraryTemplateLoader(@Nonnull String current, @Nonnull Library library) {
       if (!current.startsWith("/")) {
         current = "/" + current;
       }
-      this.current = new File(current).toPath();
-      setPrefix(prefix);
-      setSuffix(suffix);
+      this.current = URI.create(current);
+      this.library = library;
+      setPrefix(TemplateLoader.DEFAULT_PREFIX);
+      setSuffix(TemplateLoader.DEFAULT_SUFFIX);
     }
 
-    private LibraryTemplateLoader(String current, String prefix) {
-      this(current, prefix, DEFAULT_SUFFIX);
-    }
-
-    private LibraryTemplateLoader(String current) {
-      this(current, DEFAULT_PREFIX, DEFAULT_SUFFIX);
-    }
-
-    /** Normalize locations by removing redundant path components */
+    /**
+     * Resolve (possibly relative) uri to a new relative location against "current" rooted below
+     * prefix
+     */
     @Override
-    protected String normalize(final String location) {
-      return new File(location).toPath().normalize().toString();
-    }
-
-    /** Resolve possibly relative uri relative to current rooted below prefix */
-    @Override
-    public String resolve(final String uri) {
-      var location = current.resolveSibling(uri).normalize().toString();
+    @Nonnull
+    public String resolve(@Nonnull final String path) {
+      var location = current.resolve(path).normalize().toString();
       if (location.startsWith("/")) {
         location = location.substring(1);
       }
@@ -91,34 +136,9 @@ public class HandlebarsUtil<T> {
     }
 
     @Override
-    protected URL getResource(String location) throws IOException {
-      if (location.startsWith("/")) {
-        location = location.substring(1);
-      }
-      return new URL("lib://" + location);
-    }
-  }
-
-  private static enum MapToolHelpers implements Helper<Object> {
-    /**
-     * Turns the textual form of the value into a base64-encoded string. For example:
-     *
-     * <pre>
-     * &lt;script type="application/json;base64" id="jsonProperty"&gt;
-     *   {{ base64Encode properties[0].value }}
-     * &lt;/script&gt;
-     * &lt;script type="application/javascript"&gt;
-     * const jsonProperty = JSON.parse(atob(document.getElementById("jsonProperty").innerText));
-     * &lt;/script&gt;
-     * </pre>
-     */
-    base64Encode {
-      @Override
-      public Object apply(final Object context, final Options options) {
-        byte[] message = context.toString().getBytes(StandardCharsets.UTF_8);
-
-        return new Handlebars.SafeString(Base64.getUrlEncoder().encodeToString(message));
-      }
+    @Nonnull
+    public LibraryTemplateSource sourceAt(@Nonnull final String location) {
+      return new LibraryTemplateSource(library, resolve(location));
     }
   }
 
@@ -127,22 +147,14 @@ public class HandlebarsUtil<T> {
    *
    * @param stringTemplate The template to compile.
    * @param loader The template loader for loading included partial templates
-   * @throws IOException If there is an error compiling the template.
+   * @throws IOException when compiling the template throws an error.
    */
   private HandlebarsUtil(String stringTemplate, TemplateLoader loader) throws IOException {
+    Handlebars handlebars = getHandlebarsInstance(loader);
     try {
-      Handlebars handlebars = new Handlebars(loader);
-      StringHelpers.register(handlebars);
-      Arrays.stream(ConditionalHelpers.values())
-          .forEach(h -> handlebars.registerHelper(h.name(), h));
-      NumberHelper.register(handlebars);
-      handlebars.registerHelper(AssignHelper.NAME, AssignHelper.INSTANCE);
-      handlebars.registerHelper(IncludeHelper.NAME, IncludeHelper.INSTANCE);
-      Arrays.stream(MapToolHelpers.values()).forEach(h -> handlebars.registerHelper(h.name(), h));
-
       template = handlebars.compileInline(stringTemplate);
     } catch (IOException e) {
-      log.error("Handlebars Error: {}", e.getMessage());
+      log.error("Handlebars Compile Error: {}", e.getMessage());
       throw e;
     }
   }
@@ -151,18 +163,23 @@ public class HandlebarsUtil<T> {
    * Creates a new instance of the utility class.
    *
    * @param stringTemplate The template to compile.
-   * @param entry The lib:// URL of the template to load partial templates relative to
-   * @throws IOException If there is an error compiling the template.
+   * @param entry The base lib:// URL of the template for relative partial templates
+   * @throws IOException when compiling the template throws an error.
    */
   public HandlebarsUtil(String stringTemplate, URL entry) throws IOException {
-    this(stringTemplate, new LibraryTemplateLoader(entry.getHost() + entry.getPath()));
+    this(
+        stringTemplate,
+        new LibraryTemplateLoader(
+            entry.getPath(),
+            // Template is defined by AddOn so library should always be present.
+            new LibraryManager().getLibrary(entry).join().orElseThrow()));
   }
 
   /**
    * Creates a new instance of the utility class.
    *
    * @param stringTemplate The template to compile.
-   * @throws IOException If there is an error compiling the template.
+   * @throws IOException when compiling the template throws an error.
    */
   public HandlebarsUtil(String stringTemplate) throws IOException {
     this(stringTemplate, new ClassPathTemplateLoader());
@@ -173,14 +190,14 @@ public class HandlebarsUtil<T> {
    *
    * @param bean The bean to apply the template to.
    * @return The result of applying the template to the bean.
-   * @throws IOException If there is an error applying the template.
+   * @throws IOException when applying the template throws an error.
    */
   public String apply(T bean) throws IOException {
     try {
       var context = Context.newBuilder(bean).resolver(JavaBeanValueResolver.INSTANCE).build();
       return template.apply(context);
     } catch (IOException e) {
-      log.error("Handlebars Error: {}", e.getMessage());
+      log.error("Handlebars Apply Error: {}", e.getMessage());
       throw e;
     }
   }

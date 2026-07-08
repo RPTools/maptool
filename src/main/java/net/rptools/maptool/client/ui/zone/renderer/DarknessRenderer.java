@@ -32,7 +32,7 @@ public class DarknessRenderer {
   private final ZoneView zoneView;
 
   public DarknessRenderer(RenderHelper renderHelper, ZoneView zoneView) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("DarknessRenderer");
     this.zoneView = zoneView;
   }
 

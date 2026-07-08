@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -49,10 +50,10 @@ import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
-import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.proto.CampaignPropertiesDto;
+import net.rptools.maptool.server.proto.HaloListDto;
 import net.rptools.maptool.server.proto.LightSourceListDto;
 import net.rptools.maptool.server.proto.TokenPropertyListDto;
 
@@ -94,6 +95,14 @@ public class CampaignProperties implements Serializable {
   private Map<String, LookupTable> lookupTableMap = new HashMap<>();
 
   private String defaultSightType;
+
+  /**
+   * @deprecated Only present for serialization. Instead use {@link #categorizedHalos} (outside of
+   *     {@link #readResolve()} and {@code #writeReplace()}).
+   */
+  @Deprecated private Map<String, Map<GUID, Halo>> halosMap = new TreeMap<>();
+
+  private transient @Nonnull CategorizedHalos categorizedHalos = new CategorizedHalos();
 
   private Map<String, BooleanTokenOverlay> tokenStates = new LinkedHashMap<>();
   private Map<String, BarTokenOverlay> tokenBars = new LinkedHashMap<>();
@@ -146,9 +155,10 @@ public class CampaignProperties implements Serializable {
     defaultSightType = properties.defaultSightType;
     sights = new Sights(properties.sights);
     categorizedLights = new CategorizedLights(properties.categorizedLights);
+    categorizedHalos = new CategorizedHalos(properties.categorizedHalos);
 
     for (BooleanTokenOverlay overlay : properties.tokenStates.values()) {
-      overlay = (BooleanTokenOverlay) overlay.clone();
+      overlay = overlay.clone();
       tokenStates.put(overlay.getName(), overlay);
     } // endfor
 
@@ -181,6 +191,7 @@ public class CampaignProperties implements Serializable {
     }
 
     properties.categorizedLights.addAll(categorizedLights);
+    properties.categorizedHalos.addAll(categorizedHalos);
     properties.lookupTableMap.putAll(lookupTableMap);
     properties.sights.addAll(sights);
     properties.tokenStates.putAll(tokenStates);
@@ -200,9 +211,7 @@ public class CampaignProperties implements Serializable {
    */
   public StatSheetProperties getTokenTypeDefaultStatSheet(String propertyType) {
     return tokenTypeStatSheetMap.getOrDefault(
-        propertyType,
-        new StatSheetProperties(
-            StatSheetManager.LEGACY_STATSHEET_ID, StatSheetLocation.BOTTOM_LEFT));
+        propertyType, new StatSheetProperties(StatSheetManager.LEGACY_STATSHEET_ID, null));
   }
 
   /**
@@ -256,6 +265,14 @@ public class CampaignProperties implements Serializable {
     categorizedLights = new CategorizedLights(newLights);
   }
 
+  public CategorizedHalos getCategorizedHalos() {
+    return new CategorizedHalos(categorizedHalos);
+  }
+
+  public void setCategorizedHalos(CategorizedHalos newCategorizedHalos) {
+    categorizedHalos = new CategorizedHalos(newCategorizedHalos);
+  }
+
   public Map<String, LookupTable> getLookupTableMap() {
     return lookupTableMap;
   }
@@ -285,6 +302,7 @@ public class CampaignProperties implements Serializable {
 
   public void initDefaultProperties() {
     initLightSources();
+    initHalos();
     initTokenTypeMap();
     initSightTypeMap();
     initTokenStatesMap();
@@ -343,10 +361,195 @@ public class CampaignProperties implements Serializable {
                 radius * 2,
                 0,
                 360,
-                new DrawableColorPaint(new Color(0, 0, 0, 100)),
+                new DrawableColorPaint(Color.black),
                 100,
                 false,
                 false)));
+  }
+
+  private void initHalos() {
+    if (!categorizedHalos.isEmpty()) {
+      return;
+    }
+
+    categorizedHalos.addAllToCategory(
+        I18N.getText("Default.campaign.halos.category.generic"),
+        List.of(
+            createHalo(
+                "Yellow Circle",
+                HaloPart.HaloShapeType.CIRCLE,
+                5,
+                new DrawableColorPaint(new Color(255, 255, 0, 255)),
+                null,
+                false,
+                false,
+                0,
+                0,
+                0),
+            createHalo(
+                "Aqua Square",
+                HaloPart.HaloShapeType.SQUARE,
+                5,
+                new DrawableColorPaint(new Color(0, 255, 255, 255)),
+                null,
+                false,
+                false,
+                0,
+                0,
+                0),
+            createHalo(
+                "Magenta Dots",
+                HaloPart.HaloShapeType.TOKEN,
+                5,
+                new DrawableColorPaint(new Color(255, 0, 255, 255)),
+                new ArrayList<>(Arrays.asList(5F, 5F)),
+                false,
+                false,
+                0,
+                0,
+                0),
+            createHalo(
+                "Magenta Dashes",
+                HaloPart.HaloShapeType.TOKEN,
+                5,
+                new DrawableColorPaint(new Color(255, 0, 255, 255)),
+                new ArrayList<>(Arrays.asList(10F, 5F)),
+                false,
+                false,
+                0,
+                0,
+                0),
+            createHalo(
+                "Yellow Mini Circles",
+                HaloPart.HaloShapeType.CIRCLE,
+                10,
+                new DrawableColorPaint(new Color(255, 255, 0, 255)),
+                null,
+                false,
+                false,
+                6,
+                6,
+                0),
+            createHalo(
+                "Aqua Mini Squares",
+                HaloPart.HaloShapeType.SQUARE,
+                10,
+                new DrawableColorPaint(new Color(0, 255, 255, 255)),
+                null,
+                false,
+                false,
+                6,
+                6,
+                0),
+            createHalo(
+                "Blue Mini Triangles",
+                HaloPart.HaloShapeType.TRIANGLE,
+                10,
+                new DrawableColorPaint(new Color(0, 0, 255, 255)),
+                null,
+                false,
+                false,
+                6,
+                6,
+                0),
+            createHalo(
+                "White Mini Stars",
+                HaloPart.HaloShapeType.STAR,
+                10,
+                new DrawableColorPaint(new Color(255, 255, 255, 125)),
+                null,
+                false,
+                false,
+                12,
+                6,
+                5)));
+
+    /*
+     * Initial work to replace original halos
+     */
+    // Creates a halo for each color name which would have been displayed for the original halos
+    List<Halo> haloColoredGrid = new ArrayList<>();
+    List<Halo> haloColoredCircle = new ArrayList<>();
+    Set<String> colorNames = MapToolUtil.getColorNames();
+    for (String colorName : colorNames) {
+      Color color = MapToolUtil.getColor(colorName);
+      String displayName = I18N.getString("Color.".concat(colorName));
+      if (displayName == null) {
+        displayName = colorName;
+      }
+      // grid shape is equivalent to original halo shape
+      haloColoredGrid.add(
+          createHalo(
+              displayName,
+              HaloPart.HaloShapeType.GRID,
+              null,
+              new DrawableColorPaint(color),
+              null,
+              false,
+              false,
+              0,
+              0,
+              0));
+      // circle shapes for a little variety
+      haloColoredCircle.add(
+          createHalo(
+              displayName,
+              HaloPart.HaloShapeType.CIRCLE,
+              null,
+              new DrawableColorPaint(color),
+              null,
+              false,
+              false,
+              0,
+              0,
+              0));
+    }
+    categorizedHalos.addAllToCategory(
+        I18N.getText("Default.campaign.halos.category.coloredGrid"), haloColoredGrid);
+    categorizedHalos.addAllToCategory(
+        I18N.getText("Default.campaign.halos.category.coloredCircle"), haloColoredCircle);
+  }
+
+  private static Halo createHalo(
+      String haloName,
+      HaloPart.HaloShapeType haloShapeType,
+      Integer width,
+      DrawableColorPaint paint,
+      ArrayList<Float> dashedPattern,
+      boolean gm,
+      boolean owner,
+      int mini,
+      int offset,
+      int vertices) {
+    return new Halo(
+        new GUID(),
+        haloName,
+        gm,
+        owner,
+        false,
+        false,
+        false,
+        false,
+        List.of(
+            new HaloPart(
+                paint,
+                haloShapeType,
+                width,
+                dashedPattern,
+                false,
+                false,
+                false,
+                0,
+                offset,
+                0,
+                1d,
+                1d,
+                vertices,
+                mini,
+                0,
+                0,
+                0,
+                1d)));
   }
 
   public String getDefaultSightType() {
@@ -564,9 +767,18 @@ public class CampaignProperties implements Serializable {
       lightSourcesMap = new TreeMap<>();
     }
 
+    categorizedHalos = new CategorizedHalos();
+    if (halosMap != null) {
+      // Import the serialized halos.
+      categorizedHalos = CategorizedHalos.copyOf(halosMap);
+    } else {
+      // We'll still need it when serializing.
+      halosMap = new TreeMap<>();
+    }
+
     sights = new Sights();
     if (sightTypeMap != null) {
-      // Import the serialized light sources.
+      // Import the serialized sight types.
       sights = Sights.copyOf(sightTypeMap.values());
     } else {
       // We'll still need it when serializing.
@@ -607,6 +819,15 @@ public class CampaignProperties implements Serializable {
         map.put(lightSource.getId(), lightSource);
       }
       lightSourcesMap.put(category.name(), map);
+    }
+
+    halosMap.clear();
+    for (var category : categorizedHalos.getCategories()) {
+      var map = new LinkedHashMap<GUID, Halo>();
+      for (var halo : category.halos()) {
+        map.put(halo.getId(), halo);
+      }
+      halosMap.put(category.name(), map);
     }
 
     sightTypeMap.clear();
@@ -661,6 +882,12 @@ public class CampaignProperties implements Serializable {
             (k, v) -> {
               v.getLightSourcesList()
                   .forEach(l -> props.categorizedLights.addToCategory(k, LightSource.fromDto(l)));
+            });
+    dto.getHalosMap()
+        .forEach(
+            (k, v) -> {
+              v.getHalosList()
+                  .forEach(l -> props.categorizedHalos.addToCategory(k, Halo.fromDto(l)));
             });
     props.remoteRepositoryList.addAll(dto.getRemoteRepositoriesList());
     dto.getLookupTablesList()
@@ -724,6 +951,15 @@ public class CampaignProperties implements Serializable {
                   .map(LightSource::toDto)
                   .forEachOrdered(lightSources::addLightSources);
               dto.putLightSources(category.name(), lightSources.build());
+            });
+
+    categorizedHalos
+        .getCategories()
+        .forEach(
+            category -> {
+              HaloListDto.Builder halos = HaloListDto.newBuilder();
+              category.halos().stream().map(Halo::toDto).forEachOrdered(halos::addHalos);
+              dto.putHalos(category.name(), halos.build());
             });
 
     dto.addAllRemoteRepositories(remoteRepositoryList);

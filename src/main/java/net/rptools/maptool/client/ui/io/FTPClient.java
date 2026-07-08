@@ -17,9 +17,6 @@ package net.rptools.maptool.client.ui.io;
 /**
  * @author crash
  */
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,11 +29,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
@@ -335,31 +328,5 @@ public class FTPClient {
       }
       uploadDone(data, false);
     }
-  }
-
-  public static void main(String args[]) {
-    JFrame frame = new JFrame("FTP Test");
-    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    frame.setLayout(new BorderLayout());
-    JLabel progress = new JLabel();
-    frame.add(progress, BorderLayout.SOUTH);
-
-    JPanel panel = new JPanel();
-    panel.setLayout(new GridLayout(0, 1, 5, 5));
-    frame.add(panel, BorderLayout.CENTER);
-    frame.setSize(new Dimension(400, 200));
-    frame.setVisible(true);
-
-    String[] uploadList =
-        new String[] {
-          "campaignItemList.xml", "mockup.jfpr", "standard.mtprops", "updateRepoDialog.xml",
-        };
-    FTPClient ftp = new FTPClient("www.eeconsulting.net", "username", "password");
-    File dir = new File("testdir");
-    for (String s : uploadList) {
-      FTPTransferObject fto = new FTPTransferObject(Direction.FTP_PUT, s, dir, s);
-      ftp.addToQueue(fto);
-    }
-    // Need to listen for all progress bars to finish and count down using 'progress'.
   }
 }

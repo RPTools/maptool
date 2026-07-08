@@ -14,28 +14,34 @@
  */
 package net.rptools.maptool.client.ui.addresource;
 
+import com.google.common.collect.ImmutableList;
 import com.jidesoft.swing.FolderChooser;
-import io.sentry.Sentry;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppSetup;
 import net.rptools.maptool.client.AppStatePersisted;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.RemoteFileDownloader;
-import net.rptools.maptool.client.WebDownloader;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ButtonKind;
 import net.rptools.maptool.client.swing.GenericDialog;
@@ -43,19 +49,13 @@ import net.rptools.maptool.client.swing.GenericDialogFactory;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.library.Library;
+import net.rptools.maptool.util.library.LibraryUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
-  private static final long serialVersionUID = -1709712124453405062L;
-
-  private static final Logger log = LogManager.getLogger(AddResourceDialog.class);
-
-  private static final String LIBRARY_URL = "http://library.rptools.net/1.3";
-  private static final String LIBRARY_LIST_URL = LIBRARY_URL + "/listArtPacks";
-
-  public enum Tab {
+  private enum Tab {
     LOCAL,
     WEB,
     RPTOOLS
@@ -66,57 +66,99 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
           .setDialogTitle(I18N.getText("action.addIconSelector"))
           .addButton(ButtonKind.CANCEL)
           .setCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-  private Model model;
   private boolean downloadLibraryListInitiated;
 
-  private boolean install = false;
-
   public AddResourceDialog() {
-    super(new AddRessourcesDialogView().getRootComponent());
+    super(new AddResourceDialogView().getRootComponent());
     setPreferredSize(new Dimension(550, 300));
     panelInit();
     dialogFactory
         .setContent(this)
-        .addButton(
-            ButtonKind.INSTALL,
-            e -> {
-              install = true;
-              if (commit()) {
-                dialogFactory.getDialog().closeDialog();
-              }
-            })
+        .addButton(ButtonKind.INSTALL)
         .setDefaultButton(ButtonKind.INSTALL);
   }
 
-  public boolean getInstall() {
-    return install;
-  }
-
   public void showDialog() {
-    model = new Model();
-    bind(model);
+    bind(new Model());
     dialogFactory.display();
   }
 
-  @Override
-  public Model getModel() {
-    return model;
-  }
-
-  public JTextField getBrowseTextField() {
+  private JTextField getBrowseTextField() {
     return (JTextField) getComponent("@localDirectory");
   }
 
-  public JList getLibraryList() {
-    return (JList) getComponent("@rptoolsList");
+  private JLabel getDownloadingLabel() {
+    return getLabel("downloadingLabel");
+  }
+
+  private Container getLibraryListPane() {
+    return (Container) getComponent("rptoolsListPane");
+  }
+
+  private JTable getLibraryTable() {
+    return (JTable) getComponent("libraryTable");
+  }
+
+  private void setLibraryListVisible(boolean visible) {
+    // Actually show or hide the scroll pane that contains it.
+    getLibraryListPane().setVisible(visible);
   }
 
   @SuppressWarnings("unused")
-  public void initLibraryList() {
-    JList list = getLibraryList();
-    list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+  public void initLibraryTable() {
+    JTable table = getLibraryTable();
+    table.setModel(new LibraryTableModel(List.of()));
+    table.setDefaultRenderer(Long.class, new FileSizeCellRenderer());
+    table.getTableHeader().setReorderingAllowed(false);
+    setLibraryListVisible(false);
 
-    list.setModel(new MessageListModel(I18N.getText("dialog.addresource.downloading")));
+    // The library name needs most of the real estate, while the author name and library size don't
+    // need nearly as much. At the same time, we want to let the user resize columns as they wish.
+    // So to start, we have our list of default proportions that we enforce. But once the user gets
+    // involved, we stop using them by clearing the weights.
+    var columnWeights = new ArrayList<>(List.of(0.6, 0.25, 0.15));
+    var columnModel = table.getColumnModel();
+    table.addComponentListener(
+        new ComponentAdapter() {
+          @Override
+          public void componentResized(ComponentEvent e) {
+            int total = table.getWidth();
+            for (int i = 0; i < columnWeights.size(); ++i) {
+              columnModel.getColumn(i).setPreferredWidth((int) (total * columnWeights.get(i)));
+            }
+          }
+        });
+    // Let the user resize columns to modify the default weights.
+    columnModel.addColumnModelListener(
+        new TableColumnModelListener() {
+          @Override
+          public void columnMarginChanged(ChangeEvent e) {
+            if (table.getTableHeader().getResizingColumn() != null) {
+              // User-initiated event. Time to stop enforcing our default proportions.
+              columnWeights.clear();
+            }
+          }
+
+          @Override
+          public void columnAdded(TableColumnModelEvent e) {}
+
+          @Override
+          public void columnRemoved(TableColumnModelEvent e) {}
+
+          @Override
+          public void columnMoved(TableColumnModelEvent e) {}
+
+          @Override
+          public void columnSelectionChanged(ListSelectionEvent e) {}
+        });
+  }
+
+  @SuppressWarnings("unused")
+  public void initDownloadingLabel() {
+    var label = getDownloadingLabel();
+    label.setForeground(Color.BLACK);
+    label.setText(I18N.getText("dialog.addresource.downloading"));
+    label.setVisible(true);
   }
 
   @SuppressWarnings("unused")
@@ -132,6 +174,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
         .addChangeListener(
             e -> {
               // Hmmm, this is fragile (breaks if the order changes) rethink this later
+              var model = getModel();
               switch (tabPane.getSelectedIndex()) {
                 case 0 -> model.tab = Tab.LOCAL;
                 case 1 -> model.tab = Tab.WEB;
@@ -171,20 +214,37 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     // This pattern is safe because it is only called on the EDT
     downloadLibraryListInitiated = true;
 
-    try {
-      DownloadListWorker worker =
-          new DownloadListWorker(
-              getLibraryList(),
-              new WebDownloader(new URL(LIBRARY_LIST_URL)),
-              AppStatePersisted.getAssetRoots());
-      worker.execute();
-    } catch (MalformedURLException e) {
-      MapTool.showMessage(
-          "dialog.addresource.error.malformedurl",
-          "Error",
-          JOptionPane.ERROR_MESSAGE,
-          LIBRARY_LIST_URL);
-    }
+    var downloadingLabel = getDownloadingLabel();
+    var libraryTable = getLibraryTable();
+
+    LibraryUtils.downloadLibraryList()
+        .whenCompleteAsync(
+            (librariesString, t) -> {
+              List<Library> libraries;
+              if (t != null) {
+                downloadingLabel.setText(I18N.getText("dialog.addresource.errorDownloading"));
+                downloadingLabel.setForeground(new Color(255, 56, 0));
+                downloadingLabel.setVisible(true);
+                setLibraryListVisible(false);
+
+                libraries = List.of();
+              } else {
+                downloadingLabel.setVisible(false);
+                setLibraryListVisible(true);
+
+                // No need to show the user libraries they already have.
+                var assetRoots =
+                    AppStatePersisted.getAssetRoots().stream().map(File::getName).toList();
+
+                libraries =
+                    LibraryUtils.parseLibraryList(librariesString).stream()
+                        .filter(l -> !assetRoots.contains(l.name()))
+                        .sorted(Comparator.comparing(Library::name))
+                        .toList();
+              }
+              libraryTable.setModel(new LibraryTableModel(libraries));
+            },
+            SwingUtilities::invokeLater);
   }
 
   @Override
@@ -194,8 +254,9 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     }
 
     // Add the resource
-    final List<LibraryRow> rowList = new ArrayList<>();
+    final List<Library> rowList = new ArrayList<>();
 
+    var model = getModel();
     switch (model.getTab()) {
       case LOCAL -> {
         if (StringUtils.isEmpty(model.getLocalDirectory())) {
@@ -236,9 +297,10 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
           return false;
         }
         // validate the url format so that we don't hit it later
+        URL url;
         try {
-          new URL(model.getUrl());
-        } catch (MalformedURLException e) {
+          url = new URI(model.getUrl()).toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
           MapTool.showMessage(
               "dialog.addresource.warn.invalidurl",
               "Error",
@@ -246,64 +308,51 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
               model.getUrl());
           return false;
         }
-        rowList.add(new LibraryRow(model.getUrlName(), model.getUrl(), -1));
+        rowList.add(new Library(model.getUrlName(), url, -1, null));
       }
 
       case RPTOOLS -> {
-        Object[] selectedRows = getLibraryList().getSelectedValuesList().toArray();
+        var table = getLibraryTable();
+        var selectedRows = table.getSelectedRows();
 
         if (selectedRows == null || selectedRows.length == 0) {
           MapTool.showMessage(
               "dialog.addresource.warn.mustselectone", "Error", JOptionPane.ERROR_MESSAGE);
           return false;
         }
-        for (Object obj : selectedRows) {
-          // Somehow a String is being returned instead of a LibraryRow object
-          // in some cases.  See issue #343 on GitHub.
-          if (obj instanceof String) {
-            MapTool.showMessage(
-                "dialog.addresource.warn.badresourceid", "Error", JOptionPane.ERROR_MESSAGE, obj);
-            Sentry.captureMessage("Add Resource to Library Error\nResource: " + obj);
-            // Move on to next one...
-            continue;
-          }
-          LibraryRow row = (LibraryRow) obj;
 
-          // validate the url format
-          row.path = LIBRARY_URL + "/" + row.path;
-          try {
-            new URL(row.path);
-          } catch (MalformedURLException e) {
-            MapTool.showMessage(
-                "dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, row.path);
-            return false;
-          }
-          rowList.add(row);
+        var tableModel = (LibraryTableModel) getLibraryTable().getModel();
+        for (var i : selectedRows) {
+          rowList.add(tableModel.getRowAt(i));
         }
       }
     }
 
-    new SwingWorker<Object, Object>() {
-      @Override
-      protected Object doInBackground() {
-        for (LibraryRow row : rowList) {
-          try {
-            RemoteFileDownloader downloader = new RemoteFileDownloader(new URL(row.path));
-            File tmpFile = downloader.read();
-            AppSetup.installLibrary(row.name, tmpFile.toURI().toURL());
-            tmpFile.delete();
-          } catch (IOException e) {
-            log.error("Error downloading library: {}", e, e);
-            MapTool.showInformation("dialog.addresource.warn.couldnotload");
-          }
-        }
-        return null;
-      }
-    }.execute();
+    LibraryUtils.downloadAndInstall(rowList)
+        .thenAcceptAsync(
+            downloadResult -> {
+              if (!downloadResult.failures().isEmpty()) {
+                MapTool.showError(
+                    formatLibraryInstallMessage(
+                        I18N.getText("dialog.addresource.error.couldNotInstallLibraries"),
+                        downloadResult.failures()));
+              }
+            },
+            SwingUtilities::invokeLater);
+
     return true;
   }
 
-  public static class Model {
+  private static String formatLibraryInstallMessage(String main, List<Library> libraries) {
+    var messageBuilder = new StringBuilder().append("<html><body>").append(main).append("<ul>");
+    for (var library : libraries) {
+      messageBuilder.append("<li>").append(library.name());
+    }
+    messageBuilder.append("</ul></body></html>");
+    return messageBuilder.toString();
+  }
+
+  protected static class Model {
     private String localDirectory;
     private String urlName;
     private String url;
@@ -341,118 +390,93 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
       this.urlName = urlName;
     }
   }
-}
 
-class LibraryRow {
-  final String name;
-  String path;
-  final int size;
+  private static final class LibraryTableModel extends AbstractTableModel {
+    private static final int NAME_COLUMN_INDEX = 0;
+    private static final int AUTHOR_COLUMN_INDEX = 1;
+    private static final int SIZE_COLUMN_INDEX = 2;
+    private final List<Library> rowList;
 
-  LibraryRow(String name, String path, int size) {
-    this.name = name.trim();
-    this.path = path.trim();
-    this.size = size;
-  }
+    private final List<String> columnNames =
+        List.of(
+            I18N.getText("dialog.addresource.column.libraryName"),
+            I18N.getText("dialog.addresource.column.libraryAuthor"),
+            I18N.getText("dialog.addresource.column.librarySize"));
 
-  LibraryRow(String row) {
-    String[] data = row.split("\\|");
-
-    name = data[0].trim();
-    path = data[1].trim();
-    size = Integer.parseInt(data[2]);
-  }
-
-  @Override
-  public String toString() {
-    return "<html><b>" + name + "</b> <i>(" + getSizeString() + ")</i>";
-  }
-
-  private String getSizeString() {
-    NumberFormat format = NumberFormat.getNumberInstance();
-    if (size < 1000) {
-      return format.format(size) + " bytes";
+    public LibraryTableModel(List<Library> rowList) {
+      this.rowList = ImmutableList.copyOf(rowList);
     }
-    if (size < 1000000) {
-      return format.format(size / 1000) + " k";
+
+    public Library getRowAt(int rowIndex) {
+      return rowList.get(rowIndex);
     }
-    return format.format(size / 1000000) + " mb";
+
+    public int getColumnCount() {
+      return columnNames.size();
+    }
+
+    public int getRowCount() {
+      return rowList.size();
+    }
+
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      var row = getRowAt(rowIndex);
+
+      return switch (columnIndex) {
+        case NAME_COLUMN_INDEX -> row.name();
+        case AUTHOR_COLUMN_INDEX ->
+            Objects.requireNonNullElseGet(
+                row.author(), () -> I18N.getText("dialog.addresource.unknownAuthor"));
+        case SIZE_COLUMN_INDEX -> row.size();
+        default -> "";
+      };
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+      // Data is not editable.
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+      return switch (columnIndex) {
+        case NAME_COLUMN_INDEX -> String.class;
+        case AUTHOR_COLUMN_INDEX -> String.class;
+        case SIZE_COLUMN_INDEX -> Long.class;
+        default -> String.class;
+      };
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+      return columnNames.get(columnIndex);
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+      return false;
+    }
   }
-}
 
-class MessageListModel extends AbstractListModel {
-  private final String message;
+  /** Displays file sizes in a human readable format, right-aligned. */
+  private static final class FileSizeCellRenderer extends DefaultTableCellRenderer {
+    @Override
+    public Component getTableCellRendererComponent(
+        JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+      super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-  public MessageListModel(String message) {
-    this.message = message;
-  }
-
-  public Object getElementAt(int index) {
-    return message;
-  }
-
-  public int getSize() {
-    return 1;
-  }
-}
-
-class DownloadListWorker extends SwingWorker<Object, Object> {
-  private static final Logger log = LogManager.getLogger(DownloadListWorker.class);
-  private ListModel model;
-  private JList<LibraryRow> jList;
-  private WebDownloader downloader;
-  private Set<File> assetRoots;
-
-  DownloadListWorker(JList<LibraryRow> jList, WebDownloader downloader, Set<File> assetRoots) {
-    this.jList = jList;
-    this.downloader = downloader;
-    this.assetRoots = assetRoots;
-  }
-
-  @Override
-  protected Object doInBackground() throws Exception {
-    String result = null;
-    try {
-      result = downloader.read();
-    } finally {
-      if (result == null) {
-        model = new MessageListModel(I18N.getText("dialog.addresource.errorDownloading"));
+      String text;
+      if (value instanceof Long l) {
+        text = FileUtils.byteCountToDisplaySize(l);
+      } else if (value == null) {
+        text = "";
+      } else {
+        text = value.toString();
       }
+      setText(text);
+      setHorizontalAlignment(SwingConstants.RIGHT);
+
+      return this;
     }
-    DefaultListModel<LibraryRow> listModel = new DefaultListModel<>();
-
-    // Create a list to compare against for dups
-    List<String> libraryNameList = new ArrayList<>();
-    for (File file : assetRoots) {
-      libraryNameList.add(file.getName());
-    }
-
-    try {
-      BufferedReader reader =
-          new BufferedReader(new InputStreamReader(new ByteArrayInputStream(result.getBytes())));
-      List<LibraryRow> tempRows = new ArrayList<>();
-      String line;
-      while ((line = reader.readLine()) != null) {
-        LibraryRow row = new LibraryRow(line);
-
-        // Don't include if we've already got it
-        if (!libraryNameList.contains(row.name)) {
-          tempRows.add(row);
-        }
-      }
-      tempRows.sort(Comparator.comparing(o -> o.name));
-      for (LibraryRow row : tempRows) {
-        listModel.addElement(row);
-      }
-      model = listModel;
-    } catch (Throwable t) {
-      log.error("unable to parse library list", t);
-      model = new MessageListModel(I18N.getText("dialog.addresource.errorDownloading"));
-    }
-    return null;
-  }
-
-  @Override
-  protected void done() {
-    jList.setModel(model);
   }
 }

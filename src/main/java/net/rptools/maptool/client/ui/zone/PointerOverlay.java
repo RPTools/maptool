@@ -51,7 +51,9 @@ public class PointerOverlay implements ZoneOverlay {
     for (PointerPair p : pointerList) {
       if (p.pointer.getZoneGUID().equals(zone.getId())) {
         ZonePoint zPoint = new ZonePoint(p.pointer.getX(), p.pointer.getY());
-        ScreenPoint sPoint = ScreenPoint.fromZonePointRnd(renderer, zPoint.x, zPoint.y);
+        ScreenPoint sPoint =
+            ScreenPoint.fromZonePointRnd(
+                renderer.getViewModel().getZoneScale(), zPoint.x, zPoint.y);
 
         int offX = 0;
         int offY = 0;

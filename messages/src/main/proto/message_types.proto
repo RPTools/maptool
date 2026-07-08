@@ -206,7 +206,9 @@ message SendTokensToBackMsg {
 message SetBoardMsg {
   string zone_guid = 1;
   IntPointDto point = 2;
-  string asset_id = 3;
+  double scaleX = 3;
+  double scaleY = 4;
+  string asset_id = 5;
 }
 
 message SetCampaignMsg {
@@ -391,4 +393,12 @@ message UpdatePlayerStatusMsg {
   string player = 1;
   string zone_guid = 2;
   bool loaded = 3;
+}
+
+message PutLookupTableMsg {
+  LookupTableDto table = 1;
+}
+
+message DeleteLookupTableMsg {
+  string tableName = 1;
 }

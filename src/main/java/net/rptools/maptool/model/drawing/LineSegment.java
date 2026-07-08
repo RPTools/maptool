@@ -130,6 +130,19 @@ public class LineSegment extends AbstractDrawing {
     return Collections.unmodifiableList(points);
   }
 
+  /**
+   * Translate the line segment
+   *
+   * @param deltaX offset in the X axis
+   * @param deltaY offset in the Y axis
+   */
+  public void translate(int deltaX, int deltaY) {
+    points.replaceAll(point1 -> new Point(point1.x + deltaX, point1.y + deltaY));
+    if (cachedBounds != null) {
+      cachedBounds.translate(deltaX, deltaY);
+    }
+  }
+
   @Override
   public @Nonnull Area getArea(Zone zone) {
     if (area == null) {

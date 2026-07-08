@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.GeneralPath;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -30,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarHorizHexEuclideanWalker;
@@ -58,8 +59,8 @@ public class HexGridHorizontal extends HexGrid {
   private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   @Override
-  public boolean isHexHorizontal() {
-    return true;
+  public GridType getType() {
+    return GridType.HexHorizontal;
   }
 
   @Override
@@ -252,23 +253,23 @@ public class HexGridHorizontal extends HexGrid {
   }
 
   @Override
-  public double getRendererSizeV(ZoneRenderer renderer) {
-    return renderer.getSize().getWidth();
+  public double getSizeV(Dimension2D size) {
+    return size.getWidth();
   }
 
   @Override
-  public double getRendererSizeU(ZoneRenderer renderer) {
-    return renderer.getSize().getHeight();
+  public double getSizeU(Dimension2D size) {
+    return size.getHeight();
   }
 
   @Override
-  public int getOffV(ZoneRenderer renderer) {
-    return (int) (renderer.getViewOffsetX() + getOffsetX() * renderer.getScale());
+  public int getOffV(Scale scale) {
+    return (int) (scale.getOffsetX() + getOffsetX() * scale.getScale());
   }
 
   @Override
-  public int getOffU(ZoneRenderer renderer) {
-    return (int) (renderer.getViewOffsetY() + getOffsetY() * renderer.getScale());
+  public int getOffU(Scale scale) {
+    return (int) (scale.getOffsetY() + getOffsetY() * scale.getScale());
   }
 
   @Override

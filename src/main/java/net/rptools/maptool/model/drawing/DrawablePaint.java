@@ -21,6 +21,7 @@ import java.awt.image.ImageObserver;
 import java.io.Serializable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ui.AssetPaint;
+import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
 import org.apache.logging.log4j.LogManager;
@@ -33,6 +34,10 @@ public abstract class DrawablePaint implements Serializable {
 
   public abstract Paint getPaint(
       int offsetX, int offsetY, double scale, ImageObserver... observers);
+
+  public Paint getPaint(Scale scale, ImageObserver... observers) {
+    return getPaint(scale.getOffsetX(), scale.getOffsetY(), scale.getScale(), observers);
+  }
 
   public static DrawablePaint convertPaint(Paint paint) {
     if (paint == null) {

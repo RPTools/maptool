@@ -14,17 +14,18 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.util.Objects;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
-import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import net.rptools.maptool.server.proto.ColorDotTokenOverlayDto;
+import net.rptools.maptool.server.proto.QuadrantDto;
 
 /**
  * Token overlay that draws a colored dot in one of the corners.
@@ -32,84 +33,44 @@ import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
  * @author giliath
  * @version $Revision$ $Date$ $Author$
  */
-public class ColorDotTokenOverlay extends XTokenOverlay {
+public final class ColorDotTokenOverlay extends BooleanTokenOverlay {
+  /** Color used when filling the dot. */
+  private Color color;
+
+  /**
+   * @deprecated This is a hold over from when ColorDotTokenOverlay inherited from XTokenOverlay. It
+   *     didn't do anything then, and does nothing now.
+   */
+  @Deprecated private BasicStroke stroke;
 
   /** The corner where the dot is placed */
-  private Quadrant corner = Quadrant.SOUTH_EAST;
-
-  /** Default constructor needed for XML encoding/decoding */
-  public ColorDotTokenOverlay() {
-    this(DEFAULT_STATE_NAME, Color.RED, Quadrant.SOUTH_EAST);
-  }
+  private Quadrant corner;
 
   /**
    * Create a new dot token overlay
    *
-   * @param aName Name of the token overlay
-   * @param aColor Color of the dot
-   * @param aCorner Corner containing the dot
+   * @param name Name of the token overlay
+   * @param color Color of the dot
+   * @param corner Corner containing the dot
    */
-  public ColorDotTokenOverlay(String aName, Color aColor, Quadrant aCorner) {
-    super(aName, aColor, 0);
-    if (aCorner != null) corner = aCorner;
+  public ColorDotTokenOverlay(String name, Color color, Quadrant corner) {
+    super(name);
+    this.color = Objects.requireNonNullElse(color, Color.red);
+    this.corner = Objects.requireNonNullElse(corner, Quadrant.SOUTH_EAST);
   }
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
-  @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new ColorDotTokenOverlay(getName(), getColor(), getCorner());
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
+  public ColorDotTokenOverlay(ColorDotTokenOverlay other) {
+    super(other);
+    this.color = other.color;
+    this.corner = other.corner;
   }
 
-  /**
-   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     Rectangle)
-   */
-  @Override
-  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
-    Color tempColor = g.getColor();
-    Stroke tempStroke = g.getStroke();
-    Composite tempComposite = g.getComposite();
-    try {
-      g.setColor(getColor());
-      g.setStroke(getStroke());
+  public Color getColor() {
+    return color;
+  }
 
-      double size = bounds.width * 0.2;
-      double offset = bounds.width * 0.8;
-      double x = 0;
-      double y = 0;
-      switch (corner) {
-        case SOUTH_EAST:
-          x = y = offset;
-          break;
-        case SOUTH_WEST:
-          y = offset;
-          break;
-        case NORTH_EAST:
-          x = offset;
-          break;
-        case NORTH_WEST:
-          break;
-      } // endswitch
-      Shape s = new Ellipse2D.Double(x, y, size, size);
-      if (getOpacity() != 100)
-        g.setComposite(
-            AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
-      g.fill(s);
-    } finally {
-      g.setColor(tempColor);
-      g.setStroke(tempStroke);
-      g.setComposite(tempComposite);
-    }
+  public void setColor(Color color) {
+    this.color = color;
   }
 
   /**
@@ -119,13 +80,46 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
     return corner;
   }
 
-  public static ColorDotTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new ColorDotTokenOverlay();
-    overlay.fillFrom(dto);
-    return overlay;
+  @Override
+  public ColorDotTokenOverlay clone() {
+    return new ColorDotTokenOverlay(this);
   }
 
-  public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.COLOR_DOT).build();
+  public Shape getShape(Rectangle2D bounds) {
+    var size = bounds.getWidth() / 5;
+    var offset = bounds.getWidth() - size;
+    final double x =
+        switch (corner) {
+          case SOUTH_EAST, NORTH_EAST -> offset;
+          case SOUTH_WEST, NORTH_WEST -> 0;
+        };
+    final double y =
+        switch (corner) {
+          case SOUTH_EAST, SOUTH_WEST -> offset;
+          case NORTH_EAST, NORTH_WEST -> 0;
+        };
+
+    return new Ellipse2D.Double(x + bounds.getMinX(), y + bounds.getMinY(), size, size);
+  }
+
+  @Override
+  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
+    g.setColor(getColor());
+    var shape = getShape(bounds);
+    g.fill(shape);
+  }
+
+  public ColorDotTokenOverlayDto toColorDotDto() {
+    var dto = ColorDotTokenOverlayDto.newBuilder();
+    dto.setColor(color.getRGB());
+    // Fixes #5828
+    dto.setQuadrant(QuadrantDto.valueOf(corner.name()));
+    return dto.build();
+  }
+
+  public static ColorDotTokenOverlay fromDto(ColorDotTokenOverlayDto dto) {
+    var color = new Color(dto.getColor(), true);
+    var quadrant = Quadrant.valueOf(dto.getQuadrant().name());
+    return new ColorDotTokenOverlay(DEFAULT_STATE_NAME, color, quadrant);
   }
 }

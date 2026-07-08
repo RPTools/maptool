@@ -14,77 +14,57 @@
  */
 package net.rptools.maptool.client.ui.token;
 
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
-import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import net.rptools.maptool.server.proto.CornerImageTokenOverlayDto;
 import net.rptools.maptool.server.proto.QuadrantDto;
+import net.rptools.maptool.util.ImageManager;
 
 /**
  * Place an image in a given corner.
  *
  * @author Jay
  */
-public class CornerImageTokenOverlay extends ImageTokenOverlay {
+public final class CornerImageTokenOverlay extends BooleanTokenOverlay {
+
+  /** ID of the image displayed in the overlay. */
+  private MD5Key assetId;
 
   /** The corner where the image is placed */
-  private Quadrant corner = Quadrant.SOUTH_EAST;
-
-  /** Needed for serialization */
-  public CornerImageTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, null, Quadrant.SOUTH_EAST);
-  }
+  private Quadrant corner;
 
   /**
    * Create the complete image overlay.
    *
    * @param name Name of the new token overlay
-   * @param anAssetId Id of the image displayed in the new token overlay.
-   * @param aCorner Corner that contains the image.
+   * @param assetId Id of the image displayed in the new token overlay.
+   * @param corner Corner that contains the image.
    */
-  public CornerImageTokenOverlay(String name, MD5Key anAssetId, Quadrant aCorner) {
-    super(name, anAssetId);
-    corner = aCorner;
+  public CornerImageTokenOverlay(String name, MD5Key assetId, Quadrant corner) {
+    super(name);
+    this.assetId = assetId;
+    this.corner = corner;
   }
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
-  @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new CornerImageTokenOverlay(getName(), getAssetId(), corner);
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
+  public CornerImageTokenOverlay(CornerImageTokenOverlay other) {
+    super(other);
+    this.assetId = other.assetId;
+    this.corner = other.corner;
   }
 
-  /**
-   * @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token)
-   */
   @Override
-  public Rectangle getImageBounds(Rectangle bounds, Token token) {
-    int x = (bounds.width + 1) / 2;
-    int y = (bounds.height + 1) / 2;
-    switch (corner) {
-      case SOUTH_EAST:
-        break;
-      case SOUTH_WEST:
-        x = 0;
-        break;
-      case NORTH_EAST:
-        y = 0;
-        break;
-      case NORTH_WEST:
-        x = y = 0;
-        break;
-    } // endswitch
-    return new Rectangle(x, y, bounds.width / 2, bounds.height / 2);
+  public CornerImageTokenOverlay clone() {
+    return new CornerImageTokenOverlay(this);
+  }
+
+  public MD5Key getAssetId() {
+    return assetId;
   }
 
   /**
@@ -94,17 +74,58 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
     return corner;
   }
 
-  public static CornerImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new CornerImageTokenOverlay();
-    overlay.fillFrom(dto);
-    overlay.corner = Quadrant.valueOf(dto.getQuadrant().name());
-    return overlay;
+  public Rectangle2D getBounds(Rectangle2D bounds) {
+    var result = new Rectangle2D.Double();
+    result.setRect(bounds);
+
+    // Push the image into one of the corners.
+    result.width /= 2;
+    result.height /= 2;
+    switch (corner) {
+      case NORTH_WEST -> {
+        // Already at (0, 0)
+      }
+      case NORTH_EAST -> {
+        result.x += result.width;
+      }
+      case SOUTH_EAST -> {
+        result.x += result.width;
+        result.y += result.height;
+      }
+      case SOUTH_WEST -> {
+        result.y += result.height;
+      }
+    }
+
+    return result;
   }
 
-  public BooleanTokenOverlayDto toDto() {
-    return getDto()
-        .setQuadrant(QuadrantDto.valueOf(corner.name()))
-        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.CORNER_IMAGE)
-        .build();
+  @Override
+  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
+    BufferedImage image = ImageManager.getImageAndWait(assetId);
+    Rectangle2D imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
+    AwtUtil.fitInto(imageBounds, bounds);
+    imageBounds = getBounds(imageBounds);
+
+    // Paint it at the right location
+    int width = (int) imageBounds.getWidth();
+    int height = (int) imageBounds.getHeight();
+    int x = (int) imageBounds.getMinX();
+    int y = (int) imageBounds.getMinY();
+
+    g.drawImage(image, x, y, width, height, null);
+  }
+
+  public CornerImageTokenOverlayDto toCornerImageDto() {
+    var dto = CornerImageTokenOverlayDto.newBuilder();
+    dto.setAssetId(assetId.toString());
+    dto.setQuadrant(QuadrantDto.valueOf(corner.name()));
+    return dto.build();
+  }
+
+  public static CornerImageTokenOverlay fromDto(CornerImageTokenOverlayDto dto) {
+    var assetId = new MD5Key(dto.getAssetId());
+    var quadrant = Quadrant.valueOf(dto.getQuadrant().name());
+    return new CornerImageTokenOverlay(DEFAULT_STATE_NAME, assetId, quadrant);
   }
 }

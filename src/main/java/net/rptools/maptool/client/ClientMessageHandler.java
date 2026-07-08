@@ -48,6 +48,7 @@ import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Label;
+import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
@@ -173,6 +174,8 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_PLAYER_STATUS_MSG -> handle(msg.getUpdatePlayerStatusMsg());
         case SET_WALL_TOPOLOGY_MSG -> handle(msg.getSetWallTopologyMsg());
         case UPDATE_WALL_DATA_MSG -> handle(msg.getUpdateWallDataMsg());
+        case UPDATE_LOOKUP_TABLE_MSG -> handle(msg.getUpdateLookupTableMsg());
+        case DELETE_LOOKUP_TABLE_MSG -> handle(msg.getDeleteLookupTableMsg());
         default -> log.warn(msgType + "not handled.");
       }
       log.debug(id + " handled: " + msgType);
@@ -670,10 +673,11 @@ public class ClientMessageHandler implements MessageHandler {
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
           var zone = client.getCampaign().getZone(zoneGUID);
-
-          Point boardXY = Mapper.map(msg.getPoint());
-          var assetId = new MD5Key(msg.getAssetId());
-          zone.setBoard(boardXY, assetId);
+          if (zone != null) {
+            Point boardXY = Mapper.map(msg.getPoint());
+            var assetId = new MD5Key(msg.getAssetId());
+            zone.setBoard(assetId, boardXY, (float) msg.getScaleX(), (float) msg.getScaleY());
+          }
         });
   }
 
@@ -920,8 +924,12 @@ public class ClientMessageHandler implements MessageHandler {
           if (AppPreferences.fitGmView.get()) {
             renderer.enforceView(x, y, scale, gmWidth, gmHeight);
           } else {
-            renderer.setScale(scale);
-            renderer.centerOn(new ZonePoint(x, y));
+            var viewModel = renderer.getViewModel();
+            viewModel.setZoneScale(
+                viewModel
+                    .getZoneScale()
+                    .withCenteredScale(scale, renderer.getSize())
+                    .centeredOn(x, y, renderer.getSize()));
           }
         });
   }
@@ -1091,6 +1099,23 @@ public class ClientMessageHandler implements MessageHandler {
           var wall = Wall.fromDto(updateWallDataMsg.getWall());
 
           zone.updateWall(wall);
+        });
+  }
+
+  private void handle(PutLookupTableMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var table = LookupTable.fromDto(msg.getTable());
+          client.getCampaign().getLookupTableMap().put(table.getName(), table);
+          MapTool.getFrame().getLookupTablePanel().updateView();
+        });
+  }
+
+  private void handle(DeleteLookupTableMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          client.getCampaign().getLookupTableMap().remove(msg.getTableName());
+          MapTool.getFrame().getLookupTablePanel().updateView();
         });
   }
 }

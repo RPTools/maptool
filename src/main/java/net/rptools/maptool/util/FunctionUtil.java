@@ -14,15 +14,13 @@
  */
 package net.rptools.maptool.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
@@ -38,9 +36,7 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.InvalidGUIDException;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
@@ -56,6 +52,8 @@ import net.rptools.parser.function.Function;
  * @since 1.5.5
  */
 public class FunctionUtil {
+  private static final MathContext MATH_CONTEXT = new MathContext(16, RoundingMode.HALF_EVEN);
+
   private static final String KEY_WRONG_NUM_PARAM = "macro.function.general.wrongNumParam";
   private static final String KEY_NOT_ENOUGH_PARAM = "macro.function.general.notEnoughParam";
   private static final String KEY_TOO_MANY_PARAM = "macro.function.general.tooManyParam";
@@ -101,11 +99,11 @@ public class FunctionUtil {
       String html =
           String.format(
               """
-  <table border=0 width=100%% cellspacing=3 cellpadding=0 style="background:%s;"><tr><td>
-  <table style="background: %s; color: %s"><tr valign=middle><td height="44px" width="48px">%s</td>
-  <td>%s</td></tr></table>
-  </td></tr></table>
-  """,
+                                            <table border=0 width=100%% cellspacing=3 cellpadding=0 style="background:%s;"><tr><td>
+                                            <table style="background: %s; color: %s"><tr valign=middle><td height="44px" width="48px">%s</td>
+                                            <td>%s</td></tr></table>
+                                            </td></tr></table>
+                                            """,
               red, white, textColour, imageText, messageText);
       MapTool.addGlobalMessage(html, List.of("self"));
     }
@@ -156,7 +154,7 @@ public class FunctionUtil {
   /**
    * Gets the token from the specified index or returns the token in context. This method will check
    * the list size before trying to retrieve the token so it is safe to use for functions that have
-   * the token as a optional argument.
+   * the token as an optional argument.
    *
    * @param functionName the function name (used for generating exception messages).
    * @param param the parameters for the function
@@ -204,7 +202,7 @@ public class FunctionUtil {
   /**
    * Gets the ZoneRender from the specified index or returns the current ZoneRender. This method
    * will check the list size before trying to retrieve the token so it is safe to use for functions
-   * that have the map as a optional argument.
+   * that have the map as an optional argument.
    *
    * @param functionName the function name (used for generating exception messages).
    * @param param the parameters for the function
@@ -267,20 +265,12 @@ public class FunctionUtil {
    * @param index the index of the parameter to return as BigDecimal
    * @param allowString should text that can be converted to BigDecimal be allowed?
    * @return the BigDecimal value of the parameter
-   * @throws ParserException if can't be converted to BigDecimal, or if disallowed text
+   * @throws ParserException when unable to convert to BigDecimal, or if disallowed text
    */
   public static BigDecimal paramAsBigDecimal(
       String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
-    Object parameter = parameters.get(index);
-    if (parameter instanceof BigDecimal) return (BigDecimal) parameter;
-    try {
-      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
-      return (new BigDecimal(parameter.toString()));
-    } catch (NumberFormatException ne) {
-      throw new ParserException(
-          I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
-    }
+    return new BigDecimal(paramAsNumber(functionName, parameters, index, allowString).toString());
   }
 
   /**
@@ -292,17 +282,92 @@ public class FunctionUtil {
    * @param index the index of the parameter to return as Boolean
    * @param allowString should text parameters be allowed
    * @return the parameter as a Boolean
-   * @throws ParserException if can't be converted to BigDecimal, or if disallowed text
+   * @throws ParserException when unable to convert to BigDecimal, or if disallowed text
    */
   public static Boolean paramAsBoolean(
       String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
     Object parameter = parameters.get(index);
+    if (parameter instanceof Boolean b) {
+      // already a boolean, return it.
+      return b;
+    } else if (allowString && parameter instanceof String string) {
+      // if it is a string of "true/false" return it as boolean
+      if (string.trim().equalsIgnoreCase("false")) {
+        return false;
+      } else if (string.trim().equalsIgnoreCase("true")) {
+        return true;
+      }
+    }
     try {
-      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
-      BigDecimal val = new BigDecimal(parameter.toString());
+      if (!allowString && parameter instanceof String) {
+        throw new NumberFormatException("String");
+      }
+      BigDecimal val = new BigDecimal(parameter.toString().trim());
       return !val.equals(BigDecimal.ZERO); // true if any value except zero
     } catch (NumberFormatException ne) {
+      throw new ParserException(
+          I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
+    }
+  }
+
+  /**
+   * Helper function for the various getParam as numeric type. Converts numbers of various types and
+   * formats, including scientific, hex, octal, binary and their string representations. Allows for
+   * suffixes that should not appear in macro code; i.e. 1f, 2d, 3L. Only thing it doesn't cope with
+   * is returning -0, which hopefully nobody is counting on.
+   *
+   * @param functionName for error messages
+   * @param parameters containing values
+   * @param index of value to return
+   * @param allowString if string representation of number is allowed
+   * @return number value as a Number
+   * @throws ParserException if value is not a valid number.
+   */
+  private static Number paramAsNumber(
+      String functionName, List<Object> parameters, int index, boolean allowString)
+      throws ParserException {
+    Object parameter = parameters.get(index);
+
+    if (!allowString && parameter instanceof String string) {
+      throw new ParserException(I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, string));
+    }
+    String nString;
+    if (parameter instanceof Number number) {
+      if (Double.isNaN(number.doubleValue()) || Float.isNaN(number.floatValue())) {
+        throw new ParserException(
+            I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, Double.NaN));
+      } else if (number.doubleValue() == 0) {
+        return 0;
+      }
+      // this seems stupid, but it is the only way to get consistent results between floats, doubles
+      // and ints out of BigDecimal
+      nString = number.toString();
+    } else {
+      nString = parameter.toString().trim().toLowerCase();
+      if (nString.equals("nan")) {
+        throw new ParserException(
+            I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, Double.NaN));
+      }
+    }
+    if (nString.endsWith("d") || nString.endsWith("f") || nString.endsWith("l")) {
+      nString = nString.substring(0, nString.length() - 1);
+    }
+    if (nString.startsWith("#") || nString.startsWith("0x") || nString.startsWith("0b")) {
+      try {
+        if (nString.startsWith("0b")) {
+          return Integer.parseUnsignedInt(nString.substring(2), 2);
+        } else {
+          return Integer.decode(nString);
+        }
+      } catch (NumberFormatException nfe) {
+        throw new ParserException(
+            I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
+      }
+    }
+    try {
+      return new BigDecimal(nString, MATH_CONTEXT);
+    } catch (NumberFormatException nfe) {
       throw new ParserException(
           I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
     }
@@ -317,19 +382,18 @@ public class FunctionUtil {
    * @param index the index of the parameter to return as integer
    * @param allowString should text be allowed as parameter
    * @return the parameter as an integer
-   * @throws ParserException if the parameter can't be converted to BigDecimal, or if disallowed
-   *     text
+   * @throws ParserException if the parameter can't be converted to Integer, or if disallowed text
    */
-  public static Integer paramAsInteger(
+  public static int paramAsInteger(
       String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
-    Object parameter = parameters.get(index);
-    try {
-      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
-      return Integer.valueOf(parameter.toString());
-    } catch (NumberFormatException ne) {
+
+    Number number = paramAsNumber(functionName, parameters, index, allowString);
+    if (number.intValue() == number.doubleValue()) {
+      return number.intValue();
+    } else {
       throw new ParserException(
-          I18N.getText(KEY_NOT_INT, functionName, index + 1, parameter.toString()));
+          I18N.getText(KEY_NOT_INT, functionName, index + 1, parameters.get(index).toString()));
     }
   }
 
@@ -342,19 +406,12 @@ public class FunctionUtil {
    * @param index the index of the parameter to return as Double
    * @param allowString should text be allowed
    * @return the parameter as a Double
-   * @throws ParserException if can't be converted to Double, or disallowed text
+   * @throws ParserException when cannot be converted to Double, or disallowed text
    */
-  public static Double paramAsDouble(
+  public static double paramAsDouble(
       String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
-    Object parameter = parameters.get(index);
-    try {
-      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
-      return (Double.valueOf(parameter.toString()));
-    } catch (NumberFormatException ne) {
-      throw new ParserException(
-          I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
-    }
+    return paramAsNumber(functionName, parameters, index, allowString).doubleValue();
   }
 
   /**
@@ -366,28 +423,21 @@ public class FunctionUtil {
    * @param index the index of the parameter to return as Float
    * @param allowString should text be allowed
    * @return the parameter as a Float
-   * @throws ParserException if can't be converted to Float, or if disallowed text
+   * @throws ParserException when unable to convert to Float, or if disallowed text
    */
-  public static Float paramAsFloat(
+  public static float paramAsFloat(
       String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
-    Object parameter = parameters.get(index);
-    try {
-      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
-      return (Float.valueOf(parameter.toString()));
-    } catch (NumberFormatException ne) {
-      throw new ParserException(
-          I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
-    }
+    return paramAsNumber(functionName, parameters, index, allowString).floatValue();
   }
 
   /**
    * Return the jsonObject value of a parameter supplied as a JSON Object or StringPropList.<br>
-   * Throws a <code>ParserException</code> if the parameter can't be converted to a json.
+   * Throws a <code>ParserException</code> if the parameter can't be converted to a JSON.
    *
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
-   * @param index the index of the parameter to return as Json
+   * @param index the index of the parameter to return as JSON
    * @param delimiter the delimiter if known
    * @return the parameter as a jsonObject
    * @throws ParserException if the parameter can't be converted to jsonObject or jsonArray
@@ -395,42 +445,49 @@ public class FunctionUtil {
   public static JsonObject paramFromStrPropOrJsonAsJsonObject(
       String functionName, List<Object> parameters, int index, String delimiter)
       throws ParserException {
+
+    Object arg = parameters.get(index);
+    if (arg instanceof JsonObject jo) {
+      return jo;
+    }
+
+    if (delimiter.equalsIgnoreCase("json")) {
+      return paramAsJsonObject(functionName, parameters, index);
+    }
+    delimiter = delimiter.isEmpty() ? ";" : delimiter;
+    // just in case it is a JSON Object despite the delimiter
+    Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
     try {
-      JsonObject json = new JsonObject();
-      if (delimiter.equalsIgnoreCase("json")) {
-        json = paramAsJsonObject(functionName, parameters, index);
-      } else if (parameters.get(index) instanceof JsonObject) {
-        json = paramAsJsonObject(functionName, parameters, index);
-      } else if (!delimiter.equalsIgnoreCase(";")) {
-        List<String> entries =
-            Arrays.stream(paramAsString(functionName, parameters, index, true).split(delimiter))
-                .toList();
-        String[] keyValue;
-        for (String entry : entries) {
-          keyValue = entry.split("=");
-          try {
-            json.add(keyValue[0].trim(), new JsonPrimitive(new BigDecimal(keyValue[1])));
-          } catch (NumberFormatException nfe) {
-            json.add(keyValue[0].trim(), new JsonPrimitive(keyValue[1].trim()));
-          }
+      JsonElement jsonElement = gson.toJsonTree(arg);
+      if (jsonElement.isJsonObject()) {
+        return jsonElement.getAsJsonObject();
+      }
+    } catch (JsonParseException ignored) {
+    }
+    String strProp = arg.toString();
+    String[] kvPairs = strProp.split(delimiter);
+    JsonObject jsonObject = new JsonObject();
+    for (String pair : kvPairs) {
+      String[] kv = pair.split("=");
+      if (kv.length != 2) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.unableToParse", functionName, index));
+      }
+      String key = kv[0];
+      String value = kv[1];
+      if ((value.contains("{") && value.contains("}"))
+          || (value.contains("[") && value.contains("]"))) {
+        try {
+          JsonElement je = gson.toJsonTree(value);
+          jsonObject.add(key, je);
+        } catch (JsonParseException ignored) {
+          jsonObject.addProperty(key, value);
         }
       } else {
-        // guessing time
-        if (((String) parameters.get(index)).contains("{")) {
-          json = paramAsJsonObject(functionName, parameters, index);
-        } else if (((String) parameters.get(index)).contains(";")) {
-          json =
-              JSONMacroFunctions.getInstance()
-                  .getJsonObjectFunctions()
-                  .fromStrProp(paramAsString(functionName, parameters, index, true), ";");
-        }
+        jsonObject.addProperty(key, value);
       }
-      return json;
-    } catch (ParserException pe) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.input.illegalArgumentType", "unknown", "JSON Object/StringProp"));
     }
+    return jsonObject;
   }
 
   /**
@@ -475,11 +532,11 @@ public class FunctionUtil {
 
   /**
    * Return the jsonObject or jsonArray value of a parameter. Throws a <code>ParserException</code>
-   * if the parameter can't be converted to a json.
+   * if the parameter can't be converted to a JSON.
    *
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
-   * @param index the index of the parameter to return as Json
+   * @param index the index of the parameter to return as JSON
    * @return the parameter as a jsonObject or jsonArray
    * @throws ParserException if the parameter can't be converted to jsonObject or jsonArray
    */
@@ -552,13 +609,13 @@ public class FunctionUtil {
   }
 
   /**
-   * Return the jsonObject or jsonArray value of a parameter. if the parameter can't be converted to
-   * a json. Then an empty json array will be returned if its an empty string, otherwise a a
-   * JsonArray containing the argument will be returned.
+   * Return the jsonObject or jsonArray value of a parameter. If the parameter can't be converted to
+   * a JSON, an empty string results in an empty JSON array, otherwise a JSON array containing the
+   * argument will be returned.
    *
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
-   * @param index the index of the parameter to return as Json
+   * @param index the index of the parameter to return as JSON
    * @return the parameter as a jsonObject or jsonArray
    * @throws ParserException if the parameter can't be converted to jsonObject or jsonArray
    */
@@ -573,8 +630,8 @@ public class FunctionUtil {
   }
 
   /**
-   * Return the jsonElement value of a parameter. Throws a <code>ParserException</code> if the
-   * parameter can't be converted to a jsonArray.
+   * Return the jsonElement value of a parameter. Where the value is not a JSON, returns an array
+   * containing the value.
    *
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
@@ -588,7 +645,7 @@ public class FunctionUtil {
     } catch (ParserException e) {
       JsonArray json = new JsonArray();
       Object val = parameters.get(index);
-      if (val.toString().length() > 0) {
+      if (!val.toString().isEmpty()) {
         if (val instanceof Number) {
           json.add((Number) val);
         } else {
@@ -608,21 +665,25 @@ public class FunctionUtil {
    * @return The boolean value of the object
    */
   public static boolean getBooleanValue(Object value) {
-    boolean set = false;
-    if (value instanceof Boolean) {
-      set = (Boolean) value;
-    } else if (value instanceof Number) {
-      set = ((Number) value).doubleValue() != 0;
-    } else if (value == null) {
-      set = false;
-    } else {
-      try {
-        set = !new BigDecimal(value.toString()).equals(BigDecimal.ZERO);
-      } catch (NumberFormatException e) {
-        set = Boolean.parseBoolean(value.toString());
-      } // endif
-    } // endif
-    return set;
+    boolean returnValue = false;
+    switch (value) {
+      case Boolean b -> returnValue = b;
+      case Number number -> returnValue = number.doubleValue() != 0;
+      case String string -> {
+        string = string.trim();
+        if (string.equalsIgnoreCase("false") || string.equalsIgnoreCase("true")) {
+          returnValue = string.equalsIgnoreCase("true");
+        } else {
+          try {
+            returnValue = !new BigDecimal(string).equals(BigDecimal.ZERO);
+          } catch (NumberFormatException e) {
+            returnValue = Boolean.parseBoolean(value.toString());
+          }
+        }
+      }
+      case null, default -> {}
+    }
+    return returnValue;
   }
 
   /**
@@ -636,7 +697,7 @@ public class FunctionUtil {
   }
 
   /**
-   * Parses a string into either a Color Paint or Texture Paint.
+   * Parses a string into either a Colour Paint or Texture Paint.
    *
    * @param paint String containing the paint description.
    * @return Pen DrawableTexturePaint or DrawableColorPaint.

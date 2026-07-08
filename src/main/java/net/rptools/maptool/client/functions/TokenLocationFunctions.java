@@ -571,19 +571,24 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @throws ParserException if an error occurs.
    */
   private String gotoLoc(VariableResolver resolver, List<Object> args) throws ParserException {
-    int x;
-    int y;
+    var renderer = MapTool.getFrame().getCurrentZoneRenderer();
 
+    ZonePoint point;
     if (args.size() < 2) {
       Token token = FunctionUtil.getTokenFromParam(resolver, "goto", args, 0, -1);
-      x = token.getX();
-      y = token.getY();
-      MapTool.getFrame().getCurrentZoneRenderer().centerOn(new ZonePoint(x, y));
+      point = new ZonePoint(token.getX(), token.getY());
     } else {
-      x = FunctionUtil.paramAsInteger("goto", args, 0, false);
-      y = FunctionUtil.paramAsInteger("goto", args, 1, false);
-      MapTool.getFrame().getCurrentZoneRenderer().centerOn(new CellPoint(x, y));
+      var x = FunctionUtil.paramAsInteger("goto", args, 0, false);
+      var y = FunctionUtil.paramAsInteger("goto", args, 1, false);
+      point = renderer.getZone().getGrid().convert(new CellPoint(x, y));
     }
+    renderer
+        .getViewModel()
+        .setZoneScale(
+            renderer
+                .getViewModel()
+                .getZoneScale()
+                .centeredOn(point.x, point.y, renderer.getSize()));
 
     return "";
   }

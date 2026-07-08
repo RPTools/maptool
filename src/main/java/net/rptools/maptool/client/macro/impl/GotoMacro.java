@@ -23,7 +23,6 @@ import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
 @MacroDefinition(
@@ -31,30 +30,41 @@ import net.rptools.maptool.model.ZonePoint;
     aliases = {"g"},
     description = "goto.description")
 public class GotoMacro implements Macro {
-  private static Pattern COORD_PATTERN = Pattern.compile("(-?\\d+)\\s*,?\\s*(-?\\d+)");
+  private static final Pattern COORD_PATTERN = Pattern.compile("(-?\\d+)\\s*,?\\s*(-?\\d+)");
 
   public void execute(
       MacroContext context, String parameter, MapToolMacroContext executionContext) {
+    var renderer = MapTool.getFrame().getCurrentZoneRenderer();
+    var zone = renderer.getZone();
+
     Matcher m = COORD_PATTERN.matcher(parameter.trim());
+
+    ZonePoint point;
     if (m.matches()) {
       // goto coordinate locations
       int x = Integer.parseInt(m.group(1));
       int y = Integer.parseInt(m.group(2));
-
-      MapTool.getFrame().getCurrentZoneRenderer().centerOn(new CellPoint(x, y));
+      point = zone.getGrid().convert(new CellPoint(x, y));
     } else {
       // goto token location
-      Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       Token token = zone.getTokenByName(parameter);
 
+      if (token == null) {
+        return;
+      }
       if (!MapTool.getPlayer().isGM() && !zone.isTokenVisible(token)) {
         return;
       }
-      if (token != null) {
-        int x = token.getX();
-        int y = token.getY();
-        MapTool.getFrame().getCurrentZoneRenderer().centerOn(new ZonePoint(x, y));
-      }
+
+      point = new ZonePoint(token.getX(), token.getY());
     }
+
+    renderer
+        .getViewModel()
+        .setZoneScale(
+            renderer
+                .getViewModel()
+                .getZoneScale()
+                .centeredOn(point.x, point.y, renderer.getSize()));
   }
 }

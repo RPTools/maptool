@@ -122,9 +122,10 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     maskOverlay.paintOverlay(renderer, g);
 
+    var zoneScale = renderer.getViewModel().getZoneScale();
+
     Graphics2D g2 = (Graphics2D) g.create();
-    g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-    g2.scale(renderer.getScale(), renderer.getScale());
+    g2.transform(zoneScale.toScreenTransform());
 
     if (state != null) {
       var result = strategy.getShape(state, currentPoint, centerOnOrigin, false);
@@ -142,7 +143,7 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
           g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 255));
           g2.setStroke(
               new BasicStroke(
-                  1 / (float) renderer.getScale(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+                  1 / (float) zoneScale.getScale(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
           g2.draw(result.shape());
 
           g2.setColor(color);
@@ -216,8 +217,7 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
       Zone zone = renderer.getZone();
 
       Graphics2D g2 = (Graphics2D) g.create();
-      g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-      g2.scale(renderer.getScale(), renderer.getScale());
+      g2.transform(renderer.getViewModel().getZoneScale().toScreenTransform());
 
       var tokenMasks = zone.getTokenMaskTopologies(null);
       g2.setColor(AppStyle.tokenMblColor);

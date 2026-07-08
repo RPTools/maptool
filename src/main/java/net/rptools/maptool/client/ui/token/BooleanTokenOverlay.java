@@ -20,17 +20,23 @@ import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.FunctionUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An overlay that may be applied to a token to show state.
  *
  * @author jgorrell
  */
-public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
-
-  /*---------------------------------------------------------------------------------------------
-   * Constructors
-   *-------------------------------------------------------------------------------------------*/
+public abstract sealed class BooleanTokenOverlay extends AbstractTokenOverlay
+    permits AbstractShapeTokenOverlay,
+        AbstractFlowShapeTokenOverlay,
+        ColorDotTokenOverlay,
+        ImageTokenOverlay,
+        CornerImageTokenOverlay,
+        FlowImageTokenOverlay,
+        ShadedTokenOverlay {
+  private static final Logger log = LogManager.getLogger(BooleanTokenOverlay.class);
 
   /**
    * Create an overlay with the passed name.
@@ -41,29 +47,30 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
     super(aName);
   }
 
-  /*---------------------------------------------------------------------------------------------
-   * AbstractTokenOverlay Methods
-   *-------------------------------------------------------------------------------------------*/
-
-  /**
-   * @see AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle, java.lang.Object)
-   */
-  @Override
-  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
-    if (FunctionUtil.getBooleanValue(value)) {
-      // Apply Alpha Transparency
-      float opacity = token.getTokenOpacity();
-      if (opacity < 1.0f)
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-
-      paintOverlay(g, token, bounds);
-    }
+  protected BooleanTokenOverlay(BooleanTokenOverlay other) {
+    super(other);
   }
 
-  /*---------------------------------------------------------------------------------------------
-   * Abstract Methods
-   *-------------------------------------------------------------------------------------------*/
+  @Override
+  public abstract BooleanTokenOverlay clone();
+
+  @Override
+  public final void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
+    if (!FunctionUtil.getBooleanValue(value)) {
+      return;
+    }
+
+    g = (Graphics2D) g.create();
+    try {
+      // Apply Alpha Transparency
+      float opacity = token.getTokenOpacity() * getOpacity() / 100.f;
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+
+      paintOverlay(g, token, bounds);
+    } finally {
+      g.dispose();
+    }
+  }
 
   /**
    * Paint the overlay for the passed token.
@@ -79,55 +86,43 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
   public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds);
 
   public static BooleanTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    switch (dto.getType()) {
-      case X -> {
-        return XTokenOverlay.fromDto(dto);
-      }
-      case YIELD -> {
-        return YieldTokenOverlay.fromDto(dto);
-      }
-      case O -> {
-        return OTokenOverlay.fromDto(dto);
-      }
-      case COLOR_DOT -> {
-        return ColorDotTokenOverlay.fromDto(dto);
-      }
-      case DIAMOND -> {
-        return DiamondTokenOverlay.fromDto(dto);
-      }
-      case TRIANGLE -> {
-        return TriangleTokenOverlay.fromDto(dto);
-      }
-      case CROSS -> {
-        return CrossTokenOverlay.fromDto(dto);
-      }
-      case FLOW_COLOR_DOT -> {
-        return FlowColorDotTokenOverlay.fromDto(dto);
-      }
-      case FLOW_DIAMOND -> {
-        return FlowDiamondTokenOverlay.fromDto(dto);
-      }
-      case FLOW_COLOR_SQUARE -> {
-        return FlowColorSquareTokenOverlay.fromDto(dto);
-      }
-      case FLOW_YIELD -> {
-        return FlowYieldTokenOverlay.fromDto(dto);
-      }
-      case SHADED -> {
-        return ShadedTokenOverlay.fromDto(dto);
-      }
-      case IMAGE -> {
-        return ImageTokenOverlay.fromDto(dto);
-      }
-      case FLOW_IMAGE -> {
-        return FlowImageTokenOverlay.fromDto(dto);
-      }
-      case CORNER_IMAGE -> {
-        return CornerImageTokenOverlay.fromDto(dto);
-      }
+    BooleanTokenOverlay overlay =
+        switch (dto.getChildTypeCase()) {
+          case SHAPE -> AbstractShapeTokenOverlay.fromDto(dto.getShape());
+          case FLOW_SHAPE -> AbstractFlowShapeTokenOverlay.fromDto(dto.getFlowShape());
+          case COLOR_DOT -> ColorDotTokenOverlay.fromDto(dto.getColorDot());
+          case IMAGE -> ImageTokenOverlay.fromDto(dto.getImage());
+          case CORNER_IMAGE -> CornerImageTokenOverlay.fromDto(dto.getCornerImage());
+          case FLOW_IMAGE -> FlowImageTokenOverlay.fromDto(dto.getFlowImage());
+          case SHADED -> ShadedTokenOverlay.fromDto(dto.getShaded());
+          case CHILDTYPE_NOT_SET -> {
+            log.error("Unrecognized BooleanTokenOverlay type");
+            yield null;
+          }
+        };
+    if (overlay != null) {
+      overlay.fillFrom(dto.getCommon());
     }
-    return null;
+    return overlay;
   }
 
-  public abstract BooleanTokenOverlayDto toDto();
+  public final BooleanTokenOverlayDto toDto() {
+    var message = BooleanTokenOverlayDto.newBuilder();
+    message.setCommon(getCommonDto());
+    switch (this) {
+      case AbstractShapeTokenOverlay shapeOverlay -> message.setShape(shapeOverlay.toShapeDto());
+      case AbstractFlowShapeTokenOverlay flowShapeOverlay ->
+          message.setFlowShape(flowShapeOverlay.toFlowShapeDto());
+      case ColorDotTokenOverlay colorDotTokenOverlay ->
+          message.setColorDot(colorDotTokenOverlay.toColorDotDto());
+      case ImageTokenOverlay imageTokenOverlay -> message.setImage(imageTokenOverlay.toImageDto());
+      case CornerImageTokenOverlay cornerImageTokenOverlay ->
+          message.setCornerImage(cornerImageTokenOverlay.toCornerImageDto());
+      case FlowImageTokenOverlay flowImageTokenOverlay ->
+          message.setFlowImage(flowImageTokenOverlay.toFlowImageDto());
+      case ShadedTokenOverlay shadedTokenOverlay ->
+          message.setShaded(shadedTokenOverlay.toShadedDto());
+    }
+    return message.build();
+  }
 }

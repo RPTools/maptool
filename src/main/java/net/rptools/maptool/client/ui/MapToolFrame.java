@@ -102,7 +102,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
@@ -126,7 +125,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private static final int WINDOW_WIDTH = 800;
   private static final int WINDOW_HEIGHT = 600;
 
-  private final Pen pen = new Pen(Pen.DEFAULT);
   private final Map<MTFrame, DockableFrame> frameMap = new HashMap<MTFrame, DockableFrame>();
 
   /** Are the drawing measurements being painted? */
@@ -427,6 +425,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     pointerToolOverlay = new PointerToolOverlay();
     zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
+
+    // bring chat notifications to the front
+    zoneRendererPanel.setComponentZOrder(getChatTypingPanel(), 0);
+    zoneRendererPanel.setComponentZOrder(getChatActionLabel(), 0);
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -1276,15 +1278,18 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
                 tree.clearSelection();
               }
               tree.addSelectionInterval(rowIndex, rowIndex);
-              if (row instanceof DrawnElement && e.getClickCount() == 2) {
-                DrawnElement de = (DrawnElement) row;
+              if (row instanceof DrawnElement de && e.getClickCount() == 2) {
                 var renderer = getCurrentZoneRenderer();
                 var zone = renderer.getZone();
-                getCurrentZoneRenderer()
-                    .centerOn(
-                        new ZonePoint(
-                            (int) de.getDrawable().getBounds(zone).getCenterX(),
-                            (int) de.getDrawable().getBounds(zone).getCenterY()));
+                var bounds = de.getDrawable().getBounds(zone);
+                var viewModel = renderer.getViewModel();
+                viewModel.setZoneScale(
+                    viewModel
+                        .getZoneScale()
+                        .centeredOn(
+                            (int) bounds.getCenterX(),
+                            (int) bounds.getCenterY(),
+                            renderer.getSize()));
               }
               /*
                * int[] treeRows = tree.getSelectionRows(); java.util.Arrays.sort(treeRows); drawablesPanel.clearSelectedIds(); for (int i = 0; i < treeRows.length; i++) { TreePath p =
@@ -1398,6 +1403,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
                       }
                     }
                     if (!selectedTokenSet.isEmpty()) {
+                      if (!MapTool.getPlayer().isGM()
+                          && MapTool.getServerPolicy().isTokenContextLocked()) {
+                        return;
+                      }
                       try {
                         if (firstToken.getLayer().isStampLayer()) {
                           new StampPopupMenu(
@@ -1489,7 +1498,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
               zone.setBackgroundPaint(new DrawableTexturePaint(asset));
               zone.setBackgroundAsset(asset.getMD5Key());
             } else {
-              zone.setMapAsset(asset.getMD5Key());
+              zone.setMapAssetId(asset.getMD5Key());
               zone.setBackgroundPaint(new DrawableColorPaint(Color.black));
               zone.setBackgroundAsset(asset.getMD5Key());
             }
@@ -1571,12 +1580,31 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     assetPanel.addAssetRoot(new AssetDirectory(rootDir, AppConstants.IMAGE_FILE_FILTER));
   }
 
-  public Pen getPen() {
-    pen.setPaint(DrawablePaint.convertPaint(colorPicker.getForegroundPaint()));
-    pen.setBackgroundPaint(DrawablePaint.convertPaint(colorPicker.getBackgroundPaint()));
+  /**
+   * Creates a new {@link Pen} based on the color picker state.
+   *
+   * @param isEraser If {@code true}, the return pen will be an eraser.
+   * @return A new pen matching the color picker state.
+   */
+  public Pen getPen(boolean isEraser) {
+    var pen = new Pen();
+    pen.setEraser(isEraser);
+
+    if (colorPicker.isFillForegroundSelected()) {
+      pen.setPaint(DrawablePaint.convertPaint(colorPicker.getForegroundPaint()));
+    } else {
+      pen.setPaint(null);
+    }
+    if (colorPicker.isFillBackgroundSelected()) {
+      pen.setBackgroundPaint(DrawablePaint.convertPaint(colorPicker.getBackgroundPaint()));
+    } else {
+      pen.setBackgroundPaint(null);
+    }
+
     pen.setThickness(colorPicker.getStrokeWidth());
     pen.setOpacity(colorPicker.getOpacity());
-    pen.setThickness(colorPicker.getStrokeWidth());
+    pen.setSquareCap(colorPicker.isSquareCapSelected());
+
     return pen;
   }
 
@@ -1904,6 +1932,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     zoneRendererPanel.add(initiativePanel, PositionalLayout.Position.SE);
     zoneRendererPanel.setComponentZOrder(initiativePanel, 0);
+
+    // bring chat notifications to the front
+    zoneRendererPanel.setComponentZOrder(getChatTypingPanel(), 0);
+    zoneRendererPanel.setComponentZOrder(getChatActionLabel(), 0);
 
     zoneRendererPanel.revalidate();
     zoneRendererPanel.doLayout();

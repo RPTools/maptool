@@ -31,8 +31,8 @@ public class PlayerView {
   /**
    * Creates a player view that does not use token views.
    *
-   * <p>Calling `isUsingTokenView()` on the new player view will return {@code false} and {@link
-   * #getTokens()} should not be called.
+   * <p>Calling {@link #isUsingTokenView()} on the new player view will return {@code false} and
+   * {@link #getTokens()} should not be called.
    *
    * @param role The player role for the view.
    */
@@ -45,8 +45,8 @@ public class PlayerView {
   /**
    * Creates a player view for a token view.
    *
-   * <p>Calling `isUsingTokenView()` on the new player view will return {@code false} and {@link
-   * #getTokens()} can be called to retrieve the list of tokens.
+   * <p>Calling {@link #isUsingTokenView()} on the new player view will return {@code true} and
+   * {@link #getTokens()} can be called to retrieve the list of tokens.
    *
    * @param role The player role for the view.
    */

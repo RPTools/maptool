@@ -34,7 +34,7 @@ public class SelectionRenderer {
   private final ZoneView zoneView;
 
   public SelectionRenderer(RenderHelper renderHelper, ZoneViewModel viewModel, ZoneView zoneView) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("SelectionRenderer");
     this.viewModel = viewModel;
     this.zoneView = zoneView;
   }

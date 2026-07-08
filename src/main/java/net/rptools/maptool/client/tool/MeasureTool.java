@@ -112,7 +112,7 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       ZonePoint lastZP = null;
       for (ZonePoint zp :
           Iterables.concat(gridlessPath.getCellPath(), List.of(currentGridlessPoint))) {
-        var sp = ScreenPoint.fromZonePoint(renderer, zp.x, zp.y);
+        var sp = renderer.getViewModel().getZoneScale().toScreenSpace(zp.x, zp.y);
         if (lastZP == null) {
           path2D.moveTo(sp.x, sp.y);
         } else {
@@ -134,7 +134,7 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
         g.draw(path2D);
 
         String distance = NumberFormat.getInstance().format(c);
-        ScreenPoint sp = ScreenPoint.fromZonePoint(renderer, lastZP.x, lastZP.y);
+        ScreenPoint sp = renderer.getViewModel().getZoneScale().toScreenSpace(lastZP.x, lastZP.y);
         GraphicsUtil.drawBoxedString(g, distance, (int) sp.x, (int) sp.y - 20);
       } finally {
         SwingUtil.restoreAntiAliasing(g, oldAA);
@@ -156,7 +156,9 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
                   renderer
                       .getZone()
                       .getGrid()
-                      .convert(new ScreenPoint(mouseX, mouseY).convertToZone(renderer));
+                      .convert(
+                          new ScreenPoint(mouseX, mouseY)
+                              .convertToZone(renderer.getViewModel().getZoneScale()));
               walker.toggleWaypoint(cp);
             } else if (gridlessPath != null) {
               gridlessPath.appendWaypoint(currentGridlessPoint);
@@ -177,7 +179,9 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
         walker = renderer.getZone().getGrid().createZoneWalker();
         walker.addWaypoints(cellPoint, cellPoint);
       } else {
-        currentGridlessPoint = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+        currentGridlessPoint =
+            new ScreenPoint(e.getX(), e.getY())
+                .convertToZone(renderer.getViewModel().getZoneScale());
         gridlessPath = new Path<>();
         gridlessPath.appendWaypoint(currentGridlessPoint);
       }
@@ -216,7 +220,9 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
         CellPoint cellPoint = renderer.getCellAt(new ScreenPoint(e.getX(), e.getY()));
         walker.replaceLastWaypoint(cellPoint);
       } else if (gridlessPath != null) {
-        currentGridlessPoint = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+        currentGridlessPoint =
+            new ScreenPoint(e.getX(), e.getY())
+                .convertToZone(renderer.getViewModel().getZoneScale());
       }
       renderer.repaint();
     }

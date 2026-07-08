@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import javax.swing.JOptionPane;
 import net.rptools.CaseInsensitiveHashMap;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
@@ -215,7 +216,7 @@ public class MapToolVariableResolver implements VariableResolver {
         // We don't want this evaluated as the # format is more useful to us then the
         // evaluated
         // format.
-        return TokenHaloFunction.getHalo(tokenInContext).toString();
+        return TokenHaloFunctions.getHalo(tokenInContext).toString();
       } else if (name.equals(TOKEN_NAME)) {
         // Don't evaluate return value.
         return TokenNameFunction.getName(tokenInContext);
@@ -272,12 +273,12 @@ public class MapToolVariableResolver implements VariableResolver {
     if ((result == null && autoPrompt) || mods == VariableModifiers.Prompt) {
       String DialogTitle = I18N.getText("lineParser.dialogTitleNoToken");
       if (tokenInContext != null
-          && tokenInContext.getGMName() != null
+          && !StringUtil.isEmpty(tokenInContext.getGMName())
           && MapTool.getPlayer().isGM()) {
         DialogTitle = I18N.getText("lineParser.dialogTitle", tokenInContext.getGMName());
       }
       if (tokenInContext != null
-          && (tokenInContext.getGMName() == null || !MapTool.getPlayer().isGM())) {
+          && (StringUtil.isEmpty(tokenInContext.getGMName()) || !MapTool.getPlayer().isGM())) {
         DialogTitle = I18N.getText("lineParser.dialogTitle", tokenInContext.getName());
       }
       result =
@@ -370,7 +371,7 @@ public class MapToolVariableResolver implements VariableResolver {
       TokenBarFunction.setValue(tokenInContext, barName, value);
       return;
     } else if (varname.equals(TOKEN_HALO)) {
-      TokenHaloFunction.setHalo(tokenInContext, value);
+      TokenHaloFunctions.setHalo(tokenInContext, value);
       return;
     } else if (varname.equals(TOKEN_NAME)) {
       if (value.toString().equals("")) {

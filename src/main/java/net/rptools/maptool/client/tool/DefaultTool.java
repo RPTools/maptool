@@ -170,7 +170,7 @@ public abstract class DefaultTool extends Tool
    * @param x the x coordinate of the drag start
    * @param y the y coordinate of the drag start
    */
-  public void setDragStart(int x, int y) {
+  private void setDragStart(int x, int y) {
     mapDragStart = new Point(x, y);
   }
 
@@ -225,7 +225,11 @@ public abstract class DefaultTool extends Tool
     mouseY = e.getY();
 
     CellPoint cp =
-        getZone().getGrid().convert(new ScreenPoint(mouseX, mouseY).convertToZone(renderer));
+        getZone()
+            .getGrid()
+            .convert(
+                new ScreenPoint(mouseX, mouseY)
+                    .convertToZone(renderer.getViewModel().getZoneScale()));
     if (cp != null) {
       MapTool.getFrame().getCoordinateStatusBar().update(cp.x, cp.y);
     } else {
@@ -255,7 +259,9 @@ public abstract class DefaultTool extends Tool
       }
 
       setDragStart(mX, mY);
-      renderer.moveViewBy(mapDX, mapDY);
+
+      var viewModel = renderer.getViewModel();
+      viewModel.setZoneScale(viewModel.getZoneScale().translated(mapDX, mapDY));
     }
   }
 
@@ -314,11 +320,14 @@ public abstract class DefaultTool extends Tool
     if (!AppState.isZoomLocked()) {
       boolean direction = e.getWheelRotation() < 0;
       direction = isKeyDown('z') == direction;
+
+      var scale = renderer.getViewModel().getZoneScale();
       if (direction) {
-        renderer.zoomOut(e.getX(), e.getY());
+        scale = scale.zoomedOut(e.getX(), e.getY());
       } else {
-        renderer.zoomIn(e.getX(), e.getY());
+        scale = scale.zoomedIn(e.getX(), e.getY());
       }
+      renderer.getViewModel().setZoneScale(scale);
       renderer.maybeForcePlayersView();
     }
   }

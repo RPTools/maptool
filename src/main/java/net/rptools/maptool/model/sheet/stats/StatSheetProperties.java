@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.sheet.stats;
 
 import java.util.Objects;
+import javax.annotation.Nullable;
 import net.rptools.maptool.server.proto.StatSheetPropertiesDto;
 
 /**
@@ -33,11 +34,12 @@ public final class StatSheetProperties {
    * Creates a new instance of the class.
    *
    * @param id The id of the stat sheet.
-   * @param location The location of the stat sheet.
+   * @param location The location of the stat sheet, or {@code null} to use the default of {@link
+   *     StatSheetLocation#BOTTOM_LEFT}.
    */
-  public StatSheetProperties(String id, StatSheetLocation location) {
+  public StatSheetProperties(String id, @Nullable StatSheetLocation location) {
     this.id = id;
-    this.location = location;
+    this.location = Objects.requireNonNullElse(location, StatSheetLocation.BOTTOM_LEFT);
   }
 
   /**

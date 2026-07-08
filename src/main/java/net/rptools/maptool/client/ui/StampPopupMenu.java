@@ -35,6 +35,7 @@ public class StampPopupMenu extends AbstractTokenPopupMenu {
     add(new StartMoveAction());
     add(createFlipMenu());
     add(createSizeMenu());
+    addOwnedItem(createHalosMenu());
     add(createArrangeMenu());
     add(createChangeToMenu(Zone.Layer.values()));
     if (getTokenUnderMouse().getCharsheetImage() != null

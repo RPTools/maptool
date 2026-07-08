@@ -15,64 +15,45 @@
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import net.rptools.maptool.model.Token;
 
 /**
  * Paint a square so that it doesn't overlay any other states being displayed in the same grid.
  *
  * @author Jay
  */
-public class FlowTriangleTokenOverlay extends FlowColorDotTokenOverlay {
-
-  /** Default constructor needed for XML encoding/decoding */
-  public FlowTriangleTokenOverlay() {
-    this(DEFAULT_STATE_NAME, Color.RED, -1);
-  }
+public final class FlowTriangleTokenOverlay extends AbstractFlowShapeTokenOverlay {
 
   /**
    * Create a new dot token overlay
    *
-   * @param aName Name of the token overlay
-   * @param aColor Color of the dot
-   * @param aGrid Size of the overlay grid for this state. All states with the same grid size share
-   *     the same overlay.
+   * @param name Name of the token overlay
+   * @param color Color of the dot
+   * @param gridSize Size of the overlay grid for this state. All states with the same grid size
+   *     share the same overlay.
    */
-  public FlowTriangleTokenOverlay(String aName, Color aColor, int aGrid) {
-    super(aName, aColor, aGrid);
+  public FlowTriangleTokenOverlay(String name, Color color, int gridSize) {
+    super(name, color, gridSize);
   }
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
-  @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new FlowTriangleTokenOverlay(getName(), getColor(), getGrid());
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
+  public FlowTriangleTokenOverlay(FlowTriangleTokenOverlay other) {
+    super(other);
   }
 
-  /**
-   * @see FlowColorDotTokenOverlay#getShape(java.awt.Rectangle, net.rptools.maptool.model.Token)
-   */
   @Override
-  public Shape getShape(Rectangle bounds, Token token) {
-    Rectangle2D r = getFlow().getStateBounds2D(bounds, token, getName());
-    GeneralPath p = new GeneralPath();
-    p.moveTo((float) r.getCenterX(), (float) r.getY());
-    p.lineTo((float) r.getX(), (float) r.getMaxY());
-    p.lineTo((float) r.getMaxX(), (float) r.getMaxY());
-    p.lineTo((float) r.getCenterX(), (float) r.getY());
-    p.closePath();
-    return p;
+  public FlowTriangleTokenOverlay clone() {
+    return new FlowTriangleTokenOverlay(this);
+  }
+
+  @Override
+  public Shape getShape(Rectangle2D bounds) {
+    var path = new Path2D.Double();
+    path.moveTo((float) bounds.getCenterX(), (float) bounds.getY());
+    path.lineTo((float) bounds.getX(), (float) bounds.getMaxY());
+    path.lineTo((float) bounds.getMaxX(), (float) bounds.getMaxY());
+    path.closePath();
+    return path;
   }
 }

@@ -19,8 +19,13 @@ import java.io.*;
 import java.net.*;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.*;
 import javax.swing.*;
+import net.rptools.lib.FileUtil;
 import net.rptools.lib.ModelVersionManager;
 import net.rptools.lib.OsDetection;
 import net.rptools.maptool.language.I18N;
@@ -37,132 +42,161 @@ public class AppUpdate {
 
   private static final String GIT_HUB_LATEST_RELEASE = "github.api.releases.latest";
 
+  public record ReleaseInfo(String id, String version, URL assetUrl, long assetSize) {}
+
+  public static CompletionStage<Optional<ReleaseInfo>> getLatestRelease() {
+    return getLatestReleaseJson()
+        .thenApply(
+            latestRelease -> {
+              if (!latestRelease.has("id") || !latestRelease.has("tag_name")) {
+                throw new RuntimeException(
+                    "Github payload missing required fields. Aborting update check.");
+              }
+
+              String latestReleaseId = latestRelease.get("id").getAsString();
+              String latestReleaseVersion = latestRelease.get("tag_name").getAsString();
+              if (StringUtils.isBlank(latestReleaseVersion)) {
+                throw new RuntimeException(
+                    "Unable to detect latest version from GitHub payload. Aborting comparison.");
+              }
+
+              // Look for the default extension for each platform.
+              // Ideally, we could even detect the current installation method and find a matching
+              // asset, but for now we just hardcode one option for each platform.
+              String downloadExtension;
+              if (OsDetection.WINDOWS) {
+                downloadExtension = ".exe";
+              } else if (OsDetection.MAC_OS_X) {
+                downloadExtension = ".pkg";
+              } else {
+                downloadExtension = ".deb";
+              }
+
+              JsonArray releaseAssets = latestRelease.get("assets").getAsJsonArray();
+              for (JsonElement elem : releaseAssets) {
+                JsonObject asset = elem.getAsJsonObject();
+                if (!asset.has("name")) {
+                  continue;
+                }
+
+                String assetName = asset.get("name").getAsString();
+                log.info("Asset: {}", assetName);
+
+                if (!assetName.toLowerCase().endsWith(downloadExtension)) {
+                  continue;
+                }
+
+                JsonElement assetDownloadElem = asset.get("browser_download_url");
+                JsonElement assetSizeElem = asset.get("size");
+                if (assetDownloadElem == null || assetSizeElem == null) {
+                  continue;
+                }
+
+                String assetDownloadURL = assetDownloadElem.getAsString();
+                final long assetDownloadSize = assetSizeElem.getAsLong();
+                log.info("Download URL: {}", assetDownloadURL);
+
+                URL url;
+                try {
+                  url = new URI(assetDownloadURL).toURL();
+                } catch (URISyntaxException | MalformedURLException e) {
+                  log.warn("Invalid asset download URL.", e);
+                  continue;
+                }
+
+                return Optional.of(
+                    new ReleaseInfo(latestReleaseId, latestReleaseVersion, url, assetDownloadSize));
+              }
+
+              return Optional.empty();
+            });
+  }
+
   /**
    * Look for a newer version of MapTool. If a newer release is found and the AppPreferences tell us
-   * the update should not be ignored, give a prompt to update.
+   * the update should not be ignored, return the information for the release.
    *
-   * @return has an update been made
+   * @return The release information for the latest release, if it is newer. If there is no newer
+   *     release, {@code Optional.empty()}.
    */
-  public static boolean gitHubReleases() {
-    if (AppPreferences.skipAutoUpdate.get()) {
-      return false;
+  public static CompletionStage<Optional<ReleaseInfo>> autoUpdateCheck() {
+    if (MapTool.isDevelopment()) {
+      log.info("Development build. Skipping update check");
+      return CompletableFuture.completedStage(Optional.empty());
     }
-
-    // Default for Linux?
-    String DOWNLOAD_EXTENSION = ".deb";
-
-    if (OsDetection.WINDOWS) DOWNLOAD_EXTENSION = ".exe";
-    else if (OsDetection.MAC_OS_X) DOWNLOAD_EXTENSION = ".pkg"; // Better default than .dmg?
+    if (AppPreferences.skipAutoUpdate.get()) {
+      log.info("Automatic updates have been disabled via preferences. Skipping update check");
+      return CompletableFuture.completedStage(Optional.empty());
+    }
 
     String runningVersion = getImplementationVersion();
     if (StringUtils.isBlank(runningVersion)) {
       log.info("Blank implementation version detected, not checking for updates.");
-      return false;
+      return CompletableFuture.completedStage(Optional.empty());
     }
 
-    Optional<JsonObject> latestReleaseOpt = getLatestReleaseInfo();
-    if (latestReleaseOpt.isEmpty()) return false;
-    JsonObject latestRelease = latestReleaseOpt.get();
-    if (!latestRelease.has("id") || !latestRelease.has("tag_name")) {
-      log.info("Github payload missing required fields??? Aborting update check.");
-      return false;
-    }
-    String latestReleaseId = latestRelease.get("id").getAsString();
-    String latestReleaseVersion = latestRelease.get("tag_name").getAsString();
-    if (StringUtils.isBlank(latestReleaseVersion)) {
-      log.info("Unable to detect latest version from GitHub payload, aborting comparison.");
-      return false;
-    }
+    return getLatestRelease()
+        .thenApply(
+            latestReleaseOptional -> {
+              if (latestReleaseOptional.isEmpty()) {
+                log.info("Did not find a latest release asset");
+                return Optional.empty();
+              }
 
-    if (!AppPreferences.skipAutoUpdateRelease.get().equals(latestReleaseId)
-        && ModelVersionManager.isBefore(runningVersion, latestReleaseVersion)) {
-      JsonArray releaseAssets = latestRelease.get("assets").getAsJsonArray();
+              var latestRelease = latestReleaseOptional.get();
+              if (AppPreferences.skipAutoUpdateRelease.get().equals(latestRelease.id())) {
+                log.info("Release {} skipped by user request", latestRelease.version());
+                return Optional.empty();
+              }
+              if (!ModelVersionManager.isBefore(runningVersion, latestRelease.version())) {
+                log.info(
+                    "Skipping release {} as it is not newer than the current version {}",
+                    latestRelease.version(),
+                    runningVersion);
+                return Optional.empty();
+              }
 
-      for (JsonElement elem : releaseAssets) {
-        JsonObject asset = elem.getAsJsonObject();
-        String assetName = asset.get("name").getAsString();
-        log.info("Asset: {}", assetName);
-
-        if (assetName.toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
-          JsonElement assetDownloadElem = asset.get("browser_download_url");
-          JsonElement assetSizeElem = asset.get("size");
-          if (assetDownloadElem != null && assetSizeElem != null) {
-            String assetDownloadURL = assetDownloadElem.getAsString();
-            final long assetDownloadSize = assetSizeElem.getAsLong();
-            log.info("Download URL: {}", assetDownloadURL);
-            try {
-              URL url = new URL(assetDownloadURL);
-              SwingUtilities.invokeLater(
-                  () -> {
-                    if (showMessage(latestReleaseId, latestReleaseVersion))
-                      downloadFile(url, assetDownloadSize);
-                  });
-            } catch (MalformedURLException e) {
-              log.error("Error with download URL.", e);
-            }
-            return true;
-          }
-        }
-      }
-    }
-
-    return false;
+              return latestReleaseOptional;
+            });
   }
 
   /**
-   * Get the release info from the GitHub /releases/latest endpoint. The GitHub API docs define
-   * "latest" as:
+   * Get the release info from the GitHub {@code /releases/latest} endpoint. The GitHub API docs
+   * define "latest" as:
    *
    * <blockquote>
    *
-   * ...the most recent non-prerelease, no-draft release, sorted by the `created_at` attribute. The
-   * `created_at` attribute is the date of the commit used for the release, and not the date when
-   * the release was drafted or published.
+   * … the most recent non-prerelease, non-draft release, sorted by the {@code created_at}
+   * attribute. The {@code created_at} attribute is the date of the commit used for the release, and
+   * not the date when the release was drafted or published.
    *
    * </blockquote>
    *
    * @return a JsonObject representing the latest release, if one could be retrieved
    */
-  private static Optional<JsonObject> getLatestReleaseInfo() {
-    String strURL = getProperty(GIT_HUB_LATEST_RELEASE);
-    try {
-      Request request = new Request.Builder().url(strURL).build();
-      Response response = new OkHttpClient().newCall(request).execute();
-      String bodyStr = response.body().string();
-      return Optional.of(JsonParser.parseString(bodyStr).getAsJsonObject());
-    } catch (IOException e) {
-      log.error("Unable to reach {}: {}", strURL, e.getLocalizedMessage());
-      return Optional.empty();
-    } catch (IllegalStateException e1) {
-      log.error("Error parsing JSON response from releases/latest.", e1);
-      return Optional.empty();
-    }
-  }
-
-  /**
-   * Get the latest commit SHA from MANIFEST.MF
-   *
-   * @return the String of the commit SHA, or null if IOException
-   */
-  @Deprecated
-  public static String getCommitSHA() {
-    String jarCommit = "";
-
-    ClassLoader cl = MapTool.class.getClassLoader();
-
-    try {
-      URL url = cl.getResource("META-INF/MANIFEST.MF");
-      Manifest manifest = new Manifest(url.openStream());
-
-      Attributes attr = manifest.getMainAttributes();
-      jarCommit = attr.getValue("Git-Commit-SHA");
-      log.info("Git-Commit-SHA from Manifest: " + jarCommit);
-    } catch (IOException e) {
-      log.error("No Git-Commit-SHA attribute found in MANIFEST.MF, skip looking for updates...", e);
-      return null;
-    }
-
-    return jarCommit;
+  private static CompletionStage<JsonObject> getLatestReleaseJson() {
+    var future = new CompletableFuture<JsonObject>();
+    ForkJoinPool.commonPool()
+        .submit(
+            () -> {
+              String strURL = getProperty(GIT_HUB_LATEST_RELEASE);
+              try {
+                Request request = new Request.Builder().url(strURL).build();
+                Response response = new OkHttpClient().newCall(request).execute();
+                String bodyStr = response.body().string();
+                future.complete(JsonParser.parseString(bodyStr).getAsJsonObject());
+              } catch (IOException e) {
+                log.error("Unable to reach {}", strURL, e);
+                future.completeExceptionally(e);
+              } catch (IllegalStateException e) {
+                log.error("Error parsing JSON response from releases/latest.", e);
+                future.completeExceptionally(e);
+              } catch (Throwable e) {
+                log.error("Unexpected error while getting release info", e);
+                future.completeExceptionally(e);
+              }
+            });
+    return future.orTimeout(5, TimeUnit.SECONDS);
   }
 
   /**
@@ -193,18 +227,28 @@ public class AppUpdate {
     return version;
   }
 
-  private static boolean showMessage(String releaseId, String tagName) {
-    JCheckBox dontAskCheckbox = new JCheckBox(I18N.getText("Update.chkbox"));
+  public static boolean confirmUpdate(ReleaseInfo releaseInfo, boolean showSkipOptions) {
+    String releaseId = releaseInfo.id();
+    String tagName = releaseInfo.version();
 
     String title = I18N.getText("Update.title");
     String msg1 = I18N.getText("Update.msg1");
     String msg2 = I18N.getText("Update.msg2", tagName);
-    String blankLine = " ";
 
-    Object[] msgContent = {msg1, msg2, blankLine, dontAskCheckbox};
-    Object[] options = {
-      I18N.getText("Button.yes"), I18N.getText("Button.no"), I18N.getText("Update.button")
-    };
+    JCheckBox dontAskCheckbox = new JCheckBox(I18N.getText("Update.chkbox"));
+
+    Object[] msgContent, options;
+    if (showSkipOptions) {
+      msgContent = new Object[] {msg1, msg2, "", dontAskCheckbox};
+      options =
+          new Object[] {
+            I18N.getText("Button.yes"), I18N.getText("Button.no"), I18N.getText("Update.button")
+          };
+    } else {
+      msgContent = new Object[] {msg1, msg2, ""};
+      options = new Object[] {I18N.getText("Button.yes"), I18N.getText("Button.no")};
+    }
+
     int result =
         JOptionPane.showOptionDialog(
             MapTool.getFrame(),
@@ -217,16 +261,19 @@ public class AppUpdate {
             options[1]);
     boolean dontAsk = dontAskCheckbox.isSelected();
 
-    if (dontAsk) {
-      AppPreferences.skipAutoUpdate.set(true);
+    if (showSkipOptions) {
+      if (dontAsk) {
+        AppPreferences.skipAutoUpdate.set(true);
+      }
+      if (result == JOptionPane.CANCEL_OPTION) {
+        AppPreferences.skipAutoUpdateRelease.set(releaseId);
+      }
     }
-
-    if (result == JOptionPane.CANCEL_OPTION) AppPreferences.skipAutoUpdateRelease.set(releaseId);
 
     return (result == JOptionPane.YES_OPTION);
   }
 
-  private static void downloadFile(URL assetDownloadURL, long assetDownloadSize) {
+  public static void downloadFile(URL assetDownloadURL, long assetDownloadSize) {
     final JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
     chooser.setSelectedFile(new File(assetDownloadURL.getFile()));
 
@@ -251,17 +298,18 @@ public class AppUpdate {
         chosenLocation = null;
       }
     }
-    final File saveLocation = chooser.getSelectedFile();
+    final File saveLocation = chosenLocation;
 
-    log.info("URL: " + assetDownloadURL.toString());
-    log.info("assetDownloadSize: " + assetDownloadSize);
+    log.info("URL: {}", assetDownloadURL);
+    log.info("assetDownloadSize: {}", assetDownloadSize);
 
     Runnable updatethread =
         () -> {
           try (InputStream stream = assetDownloadURL.openStream()) {
             ProgressMonitorInputStream pmis =
-                new ProgressMonitorInputStream(MapTool.getFrame(), "Downloading...\n", stream);
-            UIManager.put("ProgressMonitor.progressText", "New Update");
+                new ProgressMonitorInputStream(
+                    MapTool.getFrame(), I18N.getText("Update.downloading"), stream);
+            UIManager.put("ProgressMonitor.progressText", I18N.getText("Update.downloadingTitle"));
 
             ProgressMonitor pm = pmis.getProgressMonitor();
             pm.setMillisToDecideToPopup(500);
@@ -271,7 +319,14 @@ public class AppUpdate {
             pm.setMaximum((int) assetDownloadSize);
 
             FileUtils.copyInputStreamToFile(pmis, saveLocation);
+          } catch (InterruptedIOException e) {
+            // Progress monitor was canceled. This is not an error, unlike other IOExceptions, so
+            // ignore it.
+            // Don't leave partial files around.
+            FileUtil.delete(saveLocation);
           } catch (IOException ioe) {
+            // Don't leave potential broken files around..
+            FileUtil.delete(saveLocation);
             MapTool.showError("msg.error.failedSavingNewVersion", ioe);
           }
         };

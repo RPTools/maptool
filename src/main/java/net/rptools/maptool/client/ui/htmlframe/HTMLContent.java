@@ -313,23 +313,23 @@ public class HTMLContent {
     if (!(content instanceof UrlContent urlContent)) {
       throw new IllegalStateException("HTMLContent is not a URL");
     }
+    var url = urlContent.url();
 
     try {
-      Optional<Library> libraryOpt = new LibraryManager().getLibrary(urlContent.url()).get();
+      Optional<Library> libraryOpt = new LibraryManager().getLibrary(url).get();
       if (libraryOpt.isEmpty()) {
-        throw new IOException(
-            I18N.getText("msg.error.html.loadingURL", urlContent.url().toExternalForm()));
+        throw new IOException(I18N.getText("msg.error.html.loadingURL", url.toExternalForm()));
       }
 
       var library = libraryOpt.get();
-      var assetKey = library.getAssetKey(urlContent.url()).get().orElse(null);
+      var assetKey = library.getAssetKey(url).get().orElse(null);
       // Check if the asset key is null, if so try reading the resource as a string from the
       // library
       if (assetKey == null) {
-        String html = library.readAsString(urlContent.url()).get();
+        String html = library.readAsString(url).get();
         if (html != null) {
-          var mediaType = Asset.getMediaType("", html.getBytes(StandardCharsets.UTF_8));
-          var assetType = Asset.Type.fromMediaType(mediaType);
+          var mediaType = Asset.getMediaType(url.getPath(), html.getBytes(StandardCharsets.UTF_8));
+          var assetType = Asset.Type.fromMediaType(mediaType, url.getPath());
 
           if (assetType == Asset.Type.HTML) {
             return new HTMLContent(new HtmlDocumentContent(html));
@@ -352,8 +352,7 @@ public class HTMLContent {
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }
-    throw new IOException(
-        I18N.getText("msg.error.html.loadingURL", urlContent.url().toExternalForm()));
+    throw new IOException(I18N.getText("msg.error.html.loadingURL", url.toExternalForm()));
   }
 
   /**

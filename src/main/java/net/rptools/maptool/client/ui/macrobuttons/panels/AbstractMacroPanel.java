@@ -173,7 +173,9 @@ public abstract class AbstractMacroPanel extends JPanel implements Scrollable, M
 
   public void mouseReleased(MouseEvent event) {
     if (SwingUtilities.isRightMouseButton(event)) {
-      if ("CampaignPanel".equals(getPanelClass()) && !MapTool.getPlayer().isGM()) {
+      if (!MapTool.getPlayer().isGM()
+          && ("CampaignPanel".equals(getPanelClass())
+              || MapTool.getServerPolicy().isTokenContextLocked())) {
         return;
       }
       // open button group menu

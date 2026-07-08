@@ -14,14 +14,53 @@
  */
 package net.rptools.maptool.client.ui.lookuptable;
 
-import java.awt.*;
 import javax.swing.*;
 
 public class EditLookupTablePanelView {
 
   private JPanel mainPanel;
+  private JTextField tableName;
+  private JTextField defaultTableRoll;
+  private JCheckBox isVisible;
+  private JCheckBox allowLookup;
+  private JTable definitionTable;
+  private JLabel tableImagePlaceholder;
+  private JCheckBox pickOnce;
+  private JButton resetPicks;
 
   public JComponent getRootComponent() {
     return mainPanel;
+  }
+
+  public JTextField getTableName() {
+    return tableName;
+  }
+
+  public JTextField getDefaultTableRoll() {
+    return defaultTableRoll;
+  }
+
+  public JCheckBox getIsVisible() {
+    return isVisible;
+  }
+
+  public JCheckBox getAllowLookup() {
+    return allowLookup;
+  }
+
+  public JTable getDefinitionTable() {
+    return definitionTable;
+  }
+
+  public JLabel getTableImagePlaceholder() {
+    return tableImagePlaceholder;
+  }
+
+  public JCheckBox getPickOnce() {
+    return pickOnce;
+  }
+
+  public JButton getResetPicks() {
+    return resetPicks;
   }
 }

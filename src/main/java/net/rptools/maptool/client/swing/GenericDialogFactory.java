@@ -19,23 +19,21 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 public class GenericDialogFactory {
-  GenericDialog delegate;
-
-  public GenericDialog getDialog() {
-    return delegate;
-  }
+  private final GenericDialog delegate;
 
   public GenericDialogFactory() {
     delegate = new GenericDialog();
   }
 
-  @SuppressWarnings("UnusedReturnValue")
+  public GenericDialog getDialog() {
+    return delegate;
+  }
+
   public GenericDialogFactory setDefaultButton(ButtonKind buttonKind) {
     delegate.setDefaultButton(buttonKind);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addButton(
       AbstractButton b, ActionListener l, Object constraints, int index) {
     b.addActionListener(l);
@@ -43,38 +41,31 @@ public class GenericDialogFactory {
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addButton(AbstractButton b, ActionListener l, Object constraints) {
     return addButton(b, l, constraints, -1);
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addNonButton(Component c, Object constraints, int index) {
     delegate.addNonButton(c, constraints, index);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addNonButton(Component c, Object constraints) {
     return addNonButton(c, constraints, -1);
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addButton(ButtonKind buttonKind) {
     return addButton(buttonKind, null, null);
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addButton(ButtonKind buttonKind, Action action) {
     return addButton(buttonKind, action, null);
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addButton(ButtonKind buttonKind, ActionListener listener) {
     return addButton(buttonKind, null, listener);
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addButton(
       ButtonKind buttonKind, Action action, ActionListener listener) {
     delegate.addButton(buttonKind, action, listener);
@@ -89,67 +80,56 @@ public class GenericDialogFactory {
     return delegate.getButtonPanel().getOppositeButtonOrder();
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory setButtonOrder(String buttonOrder) {
     delegate.setButtonOrder(buttonOrder);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory setOppositeButtonOrder(String buttonOrder) {
     delegate.setOppositeButtonOrder(buttonOrder);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory makeModal(boolean modal) {
     delegate.setModal(modal);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory setCloseOperation(int closeOperation) {
     delegate.setDefaultCloseOperation(closeOperation);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory createOkCancelButtons() {
     delegate.createOkCancelButtons();
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory onBeforeShow(ActionListener listener) {
     delegate.onBeforeShow(listener);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory onBeforeClose(ActionListener listener) {
     delegate.onBeforeClose(listener);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory setDialogTitle(String title) {
     delegate.setTitle(title);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory setContent(JComponent content) {
     delegate.setContent(content);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory setDialogResult(String string) {
     delegate.setDialogResult(string);
     return this;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory display() {
     delegate.showDialog();
     return this;

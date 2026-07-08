@@ -26,7 +26,6 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.ToolbarPanel;
-import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -54,16 +53,12 @@ public class Campaign implements Serializable {
 
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
-  private static ExportDialog exportDialog =
-      ExportDialog
-          .getInstance(); // this is the new export dialog (different name for upward compatibility)
-
   // Static data isn't written to the campaign file when saved; these two fields hold the output
   // location and type, and the
   // settings of all JToggleButton objects (JRadioButtons and JCheckBoxes).
   private Location exportLocation;
-  private Map<String, Boolean> exportSettings =
-      new HashMap<>(); // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
+  // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
+  private Map<String, Boolean> exportSettings = new HashMap<>();
 
   private @Nonnull CampaignProperties campaignProperties = new CampaignProperties();
   private transient boolean isBeingSerialized;
@@ -307,12 +302,6 @@ public class Campaign implements Serializable {
     return campaignProperties.getLookupTableMap();
   }
 
-  public List<String> getLookupTables() {
-    List<String> list = new ArrayList<String>(getLookupTableMap().keySet());
-    Collections.sort(list);
-    return list;
-  }
-
   /**
    * Stub that calls <code>campaignProperties.getLightSourcesMap()</code>.
    *
@@ -324,6 +313,19 @@ public class Campaign implements Serializable {
 
   public void setLightSources(CategorizedLights map) {
     campaignProperties.setLightSources(map);
+  }
+
+  /**
+   * Stub that calls <code>campaignProperties.getHaloSourcesMap()</code>.
+   *
+   * @return the {@link Map} of between haloSourceIds and {@link Halo}s
+   */
+  public CategorizedHalos getCategorizedHalos() {
+    return campaignProperties.getCategorizedHalos();
+  }
+
+  public void setCategorizedHalos(CategorizedHalos map) {
+    campaignProperties.setCategorizedHalos(map);
   }
 
   /**
@@ -691,16 +693,21 @@ public class Campaign implements Serializable {
     return getCampaignProperties().getCharacterSheets();
   }
 
-  public ExportDialog getExportDialog() {
-    exportDialog.setExportSettings(exportSettings);
-    exportDialog.setExportLocation(exportLocation);
-    return exportDialog;
+  public Location getExportLocation() {
+    return exportLocation;
   }
 
-  public void setExportDialog(ExportDialog d) {
-    exportDialog = d;
-    exportSettings = d.getExportSettings();
-    exportLocation = d.getExportLocation();
+  public void setExportLocation(Location exportLocation) {
+    this.exportLocation = exportLocation;
+  }
+
+  public Map<String, Boolean> getExportSettings() {
+    return Collections.unmodifiableMap(exportSettings);
+  }
+
+  public void setExportSettings(Map<String, Boolean> exportSettings) {
+    this.exportSettings.clear();
+    this.exportSettings.putAll(exportSettings);
   }
 
   public void initDefault() {

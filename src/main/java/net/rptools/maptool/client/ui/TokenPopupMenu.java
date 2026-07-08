@@ -14,13 +14,11 @@
  */
 package net.rptools.maptool.client.ui;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Area;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -34,7 +32,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -49,7 +46,6 @@ import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.TranslatedClientAction;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -88,6 +84,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     addOwnedItem(createSpeechMenu());
     addOwnedItem(createStateMenu());
     addOwnedItem(createBarMenu());
+    addOwnedItem(createHalosMenu());
     addOwnedItem(createInitiativeMenu());
     if (MapTool.getFrame().getInitiativePanel().hasOwnerPermission(tokenUnderMouse))
       add(new ChangeInitiativeState("initiative.menu.addToInitiative"));
@@ -96,7 +93,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         && AppUtil.playerOwns(getTokenUnderMouse())) {
       add(new ShowHandoutAction());
     }
-    add(createHaloMenu());
     addOwnedItem(createArrangeMenu());
     addGMItem(createChangeToMenu(Zone.Layer.values()));
     add(new JSeparator());
@@ -315,71 +311,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
   }
 
-  protected JMenu createHaloMenu() {
-    return createColorAreaMenu(
-        "token.popup.menu.halo",
-        getTokenUnderMouse().getHaloColor(),
-        SetHaloAction.class,
-        SetColorChooserAction.class);
-  }
-
-  private JMenu createColorAreaMenu(
-      String title,
-      Color selectedColor,
-      Class<SetHaloAction> standardColorActionClass,
-      Class<SetColorChooserAction> customColorActionClass) {
-    JMenu haloMenu = new JMenu(I18N.getText(title));
-    try {
-      Constructor<SetHaloAction> standardColorActionConstructor =
-          standardColorActionClass.getConstructor(
-              TokenPopupMenu.class, ZoneRenderer.class, Set.class, Color.class, String.class);
-      Constructor<SetColorChooserAction> customColorActionConstructor =
-          customColorActionClass.getConstructor(
-              TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class);
-
-      JCheckBoxMenuItem noneMenu =
-          new JCheckBoxMenuItem(
-              standardColorActionConstructor.newInstance(
-                  this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")));
-      JCheckBoxMenuItem customMenu =
-          new JCheckBoxMenuItem(
-              customColorActionConstructor.newInstance(
-                  this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")));
-
-      if (selectedColor == null) {
-        noneMenu.setSelected(true);
-      } else {
-        customMenu.setSelected(true);
-      }
-      haloMenu.add(noneMenu);
-      haloMenu.add(customMenu);
-      haloMenu.add(new JSeparator());
-
-      Set<String> colorNames = MapToolUtil.getColorNames();
-      for (String name : colorNames) {
-        Color bgColor = MapToolUtil.getColor(name);
-        Color fgColor = ColorComboBoxRenderer.selectForegroundColor(bgColor);
-        String displayName = I18N.getString("Color.".concat(name));
-        if (displayName == null) {
-          displayName = name;
-        }
-        JCheckBoxMenuItem item =
-            new JCheckBoxMenuItem(
-                standardColorActionConstructor.newInstance(
-                    this, getRenderer(), selectedTokenSet, bgColor, displayName));
-
-        if (bgColor.equals(selectedColor)) {
-          item.setSelected(true);
-          customMenu.setSelected(false);
-        }
-        haloMenu.add(item);
-      }
-    } catch (Exception e) {
-      log.error("Error while building halo color selection menu");
-    }
-    return haloMenu;
-  }
-
   protected JMenu createBarMenu() {
     List<BarTokenOverlay> overlays =
         new ArrayList<BarTokenOverlay>(MapTool.getCampaign().getTokenBarsMap().values());
@@ -523,7 +454,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   }
 
   /**
-   * Create a radio button menu item for a particuar state
+   * Create a radio button menu item for a particular state
    *
    * @param state Create the item for this state
    * @param menu The menu containing all items.
@@ -544,123 +475,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     item.setText(bar + " (" + percent + "%)");
     menu.add(item);
     return item;
-  }
-
-  private class SetHaloAction extends AbstractAction {
-    private static final long serialVersionUID = 936075111485618012L;
-
-    protected Color color;
-    protected Set<GUID> tokenSet;
-    protected ZoneRenderer renderer;
-
-    public SetHaloAction(ZoneRenderer renderer, Set<GUID> tokenSet, Color color, String name) {
-      this.color = color;
-      this.tokenSet = tokenSet;
-      this.renderer = renderer;
-
-      putValue(Action.NAME, name);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Zone zone = renderer.getZone();
-      for (GUID guid : tokenSet) {
-        Token token = zone.getToken(guid);
-
-        if (!AppUtil.playerOwns(token)) {
-          continue;
-        }
-        updateToken(token, color);
-        MapTool.serverCommand().putToken(zone.getId(), token);
-      }
-      MapTool.getFrame().updateTokenTree();
-      renderer.repaint();
-    }
-
-    protected void updateToken(Token token, Color color) {
-      token.setHaloColor(color);
-    }
-  }
-
-  private class SetColorChooserAction extends AbstractAction {
-    private static final long serialVersionUID = 2212977067043864272L;
-
-    protected Color currentColor;
-    protected Set<GUID> tokenSet;
-    protected ZoneRenderer renderer;
-
-    public SetColorChooserAction(ZoneRenderer renderer, Set<GUID> tokenSet, String name) {
-      this.tokenSet = tokenSet;
-      this.renderer = renderer;
-      this.currentColor = renderer.getZone().getToken(tokenSet.iterator().next()).getHaloColor();
-      putValue(Action.NAME, name);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Color color = showColorChooserDialog();
-      if (color != null) {
-        Zone zone = renderer.getZone();
-        for (GUID guid : tokenSet) {
-          Token token = zone.getToken(guid);
-
-          if (!AppUtil.playerOwns(token)) {
-            continue;
-          }
-          updateToken(token, color);
-          MapTool.serverCommand().putToken(zone.getId(), token);
-        }
-        MapTool.getFrame().updateTokenTree();
-        renderer.repaint();
-      }
-    }
-
-    protected Color showColorChooserDialog() {
-      return JColorChooser.showDialog(
-          MapTool.getFrame().getContentPane(), "Choose Halo Color", currentColor);
-    }
-
-    protected void updateToken(Token token, Color color) {
-      token.setHaloColor(color);
-    }
-  }
-
-  @SuppressWarnings("unused")
-  private class SetVisionOverlayColorChooserAction extends SetColorChooserAction {
-    private static final long serialVersionUID = 5809668032069953020L;
-
-    public SetVisionOverlayColorChooserAction(
-        ZoneRenderer renderer, Set<GUID> tokenSet, String name) {
-      super(renderer, tokenSet, name);
-      this.currentColor =
-          renderer.getZone().getToken(tokenSet.iterator().next()).getVisionOverlayColor();
-    }
-
-    @Override
-    protected Color showColorChooserDialog() {
-      return JColorChooser.showDialog(
-          MapTool.getFrame().getContentPane(), "Choose Vision Overlay Color", currentColor);
-    }
-
-    @Override
-    protected void updateToken(Token token, Color color) {
-      token.setVisionOverlayColor(color);
-    }
-  }
-
-  @SuppressWarnings("unused")
-  private class SetVisionOverlayColorAction extends SetHaloAction {
-    private static final long serialVersionUID = 5116100872119403176L;
-
-    public SetVisionOverlayColorAction(
-        ZoneRenderer renderer, Set<GUID> tokenSet, Color color, String name) {
-      super(renderer, tokenSet, color, name);
-    }
-
-    @Override
-    protected void updateToken(Token token, Color color) {
-      token.setVisionOverlayColor(color);
-    }
   }
 
   private class ChangeBarAction extends AbstractAction {

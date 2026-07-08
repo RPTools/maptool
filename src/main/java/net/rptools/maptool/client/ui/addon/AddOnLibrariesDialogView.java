@@ -298,11 +298,4 @@ public class AddOnLibrariesDialogView extends JDialog {
                         a.ifPresent(
                             asset -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
   }
-
-  public static void main(String[] args) {
-    AddOnLibrariesDialogView dialog = new AddOnLibrariesDialogView();
-    dialog.pack();
-    dialog.setVisible(true);
-    System.exit(0);
-  }
 }

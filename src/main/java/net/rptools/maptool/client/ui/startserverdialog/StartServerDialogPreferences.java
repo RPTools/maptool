@@ -49,6 +49,7 @@ public class StartServerDialogPreferences {
   private static final String KEY_USE_PASSWORD_FILE = "usePasswordFile";
   private static final String KEY_HIDE_MAP_SELECT_UI = "hideMapSelectUI";
   private static final String KEY_START_LOCKED_TOKEN_EDIT = "lockTokenEditOnStartup";
+  private static final String KEY_START_LOCKED_TOKEN_CONTEXT = "lockTokenContextOnStartup";
   private static final String KEY_START_LOCKED_PLAYER_MOVEMENT = "lockPlayerMovementOnStartup";
   private static final String KEY_LOCK_PLAYER_LIBRARY = "lockPlayerLibrary";
 
@@ -242,8 +243,16 @@ public class StartServerDialogPreferences {
     return prefs.getBoolean(KEY_START_LOCKED_TOKEN_EDIT, false);
   }
 
+  public boolean getLockTokenContextOnStart() {
+    return prefs.getBoolean(KEY_START_LOCKED_TOKEN_CONTEXT, false);
+  }
+
   public void setLockTokenEditOnStart(boolean flag) {
     prefs.putBoolean(KEY_START_LOCKED_TOKEN_EDIT, flag);
+  }
+
+  public void setLockTokenContextOnStart(boolean flag) {
+    prefs.putBoolean(KEY_START_LOCKED_TOKEN_CONTEXT, flag);
   }
 
   public boolean getLockPlayerMovementOnStart() {

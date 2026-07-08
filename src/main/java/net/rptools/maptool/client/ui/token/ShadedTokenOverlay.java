@@ -14,86 +14,43 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.Objects;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import net.rptools.maptool.server.proto.ShadedTokenOverlayDto;
 
 /**
  * Paints a single reduced alpha color over the token.
  *
  * @author jgorrell
  */
-public class ShadedTokenOverlay extends BooleanTokenOverlay {
-
-  /*---------------------------------------------------------------------------------------------
-   * Instance Variables
-   *-------------------------------------------------------------------------------------------*/
-
+public final class ShadedTokenOverlay extends BooleanTokenOverlay {
   /** The color that is painted over the token. */
   private Color color;
-
-  /*---------------------------------------------------------------------------------------------
-   * Constructors
-   *-------------------------------------------------------------------------------------------*/
-
-  /** Default constructor needed for XML encoding/decoding */
-  public ShadedTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED);
-  }
 
   /**
    * Create the new token overlay
    *
-   * @param aName Name of the new overlay.
-   * @param aColor The color that is painted over the token. If the alpha is 100%, it will be
-   *     reduced to 25%.
+   * @param name Name of the new overlay.
+   * @param color The color that is painted over the token. If the alpha is 100%, it will be reduced
+   *     to 25%.
    */
-  public ShadedTokenOverlay(String aName, Color aColor) {
-    super(aName);
-    assert aColor != null : "A color is required but null was passed.";
-    color = aColor;
+  public ShadedTokenOverlay(String name, Color color) {
+    super(name);
+    this.color = Objects.requireNonNullElse(color, Color.red);
     setOpacity(25);
   }
 
-  /*---------------------------------------------------------------------------------------------
-   * TokenOverlay Abstract Method Implementations
-   *-------------------------------------------------------------------------------------------*/
-
-  /**
-   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     Rectangle)
-   */
-  @Override
-  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
-    Color temp = g.getColor();
-    g.setColor(color);
-    Composite tempComposite = g.getComposite();
-    if (getOpacity() != 100)
-      g.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
-    g.fill(bounds);
-    g.setColor(temp);
-    g.setComposite(tempComposite);
+  public ShadedTokenOverlay(ShadedTokenOverlay other) {
+    super(other);
+    this.color = other.color;
   }
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
   @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new ShadedTokenOverlay(getName(), getColor());
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
+  public ShadedTokenOverlay clone() {
+    return new ShadedTokenOverlay(this);
   }
 
   /**
@@ -114,18 +71,20 @@ public class ShadedTokenOverlay extends BooleanTokenOverlay {
     color = aColor;
   }
 
-  public static ShadedTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new ShadedTokenOverlay();
-    overlay.fillFrom(dto.getCommon());
-    overlay.color = new Color(dto.getColor(), true);
-    return overlay;
+  @Override
+  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
+    g.setColor(color);
+    g.fill(bounds);
   }
 
-  public BooleanTokenOverlayDto toDto() {
-    var dto = BooleanTokenOverlayDto.newBuilder();
-    dto.setCommon(getCommonDto());
+  public ShadedTokenOverlayDto toShadedDto() {
+    var dto = ShadedTokenOverlayDto.newBuilder();
     dto.setColor(color.getRGB());
-    dto.setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.SHADED);
     return dto.build();
+  }
+
+  public static ShadedTokenOverlay fromDto(ShadedTokenOverlayDto dto) {
+    var color = new Color(dto.getColor(), true);
+    return new ShadedTokenOverlay(DEFAULT_STATE_NAME, color);
   }
 }

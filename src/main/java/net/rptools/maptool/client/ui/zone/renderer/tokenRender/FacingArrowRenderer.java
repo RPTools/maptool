@@ -60,7 +60,7 @@ public class FacingArrowRenderer {
   }
 
   public FacingArrowRenderer(RenderHelper renderHelper, Zone zone) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("FacingArrowRenderer");
     this.zone = zone;
     for (int i = 0; i <= 90; i++) {
       figureFillColours.add(new Color(1 - 0.5f / 90f * i, 1 - 0.5f / 90f * i, 0));
@@ -106,7 +106,7 @@ public class FacingArrowRenderer {
     var timer = CodeTimer.get();
     timer.start("FacingArrowRenderer-paintArrow");
     try {
-      final var isIsometric = zone.getGrid().isIsometric();
+      final var isIsometric = zone.getGrid().getType().isIsometric();
 
       timer.start("FacingArrowRenderer-calculateTransform");
       int angle = Math.floorMod(facing + (isIsometric ? 45 : 0), 360);

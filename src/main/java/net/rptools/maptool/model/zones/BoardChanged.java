@@ -18,4 +18,4 @@ import java.awt.*;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Zone;
 
-public record BoardChanged(Zone zone, MD5Key asset, Point position) {}
+public record BoardChanged(Zone zone, MD5Key asset, Point position, double scaleX, double scaleY) {}

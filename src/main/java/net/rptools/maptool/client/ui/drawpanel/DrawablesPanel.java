@@ -90,8 +90,8 @@ public class DrawablesPanel extends JComponent {
       boolean showEraser) {
     BufferedImage backBuffer =
         new BufferedImage(
-            (int) (viewport.width * scale),
-            (int) (viewport.height * scale),
+            (int) Math.max(1, viewport.width * scale),
+            (int) Math.max(1, viewport.height * scale),
             Transparency.TRANSLUCENT);
     Graphics2D g = backBuffer.createGraphics();
     g.setClip(0, 0, backBuffer.getWidth(), backBuffer.getHeight());
@@ -105,9 +105,7 @@ public class DrawablesPanel extends JComponent {
     for (DrawnElement element : drawableList) {
       Drawable drawable = element.getDrawable();
       Pen pen = element.getPen();
-      if (pen.getOpacity() != 1
-          && pen.getOpacity()
-              != 0 /* handle legacy pens, besides, it doesn't make sense to have a non visible pen */) {
+      if (pen.getOpacity() != 1) {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
       }
       // If we are only drawing cuts, make the pen visible
@@ -149,7 +147,7 @@ public class DrawablesPanel extends JComponent {
       drawnBounds = new Rectangle(drawnBounds);
       // Handle pen size
       Pen pen = element.getPen();
-      int penSize = pen.getForegroundMode() == Pen.MODE_TRANSPARENT ? 0 : (int) pen.getThickness();
+      int penSize = pen.getPaint() == null ? 0 : (int) pen.getThickness();
       drawnBounds.setRect(
           drawnBounds.getX() - penSize,
           drawnBounds.getY() - penSize,

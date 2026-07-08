@@ -15,35 +15,25 @@
 package net.rptools.maptool.client.ui.zone.renderer.tokenRender;
 
 import java.awt.*;
-import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel.TokenPosition;
 import net.rptools.maptool.client.ui.zone.renderer.RenderHelper;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.ImageSupport;
 import net.rptools.maptool.util.TokenUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class TokenRenderer {
   private static final Logger log = LogManager.getLogger(TokenRenderer.class);
-  private static final Map<String, Map<Integer, BufferedImage>> imageTableMap =
-      Collections.synchronizedMap(new HashMap<>());
 
   private final RenderHelper renderHelper;
   private final Zone zone;
 
   public TokenRenderer(RenderHelper renderHelper, Zone zone) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("TokenRenderer");
     this.zone = zone;
   }
 
@@ -51,50 +41,27 @@ public class TokenRenderer {
     var timer = CodeTimer.get();
     timer.increment("TokenRenderer-renderToken");
     timer.start("TokenRenderer-renderToken");
-
-    timer.start("TokenRenderer-loadImageTable");
-    if (token.getHasImageTable() && !imageTableMap.containsKey(token.getImageTableName())) {
-      (new CacheTableImagesWorker(token.getImageTableName())).execute();
-    }
-    timer.stop("TokenRenderer-loadImageTable");
-
-    timer.start("TokenRenderer-paintTokenImage");
     renderHelper.render(
         g2d, worldG -> paintTokenImage(worldG, position, extraOpacity * token.getTokenOpacity()));
-    timer.stop("TokenRenderer-paintTokenImage");
     timer.stop("TokenRenderer-renderToken");
   }
 
+  /**
+   * Checks to see if token has an image table and references that if the token has a facing
+   * otherwise uses basic image
+   *
+   * @param token the token to get the image from.
+   * @return The token's current image based on its facing.
+   */
   private BufferedImage getRenderImage(Token token) {
-    var timer = CodeTimer.get();
-    timer.start("TokenRenderer-getRenderImage");
-    BufferedImage bi = ImageManager.BROKEN_IMAGE;
-    if (token.getHasImageTable() && imageTableMap.containsKey(token.getImageTableName())) {
-      Map<Integer, BufferedImage> imageTable = imageTableMap.get(token.getImageTableName());
-      int max = imageTable.keySet().stream().max(Integer::compareTo).orElse(Integer.MAX_VALUE);
-      if (max != Integer.MAX_VALUE) {
-        int useValue = (360 + token.getFacingInDegrees()) % max;
-        bi =
-            imageTable.get(
-                imageTable.keySet().stream()
-                    .sorted()
-                    .filter(integer -> integer >= useValue)
-                    .toList()
-                    .getFirst());
-      }
-    } else {
-      bi = ImageSupport.getTokenImage(token, renderHelper.getImageObserver());
-    }
-    timer.stop("TokenRenderer-getRenderImage");
-    return bi;
+    // get token image, using image table if present
+    MD5Key tokenImageId = token.getTokenImageAssetId();
+    return ImageManager.getImage(tokenImageId, renderHelper.getImageObserver());
   }
 
   private void paintTokenImage(Graphics2D g2d, TokenPosition position, float opacity) {
     var token = position.token();
     var renderImage = getRenderImage(token);
-    if (renderImage == null) {
-      return;
-    }
 
     var imageTransform =
         TokenUtil.getRenderTransform(
@@ -109,49 +76,5 @@ public class TokenRenderer {
 
     g2d.drawImage(renderImage, imageTransform, renderHelper.getImageObserver());
     g2d.setStroke(new BasicStroke(1f));
-  }
-
-  private static Map<Integer, BufferedImage> cacheImageTable(String tableName) {
-    LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(tableName);
-    if (lookupTable != null) {
-      BufferedImage broken = ImageManager.BROKEN_IMAGE;
-      Map<Integer, BufferedImage> tmp = new HashMap<>();
-      List<LookupTable.LookupEntry> entries = lookupTable.getEntryList();
-      for (LookupTable.LookupEntry entry : entries) {
-        MD5Key asset = entry.getImageId();
-        if (asset != null) {
-          BufferedImage bi = ImageManager.getImageAndWait(asset);
-          if (!bi.equals(broken)) {
-            tmp.put(entry.getMax(), bi);
-          }
-        }
-      }
-      if (!tmp.isEmpty()) {
-        return tmp;
-      }
-    }
-    return null;
-  }
-
-  private static class CacheTableImagesWorker
-      extends SwingWorker<Map<Integer, BufferedImage>, String> {
-    String tableName;
-
-    public CacheTableImagesWorker(String tableName) {
-      this.tableName = tableName;
-    }
-
-    @Override
-    public Map<Integer, BufferedImage> doInBackground() {
-      return cacheImageTable(tableName);
-    }
-
-    @Override
-    protected void done() {
-      try {
-        imageTableMap.put(tableName, get());
-      } catch (Exception ignore) {
-      }
-    }
   }
 }

@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -821,15 +820,6 @@ public class InitiativeList implements Serializable {
     /** Optional state that can be displayed in the initiative panel. */
     private String state;
 
-    /** Save off the icon so that it can be displayed as needed. */
-    private transient Icon displayIcon;
-
-    /**
-     * Need to remember whether the displayIcon was shaded (to indicate a hidden token) so we can
-     * update when needed
-     */
-    private transient boolean tokenVisibleWhenIconUpdated = false;
-
     /*---------------------------------------------------------------------------------------------
      * Constructors
      *-------------------------------------------------------------------------------------------*/
@@ -910,43 +900,6 @@ public class InitiativeList implements Serializable {
       state = aState;
       getPCS().fireIndexedPropertyChange(TOKENS_PROP, tokens.indexOf(this), old, aState);
       finishUnitOfWork(this);
-    }
-
-    /**
-     * @return Getter for displayIcon
-     */
-    public Icon getDisplayIcon() {
-      return displayIcon;
-    }
-
-    /**
-     * NOTE: Be sure to also call {@link#setTokenVisibleWhenIconUpdated(boolean)}
-     *
-     * @param displayIcon Setter for the displayIcon to set.
-     */
-    public void setDisplayIcon(Icon displayIcon) {
-      this.displayIcon = displayIcon;
-    }
-
-    /**
-     * Checks whether the cached icon for this {@link TokenInitiative} was generated with the alpha
-     * shading - indicating whether the token was visible when the icon was last refreshed.
-     *
-     * @return true if the token was visible (and the icon was therefore opaque), false otherwise
-     */
-    public boolean wasTokenVisibleWhenIconUpdated() {
-      return tokenVisibleWhenIconUpdated;
-    }
-
-    /**
-     * Remember whether the generated icon was shaded (to indicate a non-visible token), so it can
-     * be refreshed if needed.
-     *
-     * @param tokenVisibleWhenIconUpdated true to indicate that the token was visible, false
-     *     otherwise
-     */
-    public void setTokenVisibleWhenIconUpdated(boolean tokenVisibleWhenIconUpdated) {
-      this.tokenVisibleWhenIconUpdated = tokenVisibleWhenIconUpdated;
     }
 
     /**

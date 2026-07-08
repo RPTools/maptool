@@ -22,6 +22,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -29,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.util.function.BiConsumer;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
@@ -118,13 +120,8 @@ public abstract class HexGrid extends Grid {
     return edgeLength;
   }
 
-  @Override
-  public boolean isHex() {
-    return true;
-  }
-
-  public boolean isHexHorizontal() {
-    return false;
+  private boolean isHexHorizontal() {
+    return getType() == GridType.HexHorizontal;
   }
 
   @Override
@@ -137,11 +134,14 @@ public abstract class HexGrid extends Grid {
   @Override
   protected Area createCellShape() {
     var hex = new GeneralPath();
+    double edgeLengthAreaFudge =
+        0.4d; // min 0.4d so adjacent footprint cell areas touch and can composite without creating
+    // subpaths
     hex.moveTo(0, minorRadius);
     hex.lineTo(edgeProjection, 0);
-    hex.lineTo(edgeProjection + edgeLength, 0);
-    hex.lineTo(edgeProjection + edgeLength + edgeProjection, minorRadius);
-    hex.lineTo(edgeProjection + edgeLength, getSize());
+    hex.lineTo(edgeProjection + edgeLength + edgeLengthAreaFudge, 0);
+    hex.lineTo(edgeProjection + edgeLength + edgeProjection + edgeLengthAreaFudge, minorRadius);
+    hex.lineTo(edgeProjection + edgeLength + edgeLengthAreaFudge, getSize());
     hex.lineTo(edgeProjection, getSize());
     orientHex(hex);
 
@@ -338,24 +338,25 @@ public abstract class HexGrid extends Grid {
 
   protected abstract void setGridDrawTranslation(Graphics2D g, double u, double v);
 
-  public abstract double getRendererSizeU(ZoneRenderer renderer);
+  public abstract double getSizeU(Dimension2D size);
 
-  public abstract double getRendererSizeV(ZoneRenderer renderer);
+  public abstract double getSizeV(Dimension2D size);
 
-  public abstract int getOffV(ZoneRenderer renderer);
+  public abstract int getOffV(Scale scale);
 
-  public abstract int getOffU(ZoneRenderer renderer);
+  public abstract int getOffU(Scale scale);
 
   @Override
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    var scale = renderer.getScale();
+    var zoneScale = renderer.getViewModel().getZoneScale();
+    var scale = zoneScale.getScale();
     var scaledMinorRadius = minorRadius * scale;
     var scaledEdgeLength = edgeLength * scale;
     var scaledEdgeProjection = edgeProjection * scale;
     var scaledHex = createHalfShape(scaledMinorRadius, scaledEdgeProjection, scaledEdgeLength);
 
-    int offU = getOffU(renderer);
-    int offV = getOffV(renderer);
+    int offU = getOffU(zoneScale);
+    int offV = getOffV(zoneScale);
     int count = 0;
 
     Object oldAntiAlias = SwingUtil.useAntiAliasing(g);
@@ -363,7 +364,7 @@ public abstract class HexGrid extends Grid {
     g.setStroke(new BasicStroke(AppState.getGridLineWeight()));
 
     for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
-        v < getRendererSizeV(renderer);
+        v < getSizeV(renderer.getSize());
         v += scaledMinorRadius) {
       double offsetU = (int) ((count & 1) == 0 ? 0 : -(scaledEdgeProjection + scaledEdgeLength));
       count++;
@@ -371,7 +372,7 @@ public abstract class HexGrid extends Grid {
       double start =
           offU % (2 * scaledEdgeLength + 2 * scaledEdgeProjection)
               - (2 * scaledEdgeLength + 2 * scaledEdgeProjection);
-      double end = getRendererSizeU(renderer) + 2 * scaledEdgeLength + 2 * scaledEdgeProjection;
+      double end = getSizeU(renderer.getSize()) + 2 * scaledEdgeLength + 2 * scaledEdgeProjection;
       double incr = 2 * scaledEdgeLength + 2 * scaledEdgeProjection;
       for (double u = start; u < end; u += incr) {
         setGridDrawTranslation(g, u + offsetU, v);

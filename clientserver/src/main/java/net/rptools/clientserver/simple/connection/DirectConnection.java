@@ -40,7 +40,6 @@ public class DirectConnection extends AbstractConnection {
   }
 
   private final AtomicBoolean sharedClosedFlag;
-  private final String id;
   private final BlockingQueue<byte[]> writeQueue;
   private final ReceiveThread receiveThread;
 
@@ -49,8 +48,8 @@ public class DirectConnection extends AbstractConnection {
       String id,
       BlockingQueue<byte[]> writeQueue,
       BlockingQueue<byte[]> readQueue) {
+    super(id);
     this.sharedClosedFlag = sharedClosedFlag;
-    this.id = id;
     this.writeQueue = writeQueue;
     this.receiveThread = new ReceiveThread(readQueue);
   }
@@ -87,11 +86,6 @@ public class DirectConnection extends AbstractConnection {
   @Override
   public boolean isAlive() {
     return !sharedClosedFlag.get();
-  }
-
-  @Override
-  public String getId() {
-    return id;
   }
 
   @Override

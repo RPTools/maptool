@@ -17,10 +17,7 @@ package net.rptools.maptool.client.ui.theme;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.TreeSet;
 import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -49,6 +46,7 @@ public class RessourceManager {
           put(Icons.ACTION_CLOSE, IMAGE_DIR + "collapse.png");
           put(Icons.ACTION_COPY, IMAGE_DIR + "page_copy.png");
           put(Icons.ACTION_DELETE, IMAGE_DIR + "delete.png");
+          put(Icons.ACTION_ACCEPT, IMAGE_DIR + "currentIndicator.png");
           put(Icons.ACTION_EDIT, IMAGE_DIR + "pencil.png");
           put(Icons.ACTION_NEW, IMAGE_DIR + "add.png");
           put(Icons.ACTION_NEW_SMALL, IMAGE_DIR + "add_sm.png");
@@ -129,12 +127,14 @@ public class RessourceManager {
           put(Icons.GRID_SQUARE, IMAGE_DIR + "gridSquare.png");
           put(Icons.INITIATIVE_CURRENT_INDICATOR, IMAGE_DIR + "currentIndicator.png");
           put(Icons.MAPTOOL, IMAGE_DIR + "maptool_icon.png");
+          put(Icons.MENU_DISCORD, IMAGE_DIR + "discord.svg");
           put(Icons.MENU_DOCUMENTATION, IMAGE_DIR + "book_open.png");
           put(Icons.MENU_FORUMS, IMAGE_DIR + "marker.png");
           put(Icons.MENU_FRAMEWORKS, IMAGE_DIR + "minilogo.png");
           put(Icons.MENU_NETWORK_SETUP, IMAGE_DIR + "download.png");
           put(Icons.MENU_SCRIPTING, IMAGE_DIR + "pencil.png");
           put(Icons.MENU_SHOW_GRIDS, IMAGE_DIR + "grid.gif");
+          put(Icons.MENU_SHOW_TOKEN_HALOS, IMAGE_DIR + "halos.png");
           put(Icons.MENU_SHOW_TOKEN_NAMES, IMAGE_DIR + "names.png");
           put(Icons.MENU_TUTORIALS, IMAGE_DIR + "tutorial.jpg");
           put(Icons.STATUSBAR_ASSET_CACHE, IMAGE_DIR + "asset-status.png");
@@ -297,6 +297,7 @@ public class RessourceManager {
         {
           put(Icons.ACTION_COPY, ROD_ICONS + "edit/Duplicate.svg");
           put(Icons.ACTION_DELETE, ROD_ICONS + "edit/Delete.svg");
+          put(Icons.ACTION_ACCEPT, ROD_ICONS + "edit/Accept.svg");
           put(Icons.ACTION_EDIT, ROD_ICONS + "edit/Edit.svg");
           put(Icons.ACTION_EXPORT, ROD_ICONS + "edit/Export.svg");
           put(Icons.ACTION_IMPORT, ROD_ICONS + "edit/Import.svg");
@@ -362,12 +363,14 @@ public class RessourceManager {
           put(Icons.GRID_NONE, ROD_ICONS + "cross.svg");
           put(Icons.GRID_SQUARE, ROD_ICONS + "gridSquare.svg");
           put(Icons.MAPTOOL, ROD_ICONS + "maptool_icon.svg");
+          put(Icons.MENU_DISCORD, ROD_ICONS + "menu/Discord.svg");
           put(Icons.MENU_DOCUMENTATION, ROD_ICONS + "menu/Documentation.svg");
           put(Icons.MENU_FORUMS, ROD_ICONS + "menu/Forums.svg");
           put(Icons.MENU_FRAMEWORKS, ROD_ICONS + "menu/Frameworks.svg");
           put(Icons.MENU_NETWORK_SETUP, ROD_ICONS + "menu/Network Setup.svg");
           put(Icons.MENU_SCRIPTING, ROD_ICONS + "menu/Macro Scripting.svg");
           put(Icons.MENU_SHOW_GRIDS, ROD_ICONS + "menu/Show Grids.svg");
+          put(Icons.MENU_SHOW_TOKEN_HALOS, ROD_ICONS + "menu/Show Token Halos.svg");
           put(Icons.MENU_SHOW_TOKEN_NAMES, ROD_ICONS + "menu/Show Token Names.svg");
           put(Icons.MENU_TUTORIALS, ROD_ICONS + "menu/Tutorials.svg");
           put(Icons.PROPERTIES_TABLE_ALPHABETIC, ROD_ICONS + "misc/Alphabetic.svg");
@@ -596,63 +599,5 @@ public class RessourceManager {
     RESULT ressourceObject = creator.create(ressourcePath);
     cache.put(cachekey, ressourceObject);
     return ressourceObject;
-  }
-
-  public static void main(String[] args) {
-    checkMissingIcons(classicIcons, rodIcons);
-  }
-
-  private static void checkMissingIcons(
-      HashMap<Icons, String> classicIcons, HashMap<Icons, String> rodIcons) {
-    var missing = new TreeSet<Icons>();
-    for (var key : classicIcons.keySet()) {
-      if (rodIcons.containsKey(key)) {
-        continue;
-      }
-      missing.add(key);
-    }
-
-    System.out.println("Missing icons:");
-    for (var key : missing) {
-      System.out.println(key + " classic: " + classicIcons.get(key));
-    }
-  }
-
-  public static void checkMissingFiles() {
-    String basedir = "C:\\Users\\tkunze\\Source\\maptool\\src\\main\\resources\\";
-    for (String value : images.values()) {
-      if (value == null) {
-        continue;
-      }
-
-      var source = Path.of(basedir, value);
-      var target = Path.of(basedir, IMAGE_DIR, "images", source.getFileName().toString());
-
-      if (Files.notExists(source)) {
-        System.out.println(value + " is missing!");
-      }
-    }
-    for (String value : classicIcons.values()) {
-      if (value == null) {
-        continue;
-      }
-
-      var source = Path.of(basedir, value);
-
-      if (Files.notExists(source)) {
-        System.out.println(value + " is missing!");
-      }
-    }
-    for (String value : rodIcons.values()) {
-      if (value == null) {
-        continue;
-      }
-
-      var source = Path.of(basedir, value);
-
-      if (Files.notExists(source)) {
-        System.out.println(value + " is missing!");
-      }
-    }
   }
 }

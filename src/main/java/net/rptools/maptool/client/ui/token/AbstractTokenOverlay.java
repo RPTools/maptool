@@ -56,7 +56,7 @@ public abstract class AbstractTokenOverlay implements Cloneable {
   /** Flag indicating that this token overlay is displayed to the owner. */
   private boolean showOwner;
 
-  /** Flag indicating that this token overlay is displayed to the everybody else. */
+  /** Flag indicating that this token overlay is displayed to everybody else. */
   private boolean showOthers;
 
   /*---------------------------------------------------------------------------------------------
@@ -82,6 +82,17 @@ public abstract class AbstractTokenOverlay implements Cloneable {
   protected AbstractTokenOverlay(String aName) {
     assert aName != null : "A name is required but null was passed.";
     name = aName;
+  }
+
+  protected AbstractTokenOverlay(AbstractTokenOverlay other) {
+    this.name = other.name;
+    this.order = other.order;
+    this.group = other.group;
+    this.mouseover = other.mouseover;
+    this.opacity = other.opacity;
+    this.showGM = other.showGM;
+    this.showOwner = other.showOwner;
+    this.showOthers = other.showOthers;
   }
 
   /*---------------------------------------------------------------------------------------------

@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
 import javax.annotation.Nonnull;
+import net.rptools.maptool.client.tool.drawing.BlastTemplateTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -125,6 +126,7 @@ public class BlastTemplate extends ConeTemplate {
       }
       offsetX = centerOffset + Math.min(Math.max(lowerBound, relX), upperBound);
     }
+    setDirection(findDirection());
   }
 
   /**
@@ -135,6 +137,77 @@ public class BlastTemplate extends ConeTemplate {
   public void setControlCellOffset(int controlCellOffsetX, int controlCellOffsetY) {
     offsetX = controlCellOffsetX;
     offsetY = controlCellOffsetY;
+    setDirection(findDirection());
+  }
+
+  /**
+   * Determine the {@link net.rptools.maptool.model.drawing.AbstractTemplate.Direction} of the
+   * {@link BlastTemplate} using its radius and offsets. NW/NE/SE/SW need to be exactly at the
+   * extremes, otherwise generalised to N/E/S/W.
+   *
+   * @return the direction of the blast from the center vertex.
+   */
+  public Direction findDirection() {
+
+    Direction direction;
+    int radius = getRadius();
+
+    if (offsetY == -radius) {
+      // Blast is above the vertex
+      if (offsetX == -radius) {
+        direction = Direction.NORTH_WEST;
+      } else if (offsetX == 1) {
+        direction = Direction.NORTH_EAST;
+      } else {
+        direction = Direction.NORTH;
+      }
+    } else if (offsetY == 1) {
+      // Blast is below the vertex
+      if (offsetX == -radius) {
+        direction = Direction.SOUTH_WEST;
+      } else if (offsetX == 1) {
+        direction = Direction.SOUTH_EAST;
+      } else {
+        direction = Direction.SOUTH;
+      }
+    } else if (offsetX == -radius) {
+      // Blast is left of the vertex
+      direction = Direction.WEST;
+    } else if (offsetX == 1) {
+      // Blast is right of the vertex
+      direction = Direction.EAST;
+    } else {
+      // should not get here
+      return null;
+    }
+
+    return direction;
+  }
+
+  /**
+   * Set the {@link BlastTemplate}'s {@link Direction} and then set the control offsets for that
+   * direction. While this is coarser than setting the control offsets explicitly, it provides an
+   * alternative and user-friendly way of setting the control offsets when not using the {@link
+   * BlastTemplateTool}.
+   *
+   * @param direction The direction to draw the blast from the center vertex.
+   */
+  public void setDirectionControlCellOffset(Direction direction) {
+    if (direction != null) {
+      setDirection(direction);
+      int radius = getRadius();
+      switch (direction) {
+        case Direction.NORTH_WEST -> setControlCellOffset(-radius, -radius);
+        case Direction.NORTH -> setControlCellOffset(-radius / 2, -radius);
+        case Direction.NORTH_EAST -> setControlCellOffset(1, -radius);
+        case Direction.EAST -> setControlCellOffset(1, -radius / 2);
+        case Direction.SOUTH_EAST -> setControlCellOffset(1, 1);
+        case Direction.SOUTH -> setControlCellOffset(-radius / 2, 1);
+        case Direction.SOUTH_WEST -> setControlCellOffset(-radius, 1);
+        case Direction.WEST -> setControlCellOffset(-radius, -radius / 2);
+        default -> setControlCellOffset(1, 1);
+      }
+    }
   }
 
   /**

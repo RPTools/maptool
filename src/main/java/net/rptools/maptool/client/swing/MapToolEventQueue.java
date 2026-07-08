@@ -70,7 +70,7 @@ public class MapToolEventQueue extends EventQueue {
       jta.setWrapStyleWord(true);
       jta.setMargin(new Insets(5, 10, 10, 10));
       optionPane.setDetails(jta);
-      displayPopup();
+      displayPopup(optionPane);
       reportToSentryIO(soe);
     } catch (Throwable t) {
       log.error(t, t);
@@ -78,7 +78,7 @@ public class MapToolEventQueue extends EventQueue {
       optionPane.setTitle(I18N.getString("MapToolEventQueue.unexpectedError")); // $NON-NLS-1$
       optionPane.setDetails(toString(t));
       try {
-        displayPopup();
+        displayPopup(optionPane);
         reportToSentryIO(t);
       } catch (Throwable thrown) {
         // Displaying the error message using the JideOptionPane has just failed. Fallback to
@@ -109,11 +109,9 @@ public class MapToolEventQueue extends EventQueue {
     return optionPane;
   }
 
-  private static void displayPopup() {
+  private static void displayPopup(JideOptionPane optionPane) {
     optionPane.setDetailsVisible(true);
-    JDialog dialog =
-        optionPane.createDialog(
-            MapTool.getFrame(), I18N.getString("MapToolEventQueue.warning.title")); // $NON-NLS-1$
+    JDialog dialog = optionPane.createDialog(MapTool.getFrame(), optionPane.getTitle().toString());
     dialog.setResizable(true);
     dialog.pack();
     dialog.setVisible(true);

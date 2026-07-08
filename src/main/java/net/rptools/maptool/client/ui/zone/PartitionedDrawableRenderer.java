@@ -270,9 +270,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
       }
       timer.stop("createChunk:CreateChunk");
 
-      if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /*
-																 * handle legacy pens, besides, it doesn't make sense to have a non visible pen
-																 */) {
+      if (pen.getOpacity() != 1) {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
       }
 

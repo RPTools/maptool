@@ -109,7 +109,8 @@ public class WallTemplateTool extends BurstTemplateTool {
 
       // Get mouse point as an offset from the vertex
       LineTemplate lt = ((LineTemplate) template);
-      ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+      ZonePoint mouse =
+          new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
       CellPoint mousePoint = renderer.getZone().getGrid().convert(mouse);
       CellPoint vertexPoint = renderer.getZone().getGrid().convert(lt.getVertex());
       mousePoint.x = mousePoint.x - vertexPoint.x;

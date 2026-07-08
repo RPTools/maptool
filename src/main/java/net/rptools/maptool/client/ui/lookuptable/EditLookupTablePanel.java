@@ -17,303 +17,457 @@ package net.rptools.maptool.client.ui.lookuptable;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JList;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ButtonKind;
+import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.client.swing.GenericDialogFactory;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.client.ui.ImageAssetPanel;
-import net.rptools.maptool.client.ui.lookuptable.EditLookupTablePanel.LookupTableTableModel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
 
-public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
-  private static final long serialVersionUID = 2341539768448195059L;
+public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
+  private static final int PICKED_COLUMN_INDEX = 0;
+  private static final int RANGE_COLUMN_INDEX = 1;
+  private static final int VALUE_COLUMN_INDEX = 2;
+  private static final int IMAGE_COLUMN_INDEX = 3;
 
-  private LookupTable lookupTable;
+  private final GenericDialogFactory dialogFactory;
+
+  private final EditLookupTablePanelView view;
   private ImageAssetPanel tableImageAssetPanel;
   private int defaultRowHeight;
 
-  private boolean accepted = false;
-  private boolean newTable = false;
+  private EditLookupTablePanel(EditLookupTablePanelView view) {
+    super(view.getRootComponent());
+    this.view = view;
+    panelInit();
+
+    dialogFactory =
+        GenericDialog.getFactory()
+            .setContent(this)
+            .makeModal(true)
+            .addButton(ButtonKind.ACCEPT)
+            .addButton(ButtonKind.CANCEL)
+            .setDefaultButton(ButtonKind.ACCEPT)
+            .setCloseOperation(WindowConstants.HIDE_ON_CLOSE)
+            .onBeforeClose(
+                e -> {
+                  unbind();
+                });
+  }
 
   public EditLookupTablePanel() {
-    super(new EditLookupTablePanelView().getRootComponent());
-    panelInit();
+    this(new EditLookupTablePanelView());
+  }
+
+  public void showDialog(@Nullable LookupTable lookupTable, boolean isNew) {
+    var title =
+        isNew || lookupTable == null
+            ? I18N.getString("LookupTablePanel.msg.titleNew")
+            : I18N.getString("LookupTablePanel.msg.titleEdit");
+    dialogFactory.setDialogTitle(title);
+
+    bind(lookupTable);
+
+    dialogFactory.display();
+  }
+
+  public void initPickOnce() {
+    JCheckBox pickOnce = view.getPickOnce();
+    JButton resetPicks = view.getResetPicks();
+
+    pickOnce.addActionListener(
+        event -> {
+          var isPickOnce = pickOnce.isSelected();
+          view.getDefaultTableRoll().setEnabled(!isPickOnce);
+          resetPicks.setEnabled(isPickOnce);
+
+          var model = (LookupTableTableModel) view.getDefinitionTable().getModel();
+          model.showPicks(isPickOnce);
+        });
+
+    resetPicks.addActionListener(
+        e -> {
+          var model = (LookupTableTableModel) view.getDefinitionTable().getModel();
+          model.clearAllPicks();
+        });
   }
 
   public void initTableDefinitionTable() {
-    defaultRowHeight = getTableDefinitionTable().getRowHeight();
+    JTable definitionTable = view.getDefinitionTable();
 
-    getTableDefinitionTable().setDefaultRenderer(ImageAssetPanel.class, new ImageCellRenderer());
-    getTableDefinitionTable().setModel(createLookupTableModel(new LookupTable()));
-    getTableDefinitionTable()
-        .addMouseListener(
-            new MouseAdapter() {
-              @Override
-              public void mousePressed(MouseEvent e) {
-                int column = getTableDefinitionTable().columnAtPoint(e.getPoint());
-                if (column < 2) {
+    defaultRowHeight = definitionTable.getRowHeight();
+
+    definitionTable.setDefaultRenderer(ImageAssetPanel.class, new ImageCellRenderer());
+    definitionTable.setModel(new LookupTableTableModel());
+    definitionTable.addMouseListener(
+        new MouseAdapter() {
+          @Override
+          public void mousePressed(MouseEvent e) {
+            var model = (LookupTableTableModel) definitionTable.getModel();
+
+            int column = model.getCanonicalColumn(definitionTable.columnAtPoint(e.getPoint()));
+            if (column != IMAGE_COLUMN_INDEX) {
+              return;
+            }
+            var row = model.getRowAt(definitionTable.rowAtPoint(e.getPoint()));
+            String imageIdStr = row.getImageId();
+
+            // HACK: this is a hacky way to figure out if the button was pushed :P
+            if (e.getPoint().x > definitionTable.getSize().width - 15) {
+              if (imageIdStr == null || imageIdStr.isEmpty()) {
+                // Add
+                ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
+                chooserDialog.setVisible(true);
+
+                MD5Key imageId = chooserDialog.getImageId();
+                if (imageId == null) {
                   return;
                 }
-                int row = getTableDefinitionTable().rowAtPoint(e.getPoint());
-                String imageIdStr =
-                    (String) getTableDefinitionTable().getModel().getValueAt(row, column);
-
-                // HACK: this is a hacky way to figure out if the button was pushed :P
-                if (e.getPoint().x > getTableDefinitionTable().getSize().width - 15) {
-                  if (imageIdStr == null || imageIdStr.length() == 0) {
-                    // Add
-                    ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
-                    chooserDialog.setVisible(true);
-
-                    MD5Key imageId = chooserDialog.getImageId();
-                    if (imageId == null) {
-                      return;
-                    }
-                    imageIdStr = imageId.toString();
-                  } else {
-                    // Cancel
-                    imageIdStr = null;
-                  }
-                } else if (e.getPoint().x > getTableDefinitionTable().getSize().width - 30) {
-                  // Add
-                  ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
-
-                  chooserDialog.setVisible(true);
-
-                  MD5Key imageId = chooserDialog.getImageId();
-                  if (imageId == null) {
-                    return;
-                  }
-                  imageIdStr = imageId.toString();
-                }
-                getTableDefinitionTable().getModel().setValueAt(imageIdStr, row, column);
-                updateDefinitionTableRowHeights();
-                getTableDefinitionTable().repaint();
+                imageIdStr = imageId.toString();
+              } else {
+                // Cancel
+                imageIdStr = null;
               }
-            });
+            } else if (e.getPoint().x > definitionTable.getSize().width - 30) {
+              // Add
+              ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
+
+              chooserDialog.setVisible(true);
+
+              MD5Key imageId = chooserDialog.getImageId();
+              if (imageId == null) {
+                return;
+              }
+              imageIdStr = imageId.toString();
+            }
+
+            // Commit our changes back.
+            row.setImageId(imageIdStr);
+          }
+        });
   }
 
   public void initTableImage() {
     tableImageAssetPanel = new ImageAssetPanel();
     tableImageAssetPanel.setPreferredSize(new Dimension(150, 150));
     tableImageAssetPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-    replaceComponent("mainForm", "tableImage", tableImageAssetPanel);
+
+    replaceComponent(view.getTableImagePlaceholder(), tableImageAssetPanel);
   }
 
-  public void attach(LookupTable luTable) {
-    newTable = luTable == null;
-    lookupTable = newTable ? new LookupTable() : luTable;
-    accepted = false;
+  @Override
+  public void bind(LookupTable lookupTable) {
+    super.bind(lookupTable);
 
-    getTableNameTextField().setText(this.lookupTable.getName());
-    getTableRollTextField().setText(this.lookupTable.getRoll());
-    tableImageAssetPanel.setImageId(this.lookupTable.getTableImage());
-    getVisibleCheckbox().setSelected(this.lookupTable.getVisible());
-    getAllowLookupCheckbox().setSelected(this.lookupTable.getAllowLookup());
+    view.getTableName().setText(lookupTable.getName());
+    view.getDefaultTableRoll()
+        .setText(lookupTable.getPickOnce() ? "" : lookupTable.calculateRoll());
+    tableImageAssetPanel.setImageId(lookupTable.getTableImage());
+    view.getIsVisible().setSelected(lookupTable.getVisible());
+    view.getAllowLookup().setSelected(lookupTable.getAllowLookup());
 
-    getTableNameTextField().requestFocusInWindow();
+    view.getPickOnce().setSelected(lookupTable.getPickOnce());
+    view.getDefaultTableRoll().setEnabled(!lookupTable.getPickOnce());
+    view.getResetPicks().setEnabled(lookupTable.getPickOnce());
 
-    EventQueue.invokeLater(
-        () -> {
-          getTableDefinitionTable()
-              .setModel(createLookupTableModel(EditLookupTablePanel.this.lookupTable));
-          updateDefinitionTableRowHeights();
-        });
+    view.getTableName().requestFocusInWindow();
+
+    var model = new LookupTableTableModel();
+    model.addTableModelListener(e -> updateDefinitionTableRowHeights());
+    view.getDefinitionTable().setModel(model);
+    populateLookupTableModel(lookupTable, model);
   }
 
-  public boolean accepted() {
-    return accepted;
-  }
+  @Override
+  public boolean commit() {
+    if (!super.commit()) {
+      return false;
+    }
 
-  public JTextField getTableNameTextField() {
-    return (JTextField) getComponent("tableName");
-  }
+    var lookupTable = getModel();
 
-  public JTextField getTableRollTextField() {
-    return (JTextField) getComponent("defaultTableRoll");
-  }
+    // Commit any in-process edits
+    var definitionTable = view.getDefinitionTable();
+    if (definitionTable.isEditing()) {
+      definitionTable.getCellEditor().stopCellEditing();
+    }
+    String name = view.getTableName().getText().trim();
+    if (name.isEmpty()) {
+      MapTool.showError("EditLookupTablePanel.error.noName");
+      return false;
+    }
+    LookupTable existingTable = MapTool.getCampaign().getLookupTableMap().get(name);
+    if (existingTable != null && existingTable != lookupTable) {
+      MapTool.showError(I18N.getText("EditLookupTablePanel.error.sameName", name));
+      return false;
+    }
+    var tableModel = (LookupTableTableModel) definitionTable.getModel();
+    if (tableModel.getRowCount() < 1) {
+      MapTool.showError(I18N.getText("EditLookupTablePanel.error.invalidSize", name));
+      return false;
+    }
+    var isPickOnce = view.getPickOnce().isSelected();
 
-  public JTable getTableDefinitionTable() {
-    return (JTable) getComponent("definitionTable");
-  }
+    // Before modifying the table, parse and validate all the entries to avoid partial modification
+    // in case of error.
+    var entries = new ArrayList<LookupTable.LookupEntry>();
+    for (int i = 0; i < tableModel.getRowCount(); i++) {
+      var row = tableModel.getRowAt(i);
+      var range = row.getRange();
+      if (range.isEmpty()) {
+        continue;
+      }
 
-  public JList getTableList() {
-    return (JList) getComponent("tableList");
-  }
+      int min;
+      int max;
+      // Allow negative numbers
+      int split = range.indexOf('-', range.charAt(0) == '-' ? 1 : 0);
+      try {
+        if (split < 0) {
+          min = Integer.parseInt(range);
+          max = min;
+        } else {
+          min = Integer.parseInt(range.substring(0, split).trim());
+          max = Integer.parseInt(range.substring(split + 1).trim());
+        }
+      } catch (NumberFormatException nfe) {
+        MapTool.showError(I18N.getText("EditLookupTablePanel.error.badRange", name, range, i));
+        return false;
+      }
 
-  public JCheckBox getVisibleCheckbox() {
-    return (JCheckBox) getComponent("visibleCheckbox");
-  }
+      MD5Key image = null;
+      if (row.getImageId() != null && !row.getImageId().isEmpty()) {
+        image = new MD5Key(row.getImageId());
+        MapToolUtil.uploadAsset(AssetManager.getAsset(image));
+      }
 
-  public JCheckBox getAllowLookupCheckbox() {
-    return (JCheckBox) getComponent("allowLookupCheckbox");
-  }
+      var entry = new LookupEntry(min, max, row.getValue(), image);
+      if (isPickOnce) {
+        entry.setPicked(row.isPicked());
+      }
+      entries.add(entry);
+    }
 
-  public void initCancelButton() {
-    JButton button = (JButton) getComponent("cancelButton");
-    button.addActionListener(
-        e -> {
-          accepted = false;
-          close();
-        });
-  }
+    // save existing name for later removal from LookupTableMap
+    String origname = lookupTable.getName();
+    lookupTable.setName(name);
+    lookupTable.setPickOnce(isPickOnce);
+    lookupTable.setRoll(isPickOnce ? null : view.getDefaultTableRoll().getText());
+    lookupTable.setTableImage(tableImageAssetPanel.getImageId());
+    lookupTable.setVisible(view.getIsVisible().isSelected());
+    lookupTable.setAllowLookup(view.getAllowLookup().isSelected());
 
-  public void initAcceptButton() {
-    JButton button = (JButton) getComponent("acceptButton");
-    button.addActionListener(
-        e -> {
-          // Commit any in-process edits
-          if (getTableDefinitionTable().isEditing()) {
-            getTableDefinitionTable().getCellEditor().stopCellEditing();
-          }
-          String name = getTableNameTextField().getText().trim();
-          if (name.length() == 0) {
-            MapTool.showError("EditLookupTablePanel.error.noName");
-            return;
-          }
-          LookupTable existingTable = MapTool.getCampaign().getLookupTableMap().get(name);
-          if (existingTable != null && existingTable != lookupTable) {
-            MapTool.showError(I18N.getText("EditLookupTablePanel.error.sameName", name));
-            return;
-          }
-          TableModel tableModel = getTableDefinitionTable().getModel();
-          if (tableModel.getRowCount() < 1) {
-            MapTool.showError(I18N.getText("EditLookupTablePanel.error.invalidSize", name));
-            return;
-          }
-          String origname =
-              lookupTable.getName(); // save existing name for later removal from LookupTableMap
-          lookupTable.setName(name);
-          lookupTable.setRoll(getTableRollTextField().getText());
-          lookupTable.setTableImage(tableImageAssetPanel.getImageId());
-          lookupTable.setVisible(getVisibleCheckbox().isSelected());
-          lookupTable.setAllowLookup(getAllowLookupCheckbox().isSelected());
-          lookupTable.clearEntries();
-          for (int i = 0; i < tableModel.getRowCount(); i++) {
-            String range = ((String) tableModel.getValueAt(i, 0)).trim();
-            if (range.length() == 0) {
-              continue;
-            }
-            String value = ((String) tableModel.getValueAt(i, 1)).trim();
-            String imageId = (String) tableModel.getValueAt(i, 2);
+    lookupTable.clearEntries();
+    for (var entry : entries) {
+      var copy =
+          lookupTable.addEntry(
+              entry.getMin(), entry.getMax(), entry.getValue(), entry.getImageId());
+      copy.setPicked(entry.getPicked());
+    }
 
-            int min = 0;
-            int max = 0;
+    if (!name.equals(origname)) {
+      // New name is not the same as the existing name
+      MapTool.getCampaign().getLookupTableMap().remove(origname);
+    }
+    // This will add it if it is new
+    MapToolUtil.uploadAsset(AssetManager.getAsset(tableImageAssetPanel.getImageId()));
+    MapTool.serverCommand().putLookupTable(lookupTable);
 
-            int split =
-                range.indexOf('-', range.charAt(0) == '-' ? 1 : 0); // Allow negative numbers
-            try {
-              if (split < 0) {
-                min = Integer.parseInt(range);
-                max = min;
-              } else {
-                min = Integer.parseInt(range.substring(0, split).trim());
-                max = Integer.parseInt(range.substring(split + 1).trim());
-              }
-            } catch (NumberFormatException nfe) {
-              MapTool.showError(
-                  I18N.getText("EditLookupTablePanel.error.badRange", name, range, i));
-              return;
-            }
-            MD5Key image = null;
-            if (imageId != null && imageId.length() > 0) {
-              image = new MD5Key(imageId);
-              MapToolUtil.uploadAsset(AssetManager.getAsset(image));
-            }
-            lookupTable.addEntry(min, max, value, image);
-          }
-          if (!name.equals(origname)) {
-            // New name is not the same as the existing name
-            MapTool.getCampaign().getLookupTableMap().remove(origname);
-          }
-          // This will add it if it is new
-          MapToolUtil.uploadAsset(AssetManager.getAsset(tableImageAssetPanel.getImageId()));
-          MapTool.getCampaign().getLookupTableMap().put(name, lookupTable);
-          MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-          accepted = true;
-          close();
-        });
-  }
-
-  private void close() {
-    SwingUtilities.getWindowAncestor(this).setVisible(false);
+    return true;
   }
 
   private void updateDefinitionTableRowHeights() {
-    JTable table = getTableDefinitionTable();
+    JTable table = view.getDefinitionTable();
+    var model = (LookupTableTableModel) table.getModel();
+
     for (int row = 0; row < table.getRowCount(); row++) {
-      String imageId = (String) table.getModel().getValueAt(row, 2);
-      table.setRowHeight(row, imageId != null && imageId.length() > 0 ? 100 : defaultRowHeight);
+      String imageId = model.getRowAt(row).getImageId();
+      table.setRowHeight(row, imageId != null && !imageId.isEmpty() ? 100 : defaultRowHeight);
     }
   }
 
-  private LookupTableTableModel createLookupTableModel(LookupTable lookupTable) {
-    List<List<String>> rows = new ArrayList<List<String>>();
-    if (lookupTable != null) {
-      for (LookupEntry entry : lookupTable.getEntryList()) {
-        String range =
-            entry.getMax() != entry.getMin()
-                ? entry.getMin() + "-" + entry.getMax()
-                : "" + entry.getMin();
-        String value = entry.getValue();
-        MD5Key imageId = entry.getImageId();
+  private void populateLookupTableModel(LookupTable lookupTable, LookupTableTableModel model) {
+    for (LookupEntry entry : lookupTable.getEntryList()) {
+      boolean picked = entry.getPicked();
+      String range =
+          entry.getMax() != entry.getMin()
+              ? entry.getMin() + "-" + entry.getMax()
+              : "" + entry.getMin();
+      String value = entry.getValue();
+      MD5Key imageId = entry.getImageId();
 
-        rows.add(Arrays.asList(range, value, imageId != null ? imageId.toString() : null));
-      }
+      model.addRow(picked, range, value, imageId != null ? imageId.toString() : null);
     }
-    return new LookupTableTableModel(
-        rows,
-        I18N.getText("Label.range"),
-        I18N.getText("Label.value"),
-        I18N.getText("Label.image"));
+    model.showPicks(lookupTable.getPickOnce());
   }
 
   private class ImageCellRenderer extends ImageAssetPanel implements TableCellRenderer {
-    private static final long serialVersionUID = 183503471819640825L;
-
     public Component getTableCellRendererComponent(
         JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-      setImageId(
-          value != null && ((String) value).length() > 0 ? new MD5Key((String) value) : null,
-          EditLookupTablePanel.this);
+      String s = value == null ? "" : Objects.requireNonNullElse(value.toString(), "");
+      setImageId(!s.isEmpty() ? new MD5Key(s) : null, EditLookupTablePanel.this);
       return this;
     }
   }
 
-  static class LookupTableTableModel extends AbstractTableModel {
-    private static final long serialVersionUID = -6310344745803084970L;
+  private static final class LookupTableRow {
+    private final PropertyChangeSupport pcs;
+    private boolean picked;
+    private String range;
+    private String value;
+    private @Nullable String imageId;
 
-    private List<String> newRow = new ArrayList<String>();
-    private final List<List<String>> rowList;
-    private final String[] cols;
+    public LookupTableRow() {
+      this(false, "", "", null);
+    }
 
-    public LookupTableTableModel(List<List<String>> rowList, String... cols) {
-      this.rowList = rowList;
-      this.cols = cols;
+    public LookupTableRow(boolean picked, String range, String value, @Nullable String imageId) {
+      this.picked = picked;
+      this.range = range;
+      this.value = value;
+      this.imageId = imageId;
+      this.pcs = new PropertyChangeSupport(this);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+      this.pcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+      this.pcs.removePropertyChangeListener(listener);
+    }
+
+    public boolean isPicked() {
+      return picked;
+    }
+
+    public void setPicked(boolean picked) {
+      var oldValue = this.picked;
+      this.picked = picked;
+      this.pcs.firePropertyChange("picked", oldValue, picked);
+    }
+
+    public String getRange() {
+      return range;
+    }
+
+    public void setRange(String range) {
+      var oldValue = this.range;
+      this.range = range;
+      this.pcs.firePropertyChange("range", oldValue, range);
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    public void setValue(String value) {
+      var oldValue = this.value;
+      this.value = value;
+      this.pcs.firePropertyChange("value", oldValue, value);
+    }
+
+    public @Nullable String getImageId() {
+      return imageId;
+    }
+
+    public void setImageId(@Nullable String imageId) {
+      var oldValue = this.imageId;
+      this.imageId = imageId;
+      this.pcs.firePropertyChange("imageId", oldValue, imageId);
+    }
+  }
+
+  private static final class LookupTableTableModel extends AbstractTableModel
+      implements PropertyChangeListener {
+    private LookupTableRow newRow = new LookupTableRow();
+    private final List<LookupTableRow> rowList;
+
+    private final List<String> columnNames =
+        List.of(
+            I18N.getText("Label.isPicked"),
+            I18N.getText("Label.range"),
+            I18N.getText("Label.value"),
+            I18N.getText("Label.image"));
+    private boolean showPicks = false;
+
+    public LookupTableTableModel() {
+      this.rowList = new ArrayList<>();
+      newRow.addPropertyChangeListener(this);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+      fireTableDataChanged();
+    }
+
+    public void addRow(boolean isPicked, String range, String value, @Nullable String imageId) {
+      var row = new LookupTableRow(isPicked, range, value, imageId);
+      rowList.add(row);
+      row.addPropertyChangeListener(this);
+      fireTableRowsInserted(rowList.size(), rowList.size());
+    }
+
+    public int getCanonicalColumn(int columnIndex) {
+      // When the "Picked?" column is not present, the column indices don't line up with our
+      // predefined constants. So increment the index to match those.
+      return columnIndex + (showPicks ? 0 : 1);
+    }
+
+    public void showPicks(boolean show) {
+      this.showPicks = show;
+      fireTableStructureChanged();
+      // This one is needed to make sure the rows all update immediately as well.
+      fireTableDataChanged();
+    }
+
+    public void clearAllPicks() {
+      for (var row : rowList) {
+        row.setPicked(false);
+      }
+      newRow.setPicked(false);
+      fireTableRowsUpdated(0, getRowCount());
+    }
+
+    public LookupTableRow getRowAt(int rowIndex) {
+      if (rowIndex < 0 || rowIndex > rowList.size()) {
+        throw new IndexOutOfBoundsException(rowIndex);
+      }
+      if (rowIndex == rowList.size()) {
+        return newRow;
+      }
+      return rowList.get(rowIndex);
     }
 
     public int getColumnCount() {
-      return cols.length;
+      var columnCount = columnNames.size();
+      if (!showPicks) {
+        --columnCount;
+      }
+      return columnCount;
     }
 
     public int getRowCount() {
@@ -321,57 +475,66 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {
-      List<String> row = null;
+      columnIndex = getCanonicalColumn(columnIndex);
 
-      // Existing value
-      if (rowIndex < rowList.size()) {
-        row = rowList.get(rowIndex);
-      } else {
-        row = newRow;
-      }
-      return columnIndex < row.size() ? row.get(columnIndex) : "";
+      LookupTableRow row = rowIndex < rowList.size() ? rowList.get(rowIndex) : newRow;
+
+      return switch (columnIndex) {
+        case PICKED_COLUMN_INDEX -> row.isPicked();
+        case RANGE_COLUMN_INDEX -> row.getRange();
+        case VALUE_COLUMN_INDEX -> row.getValue();
+        case IMAGE_COLUMN_INDEX -> row.getImageId();
+        default -> "";
+      };
     }
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-      boolean hasNewRow = false;
-      List<String> row = null;
-      if (rowIndex < rowList.size()) {
-        row = rowList.get(rowIndex);
-      } else {
-        row = newRow;
+      columnIndex = getCanonicalColumn(columnIndex);
+
+      LookupTableRow row = rowIndex < rowList.size() ? rowList.get(rowIndex) : newRow;
+
+      switch (columnIndex) {
+        case PICKED_COLUMN_INDEX -> row.setPicked((boolean) aValue);
+        case RANGE_COLUMN_INDEX -> row.setRange((String) aValue);
+        case VALUE_COLUMN_INDEX -> row.setValue((String) aValue);
+        case IMAGE_COLUMN_INDEX -> row.setImageId((String) aValue);
+      }
+
+      if (row == newRow) {
+        // Need to make the row permanent, and add a new placeholder.
         rowList.add(newRow);
-        newRow = new ArrayList<String>();
-        hasNewRow = true;
-      }
-      while (columnIndex >= row.size()) {
-        row.add("");
-      }
-      row.set(columnIndex, (String) aValue);
-      if (hasNewRow) {
+        newRow = new LookupTableRow();
+        newRow.addPropertyChangeListener(this);
         fireTableRowsInserted(rowList.size(), rowList.size());
       }
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-      return columnIndex < 2 ? String.class : ImageAssetPanel.class;
+      columnIndex = getCanonicalColumn(columnIndex);
+
+      if (columnIndex == PICKED_COLUMN_INDEX) {
+        return Boolean.class;
+      } else if (columnIndex == IMAGE_COLUMN_INDEX) {
+        return ImageAssetPanel.class;
+      } else {
+        return String.class;
+      }
     }
 
     @Override
-    public String getColumnName(int column) {
-      return cols[column];
+    public String getColumnName(int columnIndex) {
+      columnIndex = getCanonicalColumn(columnIndex);
+
+      return columnNames.get(columnIndex);
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-      return columnIndex != 2;
-    }
-  }
+      columnIndex = getCanonicalColumn(columnIndex);
 
-  public void initToolTips() {
-    getVisibleCheckbox().setToolTipText(I18N.getString("EditLookupTablePanel.tooltip.visible"));
-    getAllowLookupCheckbox()
-        .setToolTipText(I18N.getString("EditLookupTablePanel.tooltip.allowLookup"));
+      return columnIndex != IMAGE_COLUMN_INDEX;
+    }
   }
 }

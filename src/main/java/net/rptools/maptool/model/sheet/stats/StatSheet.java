@@ -30,6 +30,10 @@ import java.util.Set;
  */
 public record StatSheet(
     String name, String description, URL entry, Set<String> propertyTypes, String namespace) {
+  public String id() {
+    return namespace + "." + name;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof StatSheet other)) {

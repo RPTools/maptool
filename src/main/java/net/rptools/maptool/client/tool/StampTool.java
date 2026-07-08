@@ -132,8 +132,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   }
 
   public void startTokenDrag(Token keyToken, Set<GUID> tokens) {
-    startTokenDrag(
-        keyToken, tokens, new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer), false);
+    startTokenDrag(keyToken, tokens, keyToken.getDragAnchor(renderer.getZone()), false);
   }
 
   private void startTokenDrag(
@@ -219,7 +218,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
                 .startTokenDrag(
                     location.getToken(),
                     Collections.singleton(location.getToken().getId()),
-                    new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer),
+                    new ScreenPoint(dragStartX, dragStartY)
+                        .convertToZone(renderer.getViewModel().getZoneScale()),
                     false);
           }
           return;
@@ -622,7 +622,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         startTokenDrag(
             tokenUnderMouse,
             selectedTokenSet,
-            new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer),
+            new ScreenPoint(dragStartX, dragStartY)
+                .convertToZone(renderer.getViewModel().getZoneScale()),
             false);
         SwingUtil.hidePointer(renderer);
       }
@@ -1000,14 +1001,17 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         }
         // Resize
         if (!token.isSnapToScale()) {
-          double scale = renderer.getScale();
+          double scale = renderer.getViewModel().getZoneScale().getScale();
           Rectangle footprintBounds = token.getFootprintBounds(renderer.getZone());
 
           double scaledWidth = (footprintBounds.width * scale);
           double scaledHeight = (footprintBounds.height * scale);
 
           ScreenPoint stampLocation =
-              ScreenPoint.fromZonePoint(renderer, footprintBounds.x, footprintBounds.y);
+              renderer
+                  .getViewModel()
+                  .getZoneScale()
+                  .toScreenSpace(footprintBounds.x, footprintBounds.y);
 
           // distance to place the resize image in the lower left corner of an unrotated stamp
           double tx = stampLocation.x + scaledWidth - resizeImg.getWidth();
@@ -1088,7 +1092,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         && cellWidthSelected > 0
         && cellHeightSelected > 0) {
       double gridSize = renderer.getZone().getGrid().getSize();
-      double zoneScale = renderer.getScale();
+      double zoneScale = renderer.getViewModel().getZoneScale().getScale();
       double newScaleX =
           ((gridSize * cellWidthSelected) / (selectedWidth / zoneScale)) * currentScaleX;
       double newScaleY =
@@ -1107,7 +1111,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
   public void adjustAnchor(double scaleX, double scaleY) {
     ZonePoint selectionTr =
-        ScreenPoint.convertToZone(renderer, selectionBoundBox.getX(), selectionBoundBox.getY());
+        new ScreenPoint(selectionBoundBox.getX(), selectionBoundBox.getY())
+            .convertToZone(renderer.getViewModel().getZoneScale());
     int gridSize = renderer.getZone().getGrid().getSize();
     int tokenX = tokenUnderMouse.getX() + tokenUnderMouse.getAnchor().x;
     int tokenY = tokenUnderMouse.getY() + tokenUnderMouse.getAnchor().y;
@@ -1171,7 +1176,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         renderer.setShape4(new Rectangle2D.Double(dragAnchor.x - 5, dragAnchor.y - 5, 10, 10));
       }
 
-      ZonePoint zonePoint = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
+      ZonePoint zonePoint =
+          new ScreenPoint(mouseX, mouseY).convertToZone(renderer.getViewModel().getZoneScale());
       zonePoint.x += dragAnchor.x - tokenDragStart.x;
       zonePoint.y += dragAnchor.y - tokenDragStart.y;
 
@@ -1283,7 +1289,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       this.originalScaleY = tokenBeingResized.getScaleY();
       this.startDragReference =
           new ScreenPoint(dragStartX + dragOffsetX, dragStartY + dragOffsetY)
-              .convertToZone(renderer);
+              .convertToZone(renderer.getViewModel().getZoneScale());
 
       this.tokenImage = ImageManager.getImage(tokenBeingResized.getImageAssetId());
     }
@@ -1294,7 +1300,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     }
 
     public void dragTo(int mouseX, int mouseY, boolean lockAspectRatio, boolean snapSizeToGrid) {
-      var currentZp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
+      var currentZp =
+          new ScreenPoint(mouseX, mouseY).convertToZone(renderer.getViewModel().getZoneScale());
       if (snapSizeToGrid) { // snap size to grid
         currentZp = renderer.getZone().getGrid().getNearestVertex(currentZp);
       } else {

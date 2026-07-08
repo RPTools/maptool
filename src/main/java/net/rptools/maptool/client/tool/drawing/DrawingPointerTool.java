@@ -23,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.RectangularShape;
 import java.io.Serial;
 import java.util.*;
 import java.util.List;
@@ -32,7 +33,6 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.events.ZoneActivated;
-import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.swing.label.FlatImageLabel;
 import net.rptools.maptool.client.swing.label.FlatImageLabelFactory;
 import net.rptools.maptool.client.tool.DefaultTool;
@@ -75,16 +75,12 @@ import org.apache.logging.log4j.Logger;
  *
  * <ul>
  *   <li>Shows the name label (if it has a name)
- *   <li><kbd>CTRL</kbd>+<kbd>V</kbd> duplicate selected (templates only)
+ *   <li><kbd>CTRL</kbd>+<kbd>V</kbd> duplicate selected
  *   <li><kbd>DELETE</kbd> delete selected
- * </ul>
- *
- * <h6>Once selected (templates only):</h6>
- *
- * <ul>
- *   <li><kbd>Left Press</kbd> Show the template(s) size/radius
- *   <li><kbd>Left Drag</kbd> if a GM or server movement policy permits, move the template(s), will
- *       then show the movement distance according using the movement metric setting.
+ *   <li><kbd>Left Press</kbd> Prepare to drag. Show the template(s) size/radius
+ *   <li><kbd>Left Drag</kbd> if a GM or server movement policy permits, move the drawable(s),
+ *       templates will show the movement distance according using the movement metric setting.
+ *   <li><kbd>Left Drag</kbd>+<kbd>CTRL</kbd> if a drawing, snap dragging to grid.
  * </ul>
  *
  * <h6>Once selected (single template only):</h6>
@@ -121,6 +117,12 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   private static final Set<DrawnElement> draggedDrawnElementSet = new HashSet<>();
 
   /**
+   * Stores pre-drag bounds of {@link Drawable}s. Used for snapping dragged drawings to grid based
+   * on their original position.
+   */
+  private static final Map<GUID, Rectangle> draggedStartBoundsMap = new HashMap<>();
+
+  /**
    * Factory to generate {@link FlatImageLabel}s for drawing/template name labels. Will be assigned
    * prior to each use as user color preferences may change.
    */
@@ -141,7 +143,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   private static final DrawPanelPopupMenu.DuplicateDrawingAction duplicateAction =
       new DrawPanelPopupMenu.DuplicateDrawingAction(selectedDrawableIdSet);
 
-  private static final Logger LOGGER = LogManager.getLogger(DrawingPointerTool.class);
+  private static final Logger log = LogManager.getLogger(DrawingPointerTool.class);
 
   /** Color picker related variables */
   private boolean isSnapToGridSelected;
@@ -167,6 +169,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
 
   private ZonePoint dragStartVertex = null;
   private ZonePoint dragWorkingCell = null;
+  private ZonePoint dragWorkingZonePoint = null;
 
   /** An enumeration of template cursor types. */
   private enum templateCursorType {
@@ -251,7 +254,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   /**
-   * Either drag drawings, or draw a draggable selection box.
+   * Either drag templates, drag drawings, or draw a draggable selection box.
    *
    * @param e the event to be processed
    */
@@ -259,12 +262,10 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   public void mouseDragged(MouseEvent e) {
     super.mouseDragged(e);
 
-    if (isDraggingDrawings) {
+    if (isDraggingDrawings && selectedTool.equals(TemplatePointerTool.class)) {
       ZonePoint dragTargetCell = getCellAtMouse(e);
       if (!dragWorkingCell.equals(dragTargetCell)) {
-
         for (DrawnElement de : draggedDrawnElementSet) {
-          // Currently drag templates only
           Drawable d = de.getDrawable();
           if (d instanceof AbstractTemplate at) {
             updateDraggedDrawnElements(e, at);
@@ -273,6 +274,26 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
         dragWorkingCell = dragTargetCell;
         renderer.repaint();
       }
+
+    } else if (isDraggingDrawings && selectedTool.equals(DrawingPointerTool.class)) {
+      ZonePoint dragTargetZonePoint =
+          new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
+      if (e.isControlDown()) {
+        dragTargetZonePoint = renderer.getZone().getGrid().getNearestVertex(dragTargetZonePoint);
+      }
+      for (DrawnElement de : draggedDrawnElementSet) {
+        Drawable d = de.getDrawable();
+        if (d instanceof DrawablesGroup dg) {
+          updateDraggedDrawnElements(e, dg);
+        } else if (d instanceof ShapeDrawable sd) {
+          updateDraggedDrawnElements(e, sd);
+        } else if (d instanceof LineSegment ls) {
+          updateDraggedDrawnElements(e, ls);
+        }
+      }
+      dragWorkingZonePoint = dragTargetZonePoint;
+      renderer.repaint();
+
     } else if (isDraggingSelectionBox) {
       int x1 = dragStartPoint.x;
       int y1 = dragStartPoint.y;
@@ -441,10 +462,10 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
         // Derive a zone rectangle from the screen rectangle
         ZonePoint zpMin =
             new ScreenPoint(drawingSelectionBox.getMinX(), drawingSelectionBox.getMinY())
-                .convertToZone(renderer);
+                .convertToZone(renderer.getViewModel().getZoneScale());
         ZonePoint zpMax =
             new ScreenPoint(drawingSelectionBox.getMaxX(), drawingSelectionBox.getMaxY())
-                .convertToZone(renderer);
+                .convertToZone(renderer.getViewModel().getZoneScale());
         Rectangle zoneTemplateSelectionBox =
             new Rectangle(zpMin.x, zpMin.y, zpMax.x - zpMin.x, zpMax.y - zpMin.y);
 
@@ -453,25 +474,24 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
 
         for (DrawnElement de : drawableList) {
           Drawable d = de.getDrawable();
-          // Only select drawing types relevant to the tool
-          // Object selectedTool = MapTool.getFrame().getToolbox().getSelectedTool().getClass();
+          // Only select drawn element types relevant to the tool
           boolean isTemplate = isTemplate(de);
           if (selectedTool == TemplatePointerTool.class && isTemplate
               || selectedTool == DrawingPointerTool.class && !isTemplate) {
 
             GUID id = d.getId();
-            // Check if the template bounds is within the bounds of the selection box
+            // Check if the drawable bounds is within the bounds of the selection box
             if (zoneTemplateSelectionBox.contains(d.getBounds(zone))) {
 
               boolean isControlCheck = true;
               boolean isAltCheck = true;
-              // CTRL key - check if the template border color matches the color picker
+              // CTRL key - check if the border color matches the color picker
               if (e.isControlDown()) {
                 isControlCheck =
                     drawablePaintToString(de.getPen().getPaint())
                         .equals(drawablePaintToString(getPen().getPaint()));
               }
-              // ALT key - check if the template fill color matches the color picker
+              // ALT key - check if the fill color matches the color picker
               if (e.isAltDown()) {
                 isAltCheck =
                     drawablePaintToString(de.getPen().getBackgroundPaint())
@@ -610,17 +630,20 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
    */
   private void dragDrawnElementsStart(MouseEvent e) {
 
-    if (isTemplate(drawnElementAtMouse)) {
-      renderer.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-    }
+    renderer.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 
     isDraggingDrawings = true;
     isDraggingSelectionBox = false;
     dragStartPoint = new Point(e.getX(), e.getY());
     dragWorkingCell = getCellAtMouse(e);
+    dragWorkingZonePoint =
+        new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
     if (drawnElementAtMouse.getDrawable() instanceof AbstractTemplate at) {
       dragStartVertex = new ZonePoint(at.getVertex());
+    } else {
+      dragStartVertex = renderer.getZone().getGrid().getNearestVertex(dragWorkingZonePoint);
     }
+
     setDraggedDrawnElementsSet();
   }
 
@@ -651,13 +674,15 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
    * @return The cell at the mouse point in screen coordinates.
    */
   private ZonePoint getCellAtMouse(MouseEvent e) {
+    var zoneScale = renderer.getViewModel().getZoneScale();
+
     // Find the cell that the mouse is in.
-    ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+    ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(zoneScale);
     CellPoint cp = getZone().getGrid().convert(mouse);
     ZonePoint working = getZone().getGrid().convert(cp);
 
     // If the mouse is over halfway to the next vertex, move it there (both X & Y)
-    int grid = (int) (getZone().getGrid().getSize() * renderer.getScale());
+    int grid = (int) (getZone().getGrid().getSize() * zoneScale.getScale());
     if (mouse.x - working.x >= grid / 2) {
       working.x += getZone().getGrid().getSize();
     }
@@ -695,7 +720,9 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       if (selectedTool == TemplatePointerTool.class && isTemplate
           || selectedTool == DrawingPointerTool.class && !isTemplate) {
         Area area = de.getDrawable().getArea(zone);
-        ZonePoint zonePos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+        ZonePoint zonePos =
+            new ScreenPoint(e.getX(), e.getY())
+                .convertToZone(renderer.getViewModel().getZoneScale());
         if (area.contains(new Point(zonePos.x, zonePos.y))) {
           drawingsAtMouseList.add(de);
           if (de.equals(drawnElementAtMouse)) {
@@ -757,10 +784,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   private AffineTransform getPaintTransform(ZoneRenderer renderer) {
-    AffineTransform transform = new AffineTransform();
-    transform.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-    transform.scale(renderer.getScale(), renderer.getScale());
-    return transform;
+    return renderer.getViewModel().getZoneScale().toScreenTransform();
   }
 
   /**
@@ -769,23 +793,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
    * @return Pen
    */
   protected Pen getPen() {
-    Pen pen = new Pen(MapTool.getFrame().getPen());
-    pen.setEraser(isEraser);
-
-    ColorPicker picker = MapTool.getFrame().getColorPicker();
-    if (picker.isFillForegroundSelected()) {
-      pen.setForegroundMode(Pen.MODE_SOLID);
-    } else {
-      pen.setForegroundMode(Pen.MODE_TRANSPARENT);
-    }
-    if (picker.isFillBackgroundSelected()) {
-      pen.setBackgroundMode(Pen.MODE_SOLID);
-    } else {
-      pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
-    }
-    pen.setSquareCap(picker.isSquareCapSelected());
-    pen.setThickness(picker.getStrokeWidth());
-    return pen;
+    return MapTool.getFrame().getPen(isEraser);
   }
 
   /**
@@ -807,7 +815,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
 
   /**
    * Helper method to get the path vertex for the template (for known template types that have
-   * them). *
+   * them).
    *
    * @param at The template.
    * @return The zone point for the path vertex, or <code>null</code>.
@@ -867,8 +875,11 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   /**
-   * Paints the drawings which are being changed via dragging. This could be a change in position,
-   * path, radius, direction, etc.
+   * Paints the drawables which are being changed via dragging.
+   *
+   * <p>For templates this could be a change in position, path, radius, direction, etc.
+   *
+   * <p>For drawings this is just a change in position
    *
    * @param g where to paint.
    */
@@ -878,8 +889,9 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
     for (DrawnElement de : draggedDrawnElementSet) {
       if (de != null) {
 
-        // Templates only
         if (de.getDrawable() instanceof AbstractTemplate at) {
+          // i.e. templates only
+
           Pen pen = de.getPen();
           AffineTransform oldTransform = g.getTransform();
           AffineTransform newTransform = g.getTransform();
@@ -906,6 +918,36 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
           if (drawnElementAtMouse.getDrawable().getId() == at.getId()) {
             paintTemplateMovementLabel(g, dragStartVertex, at);
           }
+
+        } else if (de.getDrawable() instanceof LineSegment ls) {
+          // e.g. points and lines
+
+          AffineTransform oldTransform = g.getTransform();
+          AffineTransform newTransform = g.getTransform();
+          newTransform.concatenate(getPaintTransform(renderer));
+          g.setTransform(newTransform);
+          ls.draw(getZone(), g, de.getPen());
+          g.setTransform(oldTransform);
+
+        } else if (de.getDrawable() instanceof ShapeDrawable sd) {
+          // e.g. rectangles, ellipses, etc
+
+          AffineTransform oldTransform = g.getTransform();
+          AffineTransform newTransform = g.getTransform();
+          newTransform.concatenate(getPaintTransform(renderer));
+          g.setTransform(newTransform);
+          sd.draw(getZone(), g, de.getPen());
+          g.setTransform(oldTransform);
+
+        } else if (de.getDrawable() instanceof DrawablesGroup dg) {
+          // groups of drawables (inc. other groups)
+
+          AffineTransform oldTransform = g.getTransform();
+          AffineTransform newTransform = g.getTransform();
+          newTransform.concatenate(getPaintTransform(renderer));
+          g.setTransform(newTransform);
+          dg.draw(getZone(), g, de.getPen());
+          g.setTransform(oldTransform);
         }
       }
     } // end for
@@ -941,7 +983,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
         Pen pen = drawnElement.getPen();
         int x = (int) (bounds.getMinX() + bounds.getMaxX()) / 2;
         int y = (int) (bounds.getMaxY() + pen.getThickness());
-        ScreenPoint centerText = ScreenPoint.fromZonePoint(renderer, x, y);
+        ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(x, y);
 
         FlatImageLabel fil = flatImageLabelCache.get(id);
         Dimension nameDimension = fil.getDimensions(g, drawingName);
@@ -964,9 +1006,10 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
     var box = drawnElement.getDrawable().getBounds(getZone());
     var pen = drawnElement.getPen();
 
-    var scale = renderer.getScale();
+    var zoneScale = renderer.getViewModel().getZoneScale();
+    var scale = zoneScale.getScale();
 
-    var screenPoint = ScreenPoint.fromZonePoint(renderer, box.x, box.y);
+    var screenPoint = zoneScale.toScreenSpace(box.x, box.y);
 
     var x = (int) (screenPoint.x - pen.getThickness() * scale / 2);
     var y = (int) (screenPoint.y - pen.getThickness() * scale / 2);
@@ -1071,7 +1114,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       Rectangle bounds = at.getBounds(zone);
       int x = (int) (bounds.getMinX() + bounds.getMaxX()) / 2;
       int y = (int) (bounds.getMaxY());
-      ScreenPoint centerText = ScreenPoint.fromZonePoint(renderer, x, y);
+      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(x, y);
 
       ToolHelper.drawMeasurement(g, moveDistance, (int) centerText.x, (int) centerText.y);
     }
@@ -1104,7 +1147,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       int startY = startVertex.y + offsetXY;
       int endX = endVertex.x + offsetXY;
       int endY = endVertex.y + offsetXY;
-      float[] dashingPattern = {9f, 3f};
+      float[] dashingPattern = {pen.getThickness() * 9, pen.getThickness() * 3};
 
       Composite composite = g.getComposite();
       Paint paint;
@@ -1126,7 +1169,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
               BasicStroke.JOIN_MITER,
               1.0f,
               dashingPattern,
-              2.0f));
+              0));
       g.drawLine(startX, startY, endX, endY);
       g.setComposite(composite);
     }
@@ -1141,7 +1184,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
    */
   private void paintTemplateRadiusLabel(Graphics2D g, ZonePoint zp, AbstractTemplate at) {
     if (at.getRadius() > 0) {
-      ScreenPoint centerText = ScreenPoint.fromZonePoint(renderer, zp);
+      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(zp.x, zp.y);
       centerText.translate(CURSOR_WIDTH, -CURSOR_WIDTH);
       ToolHelper.drawMeasurement(
           g, at.getRadius() * getZone().getUnitsPerCell(), (int) centerText.x, (int) centerText.y);
@@ -1149,9 +1192,12 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   /**
-   * Creates a copy of the {@link DrawnElement}s being dragged. This {@link Set} is used for
-   * displaying the dragged drawings. e.g. for templates this could be either a change in position,
-   * path, direction, and/or size.
+   * Creates a copy of the {@link DrawnElement}s being dragged and stores their pre-drag bounds.
+   *
+   * <p>The {@link Set} is used for displaying the dragged drawings. e.g. for templates this could
+   * be either a change in position, path, direction, and/or size.
+   *
+   * <p>The {@link Map} is used when snapping drawings to grid whilst dragging.
    *
    * <p>In the event of the <kbd>Escape</kbd> key being pressed while dragging, any changes to
    * dragged drawings will not be applied to the original drawings.
@@ -1160,16 +1206,37 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
     List<DrawnElement> drawableList = getDrawnElementsOnLayerList(false);
 
     draggedDrawnElementSet.clear();
+    draggedStartBoundsMap.clear();
     if (!selectedDrawableIdSet.isEmpty()) {
       for (DrawnElement de : drawableList) {
         Drawable d = de.getDrawable();
         GUID id = d.getId();
         if (selectedDrawableIdSet.contains(id)) {
-          if (d instanceof AbstractTemplate) {
-            DrawnElement deCopy = new DrawnElement(de);
-            draggedDrawnElementSet.add(deCopy);
+          DrawnElement deCopy = new DrawnElement(de);
+          draggedDrawnElementSet.add(deCopy);
+          draggedStartBoundsMap.put(id, de.getDrawable().getBounds(getZone()));
+          if (d instanceof DrawablesGroup dg) {
+            setGroupDraggedStartBoundsMap(dg);
           }
         }
+      }
+    }
+  }
+
+  /**
+   * Get the bounds of the drawables group contents, recursively if there are child groups.
+   *
+   * @param dg the drawables group
+   */
+  private void setGroupDraggedStartBoundsMap(DrawablesGroup dg) {
+
+    for (DrawnElement de : dg.getDrawableList()) {
+      if (de.getDrawable() instanceof DrawablesGroup dg2) {
+        setGroupDraggedStartBoundsMap(dg2);
+      } else if (de.getDrawable() instanceof LineSegment ls) {
+        draggedStartBoundsMap.put(ls.getId(), ls.getBounds(getZone()));
+      } else if (de.getDrawable() instanceof ShapeDrawable sd) {
+        draggedStartBoundsMap.put(sd.getId(), sd.getBounds(getZone()));
       }
     }
   }
@@ -1213,6 +1280,96 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
     }
   }
 
+  private void updateDraggedDrawnElements(MouseEvent e, DrawablesGroup dg) {
+
+    if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isMovementLocked()) {
+      // i.e. not allowed
+      return;
+    }
+
+    for (DrawnElement de : dg.getDrawableList()) {
+      if (de.getDrawable() instanceof DrawablesGroup dg2) {
+        updateDraggedDrawnElements(e, dg2);
+      } else if (de.getDrawable() instanceof LineSegment ls) {
+        updateDraggedDrawnElements(e, ls);
+      } else if (de.getDrawable() instanceof ShapeDrawable sd) {
+        updateDraggedDrawnElements(e, sd);
+      }
+    }
+  }
+
+  private void updateDraggedDrawnElements(MouseEvent e, LineSegment ls) {
+
+    if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isMovementLocked()) {
+      // i.e. not allowed
+      return;
+    }
+
+    ZonePoint dragPointOffset =
+        new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
+
+    if (e.isControlDown()) {
+      // Snap to grid based on the drawing's original (i.e. pre-dragged) position.
+      ZonePoint dragNearestVertex = renderer.getZone().getGrid().getNearestVertex(dragPointOffset);
+      dragPointOffset.x =
+          dragStartVertex.x
+              - draggedStartBoundsMap.get(ls.getId()).getBounds().x
+              - dragNearestVertex.x
+              + ls.getBounds(getZone()).x;
+      dragPointOffset.y =
+          dragStartVertex.y
+              - draggedStartBoundsMap.get(ls.getId()).getBounds().y
+              - dragNearestVertex.y
+              + ls.getBounds(getZone()).y;
+    } else {
+      // Not snapping to grid
+      dragPointOffset.x = dragWorkingZonePoint.x - dragPointOffset.x;
+      dragPointOffset.y = dragWorkingZonePoint.y - dragPointOffset.y;
+    }
+
+    ls.translate(-dragPointOffset.x, -dragPointOffset.y);
+  }
+
+  private void updateDraggedDrawnElements(MouseEvent e, ShapeDrawable sd) {
+
+    if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isMovementLocked()) {
+      // i.e. not allowed
+      return;
+    }
+
+    ZonePoint dragPointOffset =
+        new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
+
+    if (e.isControlDown()) {
+      // Snap to grid based on the drawing's original (i.e. pre-dragged) position.
+      ZonePoint dragNearestVertex = renderer.getZone().getGrid().getNearestVertex(dragPointOffset);
+      dragPointOffset.x =
+          dragStartVertex.x
+              - draggedStartBoundsMap.get(sd.getId()).getBounds().x
+              - dragNearestVertex.x
+              + sd.getBounds().x;
+      dragPointOffset.y =
+          dragStartVertex.y
+              - draggedStartBoundsMap.get(sd.getId()).getBounds().y
+              - dragNearestVertex.y
+              + sd.getBounds().y;
+    } else {
+      // Not snapping to grid
+      dragPointOffset.x = dragWorkingZonePoint.x - dragPointOffset.x;
+      dragPointOffset.y = dragWorkingZonePoint.y - dragPointOffset.y;
+    }
+
+    if (sd.getShape() instanceof RectangularShape rs) {
+      rs.setFrame(
+          rs.getBounds().x - dragPointOffset.x,
+          rs.getBounds().y - dragPointOffset.y,
+          rs.getWidth(),
+          rs.getHeight());
+    } else if (sd.getShape() instanceof Polygon p) {
+      p.translate(-dragPointOffset.x, -dragPointOffset.y);
+    }
+  }
+
   /**
    * Handles moving the template by moving the vertex and (if relevant) the pathVertex.
    *
@@ -1240,24 +1397,27 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       // Resize the Template Radius
       CellPoint workingCell = getZone().getGrid().convert(getCellAtMouse(e));
       CellPoint vertexCell = getZone().getGrid().convert(vertex);
-      int x = Math.abs(workingCell.x - vertexCell.x);
-      int y = Math.abs(workingCell.y - vertexCell.y);
-      int dragRadius = at.getDistance(x, y);
+      int x = workingCell.x - vertexCell.x;
+      int y = workingCell.y - vertexCell.y;
+      int dragRadius = at.getDistance(Math.abs(x), Math.abs(y));
       at.setRadius(dragRadius);
 
-      // Move the Template around the Vertex (if applicable)
+      // Move the BlastTemplate around the Vertex
       if (templateType.equals("BlastTemplate")) {
-        ((BlastTemplate) at)
-            .setControlCellRelative(workingCell.x - vertexCell.x, workingCell.y - vertexCell.y);
-      }
-      if (templateType.equals("ConeTemplate")) {
-        ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-        ((ConeTemplate) at)
-            .setDirection(
-                RadiusTemplate.Direction.findDirection(mouse.x, mouse.y, vertex.x, vertex.y));
+        ((BlastTemplate) at).setControlCellRelative(x, y);
       }
 
-      // ALT -> Change the Path Vertex if only one drawing selected
+      // Change ConeTemplate direction
+      if (templateType.equals("ConeTemplate") && at instanceof ConeTemplate ct) {
+        ZonePoint mouse =
+            new ScreenPoint(e.getX(), e.getY())
+                .convertToZone(renderer.getViewModel().getZoneScale());
+        ct.setDirection(
+            RadiusTemplate.Direction.findDirection(mouse.x, mouse.y, vertex.x, vertex.y));
+      }
+
+      // ALT ->  If only one template selected change the Path Vertex (Line/LineCell), Control
+      // Offset (Blast), or Direction (Cone)
     } else if (selectedDrawableIdSet.size() == 1 && e.isAltDown()) {
 
       // Move just pathVertex (if applicable)
@@ -1266,6 +1426,34 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
         pathVertex.x = pathVertex.x - dragCellOffset.x;
         pathVertex.y = pathVertex.y - dragCellOffset.y;
         setTemplatePathVertex(at, pathVertex);
+      }
+
+      // Move the BlastTemplate about the Vertex (i.e. without changing the radius)
+      // N.B. this ALT behaviour is not available in the BlastTemplateTool
+      if (templateType.equals("BlastTemplate") && at instanceof BlastTemplate bt) {
+        int blastRadius = bt.getRadius();
+        int ox = bt.getOffsetX();
+        int oy = bt.getOffsetY();
+        CellPoint dragCell = getZone().getGrid().convert(dragCellOffset);
+
+        if (dragCell.y != 0 && (ox == -blastRadius || ox == 1)) {
+          // blast is to the left or right of the vertex, so only move up or down
+          oy = Math.min(1, Math.max(-blastRadius, oy - dragCell.y));
+        } else if (dragCell.x != 0 && (oy == -blastRadius || oy == 1)) {
+          // blast is above or below the vertex, so only move left or right
+          ox = Math.min(1, Math.max(-blastRadius, ox - dragCell.x));
+        }
+        bt.setControlCellOffset(ox, oy);
+      }
+
+      // Rotate the ConeTemplate about the Vertex (i.e. change direction without changing the
+      // radius)
+      // N.B. this ALT behaviour is not available in the ConeTemplateTool
+      if (templateType.equals("ConeTemplate") && at instanceof ConeTemplate ct) {
+        ZonePoint mouse =
+            new ScreenPoint(e.getX(), e.getY())
+                .convertToZone(renderer.getViewModel().getZoneScale());
+        ct.setDirection(ConeTemplate.Direction.findDirection(mouse.x, mouse.y, vertex.x, vertex.y));
       }
 
     } else {
@@ -1302,34 +1490,25 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       for (DrawnElement deDragged : draggedDrawnElementSet) {
         GUID id = deDragged.getDrawable().getId();
         if (id == deOriginal.getDrawable().getId()) {
-          if (deOriginal.getDrawable() instanceof AbstractTemplate atOriginal
-              && deDragged.getDrawable() instanceof AbstractTemplate atDragged) {
+          deOriginal.setDrawable(deDragged.getDrawable());
 
-            // Update the radius and vertex (all templates have these)
-            atOriginal.setVertex(atDragged.getVertex());
-            atOriginal.setRadius(atDragged.getRadius());
-
-            // Update the path vertex (if applicable to the template type)
-            setTemplatePathVertex(atOriginal, getTemplatePathVertex(atDragged));
-
-            // Update other special things (applicable to specific template types)
-            String templateType = getTemplateType(atOriginal);
-            if (templateType.equals("BlastTemplate")) {
-              int OffsetX = ((BlastTemplate) atDragged).getOffsetX();
-              int OffsetY = ((BlastTemplate) atDragged).getOffsetY();
-              ((BlastTemplate) atOriginal).setControlCellOffset(OffsetX, OffsetY);
-            } else if (templateType.equals("ConeTemplate")) {
-              ((ConeTemplate) atOriginal).setDirection(((ConeTemplate) atDragged).getDirection());
-            }
-
-            // Server drawing update
-            MapTool.serverCommand().updateDrawing(zone.getId(), deOriginal.getPen(), deOriginal);
-            renderer.getZone().updateDrawable(deOriginal, deOriginal.getPen());
-          }
+          // Server drawing update
+          MapTool.serverCommand().updateDrawing(zone.getId(), deOriginal.getPen(), deOriginal);
+          renderer.getZone().updateDrawable(deOriginal, deOriginal.getPen());
         }
       } // end for
     } // end for
     draggedDrawnElementSet.clear();
     renderer.repaint();
+  }
+
+  /**
+   * Get an unmodifiable {@link List} of {@link GUID}s for each {@link Drawable} selected by this
+   * tool.
+   *
+   * @return a list of selected drawable guids
+   */
+  public static List<GUID> getSelectedDrawables() {
+    return selectedDrawableIdSet.stream().toList();
   }
 }

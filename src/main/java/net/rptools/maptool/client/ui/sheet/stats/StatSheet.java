@@ -14,22 +14,23 @@
  */
 package net.rptools.maptool.client.ui.sheet.stats;
 
+import com.github.jknack.handlebars.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.*;
 import javafx.application.Platform;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.TokenHoverEnter;
 import net.rptools.maptool.client.ui.htmlframe.HTMLContent;
-import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.sheet.stats.StatSheetContext;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.util.HandlebarsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** Class that represents a pop up stat sheet. */
+/** Class that represents a pop-up stat sheet. */
 public class StatSheet {
-
   /** Object for logging messages. */
   private static final Logger log = LogManager.getLogger(StatSheet.class);
 
@@ -37,13 +38,14 @@ public class StatSheet {
    * Sets the content for the stat sheet. The content is a HTML page that is rendered using the
    * Handlebars template engine.
    *
-   * @param token the token to render the stat sheet for.
+   * @param event the token hover event triggering the stat-sheet rendering.
    * @param content the content of the stat sheet.
    * @param location the location of the stat sheet.
    */
-  public void setContent(Token token, String content, URL entry, StatSheetLocation location) {
+  public void setContent(
+      TokenHoverEnter event, String content, URL entry, StatSheetLocation location) {
     try {
-      var statSheetContext = new StatSheetContext(token, MapTool.getPlayer(), location);
+      var statSheetContext = new StatSheetContext(event, MapTool.getPlayer(), location);
       var output =
           HTMLContent.htmlFromString(new HandlebarsUtil<>(content, entry).apply(statSheetContext))
               .injectURLBase(entry);

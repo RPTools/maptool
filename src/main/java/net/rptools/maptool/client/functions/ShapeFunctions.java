@@ -17,16 +17,13 @@ package net.rptools.maptool.client.functions;
 // @formatter:off
 
 import com.google.common.primitives.Floats;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiFunction;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -78,22 +75,23 @@ public class ShapeFunctions extends AbstractFunction {
   public static final Map<String, String> SOURCE_LINKS =
       Map.of(
           "arc",
-              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Arc2D.Double.html#Double-double-double-double-double-double-double-int-",
+          "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Arc2D.Double.html#Double-double-double-double-double-double-double-int-",
           "cubicCurve",
-              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/CubicCurve2D.Double.html#Double-double-double-double-double-double-double-double-double-",
+          "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/CubicCurve2D.Double.html#Double-double-double-double-double-double-double-double-double-",
           "ellipse",
-              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Ellipse2D.Double.html#Double-double-double-double-double-",
+          "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Ellipse2D.Double.html#Double-double-double-double-double-",
           "line",
-              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Line2D.Double.html#Double-double-double-double-double-",
+          "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Line2D.Double.html#Double-double-double-double-double-",
           "polygon",
-              "https://xmlgraphics.apache.org/batik/javadoc/org/apache/batik/ext/awt/geom/Polygon2D.html#Polygon2D-float:A-float:A-int-",
+          "https://xmlgraphics.apache.org/batik/javadoc/org/apache/batik/ext/awt/geom/Polygon2D.html#Polygon2D-float:A-float:A-int-",
           "quadCurve",
-              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/QuadCurve2D.Double.html#Double-double-double-double-double-double-double-",
+          "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/QuadCurve2D.Double.html#Double-double-double-double-double-double-double-",
           "rectangle",
-              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Rectangle2D.Double.html#Double-double-double-double-double-",
+          "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Rectangle2D.Double.html#Double-double-double-double-double-",
           "roundRectangle",
-              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/RoundRectangle2D.Double.html#Double-double-double-double-double-double-double-",
-          "svgPath", "https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths");
+          "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/RoundRectangle2D.Double.html#Double-double-double-double-double-double-double-",
+          "svgPath",
+          "https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths");
   public static final String[] SHAPE_TYPES =
       new String[] {
         "arc",
@@ -521,7 +519,9 @@ public class ShapeFunctions extends AbstractFunction {
     if (!CACHED_SHAPES.containsKey(shapeName)) {
       throw new ParserException(I18N.getText(OBJECT_NOT_FOUND, functionName, shapeName));
     }
-    ShapeDrawable shapeDrawable = CACHED_SHAPES.get(shapeName);
+    ShapeDrawable shapeDrawable = new ShapeDrawable(CACHED_SHAPES.get(shapeName));
+    shapeDrawable.setId(
+        new GUID()); // this gives the drawn element a separate ID to the cached shape
     Rectangle bounds = shapeDrawable.getBounds();
 
     /* Sanity checks */
@@ -531,7 +531,7 @@ public class ShapeFunctions extends AbstractFunction {
       return false;
     }
 
-    Pen pen = new Pen(Pen.DEFAULT);
+    Pen pen = new Pen();
     if (parameters.size() > 2) {
       String delimiter = ";";
       if (parameters.size() > 3) {
@@ -545,18 +545,16 @@ public class ShapeFunctions extends AbstractFunction {
       if (penObject.keySet().contains("foreground")) {
         String fg = penObject.get("foreground").getAsString();
         if (fg.equalsIgnoreCase("transparent") || fg.equalsIgnoreCase("")) {
-          pen.setForegroundMode(Pen.MODE_TRANSPARENT);
+          pen.setPaint(null);
         } else {
-          pen.setForegroundMode(Pen.MODE_SOLID);
           pen.setPaint(FunctionUtil.getPaintFromString(fg));
         }
       }
       if (penObject.keySet().contains("background")) {
         String bg = penObject.get("background").getAsString();
         if (bg.equalsIgnoreCase("transparent") || bg.equalsIgnoreCase("")) {
-          pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
+          pen.setBackgroundPaint(null);
         } else {
-          pen.setBackgroundMode(Pen.MODE_SOLID);
           pen.setBackgroundPaint(FunctionUtil.getPaintFromString(bg));
         }
       }
@@ -578,7 +576,7 @@ public class ShapeFunctions extends AbstractFunction {
         pen.setEraser(penObject.get("eraser").getAsBoolean());
       }
     }
-    DrawnElement drawnElement = new DrawnElement(CACHED_SHAPES.get(shapeName), pen);
+    DrawnElement drawnElement = new DrawnElement(shapeDrawable.copy(), pen);
     drawnElement.setPen(pen);
 
     MapTool.serverCommand()
@@ -594,12 +592,30 @@ public class ShapeFunctions extends AbstractFunction {
   private Object getProperties(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    /* name, delimiter */
+    /* name, delimiter, nested delimiter */
     String name = FunctionUtil.paramAsString(functionName, parameters, 0, false);
-    String delimiter =
+    String delimiter1 =
         parameters.size() < 2
             ? ";"
             : FunctionUtil.paramAsString(functionName, parameters, 1, false);
+    String delimiter2 =
+        parameters.size() < 3
+            ? ","
+            : FunctionUtil.paramAsString(functionName, parameters, 2, false);
+    String delimiter3 =
+        parameters.size() < 4
+            ? ":"
+            : FunctionUtil.paramAsString(functionName, parameters, 3, false);
+    if (delimiter1.equals(delimiter2)) {
+      throw new ParserException(
+          I18N.getText("macro.function.general.argumentTypeB", functionName, 3, 2));
+    } else if (delimiter2.equals(delimiter3)) {
+      throw new ParserException(
+          I18N.getText("macro.function.general.argumentTypeB", functionName, 4, 3));
+    } else if (delimiter3.equals(delimiter1)) {
+      throw new ParserException(
+          I18N.getText("macro.function.general.argumentTypeB", functionName, 4, 2));
+    }
     if (!CACHED_SHAPES.containsKey(name)) {
       return false;
     }
@@ -616,23 +632,17 @@ public class ShapeFunctions extends AbstractFunction {
               seg, coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], coords[6]));
       pi.next();
     }
-    StringBuilder stringBuilder = new StringBuilder(sd.toString());
-    stringBuilder.append("segments=").append(String.join(",", segments)).append(";");
 
-    if (delimiter.equalsIgnoreCase("json")) {
-      JsonObject jsonObject =
-          JSONMacroFunctions.getInstance()
-              .getJsonObjectFunctions()
-              .fromStrProp(stringBuilder.toString(), ";");
-      jsonObject.add(
-          "segments",
-          JSONMacroFunctions.getInstance()
-              .getJsonArrayFunctions()
-              .fromStringList(String.join("##", segments), "##"));
+    if (delimiter1.equalsIgnoreCase("json")) {
+      JsonObject jsonObject = sd.toJson();
+      jsonObject.add("segments", new Gson().toJsonTree(segments));
       return jsonObject;
     } else {
-      stringBuilder.append("segments=\"").append(String.join("\",\"", segments)).append("\";");
-      return stringBuilder.toString();
+      return sd.toNonLocalisedString().replaceAll(";", delimiter1)
+          + delimiter1
+          + "segments="
+          + String.join(
+              delimiter2, segments.stream().map(s -> s.replaceAll(",", delimiter3)).toList());
     }
   }
 

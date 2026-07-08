@@ -566,19 +566,23 @@ public class ServerCommandClientImpl implements ServerCommand {
     }
   }
 
-  public void setBoard(GUID zoneGUID, MD5Key mapAssetId, int x, int y) {
+  public void setBoard(
+      GUID zoneGUID, MD5Key mapAssetId, int x, int y, double scaleX, double scaleY) {
     // First, ensure that the possibly new map texture is available on the client
     // note: This may not be the optimal solution... can't tell from available documentation.
     // it may send a texture that is already sent
     // it might be better to do it in the background(?)
     // there seem to be other ways to upload textures (?) (e.g. in MapToolUtil)
     putAsset(AssetManager.getAsset(mapAssetId));
+
     // Second, tell the client to change the zone's board info
     var msg =
         SetBoardMsg.newBuilder()
             .setZoneGuid(zoneGUID.toString())
             .setAssetId(mapAssetId.toString())
-            .setPoint(IntPointDto.newBuilder().setY(x).setY(y));
+            .setPoint(IntPointDto.newBuilder().setX(x).setY(y))
+            .setScaleX(scaleX)
+            .setScaleY(scaleY);
     makeServerCall(Message.newBuilder().setSetBoardMsg(msg).build());
   }
 
@@ -670,6 +674,16 @@ public class ServerCommandClientImpl implements ServerCommand {
         TokenPropertyValueDto.newBuilder()
             .setLightSourceId(lightSource.getId().toString())
             .build());
+  }
+
+  @Override
+  public void toggleHaloSourceOnToken(Token token, boolean toggleOn, Halo halo) {
+    var update = toggleOn ? Token.Update.addHalo : Token.Update.removeHalo;
+    // We only need to send the ID of the halo source.
+    updateTokenProperty(
+        token,
+        update,
+        TokenPropertyValueDto.newBuilder().setHaloId(halo.getId().toString()).build());
   }
 
   public void setTokenMaskTopology(
@@ -839,6 +853,20 @@ public class ServerCommandClientImpl implements ServerCommand {
             .setZoneGuid(player.getZoneId().toString())
             .setLoaded(player.getLoaded());
     makeServerCall(Message.newBuilder().setUpdatePlayerStatusMsg(msg).build());
+  }
+
+  @Override
+  public void putLookupTable(LookupTable lookupTable) {
+    var msg = PutLookupTableMsg.newBuilder().setTable(lookupTable.toDto());
+    client.getCampaign().getLookupTableMap().put(lookupTable.getName(), lookupTable);
+    makeServerCall(Message.newBuilder().setUpdateLookupTableMsg(msg).build());
+  }
+
+  @Override
+  public void deleteLookupTable(String tableName) {
+    var msg = DeleteLookupTableMsg.newBuilder().setTableName(tableName);
+    client.getCampaign().getLookupTableMap().remove(tableName);
+    makeServerCall(Message.newBuilder().setDeleteLookupTableMsg(msg).build());
   }
 
   /**

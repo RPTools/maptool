@@ -49,6 +49,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox playersCanRevealVision;
   private JCheckBox hideMapSelectUI;
   private JCheckBox lockTokenEditOnStartup;
+  private JCheckBox lockTokenContextOnStartup;
   private JCheckBox lockPlayerMoveOnStartup;
   private JCheckBox lockPlayerLibrary;
   private JButton generateGMPassword;
@@ -69,7 +70,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
               // We don't have a good, server-side way of testing anymore.
               boolean ok = MapTool.confirm("msg.info.server.networkingHelp");
               if (ok) {
-                MapTool.showDocument(I18N.getString("msg.info.server.forumNFAQ_URL"));
+                MapTool.showDocument("https://forums.rptools.net/viewtopic.php?f=22&t=3370");
               }
             })
         .addButton(
@@ -92,6 +93,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     usePasswordFile = (JCheckBox) getComponent("@usePasswordFile");
     hideMapSelectUI = (JCheckBox) getComponent("@hideMapSelectUI");
     lockTokenEditOnStartup = (JCheckBox) getComponent("@lockTokenEditOnStartup");
+    lockTokenContextOnStartup = (JCheckBox) getComponent("@lockTokenContextOnStartup");
     lockPlayerMoveOnStartup = (JCheckBox) getComponent("@lockPlayerMovementOnStartup");
     lockPlayerLibrary = (JCheckBox) getComponent("@disablePlayerLibrary");
 
@@ -143,6 +145,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
         });
     hideMapSelectUI.setSelected(prefs.getMapSelectUIHidden());
     lockTokenEditOnStartup.setSelected(prefs.getLockTokenEditOnStart());
+    lockTokenContextOnStartup.setSelected(prefs.getLockTokenContextOnStart());
     lockPlayerMoveOnStartup.setSelected(prefs.getLockPlayerMovementOnStart());
     lockPlayerLibrary.setSelected(prefs.getPlayerLibraryLock());
 
@@ -265,6 +268,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setUseEasyConnect(useEasyConnect.isSelected());
                 prefs.setMapSelectUIHidden(hideMapSelectUI.isSelected());
                 prefs.setLockTokenEditOnStart(lockTokenEditOnStartup.isSelected());
+                prefs.setLockTokenContextOnStart(lockTokenContextOnStartup.isSelected());
                 prefs.setLockPlayerMovementOnStart(lockPlayerMoveOnStartup.isSelected());
                 prefs.setPlayerLibraryLock(lockPlayerLibrary.isSelected());
 

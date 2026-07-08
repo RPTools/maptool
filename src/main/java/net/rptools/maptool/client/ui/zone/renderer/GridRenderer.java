@@ -93,11 +93,12 @@ public class GridRenderer {
 
   public void renderGrid(Graphics2D g, PlayerView view) {
     if (!AppState.isShowGrid()
-        || zone.getGrid().getSize() * renderer.getScale() < ZoneRendererConstants.MIN_GRID_SIZE) {
+        || zone.getGrid().getSize() * renderer.getViewModel().getZoneScale().getScale()
+            < ZoneRendererConstants.MIN_GRID_SIZE) {
       return;
     }
     gridLineWeight = AppState.getGridLineWeight();
-    scale = (float) renderer.getScale();
+    scale = (float) renderer.getViewModel().getZoneScale().getScale();
     baseWidth = zone.getGrid().getSize() / 50f;
     if (gridColours == null) {
       setGridColours();

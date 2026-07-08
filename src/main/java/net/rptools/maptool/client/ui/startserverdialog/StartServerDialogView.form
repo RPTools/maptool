@@ -117,7 +117,7 @@
           <text resource-bundle="net/rptools/maptool/language/i18n" key="ServerDialog.label.gmpassword"/>
         </properties>
       </component>
-      <grid id="fc9cf" layout-manager="GridLayoutManager" row-count="15" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="fc9cf" layout-manager="GridLayoutManager" row-count="16" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="6" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -196,7 +196,7 @@
           </component>
           <component id="bdee" class="javax.swing.JLabel">
             <constraints>
-              <grid row="14" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="15" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="ServerDialog.label.metric"/>
@@ -249,7 +249,7 @@
           </component>
           <component id="cd443" class="javax.swing.JCheckBox">
             <constraints>
-              <grid row="11" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="12" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <actionCommand value="Lock Play Movement"/>
@@ -260,7 +260,7 @@
           </component>
           <component id="860" class="javax.swing.JCheckBox">
             <constraints>
-              <grid row="12" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="13" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <actionCommand value="Lock Player Library"/>
@@ -282,7 +282,7 @@
           </component>
           <component id="3eea1" class="javax.swing.JComboBox">
             <constraints>
-              <grid row="14" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="15" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <actionCommand value="comboBoxChanged"/>
@@ -292,9 +292,21 @@
           </component>
           <hspacer id="6c8b3">
             <constraints>
-              <grid row="13" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="14" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
+          <component id="e67f" class="javax.swing.JCheckBox">
+            <constraints>
+              <grid row="11" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="Lock Token Context Menu"/>
+              <name value="@lockTokenContextOnStartup"/>
+              <selected value="false"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="action.toggleTokenContextMenuLock"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="action.toggleTokenContextMenuLock.description"/>
+            </properties>
+          </component>
         </children>
       </grid>
       <grid id="67b44" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

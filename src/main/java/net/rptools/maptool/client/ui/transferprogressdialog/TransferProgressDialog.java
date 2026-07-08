@@ -50,6 +50,7 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
                     .removeConsumerListener(TransferProgressDialog.this))
         .addButton(ButtonKind.CLOSE)
         .setDefaultButton(ButtonKind.CLOSE)
+        .setCloseOperation(GenericDialog.DISPOSE_ON_CLOSE)
         .display();
   }
 

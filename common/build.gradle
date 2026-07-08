@@ -16,7 +16,7 @@ dependencies {
     implementation(libs.gson)
 
     implementation(libs.bundles.imageio)
-    implementation(libs.batik)
+    implementation(libs.bundles.batik)
     implementation(libs.jsvg)
 
     implementation(libs.apache.commons.io)

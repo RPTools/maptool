@@ -15,6 +15,7 @@
 package net.rptools.lib;
 
 import java.awt.Dimension;
+import java.awt.geom.Rectangle2D;
 
 public final class AwtUtil {
   private AwtUtil() {
@@ -47,5 +48,41 @@ public final class AwtUtil {
                       : (width / (double) dim.width) * dim.height);
       constrainTo(dim, size);
     }
+  }
+
+  /**
+   * Modifies {@code inner} so that it fits into {@code outer} and is centered within.
+   *
+   * <p>The aspect ration of {@code inner} is preserved, but this method will translate and scale it
+   * as needed to fit within {@code other}.
+   *
+   * @param inner
+   * @param outer
+   */
+  public static void fitInto(Rectangle2D inner, Rectangle2D outer) {
+    if (outer.getWidth() == 0 || outer.getHeight() == 0) {
+      inner.setRect(outer);
+      return;
+    }
+
+    var widthRatio = outer.getWidth() / inner.getWidth();
+    var heightRatio = outer.getHeight() / inner.getHeight();
+
+    boolean fitToWidth = widthRatio < heightRatio;
+    double x, y, width, height;
+    if (fitToWidth) {
+      x = outer.getMinX();
+      width = outer.getWidth();
+
+      height = inner.getHeight() * widthRatio;
+      y = outer.getMinY() + (outer.getHeight() - height) / 2.;
+    } else {
+      y = outer.getMinY();
+      height = outer.getHeight();
+
+      width = inner.getWidth() * heightRatio;
+      x = outer.getMinX() + (outer.getWidth() - width) / 2.;
+    }
+    inner.setRect(x, y, width, height);
   }
 }
