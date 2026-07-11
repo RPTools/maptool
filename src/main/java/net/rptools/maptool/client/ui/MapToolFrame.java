@@ -1678,8 +1678,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       zoneRendererPanel.remove(currentRenderer);
     }
     if (renderer != null) {
-      zoneRendererPanel.add(
-          renderer, PositionalLayout.Position.CENTER, zoneRendererPanel.getComponentCount() - 2);
+      zoneRendererPanel.add(renderer, PositionalLayout.Position.CENTER);
       zoneRendererPanel.doLayout();
     }
     currentRenderer = renderer;
