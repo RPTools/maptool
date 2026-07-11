@@ -1956,6 +1956,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     menuBar.setVisible(true);
     this.setVisible(true);
 
+    // hide the chat action label if the chat window is already visible in windowed mode
+    if (chatActionLabel.isShowing() && isCommandPanelVisible()) {
+      chatActionLabel.setVisible(false);
+    }
+
     fullScreenFrame.dispose();
     fullScreenFrame = null;
   }
