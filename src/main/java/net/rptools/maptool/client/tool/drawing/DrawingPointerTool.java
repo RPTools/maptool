@@ -1085,9 +1085,9 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   /**
-   * Paint the dragged movement distance in feet according to the Movement Metric setting.
+   * Paint the dragged movement distance according to the Movement Metric setting.
    *
-   * <p>Label is displayed below the template (i.e. similar to dragging a token)
+   * <p>Label is displayed near the dragged terminus
    *
    * @param g where to draw.
    * @param startVertex the starting point.
@@ -1112,10 +1112,9 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
 
     if (moveDistance != 0) {
       Rectangle bounds = at.getBounds(zone);
-      int x = (int) (bounds.getMinX() + bounds.getMaxX()) / 2;
-      int y = (int) (bounds.getMaxY());
-      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(x, y);
-
+      ScreenPoint centerText =
+          renderer.getViewModel().getZoneScale().toScreenSpace(endVertex.x, endVertex.y);
+      centerText.translate(CURSOR_WIDTH, CURSOR_WIDTH);
       ToolHelper.drawMeasurement(g, moveDistance, (int) centerText.x, (int) centerText.y);
     }
   }
@@ -1176,19 +1175,23 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   /**
-   * Paint the radius value in feet. To be displayed above the template vertex (i.e. same as when
-   * drawing a template)
+   * Paint the template radius value label.
+   *
+   * <p>Label is displayed to the right of the template.
    *
    * @param g where to paint.
    * @param zp where on the map to paint the radius label.
    */
   private void paintTemplateRadiusLabel(Graphics2D g, ZonePoint zp, AbstractTemplate at) {
     if (at.getRadius() > 0) {
-      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(zp.x, zp.y);
-      centerText.translate(CURSOR_WIDTH, -CURSOR_WIDTH);
+      Zone zone = getZone();
+      Rectangle bounds = at.getBounds(zone);
+      int x = (int) bounds.getMaxX();
+      int y = (int) (bounds.getMinY() + bounds.getMaxY()) / 2;
+      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(x, y);
       ToolHelper.drawMeasurement(
           g, at.getRadius() * getZone().getUnitsPerCell(), (int) centerText.x, (int) centerText.y);
-    } // endif
+    }
   }
 
   /**
