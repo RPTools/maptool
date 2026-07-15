@@ -436,7 +436,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       }
     }
 
-    if (SwingUtilities.isRightMouseButton(e)) {
+    if (SwingUtilities.isRightMouseButton(e) && isDraggingMap()) {
       cancelMapDrag(); // We no longer drag the map. Fixes bug #616
       return;
     }
