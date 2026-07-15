@@ -41,6 +41,7 @@ import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.*;
 import org.apache.logging.log4j.LogManager;
@@ -1401,6 +1402,14 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
           cubic.getCtrlY2() - dragPointOffset.y,
           cubic.getX2() - dragPointOffset.x,
           cubic.getY2() - dragPointOffset.y);
+    } else {
+      // log that we cannot drag certain types of shape that are being dragged
+      log.warn(
+          I18N.getText(
+              "tool.drawingpointer.draggingUnsupportedShapeType",
+              s.getClass().getSimpleName(),
+              sd.getId(),
+              sd.getName()));
     }
   }
 
