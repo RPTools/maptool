@@ -21,9 +21,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.RectangularShape;
+import java.awt.geom.*;
 import java.io.Serial;
 import java.util.*;
 import java.util.List;
@@ -1362,14 +1360,47 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       dragPointOffset.y = dragWorkingZonePoint.y - dragPointOffset.y;
     }
 
-    if (sd.getShape() instanceof RectangularShape rs) {
+    Shape s = sd.getShape();
+    if (s instanceof RectangularShape rs) {
       rs.setFrame(
-          rs.getBounds().x - dragPointOffset.x,
-          rs.getBounds().y - dragPointOffset.y,
+          rs.getX() - dragPointOffset.x,
+          rs.getY() - dragPointOffset.y,
           rs.getWidth(),
           rs.getHeight());
-    } else if (sd.getShape() instanceof Polygon p) {
+    } else if (s instanceof Polygon p) {
       p.translate(-dragPointOffset.x, -dragPointOffset.y);
+    } else if (s instanceof Area a) {
+      AffineTransform tx =
+          AffineTransform.getTranslateInstance(-dragPointOffset.x, -dragPointOffset.y);
+      a.transform(tx);
+    } else if (s instanceof Path2D p2d) {
+      AffineTransform tx =
+          AffineTransform.getTranslateInstance(-dragPointOffset.x, -dragPointOffset.y);
+      p2d.transform(tx);
+    } else if (s instanceof Line2D line) {
+      line.setLine(
+          line.getX1() - dragPointOffset.x,
+          line.getY1() - dragPointOffset.y,
+          line.getX2() - dragPointOffset.x,
+          line.getY2() - dragPointOffset.y);
+    } else if (s instanceof QuadCurve2D quad) {
+      quad.setCurve(
+          quad.getX1() - dragPointOffset.x,
+          quad.getY1() - dragPointOffset.y,
+          quad.getCtrlX() - dragPointOffset.x,
+          quad.getCtrlY() - dragPointOffset.y,
+          quad.getX2() - dragPointOffset.x,
+          quad.getY2() - dragPointOffset.y);
+    } else if (s instanceof CubicCurve2D cubic) {
+      cubic.setCurve(
+          cubic.getX1() - dragPointOffset.x,
+          cubic.getY1() - dragPointOffset.y,
+          cubic.getCtrlX1() - dragPointOffset.x,
+          cubic.getCtrlY1() - dragPointOffset.y,
+          cubic.getCtrlX2() - dragPointOffset.x,
+          cubic.getCtrlY2() - dragPointOffset.y,
+          cubic.getX2() - dragPointOffset.x,
+          cubic.getY2() - dragPointOffset.y);
     }
   }
 
