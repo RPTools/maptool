@@ -42,6 +42,7 @@ import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
@@ -530,8 +531,20 @@ public class TokenBarController
     boolean hasImages = false;
     BarTokenOverlay selectedBar = (BarTokenOverlay) formPanel.getList(BARS).getSelectedValue();
     boolean hasUniqueUpdateName = false;
+    var namesToCheck = new ArrayList<String>();
+    // We need to check for both the name and the name with the hidden value suffix
+    if (selectedBar != null) {
+      for (String name : getNames()) {
+        namesToCheck.add(name + TokenBarFunction.hidenBarSuffix);
+        namesToCheck.add(name);
+        if (name.endsWith(TokenBarFunction.hidenBarSuffix)) {
+          namesToCheck.add(
+              name.substring(0, name.length() - TokenBarFunction.hidenBarSuffix.length()));
+        }
+      }
+    }
     if (selectedBar != null)
-      hasUniqueUpdateName = selectedBar.getName().equals(text) || !getNames().contains(text);
+      hasUniqueUpdateName = selectedBar.getName().equals(text) || !namesToCheck.contains(text);
     if (size > 0 && imageCount == size) {
       hasImages = true;
     } else if (size < 0 && imageCount == increments && increments > 0) {
@@ -541,7 +554,7 @@ public class TokenBarController
     } // endif
     formPanel
         .getButton(ADD)
-        .setEnabled(hasName && !getNames().contains(text) && hasImages && hasShow);
+        .setEnabled(hasName && !namesToCheck.contains(text) && hasImages && hasShow);
     formPanel
         .getButton(UPDATE)
         .setEnabled(hasName && hasUniqueUpdateName && selectedBar != null && hasShow && hasImages);

@@ -38,6 +38,9 @@ public class TokenBarFunction extends AbstractFunction {
   /** singleton instance of this function */
   private static final TokenBarFunction instance = new TokenBarFunction();
 
+  /** Suffix added to the bar name to store the hidden value of the bar */
+  public static final String hidenBarSuffix = "StoredValue";
+
   /**
    * @return singleton instance
    */
@@ -84,7 +87,10 @@ public class TokenBarFunction extends AbstractFunction {
    * @return A {@link BigDecimal} value, or an empty string "" if bar is not visible
    */
   public static Object getValue(Token token, String bar) {
-    Object value = token.getState(bar);
+    Object value = token.getState(bar + hidenBarSuffix);
+    if (value == null) {
+      value = token.getState(bar);
+    }
     return value != null ? value : "";
   }
 
@@ -95,8 +101,19 @@ public class TokenBarFunction extends AbstractFunction {
    * @return The {@link BigDecimal} value that was actually set.
    */
   public static Object setValue(Token token, String bar, Object value) {
+    Object valueShown = token.getState(bar);
     BigDecimal val = getBigDecimalValue(value);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, val);
+    if (valueShown != null) {
+      // If the bar is visible, set both the visual value of the bar and the stored value
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, val);
+      MapTool.serverCommand()
+          .updateTokenProperty(token, Token.Update.setState, bar + hidenBarSuffix, val);
+    } else {
+      // If the bar is not visible, only set the stored value
+      MapTool.serverCommand()
+          .updateTokenProperty(token, Token.Update.setState, bar + hidenBarSuffix, val);
+    }
+
     return val;
   }
 
@@ -116,7 +133,34 @@ public class TokenBarFunction extends AbstractFunction {
    * @return If the bar visible or not
    */
   public static BigDecimal setVisible(Token token, String bar, boolean show) {
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, show);
+    Object valueShown = token.getState(bar);
+    Object valueHidden = token.getState(bar + hidenBarSuffix);
+    if (show) {
+      if (valueHidden != null) {
+        // if we want to show the bar, and we have a hidden value, restore it
+        MapTool.serverCommand()
+            .updateTokenProperty(
+                token, Token.Update.setState, bar, getBigDecimalValue(valueHidden));
+      } else {
+        if (valueShown == null) {
+          // if we want to show the bar, and we don't have a hidden value, and no shown value, set
+          // both to true/1.0
+          // This check is to avoid messing with old tokens that does not have a hidden value.
+          MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, true);
+          MapTool.serverCommand()
+              .updateTokenProperty(token, Token.Update.setState, bar + hidenBarSuffix, true);
+        }
+      }
+    } else {
+      if (valueShown != null) {
+        // if we want to hide the bar, and we have a shown value, store it and hide the bar
+        MapTool.serverCommand()
+            .updateTokenProperty(
+                token, Token.Update.setState, bar + hidenBarSuffix, getBigDecimalValue(valueShown));
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, false);
+      }
+    }
+
     return show ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
