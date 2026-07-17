@@ -30,7 +30,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: "21"
       - name: spotlessCheck
         run: ./gradlew spotlessCheck
@@ -38,12 +38,12 @@ jobs:
     permissions:
       contents: read
     name: ${{ matrix.os }} w/JDK ${{ matrix.java }}
-    runs-on:  ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-15-intel]
-        java: [ '21' ]
-        distribution: [ 'temurin']
+        java: ["21"]
+        distribution: ["temurin"]
       fail-fast: false
     steps:
       - name: Git checkout
@@ -60,9 +60,15 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      #- name: Junit Report to Annotations
-      #  uses: ashley-taylor/junit-report-annotations-action@v1.0
       - name: Build with Gradle
         uses: GabrielBB/xvfb-action@v1.0
-        with: 
-          run: ./gradlew build --no-daemon
+        with:
+          run: ./gradlew build --no-daemon --info
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ matrix.os }}-jdk${{ matrix.java }}
+          path: |
+            build/reports/tests/test/**
+            build/test-results/test/**
