@@ -127,12 +127,8 @@ public final class ExtractImagesFromPDF {
     imageTracker.clear();
 
     if (!isInterupted) {
-      FileOutputStream out;
-
-      try {
-        out = new FileOutputStream(pdfFileHash);
+      try (FileOutputStream out = new FileOutputStream(pdfFileHash)) {
         out.flush();
-        out.close();
       } catch (IOException e) {
         log.error("Error while writing PDF image to disk", e);
       }
