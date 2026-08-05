@@ -32,9 +32,9 @@ public class Scale implements Serializable {
   private final double scaleIncrement = .075;
 
   /** Calculated from {@link #scale} */
-  private transient int zoomLevel;
+  transient int zoomLevel; //package private for unit testing
 
-  private double scale;
+  double scale; // package private for unit testing
   private int offsetX;
   private int offsetY;
 
