@@ -34,11 +34,28 @@ public class ScaleZoomTest {
   }
 
   @Test
+  void testConstructorByScale1to1() {
+    // this constructor does not snap the scale to the zoom level, which IMO may be a bug
+    Scale s = new Scale(1.0, 10, 10);
+
+    assertEquals(1.0, s.scale);
+    assertEquals(0, s.zoomLevel);
+  }
+
+  @Test
   void testConstructorByZoomLevel() {
     Scale s = new Scale(3, 10, 10);
 
     assertEquals(3, s.zoomLevel);
     assertApprox(1.075 * 1.075 * 1.075, s.scale);
+  }
+
+  @Test
+  void testConstructorByZoomLevel1to1() {
+    Scale s = new Scale(0, 10, 10);
+
+    assertEquals(0, s.zoomLevel);
+    assertApprox(1, s.scale);
   }
 
   @Test

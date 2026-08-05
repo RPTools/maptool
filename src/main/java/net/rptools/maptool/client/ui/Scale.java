@@ -28,8 +28,14 @@ public class Scale implements Serializable {
   private static final int MIN_ZOOM_LEVEL = -175;
   private static final int MAX_ZOOM_LEVEL = 175;
 
+  // mouse wheels tend to have 24 steps per wheel rotation.
+  private static final int FINE_ZOOM_MULTIPLIER = 24;
+
   private final double oneToOneScale = 1; // Let this be configurable at some point
   private final double scaleIncrement = .075;
+
+  private final double logScaleIncrement = Math.log(1 + scaleIncrement);
+  private final double logFineScaleIncrement = logScaleIncrement / FINE_ZOOM_MULTIPLIER;
 
   /** Calculated from {@link #scale} */
   transient int zoomLevel; //package private for unit testing
@@ -96,11 +102,11 @@ public class Scale implements Serializable {
   }
 
   private int zoomLevelForScale(double scale) {
-    return (int) Math.round(Math.log(scale / oneToOneScale) / Math.log(1 + scaleIncrement));
+    return (int) Math.round(Math.log(scale / oneToOneScale) / logScaleIncrement);
   }
 
   private double scaleForZoomLevel(int zoomLevel) {
-    return zoomLevel == 0 ? oneToOneScale : oneToOneScale * Math.pow(1 + scaleIncrement, zoomLevel);
+    return zoomLevel == 0 ? oneToOneScale : oneToOneScale * Math.exp(logScaleIncrement * zoomLevel);
   }
 
   private double clampScale(double newScale) {
@@ -182,7 +188,7 @@ public class Scale implements Serializable {
     var newScale =
         newZoomLevel == 0
             ? oneToOneScale
-            : oneToOneScale * Math.pow(1 + scaleIncrement, newZoomLevel);
+            : oneToOneScale * Math.exp(logScaleIncrement * newZoomLevel);
 
     return withScale(newScale, x, y);
   }
