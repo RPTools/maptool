@@ -15,12 +15,12 @@
 package net.rptools.maptool.model;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarVertHexEuclideanWalker;
@@ -48,7 +48,7 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  *
  * @formatter:on
  */
-public class HexGridVertical extends HexGrid {
+public final class HexGridVertical extends HexGrid {
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       (originPoint, offsetPoint) -> {
         if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
@@ -56,6 +56,11 @@ public class HexGridVertical extends HexGrid {
         }
       };
   private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
+
+  @Override
+  public GridType getType() {
+    return GridType.HexVertical;
+  }
 
   @Override
   protected List<TokenFootprint> createFootprints() {
@@ -228,28 +233,23 @@ public class HexGridVertical extends HexGrid {
   }
 
   @Override
-  protected void setGridDrawTranslation(Graphics2D g, double U, double V) {
-    g.translate(U, V);
+  public double getSizeV(Dimension2D size) {
+    return size.getHeight();
   }
 
   @Override
-  public double getRendererSizeV(ZoneRenderer renderer) {
-    return renderer.getSize().getHeight();
+  public double getSizeU(Dimension2D size) {
+    return size.getWidth();
   }
 
   @Override
-  public double getRendererSizeU(ZoneRenderer renderer) {
-    return renderer.getSize().getWidth();
+  public int getOffV(Scale scale) {
+    return (int) (scale.getOffsetY() + getOffsetY() * scale.getScale());
   }
 
   @Override
-  public int getOffV(ZoneRenderer renderer) {
-    return (int) (renderer.getViewOffsetY() + getOffsetY() * renderer.getScale());
-  }
-
-  @Override
-  public int getOffU(ZoneRenderer renderer) {
-    return (int) (renderer.getViewOffsetX() + getOffsetX() * renderer.getScale());
+  public int getOffU(Scale scale) {
+    return (int) (scale.getOffsetX() + getOffsetX() * scale.getScale());
   }
 
   @Override

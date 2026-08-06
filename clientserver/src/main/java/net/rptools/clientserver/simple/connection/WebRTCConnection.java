@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.clientserver.simple.webrtc.*;
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +40,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
   private final RTCDataChannelObserver rtcDataChannelObserver = new RTCDataChannelObserverImpl();
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
   private final String serverName;
-  private final String id;
   private final Gson gson = new Gson();
   private final Listener listener;
   private WebSocketClient signalingClient;
@@ -57,7 +57,7 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
   // used from client side
   public WebRTCConnection(String id, String serverName, Listener listener) {
-    this.id = id;
+    super(id);
     this.serverName = serverName;
     this.listener = listener;
     init();
@@ -65,7 +65,7 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
   // this is used from the server side
   public WebRTCConnection(OfferMessageDto message, WebRTCServer webRTCServer) {
-    this.id = message.source;
+    super(message.source);
     this.server = webRTCServer;
     this.serverName = server.getName();
     this.listener = () -> {};
@@ -223,11 +223,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
       case CONNECTED, DISCONNECTED -> true;
       default -> false;
     };
-  }
-
-  @Override
-  public String getId() {
-    return id;
   }
 
   @Override
@@ -571,6 +566,46 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
       if (message != null) {
         dispatchCompressedMessage(message);
       }
+    }
+
+    private ByteBuffer messageBuffer = null;
+
+    private byte[] readMessage(ByteBuffer part) {
+      if (messageBuffer == null) {
+        int length = part.getInt();
+        notifyListeners(
+            ActivityListener.Direction.Inbound, ActivityListener.State.Start, length, 0);
+
+        if (part.remaining() == length) {
+          var ret = new byte[length];
+          part.get(ret);
+          notifyListeners(
+              ActivityListener.Direction.Inbound, ActivityListener.State.Complete, length, length);
+          return ret;
+        }
+
+        messageBuffer = ByteBuffer.allocate(length);
+      }
+
+      messageBuffer.put(part);
+      notifyListeners(
+          ActivityListener.Direction.Inbound,
+          ActivityListener.State.Progress,
+          messageBuffer.capacity(),
+          messageBuffer.position());
+
+      if (messageBuffer.capacity() == messageBuffer.position()) {
+        notifyListeners(
+            ActivityListener.Direction.Inbound,
+            ActivityListener.State.Complete,
+            messageBuffer.capacity(),
+            messageBuffer.capacity());
+        var ret = messageBuffer.array();
+        messageBuffer = null;
+        return ret;
+      }
+
+      return null;
     }
   }
 }

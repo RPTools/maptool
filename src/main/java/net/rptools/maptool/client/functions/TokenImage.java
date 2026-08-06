@@ -65,9 +65,6 @@ public class TokenImage extends AbstractFunction {
   public static final String SET_IMAGE = "setImage";
   public static final String SET_PORTRAIT = "setTokenPortrait";
   public static final String SET_HANDOUT = "setTokenHandout";
-  public static final String FILE_HEADER_WEBP = "RIFF";
-  public static final String FILE_HEADER_JPG = "ÿØÿà";
-  public static final String FILE_HEADER_PNG = "‰PNG";
 
   private TokenImage() {
     super(
@@ -189,46 +186,39 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 2, 2);
       String imageName = args.get(0).toString();
       String imageString = args.get(1).toString();
+      Asset asset = null;
       if (imageName.isEmpty() || imageString.isEmpty()) {
         throw new ParserException(
             I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
       } else if (imageString.length() > 8) {
-        Asset asset;
-        URI uri;
+        byte[] imageBytes = Base64.decode(imageString);
         try {
-          uri = new URI(imageString);
-        } catch (URISyntaxException e) {
-          uri = null;
-        }
-        if (uri != null && isValidAssetScheme(uri) && isValidAssetExtension(uri)) {
+          asset = Asset.createAssetDetectType(imageName, imageBytes);
+        } catch (Exception e) {
+          URI uri;
           try {
-            URL url = uri.toURL();
-            BufferedImage imageRAW = ImageIO.read(url);
-            asset = Asset.createImageAsset(imageName, imageRAW);
-          } catch (MalformedURLException | IllegalArgumentException e) {
-            throw new ParserException(
-                I18N.getText("macro.function.input.illegalArgumentType", imageString));
-          } catch (IOException e1) {
-            throw new ParserException(I18N.getText("macro.function.html5.invalidURI", imageString));
+            uri = new URI(imageString);
+          } catch (URISyntaxException e1) {
+            uri = null;
           }
-        } else {
-          byte[] imageBytes = Base64.decode(imageString);
-          String imageCheck;
-          try {
-            imageCheck = new String(imageBytes, 0, 4);
-          } catch (Exception e) {
-            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
-          }
-          if (imageCheck.equals(FILE_HEADER_WEBP)
-              || imageCheck.equals(FILE_HEADER_JPG)
-              || imageCheck.equals(FILE_HEADER_PNG)) {
-            asset = Asset.createImageAsset(imageName, imageBytes);
-          } else {
-            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          if (uri != null && isValidAssetScheme(uri) && isValidAssetExtension(uri)) {
+            try {
+              URL url = uri.toURL();
+              BufferedImage imageRAW = ImageIO.read(url);
+              asset = Asset.createImageAsset(imageName, imageRAW);
+            } catch (MalformedURLException | IllegalArgumentException e2) {
+              throw new ParserException(
+                  I18N.getText("macro.function.input.illegalArgumentType", imageString));
+            } catch (IOException e3) {
+              throw new ParserException(
+                  I18N.getText("macro.function.html5.invalidURI", imageString));
+            }
           }
         }
-        AssetManager.putAsset(asset);
-        return "asset://" + asset.getMD5Key().toString();
+        if (asset != null) {
+          AssetManager.putAsset(asset);
+          return "asset://" + asset.getMD5Key().toString();
+        }
       } else {
         throw new ParserException(
             I18N.getText("macro.function.general.wrongParamType", functionName));
@@ -388,9 +378,13 @@ public class TokenImage extends AbstractFunction {
    * @param uri The URI to check.
    * @return {@code true} if the scheme is valid.
    */
-  private boolean isValidAssetScheme(URI uri) {
+  public boolean isValidAssetScheme(URI uri) {
+    if (uri == null || uri.getScheme() == null) {
+      return false;
+    }
     return uri.getScheme().equalsIgnoreCase("http")
         || uri.getScheme().equalsIgnoreCase("https")
+        || uri.getScheme().equalsIgnoreCase("asset")
         || uri.getScheme().equalsIgnoreCase("lib");
   }
 

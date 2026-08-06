@@ -99,6 +99,8 @@
                     <constraints/>
                     <properties>
                       <name value="aliasTable"/>
+                      <showHorizontalLines value="false"/>
+                      <showVerticalLines value="false"/>
                     </properties>
                   </component>
                 </children>

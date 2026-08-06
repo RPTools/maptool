@@ -20,7 +20,7 @@ import java.util.prefs.Preferences;
 import net.rptools.lib.image.RenderQuality;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.preferences.Preference;
@@ -475,6 +475,44 @@ public class AppPreferences {
               "nonVisMapLabelBorderColor", nonVisibleTokenMapLabelForeground.getDefault(), true)
           .setLabel("Preferences.label.access.tokenLabel.nonVisBorderColor");
 
+  /** The background color to use for drawing labels. */
+  public static final Preference<Color> drawingMapLabelBackgroundColor =
+      store
+          .defineColor("drawingMapLabelBackgroundColor", Color.YELLOW, true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.drawingBackground.tooltip");
+
+  /** The foreground color to use for drawing labels. */
+  public static final Preference<Color> drawingMapLabelForegroundColor =
+      store
+          .defineColor("drawingMapLabelForegroundColor", Color.BLACK, true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.drawingForeground.tooltip");
+
+  /** The border color to use for drawing labels. */
+  public static final Preference<Color> drawingMapLabelBorderColor =
+      store
+          .defineColor(
+              "drawingMapLabelBorderColor", drawingMapLabelForegroundColor.getDefault(), true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.drawingBorder.tooltip");
+
+  /** The background color to use for template labels. */
+  public static final Preference<Color> templateMapLabelBackgroundColor =
+      store
+          .defineColor("templateMapLabelBackgroundColor", Color.RED, true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.templateBackground.tooltip");
+
+  /** The foreground color to use for template labels. */
+  public static final Preference<Color> templateMapLabelForegroundColor =
+      store
+          .defineColor("templateMapLabelForegroundColor", Color.WHITE, true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.templateForeground.tooltip");
+
+  /** The border color to use for template labels. */
+  public static final Preference<Color> templateMapLabelBorderColor =
+      store
+          .defineColor(
+              "templateMapLabelBorderColor", templateMapLabelForegroundColor.getDefault(), true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.templateBorder.tooltip");
+
   /** The font size to use for token map labels. */
   public static final Preference.Numeric<Integer> mapLabelFontSize =
       (Preference.Numeric<Integer>)
@@ -577,7 +615,7 @@ public class AppPreferences {
 
   public static final Preference<String> defaultGridType =
       store
-          .defineString("defaultGridType", GridFactory.SQUARE)
+          .defineString("defaultGridType", Grid.GridType.Square.toString())
           .setLabel("Preferences.label.maps.grid")
           .setTooltip("Preferences.label.maps.grid.tooltip");
 
@@ -601,6 +639,15 @@ public class AppPreferences {
           "Preferences.label.tokens.portrait.mouse",
           "Preferences.label.tokens.portrait.mouse.tooltip",
           true);
+  public static final Preference<Color> facingArrowBGColour =
+      store
+          .defineColor("facingArrowBGColour", Color.yellow, false)
+          .setLabel("Preferences.label.tokens.arrow.background");
+
+  public static final Preference<Color> facingArrowBorderColour =
+      store
+          .defineColor("facingArrowBorderColour", Color.darkGray, false)
+          .setLabel("Preferences.label.tokens.arrow.border");
 
   public static final Preference<Boolean> forceFacingArrow =
       store.defineBoolean(

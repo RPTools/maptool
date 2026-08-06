@@ -19,8 +19,6 @@ import com.jidesoft.swing.*;
 import com.jidesoft.utils.PortingUtils;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -28,15 +26,13 @@ import net.rptools.maptool.language.I18N;
 public class GenericDialog extends JDialog {
   public static final String AFFIRM = ButtonPanel.AFFIRMATIVE_BUTTON;
   public static final String DENY = ButtonPanel.CANCEL_BUTTON;
-  private Dimension _preferredSize = null;
   private boolean hasBeenShown;
   private String _dialogResult = ButtonPanel.CANCEL_BUTTON;
-  protected final Resizable _resizable;
+  private final Resizable _resizable;
   private final JComponent _contentPane = new JPanel();
   private JComponent _content = new JPanel();
   private final JScrollPane _scrollPane = new JScrollPane();
   private ScrollableButtonPanel _buttonPanel;
-  private boolean _usingAbeillePanel = false;
   private ActionListener _onCloseAction;
   private ActionListener _onShowAction;
 
@@ -227,7 +223,6 @@ public class GenericDialog extends JDialog {
 
   public void setContent(JComponent content) {
     this._content = content;
-    this._usingAbeillePanel = content instanceof AbeillePanel;
     this._scrollPane.setViewportView(content);
   }
 
@@ -259,24 +254,8 @@ public class GenericDialog extends JDialog {
         bounds.width - insets.left - insets.right, bounds.height - insets.top - insets.bottom);
   }
 
-  private List<Component> getAllComponents(Container c) {
-    List<Component> listOut = new ArrayList<>();
-    Component[] components = c.getComponents();
-    for (Component _c : components) {
-      listOut.add(_c);
-      if (_c instanceof Container c_) {
-        listOut.addAll(getAllComponents(c_));
-      }
-    }
-    return listOut;
-  }
-
   @Override
   public Dimension getPreferredSize() {
-    //    for (Component c : getAllComponents(this)) {
-    //      System.out.println(c.getName() + c.getPreferredSize());
-    //    }
-
     int scrollBarSize = UIManager.getDefaults().getInt("ScrollBar.width");
     Dimension frameSize = MapTool.getFrame().getSize();
     Dimension superPref = super.getPreferredSize();
@@ -355,12 +334,15 @@ public class GenericDialog extends JDialog {
   }
 
   public void closeDialog() {
-    if (this._usingAbeillePanel && ((AbeillePanel<?>) this._content).getModel() != null) {
+    if (this._content instanceof AbeillePanel<?> abeillePanel && abeillePanel.getModel() != null) {
       // wrap up any AbeillePanel commits and unbinding
       if (this.getDialogResult().equals(AFFIRM)) {
-        ((AbeillePanel<?>) _content).commit();
+        if (!abeillePanel.commit()) {
+          // Do not close the dialog since validation failed.
+          return;
+        }
       }
-      ((AbeillePanel<?>) _content).unbind();
+      abeillePanel.unbind();
     }
     // set off the onCloseAction if present
     if (this._onCloseAction != null) {

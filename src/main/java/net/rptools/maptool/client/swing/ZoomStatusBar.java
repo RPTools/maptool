@@ -22,7 +22,6 @@ import javax.swing.*;
 import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 
 /**
@@ -50,12 +49,12 @@ public class ZoomStatusBar extends JTextField implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     JTextField target = (JTextField) e.getSource();
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-      double zoom;
-      ZoneRenderer renderer;
       try {
-        zoom = StringUtil.parseDecimal(target.getText());
-        renderer = MapTool.getFrame().getCurrentZoneRenderer();
-        renderer.setScale(zoom / 100);
+        var zoom = StringUtil.parseDecimal(target.getText());
+        var renderer = MapTool.getFrame().getCurrentZoneRenderer();
+        var viewModel = renderer.getViewModel();
+        viewModel.setZoneScale(
+            viewModel.getZoneScale().withCenteredScale(zoom / 100., renderer.getSize()));
         renderer.maybeForcePlayersView();
         update();
       } catch (ParseException ex) {
@@ -67,7 +66,8 @@ public class ZoomStatusBar extends JTextField implements ActionListener {
   public void update() {
     String zoom = "";
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-      double scale = MapTool.getFrame().getCurrentZoneRenderer().getZoneScale().getScale();
+      double scale =
+          MapTool.getFrame().getCurrentZoneRenderer().getViewModel().getZoneScale().getScale();
       scale *= 100;
 
       if (scale < 10) {

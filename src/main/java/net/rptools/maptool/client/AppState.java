@@ -28,6 +28,7 @@ public class AppState {
 
   private static boolean showGrid = false;
   private static boolean showCoordinates = false;
+  private static boolean showTokenHalos = true;
   private static boolean showTokenNames = false;
   private static boolean linkPlayerViews = false;
   private static boolean useDoubleWideLine = true;
@@ -121,6 +122,14 @@ public class AppState {
 
   public static void setShowCoordinates(boolean flag) {
     showCoordinates = flag;
+  }
+
+  public static void setShowTokenHalos(boolean flag) {
+    showTokenHalos = flag;
+  }
+
+  public static boolean isShowTokenHalos() {
+    return showTokenHalos;
   }
 
   public static void setShowTokenNames(boolean flag) {

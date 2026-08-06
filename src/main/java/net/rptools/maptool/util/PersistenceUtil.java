@@ -407,7 +407,7 @@ public class PersistenceUtil {
             ZoneRenderer currentZoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
             if (currentZoneRenderer != null) {
               persistedCampaign.currentZoneId = currentZoneRenderer.getZone().getId();
-              persistedCampaign.currentView = currentZoneRenderer.getZoneScale();
+              persistedCampaign.currentView = currentZoneRenderer.getViewModel().getZoneScale();
             }
             // Save all assets in active use (consolidate duplicates between maps)
             saveTimer.start("Collect all assets");

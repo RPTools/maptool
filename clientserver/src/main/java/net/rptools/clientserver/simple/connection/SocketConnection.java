@@ -17,6 +17,7 @@ package net.rptools.clientserver.simple.connection;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import net.rptools.clientserver.ActivityListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,32 +28,29 @@ public class SocketConnection extends AbstractConnection implements Connection {
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(SocketConnection.class);
 
-  private final String id;
+  // Only valid for open connections.
   private SendThread send;
   private ReceiveThread receive;
   private Socket socket;
+
+  // Only valid for pending connections before #open() is called.
   private String hostName;
   private int port;
 
   public SocketConnection(String id, String hostName, int port) {
-    this.id = id;
+    super(id);
     this.hostName = hostName;
     this.port = port;
   }
 
   public SocketConnection(String id, Socket socket) {
-    this.id = id;
-    this.socket = socket;
-
-    initialize(socket);
+    super(id);
+    connect(socket);
   }
 
-  @Override
-  public String getId() {
-    return id;
-  }
+  private void connect(Socket socket) {
+    assert this.socket != null : "Should only call #connect() not already open";
 
-  private void initialize(Socket socket) {
     this.socket = socket;
     this.send = new SendThread(socket);
     this.receive = new ReceiveThread(socket);
@@ -63,7 +61,11 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
   @Override
   public void open() throws IOException {
-    initialize(new Socket(hostName, port));
+    if (this.socket != null) {
+      throw new IOException("The connection has already been opened.");
+    }
+
+    connect(new Socket(hostName, port));
   }
 
   @Override
@@ -73,6 +75,11 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
   @Override
   protected void onClose() {
+    if (socket == null) {
+      // Not open, so nothing to do.
+      return;
+    }
+
     receive.interrupt();
     send.interrupt();
 
@@ -85,7 +92,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
   @Override
   public boolean isAlive() {
-    return !socket.isClosed();
+    return socket != null && !socket.isClosed();
   }
 
   @Override
@@ -124,7 +131,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
           }
 
           try {
-            SocketConnection.this.writeMessage(out, message);
+            writeMessage(out, message);
           } catch (IOException e) {
             log.error("Error while writing message. Closing connection.", e);
             return;
@@ -133,6 +140,29 @@ public class SocketConnection extends AbstractConnection implements Connection {
       } finally {
         SocketConnection.this.close();
       }
+    }
+
+    protected final void writeMessage(OutputStream out, byte[] message) throws IOException {
+      int length = message.length;
+
+      notifyListeners(ActivityListener.Direction.Outbound, ActivityListener.State.Start, length, 0);
+
+      out.write(length >> 24);
+      out.write(length >> 16);
+      out.write(length >> 8);
+      out.write(length);
+
+      for (int i = 0; i < message.length; i++) {
+        out.write(message[i]);
+
+        if (i != 0 && i % ActivityListener.CHUNK_SIZE == 0) {
+          notifyListeners(
+              ActivityListener.Direction.Outbound, ActivityListener.State.Progress, length, i);
+        }
+      }
+      out.flush();
+      notifyListeners(
+          ActivityListener.Direction.Outbound, ActivityListener.State.Complete, length, length);
     }
   }
 
@@ -160,7 +190,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
         while (!SocketConnection.this.isClosed() && SocketConnection.this.isAlive()) {
           try {
-            byte[] message = SocketConnection.this.readMessage(in);
+            byte[] message = readMessage(in);
             SocketConnection.this.dispatchCompressedMessage(message);
           } catch (SocketTimeoutException e) {
             log.warn("Lost client {}", SocketConnection.this.getId(), e);
@@ -177,6 +207,33 @@ public class SocketConnection extends AbstractConnection implements Connection {
         SocketConnection.this.close();
         fireDisconnect();
       }
+    }
+
+    private byte[] readMessage(InputStream in) throws IOException {
+      int b32 = in.read();
+      int b24 = in.read();
+      int b16 = in.read();
+      int b8 = in.read();
+
+      if (b32 < 0) {
+        throw new IOException("Stream closed");
+      }
+      int length = (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
+
+      notifyListeners(ActivityListener.Direction.Inbound, ActivityListener.State.Start, length, 0);
+
+      byte[] ret = new byte[length];
+      for (int i = 0; i < length; i++) {
+        ret[i] = (byte) in.read();
+
+        if (i != 0 && i % ActivityListener.CHUNK_SIZE == 0) {
+          notifyListeners(
+              ActivityListener.Direction.Inbound, ActivityListener.State.Progress, length, i);
+        }
+      }
+      notifyListeners(
+          ActivityListener.Direction.Inbound, ActivityListener.State.Complete, length, length);
+      return ret;
     }
   }
 }

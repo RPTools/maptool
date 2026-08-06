@@ -235,7 +235,8 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
 
     // Quadrant change?
     if (pathVertex != null) {
-      ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+      ZonePoint mouse =
+          new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
       int dx = mouse.x - vertex.x;
       int dy = mouse.y - vertex.y;
       AbstractTemplate.Quadrant quadrant =

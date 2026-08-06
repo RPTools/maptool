@@ -461,7 +461,7 @@ public class HTMLWebViewManager {
     Node head = doc.getDocumentElement().getElementsByTagName("head").item(0);
     Node nodeCSS = head.insertBefore(styleNode, head.getFirstChild());
 
-    // Deal with CSS and events of <link>.
+    // Deal with CSS, icon, and events of <link>.
     nodeList = doc.getElementsByTagName("link");
     for (int i = 0; i < nodeList.getLength(); i++) {
       fixLink(nodeList.item(i), doc);
@@ -541,6 +541,8 @@ public class HTMLWebViewManager {
         } catch (ExecutionException | InterruptedException e) {
           // Do nothing
         }
+      } else if (rel.getTextContent().equalsIgnoreCase("icon")) {
+        doChangeIcon(content);
       } else if (type.getTextContent().equalsIgnoreCase("macro")) {
         if (rel.getTextContent().equalsIgnoreCase("onChangeImpersonated")) {
           doRegisterMacro("onChangeImpersonated", content);
@@ -610,6 +612,18 @@ public class HTMLWebViewManager {
     if (actionListeners != null) {
       log.debug("changeTitle event: {}", title);
       actionListeners.actionPerformed(new HTMLActionEvent.ChangeTitleActionEvent(this, title));
+    }
+  }
+
+  /**
+   * Handle an icon change.
+   *
+   * @param iconHref The icon to change to.
+   */
+  private void doChangeIcon(String iconHref) {
+    if (actionListeners != null) {
+      log.debug("changeIcon event: {}", iconHref);
+      actionListeners.actionPerformed(new HTMLActionEvent.ChangeIconActionEvent(this, iconHref));
     }
   }
 

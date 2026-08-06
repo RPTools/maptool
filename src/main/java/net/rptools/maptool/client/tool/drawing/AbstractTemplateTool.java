@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.tool.drawing;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -21,12 +22,12 @@ import java.awt.geom.AffineTransform;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
 
 /** Base class for tools that draw templates. */
@@ -39,10 +40,7 @@ public abstract class AbstractTemplateTool extends DefaultTool implements ZoneOv
   private boolean isEraser;
 
   protected AffineTransform getPaintTransform(ZoneRenderer renderer) {
-    AffineTransform transform = new AffineTransform();
-    transform.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-    transform.scale(renderer.getScale(), renderer.getScale());
-    return transform;
+    return renderer.getViewModel().getZoneScale().toScreenTransform();
   }
 
   @Override
@@ -88,23 +86,36 @@ public abstract class AbstractTemplateTool extends DefaultTool implements ZoneOv
     return defaultValue;
   }
 
+  /**
+   * @return The pen to used for the finished template.
+   */
   protected Pen getPen() {
-    Pen pen = new Pen(MapTool.getFrame().getPen());
-    pen.setEraser(isEraser());
+    var pen = MapTool.getFrame().getPen(isEraser());
+    if (pen.getBackgroundPaint() == null) {
+      pen.setBackgroundPaint(new DrawableColorPaint(Color.black));
+    }
+    return pen;
+  }
 
-    ColorPicker picker = MapTool.getFrame().getColorPicker();
-    if (picker.isFillForegroundSelected()) {
-      pen.setForegroundMode(Pen.MODE_SOLID);
-    } else {
-      pen.setForegroundMode(Pen.MODE_TRANSPARENT);
+  /**
+   * Get the pen set up to paint the overlay.
+   *
+   * @return The pen used to paint the overlay.
+   */
+  protected Pen getPenForOverlay() {
+    // Get the pen and modify to only show a cursor and the boundary
+    Pen pen = getPen(); // new copy of pen, OK to modify
+    if (pen.getBackgroundPaint() == null) {
+      pen.setBackgroundPaint(new DrawableColorPaint(Color.black));
     }
-    if (picker.isFillBackgroundSelected()) {
-      pen.setBackgroundMode(Pen.MODE_SOLID);
-    } else {
-      pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
+    if (pen.getPaint() == null) {
+      pen.setPaint(new DrawableColorPaint(Color.black));
     }
-    pen.setSquareCap(picker.isSquareCapSelected());
-    pen.setThickness(picker.getStrokeWidth());
+    pen.setThickness(3);
+    if (pen.isEraser()) {
+      pen.setEraser(false);
+      pen.setPaint(new DrawableColorPaint(Color.WHITE));
+    }
     return pen;
   }
 
@@ -145,7 +156,6 @@ public abstract class AbstractTemplateTool extends DefaultTool implements ZoneOv
   }
 
   private boolean hasPaint(Pen pen) {
-    return pen.getForegroundMode() != Pen.MODE_TRANSPARENT
-        || pen.getBackgroundMode() != Pen.MODE_TRANSPARENT;
+    return pen.getPaint() != null || pen.getBackgroundPaint() != null;
   }
 }

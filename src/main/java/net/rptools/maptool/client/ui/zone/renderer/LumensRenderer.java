@@ -38,14 +38,14 @@ public class LumensRenderer {
   private final ZoneView zoneView;
 
   public LumensRenderer(RenderHelper renderHelper, Zone zone, ZoneView zoneView) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("LumensRenderer");
     this.zone = zone;
     this.zoneView = zoneView;
   }
 
   public void render(Graphics2D g2d, PlayerView view) {
     var timer = CodeTimer.get();
-    timer.start("renderLumensOverlay");
+    timer.start("LumensRenderer-renderLumensOverlay");
     try {
       if (!AppState.isShowLumensOverlay()) {
         return;
@@ -53,7 +53,7 @@ public class LumensRenderer {
 
       renderHelper.bufferedRender(g2d, AlphaComposite.SrcOver, worldG -> renderWorld(worldG, view));
     } finally {
-      timer.stop("renderLumensOverlay");
+      timer.stop("LumensRenderer-renderLumensOverlay");
     }
   }
 
@@ -61,7 +61,7 @@ public class LumensRenderer {
     var timer = CodeTimer.get();
     var overlayOpacity = AppPreferences.lumensOverlayOpacity.get() / 255.0f;
 
-    var visibleArea = zoneView.getVisibleArea(view);
+    var visibleArea = zoneView.getVisibility(view).visibleArea();
     final var disjointLumensLevels = zoneView.getDisjointObscuredLumensLevels(view);
 
     var originalClip = worldG.getClip();
@@ -76,16 +76,16 @@ public class LumensRenderer {
     worldG.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
     if (!view.isGMView()) {
-      timer.start("renderLumensOverlay:setClip");
+      timer.start("LumensRenderer-renderLumensOverlay:setClip");
       Area clip = new Area(originalClip);
       clip.intersect(visibleArea);
       worldG.setClip(clip);
-      timer.stop("renderLumensOverlay:setClip");
+      timer.stop("LumensRenderer-renderLumensOverlay:setClip");
     }
 
     worldG.setComposite(AlphaComposite.Src.derive(overlayOpacity));
 
-    timer.start("renderLumensOverlay:drawLumens");
+    timer.start("LumensRenderer-renderLumensOverlay:drawLumens");
     for (final var lumensLevel : disjointLumensLevels) {
       final var lumensStrength = lumensLevel.lumensStrength();
 
@@ -112,7 +112,7 @@ public class LumensRenderer {
 
       worldG.setPaint(new Color(0.f, 0.f, 0.f, 1.f));
       worldG.fill(lumensLevel.darknessArea());
-      timer.stop("renderLumensOverlay:drawLights:fillArea");
+      timer.stop("LumensRenderer-renderLumensOverlay:drawLights:fillArea");
     }
 
     // Now draw borders around each region if configured.
@@ -123,13 +123,13 @@ public class LumensRenderer {
       worldG.setComposite(AlphaComposite.SrcOver);
       worldG.setPaint(new Color(0.f, 0.f, 0.f, 1.f));
       for (final var lumensLevel : disjointLumensLevels) {
-        timer.start("renderLumensOverlay:drawLights:drawArea");
+        timer.start("LumensRenderer-renderLumensOverlay:drawLights:drawArea");
         worldG.draw(lumensLevel.lightArea());
         worldG.draw(lumensLevel.darknessArea());
-        timer.stop("renderLumensOverlay:drawLights:drawArea");
+        timer.stop("LumensRenderer-renderLumensOverlay:drawLights:drawArea");
       }
     }
 
-    timer.stop("renderLumensOverlay:drawLumens");
+    timer.stop("LumensRenderer-renderLumensOverlay:drawLumens");
   }
 }

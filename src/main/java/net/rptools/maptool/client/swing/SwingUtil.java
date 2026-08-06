@@ -108,6 +108,22 @@ public class SwingUtil {
     return (modifiers & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK;
   }
 
+  public static boolean isAltDown(InputEvent e) {
+    return isAltDown(e.getModifiersEx());
+  }
+
+  /**
+   * Passed the event's extended modifiers this method returns <code>true</code> if the Alt key,
+   * Right Alt key or Alt-Graph key is down.
+   *
+   * @param modifiers as returned by {@link InputEvent#getModifiersEx()}
+   * @return <code>true</code> if Alt/Right-Alt/Alt-Graph key is down
+   */
+  public static boolean isAltDown(int modifiers) {
+    return (modifiers & InputEvent.ALT_DOWN_MASK) == InputEvent.ALT_DOWN_MASK
+        || (modifiers & InputEvent.ALT_GRAPH_DOWN_MASK) == InputEvent.ALT_GRAPH_DOWN_MASK;
+  }
+
   /**
    * Centers the innerWindow over the outerWindow. Basically, this method finds the centerpoint of
    * the <code>outerWindow</code> and sets the location of <code>innerWindow</code> so that it's

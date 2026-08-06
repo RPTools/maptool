@@ -161,7 +161,7 @@ public interface ServerCommand {
 
   void updateGmMacros(List<MacroButtonProperties> properties);
 
-  void setBoard(GUID zoneGUID, MD5Key mapAsset, int X, int Y);
+  void setBoard(GUID zoneGUID, MD5Key mapAsset, int x, int y, double scalex, double scaleY);
 
   void setLiveTypingLabel(String name, boolean show);
 
@@ -201,6 +201,16 @@ public interface ServerCommand {
    */
   void toggleLightSourceOnToken(Token token, boolean toggleOn, LightSource lightSource);
 
+  /**
+   * Adds or removes a halo source on {@code token}.
+   *
+   * @param token The token to modify
+   * @param toggleOn If {@code true}, the halo source is turned on for the token. Otherwise, it is
+   *     turned off.
+   * @param halo The halo source to add.
+   */
+  void toggleHaloSourceOnToken(Token token, boolean toggleOn, Halo halo);
+
   void setTokenMaskTopology(Token token, @Nullable Area area, Zone.TopologyType topologyType);
 
   void updateTokenProperty(Token token, Token.Update update, int value);
@@ -238,4 +248,8 @@ public interface ServerCommand {
   void updateTokenProperty(Token token, Token.Update update, String value, BigDecimal value2);
 
   void updatePlayerStatus(Player player);
+
+  void putLookupTable(LookupTable lookupTable);
+
+  void deleteLookupTable(String tableName);
 }

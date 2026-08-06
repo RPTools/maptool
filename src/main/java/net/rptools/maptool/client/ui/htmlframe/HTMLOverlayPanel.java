@@ -34,8 +34,6 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.OverlayVisibilityChanged;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.tool.DefaultTool;
-import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Token;
@@ -314,7 +312,7 @@ public class HTMLOverlayPanel extends JFXPanel {
             SwingUtilities.invokeLater(
                 () -> {
                   if (result == mousePassResult.PASS || !isOpaque(e.getX(), e.getY())) {
-                    passMouseEvent(e);
+                    passMouseEventImmediately(e);
                   }
                 });
           }
@@ -388,7 +386,6 @@ public class HTMLOverlayPanel extends JFXPanel {
 
           @Override
           public void mousePressed(MouseEvent e) {
-            maySetMapDragStart(e); // may set map dragstart x and y, even if on overlay
             mayPassClick(e);
             e.consume(); // workaround for java bug JDK-8200224
           }
@@ -415,26 +412,26 @@ public class HTMLOverlayPanel extends JFXPanel {
    *
    * @param e the mouse event to forward
    */
-  void passMouseEvent(MouseEvent e) {
+  private void passMouseEvent(MouseEvent e) {
+    /*
+     * Important: because mayPassClick() first goes to Platform.runLater(), then
+     * `SwingUtilities.invokeLater()` if permitted, we need to do the same here. Otherwise, events
+     * can end up out of order.
+     */
+
+    Platform.runLater(
+        () -> {
+          SwingUtilities.invokeLater(
+              () -> {
+                passMouseEventImmediately(e);
+              });
+        });
+  }
+
+  private void passMouseEventImmediately(MouseEvent e) {
     Component c = MapTool.getFrame().getCurrentZoneRenderer();
     if (c != null) {
       c.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, c));
-    }
-  }
-
-  /**
-   * Sets up the initial drag start. If the mouse press is a right click and the tool could be
-   * dragging the map, sets up the initial drag start. This is required or the map will "jump" if
-   * performing a right click on the overlay followed by a drag.
-   *
-   * @param e the mouse press event
-   */
-  private void maySetMapDragStart(MouseEvent e) {
-    if (SwingUtilities.isRightMouseButton(e)) {
-      Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
-      if (tool instanceof DefaultTool) {
-        ((DefaultTool) tool).setDragStart(e.getX(), e.getY());
-      }
     }
   }
 

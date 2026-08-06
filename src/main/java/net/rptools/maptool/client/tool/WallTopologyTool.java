@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.tool;
 
+import com.github.weisj.jsvg.util.ColorUtil;
 import com.google.common.eventbus.Subscribe;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -29,16 +30,21 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.CollectionUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.walls.WallConfigurationController;
 import net.rptools.maptool.client.tool.drawing.TopologyTool;
@@ -50,6 +56,7 @@ import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.topology.Vertex;
+import net.rptools.maptool.model.topology.VisibilityType;
 import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.zones.WallTopologyChanged;
 import org.locationtech.jts.math.Vector2D;
@@ -59,7 +66,8 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
       new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
   private final WallConfigurationController controlPanel;
-  private @Nullable WallTopologyRig.MovableWall selectedWall;
+  private final CopyOnWriteArrayList<WallTopologyRig.MovableWall> selectedWalls =
+      new CopyOnWriteArrayList<>();
 
   /** The current tool behaviour. Each operation enters a distinct mode so we don't cross-talk. */
   private ToolMode mode = new NilToolMode();
@@ -72,11 +80,10 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
     controlPanel =
         new WallConfigurationController(
             event -> {
-              var newData = (Wall.Data) event.getNewValue();
-
-              if (selectedWall != null) {
-                selectedWall.getSource().setData(newData);
-                mode.onWallChanged(selectedWall);
+              var newData = (WallConfigurationController.WallData) event.getNewValue();
+              for (var wall : selectedWalls) {
+                wall.getSource().setData(newData.toWallData(wall.getSource().data()));
+                mode.onWallChanged(wall);
               }
             });
   }
@@ -141,8 +148,7 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
     maskOverlay.paintOverlay(renderer, g);
 
     Graphics2D g2 = (Graphics2D) g.create();
-    g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-    g2.scale(renderer.getScale(), renderer.getScale());
+    g2.transform(renderer.getViewModel().getZoneScale().toScreenTransform());
     SwingUtil.useAntiAliasing(g2);
     g2.setComposite(AlphaComposite.SrcOver);
 
@@ -195,11 +201,11 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
   }
 
   private double getHandleRadius() {
-    return 4. / Math.min(1., renderer.getScale());
+    return 4. / Math.min(1., renderer.getViewModel().getZoneScale().getScale());
   }
 
   private double getWallHalfWidth() {
-    return 1.5 / Math.min(1, renderer.getScale());
+    return 1.5 / Math.min(1, renderer.getViewModel().getZoneScale().getScale());
   }
 
   private double getHandleSelectDistance() {
@@ -211,20 +217,57 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
     return getWallHalfWidth() * 1.5;
   }
 
-  private void setSelectedWall(@Nullable WallTopologyRig.MovableWall wall) {
-    selectedWall = wall;
-    if (selectedWall != null) {
-      controlPanel.bind(selectedWall.getSource().data());
+  private void rebindSelection() {
+    if (!this.selectedWalls.isEmpty()) {
+      // For each field, need to check if we have agreement or not. If not, null the field.
+      // Otherwise set it to the elemnt's field.
+      var firstData = this.selectedWalls.getFirst().getSource().data();
+      var direction = firstData.direction();
+      var movementModifier = firstData.movementModifier();
+      var modifiers =
+          CollectionUtil.newFilledEnumMap(VisibilityType.class, firstData::directionModifier);
+
+      for (var wall : this.selectedWalls) {
+        var data = wall.getSource().data();
+        if (data.direction() != direction) {
+          direction = null;
+        }
+        if (data.movementModifier() != movementModifier) {
+          movementModifier = null;
+        }
+        for (var type : VisibilityType.values()) {
+          if (data.directionModifier(type) != modifiers.get(type)) {
+            modifiers.put(type, null);
+          }
+        }
+      }
+
+      controlPanel.bind(
+          new WallConfigurationController.WallData(direction, movementModifier, modifiers));
     }
   }
 
-  private boolean isSelectedWall(WallTopologyRig.MovableWall wall) {
-    var selected = getSelectedWall();
-    return selected.isPresent() && wall.isForSameElement(selected.get());
+  private void clearSelectedWalls() {
+    this.selectedWalls.clear();
+    rebindSelection();
   }
 
-  private Optional<WallTopologyRig.MovableWall> getSelectedWall() {
-    return Optional.ofNullable(selectedWall);
+  private void addSelectedWall(WallTopologyRig.MovableWall wall) {
+    this.selectedWalls.add(wall);
+    rebindSelection();
+  }
+
+  private void removeWallsFromSelectionIf(Predicate<WallTopologyRig.MovableWall> predicate) {
+    this.selectedWalls.removeIf(predicate);
+    rebindSelection();
+  }
+
+  private boolean isSelectedWall(WallTopologyRig.MovableWall wall) {
+    return getSelectedWalls().stream().anyMatch(wall::isForSameElement);
+  }
+
+  public List<WallTopologyRig.MovableWall> getSelectedWalls() {
+    return Collections.unmodifiableList(selectedWalls);
   }
 
   private void changeToolMode(ToolMode newMode) {
@@ -238,7 +281,8 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
   }
 
   private Point2D updateCurrentPosition(MouseEvent e) {
-    return currentPosition = ScreenPoint.convertToZone2d(renderer, e.getX(), e.getY());
+    return currentPosition =
+        renderer.getViewModel().getZoneScale().toWorldSpace(e.getX(), e.getY());
   }
 
   private Snap getSnapMode(MouseEvent e) {
@@ -274,16 +318,17 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
 
   @Subscribe
   private void onTopologyChanged(WallTopologyChanged event) {
-    var selected = getSelectedWall();
+    var selected = new ArrayList<>(getSelectedWalls());
 
     var rig = new WallTopologyRig(this::getHandleSelectDistance, this::getWallSelectDistance);
     rig.setWalls(getZone().getWalls());
     changeToolMode(new BasicToolMode(this, rig));
 
-    // If the selected wall still exists, rebind it.
-    var newSelectedWall =
-        selected.flatMap(s -> rig.getWall(s.getSource().from(), s.getSource().to())).orElse(null);
-    setSelectedWall(newSelectedWall);
+    // Rebind any selected walls that still exist, in case any of them have changed.
+    clearSelectedWalls();
+    selected.stream()
+        .flatMap(s -> rig.getWall(s.getSource().from(), s.getSource().to()).stream())
+        .forEach(this::addSelectedWall);
   }
 
   /**
@@ -462,14 +507,13 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
     @Override
     public void delete() {}
 
-    protected void deleteSelectedWall() {
-      tool.getSelectedWall()
-          .ifPresent(
-              wall -> {
-                tool.setSelectedWall(null);
-                wall.delete();
-                MapTool.serverCommand().replaceWalls(tool.getZone(), rig.commit());
-              });
+    protected void deleteSelectedWalls() {
+      var toBeDeleted = new ArrayList<>(tool.getSelectedWalls());
+      tool.clearSelectedWalls();
+      for (var wall : toBeDeleted) {
+        wall.delete();
+      }
+      MapTool.serverCommand().replaceWalls(tool.getZone(), rig.commit());
     }
 
     /**
@@ -574,7 +618,7 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
               wallStroke.getLineJoin());
       var decorationStroke =
           new BasicStroke(1.5f, wallStroke.getEndCap(), wallStroke.getLineJoin());
-      var walls = rig.getWallsWithin(bounds);
+      var walls = rig.getWallsIntersecting(bounds);
       for (var wall : walls) {
         var asSegment = wall.asLineSegment();
         var asVector = Vector2D.create(asSegment.p0, asSegment.p1);
@@ -733,7 +777,7 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
 
     @Override
     public void delete() {
-      deleteSelectedWall();
+      deleteSelectedWalls();
     }
 
     @Override
@@ -749,6 +793,8 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
         switch (potentialDragElement) {
           case null -> {
             // Do nothing.
+            tool.changeToolMode(new DrawSelectionBoxToolMode(tool, rig, potentialDragPoint));
+            handled = true;
           }
           case WallTopologyRig.MovableVertex movableVertex -> {
             tool.changeToolMode(
@@ -776,16 +822,11 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
           }
           case WallTopologyRig.MovableVertex movableVertex -> {
             if (event.getClickCount() == 2) {
-              var selectionToBeDeleted =
-                  tool.getSelectedWall()
-                      .filter(
-                          s ->
-                              s.getFrom().isForSameElement(movableVertex)
-                                  || s.getTo().isForSameElement(movableVertex))
-                      .isPresent();
-              if (selectionToBeDeleted) {
-                tool.setSelectedWall(null);
-              }
+              // Remove any affected walls from the selection.
+              tool.removeWallsFromSelectionIf(
+                  wall ->
+                      wall.getFrom().isForSameElement(movableVertex)
+                          || wall.getTo().isForSameElement(movableVertex));
 
               movableVertex.delete();
               MapTool.serverCommand().replaceWalls(tool.getZone(), rig.commit());
@@ -793,15 +834,23 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
           }
           case WallTopologyRig.MovableWall movableWall -> {
             if (event.getClickCount() == 2) {
-              var isSelected = tool.isSelectedWall(movableWall);
-              if (isSelected) {
-                tool.setSelectedWall(null);
-              }
+              // Remove any affected walls from the selection.
+              tool.removeWallsFromSelectionIf(movableWall::isForSameElement);
 
               movableWall.delete();
               MapTool.serverCommand().replaceWalls(tool.getZone(), rig.commit());
+            } else if (SwingUtil.isShiftDown(event)) {
+              // Toggle the selection status of the wall.
+              var isSelected = tool.isSelectedWall(movableWall);
+              if (isSelected) {
+                tool.removeWallsFromSelectionIf(movableWall::isForSameElement);
+              } else {
+                tool.addSelectedWall(movableWall);
+              }
             } else {
-              tool.setSelectedWall(movableWall);
+              // Not holding shift, so replace the selection instead of adding to it.
+              tool.clearSelectedWalls();
+              tool.addSelectedWall(movableWall);
             }
           }
         }
@@ -878,8 +927,9 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
 
     @Override
     public void activate() {
-      wall.getSource().setData(tool.controlPanel.getModel());
-      tool.setSelectedWall(wall);
+      wall.getSource().setData(tool.controlPanel.getModel().toWallData());
+      tool.clearSelectedWalls();
+      tool.addSelectedWall(wall);
     }
 
     private void findConnectToHandle(InputEvent event) {
@@ -895,7 +945,7 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
     public boolean cancel() {
       // Revert to the original.
       rig.setWalls(tool.getZone().getWalls());
-      tool.setSelectedWall(null);
+      tool.clearSelectedWalls();
       tool.changeToolMode(new BasicToolMode(tool, rig));
       return true;
     }
@@ -938,8 +988,9 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
         }
         wall = newWall;
 
-        newWall.getSource().setData(tool.controlPanel.getModel());
-        tool.setSelectedWall(newWall);
+        newWall.getSource().setData(tool.controlPanel.getModel().toWallData());
+        tool.clearSelectedWalls();
+        tool.addSelectedWall(newWall);
       }
       if (SwingUtilities.isLeftMouseButton(event)) {
         // Like a right-click, but we're done drawing.
@@ -959,7 +1010,10 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
                   .flatMap(vertex -> rig.getWall(wall.getSource().from(), vertex.getSource().id()))
                   .orElse(null);
         }
-        tool.setSelectedWall(lastWall);
+        tool.clearSelectedWalls();
+        if (lastWall != null) {
+          tool.addSelectedWall(lastWall);
+        }
 
         MapTool.serverCommand().replaceWalls(tool.getZone(), rig.commit());
         tool.changeToolMode(new BasicToolMode(tool, rig));
@@ -1016,7 +1070,7 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
     public final boolean cancel() {
       // Revert to the original.
       rig.setWalls(tool.getZone().getWalls());
-      tool.setSelectedWall(null);
+      tool.clearSelectedWalls();
       tool.changeToolMode(new BasicToolMode(tool, rig));
       return true;
     }
@@ -1075,7 +1129,10 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
     @Override
     public void activate() {
       this.rig.bringToFront(this.movable);
-      this.tool.setSelectedWall(this.movable);
+      this.tool.clearSelectedWalls();
+      // TODO We need to be able to drag multiple walls. For now we collapse the selection to a
+      //  single wall, but this is not ideal.
+      this.tool.addSelectedWall(this.movable);
     }
 
     @Override
@@ -1137,7 +1194,7 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
 
     @Override
     public void activate() {
-      tool.setSelectedWall(null);
+      tool.clearSelectedWalls();
       this.rig.bringToFront(this.movable);
     }
 
@@ -1179,6 +1236,83 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
         return Color.green;
       }
       return super.getHandleFill(handle);
+    }
+  }
+
+  /**
+   * Tool mode for drawing a wall selection box.
+   *
+   * <p>This mode supports the following actions:
+   *
+   * <ol>
+   *   <li>Canceling leaves the selection as-is and transitions to {@link BasicToolMode}.
+   *   <li>Left-dragging the mouse will adjust the selection box accordingly.
+   *   <li>Releasing the left mouse button will commit the selection. Any walls contained within the
+   *       selection box will become the new selection. If the <kbd>Shift</kbd> key is held when
+   *       releasing the left mouse button, the newly selected walls will be added to the selection;
+   *       otherwise, they will replace the selection.
+   * </ol>
+   */
+  private static final class DrawSelectionBoxToolMode extends ToolModeBase {
+    private final Point2D.Double startPoint;
+    private final Point2D.Double endPoint;
+    private final RoundRectangle2D.Double box;
+
+    public DrawSelectionBoxToolMode(
+        WallTopologyTool tool, WallTopologyRig rig, Point2D startPoint) {
+      super(tool, rig);
+      this.startPoint = new Point2D.Double(startPoint.getX(), startPoint.getY());
+      this.endPoint = new Point2D.Double(startPoint.getX(), startPoint.getY());
+      this.box =
+          new RoundRectangle2D.Double(this.startPoint.getX(), this.startPoint.getY(), 0, 0, 10, 10);
+    }
+
+    @Override
+    public final boolean cancel() {
+      // Revert to the original.
+      rig.setWalls(tool.getZone().getWalls());
+      tool.changeToolMode(new BasicToolMode(tool, rig));
+      return true;
+    }
+
+    @Override
+    public boolean mouseDragged(Point2D point, Snap snapMode, MouseEvent event) {
+      if (SwingUtilities.isLeftMouseButton(event)) {
+        endPoint.setLocation(point.getX(), point.getY());
+        box.x = Math.min(startPoint.getX(), endPoint.getX());
+        box.y = Math.min(startPoint.getY(), endPoint.getY());
+        box.width = Math.max(startPoint.getX(), endPoint.getX()) - box.x;
+        box.height = Math.max(startPoint.getY(), endPoint.getY()) - box.y;
+      }
+
+      return false;
+    }
+
+    @Override
+    public void mouseReleased(Point2D point, Snap snapMode, MouseEvent event) {
+      if (SwingUtilities.isLeftMouseButton(event)) {
+        tool.changeToolMode(new BasicToolMode(tool, rig));
+
+        var wallsToSelect = rig.getWallsWithin(box.getBounds2D());
+        if (!SwingUtil.isShiftDown(event)) {
+          // Not holding shift, so replace the selection instead of adding to it.
+          tool.clearSelectedWalls();
+        }
+        for (var wall : wallsToSelect) {
+          tool.addSelectedWall(wall);
+        }
+      }
+    }
+
+    @Override
+    public void paint(Graphics2D g2) {
+      super.paint(g2);
+
+      g2.setPaint(ColorUtil.withAlpha(AppStyle.selectionBoxFill, 0.25f));
+      g2.fill(box);
+
+      g2.setColor(AppStyle.selectionBoxOutline);
+      g2.draw(box);
     }
   }
 }

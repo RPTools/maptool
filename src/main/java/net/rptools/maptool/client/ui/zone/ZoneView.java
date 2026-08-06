@@ -25,6 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.Illumination.LumensLevel;
@@ -139,11 +140,57 @@ public class ZoneView {
    */
   private final Map<PlayerView, Illumination> illuminationsPerView = new HashMap<>();
 
-  /** Map the PlayerView to its exposed area. */
-  private final Map<PlayerView, Area> exposedAreaMap = new HashMap<>();
+  /**
+   * Holds the visibility information for a {@link PlayerView}.
+   *
+   * <p>The {@link #visibleArea()} and {@link #exposedArea()} are the fundamental areas that
+   * describe the view's visibility and fog of war. The {@link #clearArea()} and {@link
+   * #softFogArea()} are derived from these based on the zone's configuration.
+   *
+   * <p>When {@link Zone#hasFog()} returns {@code false}, the {@link #exposedArea()} is meaningless.
+   * In this case, the area will be empty and should not be used. Because {@link #clearArea()} and
+   * {@link #softFogArea()} derive from {@link #exposedArea()}, these are also meaningless and will
+   * be set to the empty area.
+   *
+   * <p>Because of the way Fog of War has to be rendered, {@link #softFogArea()} may not be very
+   * intuitive. Keep this rendering logic in mind when thinking about these areas:
+   *
+   * <ol>
+   *   <li>Start by assuming everything is covered in hard FoW.
+   *   <li>Use {@link #softFogArea()} to carve out part of the hard FoW.
+   *   <li>Use {@link #clearArea()} to carve out part of the soft FoW and hard Fow.
+   * </ol>
+   *
+   * @param visibleArea The combined visible area of all tokens in the view.
+   * @param exposedArea The combined exposed area of all tokens in the view.
+   * @param softFogArea The area that is clear of hard FoW. Typically, the same as {@link
+   *     #exposedArea()}, unless vision is off in which case it is empty.
+   * @param clearArea The area that is clear of soft FoW and hard Fow. Typically, the intersection
+   *     of {@link #visibleArea()} and {@link #exposedArea()}, unless vision if off in which case it
+   *     is just {@link #exposedArea()}.
+   */
+  public record Visibility(
+      @Nonnull Area visibleArea,
+      @Nonnull Area exposedArea,
+      @Nonnull Area softFogArea,
+      @Nonnull Area clearArea) {
 
-  /** Map the PlayerView to its visible area. */
-  private final Map<PlayerView, Area> visibleAreaMap = new HashMap<>();
+    /**
+     * Creates a visibility record for when the zone does not have fog enabled.
+     *
+     * <p>The {@link #exposedArea()}, {@link #softFogArea()}, and {@link #clearArea()} will all be
+     * set to empty areas.
+     *
+     * @param visibleArea The visible area for the view.
+     * @return A visibility record that only contains the visible area.
+     */
+    public static @Nonnull Visibility withoutFog(@Nonnull Area visibleArea) {
+      return new Visibility(visibleArea, new Area(), new Area(), new Area());
+    }
+  }
+
+  /** Map the PlayerView to its visible area and exposed area. */
+  private final Map<PlayerView, Visibility> visibilityMap = new HashMap<>();
 
   // endregion
 
@@ -169,57 +216,80 @@ public class ZoneView {
     new MapToolEventBus().getMainEventBus().register(this);
   }
 
-  public Area getExposedArea(PlayerView view) {
-    Area exposed = exposedAreaMap.get(view);
+  private @Nonnull Area calculateExposedArea(PlayerView view) {
+    boolean combinedView =
+        !isUsingVision()
+            || MapTool.isPersonalServer()
+            || !MapTool.getServerPolicy().isUseIndividualFOW()
+            || view.isGMView();
 
-    if (exposed == null) {
-      boolean combinedView =
-          !isUsingVision()
-              || MapTool.isPersonalServer()
-              || !MapTool.getServerPolicy().isUseIndividualFOW()
-              || view.isGMView();
-
-      if (view.isUsingTokenView() || combinedView) {
-        exposed = zone.getExposedArea(view);
-      } else {
-        // Not a token-specific view, but we are using Individual FoW. So we build up all the owned
-        // tokens' exposed areas to build the soft FoW. Note that not all owned tokens may still
-        // have sight (so weren't included in the PlayerView), but could still have previously
-        // exposed areas.
-        exposed = new Area();
-        for (Token tok : zone.getTokensForLayers(Zone.Layer::supportsVision)) {
-          if (!AppUtil.playerOwns(tok)) {
-            continue;
-          }
-          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-          Area exposedArea = meta.getExposedAreaHistory();
-          exposed.add(new Area(exposedArea));
+    @Nonnull Area exposed;
+    if (view.isUsingTokenView() || combinedView) {
+      exposed = zone.getExposedArea(view);
+    } else {
+      // Not a token-specific view, but we are using Individual FoW. So we build up all the owned
+      // tokens' exposed areas to build the soft FoW. Note that not all owned tokens may still
+      // have sight (so weren't included in the PlayerView), but could still have previously
+      // exposed areas.
+      exposed = new Area();
+      for (Token tok : zone.getTokensForLayers(Zone.Layer::supportsVision)) {
+        if (!AppUtil.playerOwns(tok)) {
+          continue;
         }
+        ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
+        Area exposedArea = meta.getExposedAreaHistory();
+        exposed.add(new Area(exposedArea));
       }
-
-      exposedAreaMap.put(view, exposed);
     }
     return exposed;
   }
 
-  /**
-   * Calculate the visible area of the view, cache it in visibleAreaMap, and return it
-   *
-   * <p>The visible area is calculated for each token in the view. The token's visible area is its
-   * vision obstructed by topology and restricted to the illuminated portions of the map.
-   *
-   * @param view the PlayerView
-   * @return the visible area
-   */
-  public @Nonnull Area getVisibleArea(PlayerView view) {
-    return visibleAreaMap.computeIfAbsent(
+  private @Nonnull Area calculateVisibleArea(PlayerView view) {
+    final var visibleArea = new Area();
+    getTokensForView(view).map(token -> this.getVisibleArea(token, view)).forEach(visibleArea::add);
+    return visibleArea;
+  }
+
+  public @Nonnull Visibility getVisibility(PlayerView view) {
+    return visibilityMap.computeIfAbsent(
         view,
         view2 -> {
-          final var visibleArea = new Area();
-          getTokensForView(view2)
-              .map(token -> this.getVisibleArea(token, view2))
-              .forEach(visibleArea::add);
-          return visibleArea;
+          var timer = CodeTimer.get();
+          var tokenCount = view.isUsingTokenView() ? view.getTokens().size() : 0;
+
+          timer.start("ZoneView.getVisibility(%d tokens)-getVisibleArea", tokenCount);
+          var visibleArea = calculateVisibleArea(view2);
+          timer.stop("ZoneView.getVisibility(%d tokens)-getVisibleArea", tokenCount);
+
+          if (!zone.hasFog()) {
+            // Exposed and clear areas are meaningless when not using fog of war.
+            return Visibility.withoutFog(visibleArea);
+          }
+
+          timer.start("ZoneView.getVisibility(%d tokens)-getExposedArea", tokenCount);
+          var exposedArea = calculateExposedArea(view2);
+          timer.stop("ZoneView.getVisibility(%d tokens)-getExposedArea", tokenCount);
+
+          /*
+           * Hard FOW is cleared by exposed areas. The exposed area itself has two regions: the
+           * visible area (rendered clear) and the soft FOW area (rendered translucent). But if
+           * vision is off, treat the entire exposed area as clear with no soft FOW.
+           */
+
+          timer.start("ZoneView.getVisibility(%d tokens)-getClearArea", tokenCount);
+          Area softFogArea;
+          Area clearArea;
+          if (isUsingVision()) {
+            softFogArea = exposedArea;
+            clearArea = new Area(visibleArea);
+            clearArea.intersect(softFogArea);
+          } else {
+            softFogArea = new Area();
+            clearArea = exposedArea;
+          }
+          timer.stop("ZoneView.getVisibility(%d tokens)-getClearArea", tokenCount);
+
+          return new Visibility(visibleArea, exposedArea, softFogArea, clearArea);
         });
   }
 
@@ -722,8 +792,8 @@ public class ZoneView {
   }
 
   /**
-   * Clear the vision caches (@link #tokenVisionCachePerView}, {@link #visibleAreaMap}), fog cache
-   * ({@link #exposedAreaMap}), and illumination caches ({@link #illuminationModels}.
+   * Clear the vision caches (@link #tokenVisionCachePerView}, {@link #visibilityMap}), and
+   * illumination caches ({@link #illuminationModels}.
    *
    * <p>Needs to be called whenever topology changes, fog is edited, or map vision settings are
    * changed. These are all external factors that directly affect vision and illumination. In the
@@ -739,14 +809,13 @@ public class ZoneView {
 
     tokenVisionCachePerView.clear();
     illuminationsPerView.clear();
-    exposedAreaMap.clear();
-    visibleAreaMap.clear();
+    flushFog();
 
     flushLights();
   }
 
   public void flushFog() {
-    exposedAreaMap.clear();
+    visibilityMap.clear();
   }
 
   private void flushLights() {
@@ -756,8 +825,8 @@ public class ZoneView {
 
   /**
    * Flush the ZoneView cache of the token. Remove token from {@link #tokenVisionCachePerView}, and
-   * {@link #illuminationModels}. Can clear {@link #tokenVisionCachePerView}, {@link
-   * #visibleAreaMap}, and {@link #exposedAreaMap} depending on the token.
+   * {@link #illuminationModels}. Can clear {@link #tokenVisionCachePerView}, and {@link
+   * #visibilityMap} depending on the token.
    *
    * @param token the token to flush.
    */
@@ -776,14 +845,12 @@ public class ZoneView {
       contributedPersonalLightsByToken.remove(token.getId());
       tokenVisionCachePerView.clear();
       illuminationsPerView.clear();
-      exposedAreaMap.clear();
-      visibleAreaMap.clear();
+      flushFog();
       drawableLights.clear();
     } else if (token.getHasSight()) {
       contributedPersonalLightsByToken.remove(token.getId());
       illuminationsPerView.clear();
-      exposedAreaMap.clear();
-      visibleAreaMap.clear();
+      flushFog();
       drawableLights.clear();
     }
 
@@ -884,7 +951,7 @@ public class ZoneView {
 
   /**
    * Update {@link #lightSourceMap} with the light sources of the tokens, and clear {@link
-   * #visibleAreaMap} and {@link #exposedAreaMap} if one of the tokens has sight.
+   * #visibilityMap} if one of the tokens has sight.
    *
    * @param tokens the list of tokens
    */
@@ -892,8 +959,7 @@ public class ZoneView {
     updateLightSourcesFromTokens(tokens);
 
     if (tokens.stream().anyMatch(Token::getHasSight)) {
-      exposedAreaMap.clear();
-      visibleAreaMap.clear();
+      flushFog();
     }
 
     if (tokens.stream().anyMatch(Token::hasAnyMaskTopology)) {

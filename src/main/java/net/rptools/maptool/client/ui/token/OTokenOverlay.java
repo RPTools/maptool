@@ -14,85 +14,47 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Stroke;
+import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Draw an empty circle over a token.
  *
  * @author jgorrell
  */
-public class OTokenOverlay extends XTokenOverlay {
-
-  /** Default constructor needed for XML encoding/decoding */
-  public OTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, 5);
-  }
+public final class OTokenOverlay extends AbstractShapeTokenOverlay {
 
   /**
    * Create an O token overlay with the given name.
    *
-   * @param aName Name of this token overlay.
-   * @param aColor The color of this token overlay.
-   * @param aWidth The width of the lines in this token overlay.
+   * @param name Name of this token overlay.
+   * @param color The color of this token overlay.
+   * @param strokeWidth The width of the lines in this token overlay.
    */
-  public OTokenOverlay(String aName, Color aColor, int aWidth) {
-    super(aName, aColor, aWidth);
+  public OTokenOverlay(String name, Color color, int strokeWidth) {
+    super(name, color, strokeWidth);
   }
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
-  @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new OTokenOverlay(getName(), getColor(), getWidth());
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
+  public OTokenOverlay(OTokenOverlay other) {
+    super(other);
   }
 
-  /**
-   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     Rectangle)
-   */
   @Override
-  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
-    Color tempColor = g.getColor();
-    g.setColor(getColor());
-    Stroke tempStroke = g.getStroke();
-    g.setStroke(getStroke());
-    Composite tempComposite = g.getComposite();
-    if (getOpacity() != 100)
-      g.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
+  public OTokenOverlay clone() {
+    return new OTokenOverlay(this);
+  }
+
+  @Override
+  public Shape getShape(Rectangle2D bounds) {
     double offset = getStroke().getLineWidth() / 2.0;
-    g.draw(
+    var path =
         new Ellipse2D.Double(
-            0 + offset, 0 + offset, bounds.width - offset * 2, bounds.height - offset * 2));
-    g.setColor(tempColor);
-    g.setStroke(tempStroke);
-    g.setComposite(tempComposite);
-  }
-
-  public static OTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new OTokenOverlay();
-    overlay.fillFrom(dto);
-    return overlay;
-  }
-
-  public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.O).build();
+            bounds.getMinX() + offset,
+            bounds.getMinY() + offset,
+            bounds.getWidth() - 2 * offset,
+            bounds.getHeight() - 2 * offset);
+    return path;
   }
 }

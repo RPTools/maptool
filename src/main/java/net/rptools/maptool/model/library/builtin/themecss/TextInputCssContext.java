@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model.library.builtin.themecss;
 
-import java.awt.Color;
 import java.util.function.Function;
 import javax.swing.UIDefaults;
 
@@ -30,23 +29,35 @@ public class TextInputCssContext {
   /** The background color of the text input. */
   private final String backgroundColor;
 
+  /** The background color of the text input when disabled. */
+  private final String disabledBackgroundColor;
+
   /** The border size of the text input when disabled. */
   private final String disabledBorderSize;
 
   /** The border color of the text input when disabled. */
   private final String disabledBorderColor;
 
+  /** The foreground color of the text input when disabled. */
+  private final String disabledForegroundColor;
+
+  /** The foreground color of the text input placeholder. */
+  private final String placeholderForegroundColor;
+
   /**
    * Creates a new instance of the text input css context.
    *
    * @param uiDef The UI defaults to use to extract the values.
-   * @param formatColor The function to use to format the color.
+   * @param getColorOrBlank The function to use to convert the color key into a string color format.
    */
-  public TextInputCssContext(UIDefaults uiDef, Function<Color, String> formatColor) {
-    foregroundColor = formatColor.apply(uiDef.getColor("TextField.foreground"));
-    backgroundColor = formatColor.apply(uiDef.getColor("TextField.background"));
+  public TextInputCssContext(UIDefaults uiDef, Function<String, String> getColorOrBlank) {
+    foregroundColor = getColorOrBlank.apply("TextField.foreground");
+    backgroundColor = getColorOrBlank.apply("TextField.background");
+    disabledForegroundColor = getColorOrBlank.apply("TextField.inactiveForeground");
+    disabledBackgroundColor = getColorOrBlank.apply("TextField.disabledBackground");
+    disabledBorderColor = disabledForegroundColor;
     disabledBorderSize = "1px";
-    disabledBorderColor = formatColor.apply(uiDef.getColor("TextField.inactiveForeground"));
+    placeholderForegroundColor = getColorOrBlank.apply("TextField.placeholderForeground");
   }
 
   /**
@@ -68,6 +79,15 @@ public class TextInputCssContext {
   }
 
   /**
+   * Returns the background color of the text input when disabled.
+   *
+   * @return The background color of the text input when disabled.
+   */
+  public String getDisabledBackgroundColor() {
+    return disabledBackgroundColor;
+  }
+
+  /**
    * Returns the border size of the text input when disabled.
    *
    * @return The border size of the text input when disabled.
@@ -83,5 +103,23 @@ public class TextInputCssContext {
    */
   public String getDisabledBorderColor() {
     return disabledBorderColor;
+  }
+
+  /**
+   * Returns the foreground color of the text input when disabled.
+   *
+   * @return The foreground color of the text input when disabled.
+   */
+  public String getDisabledForegroundColor() {
+    return disabledForegroundColor;
+  }
+
+  /**
+   * Returns the foreground color of the text input placeholder.
+   *
+   * @return The foreground color of the text input placeholder.
+   */
+  public String getPlaceholderForegroundColor() {
+    return placeholderForegroundColor;
   }
 }

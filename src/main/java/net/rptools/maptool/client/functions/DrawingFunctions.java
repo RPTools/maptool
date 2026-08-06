@@ -20,23 +20,15 @@ import java.awt.Point;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.tool.drawing.DrawingPointerTool;
+import net.rptools.maptool.client.tool.drawing.TemplatePointerTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.drawing.AbstractDrawing;
-import net.rptools.maptool.model.drawing.AbstractTemplate;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
-import net.rptools.maptool.model.drawing.DrawablePaint;
-import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.model.drawing.DrawablesGroup;
-import net.rptools.maptool.model.drawing.DrawnElement;
-import net.rptools.maptool.model.drawing.LineSegment;
-import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.drawing.ShapeDrawable;
+import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -47,6 +39,67 @@ public class DrawingFunctions extends AbstractFunction {
 
   public DrawingFunctions(int minParameters, int maxParameters, String... aliases) {
     super(minParameters, maxParameters, aliases);
+  }
+
+  /**
+   * DrawableUnit enumeration, including an <code>index</code> property based on the "units" boolean
+   * argument found in certain MTScript functions, but as a tri-state with <code>CELLS</code>,
+   * <code>DISTANCE</code>, and <code>PIXELS</code> options. For template radii the units used
+   * typically will be <code>DISTANCE</code>.
+   */
+  protected enum DrawableUnit {
+    CELLS(0),
+    DISTANCE(1),
+    PIXELS(2);
+
+    DrawableUnit(int index) {
+      this.index = index;
+    }
+
+    private final int index;
+
+    public static DrawableUnit valueOfIndex(int index) {
+      for (DrawableUnit drawableUnit : values()) {
+        if (drawableUnit.index == index) {
+          return drawableUnit;
+        }
+      }
+      return null;
+    }
+
+    public static int convert(Zone zone, int value, DrawableUnit fromUnit, DrawableUnit toUnit) {
+      double fromConversion = getConversionFactor(zone, fromUnit);
+      double toConversion = getConversionFactor(zone, toUnit);
+      return (int) (value * toConversion / fromConversion);
+    }
+
+    public static int convertToCells(Zone zone, int value, DrawableUnit fromUnit) {
+      return convert(zone, value, fromUnit, DrawableUnit.CELLS);
+    }
+
+    public static double getConversionFactor(Zone zone, DrawableUnit drawableUnit) {
+      return switch (drawableUnit) {
+        case CELLS -> 1d;
+        case DISTANCE -> zone.getUnitsPerCell();
+        case PIXELS -> zone.getGrid().getSize();
+      };
+    }
+
+    public static int getIndex(DrawableUnit drawableUnit) {
+      return drawableUnit.index;
+    }
+
+    public static int getCellsIndex() {
+      return DrawableUnit.CELLS.index;
+    }
+
+    public static int getDistanceIndex() {
+      return DrawableUnit.DISTANCE.index;
+    }
+
+    public static int getPixelsIndex() {
+      return DrawableUnit.PIXELS.index;
+    }
   }
 
   @Override
@@ -124,8 +177,47 @@ public class DrawingFunctions extends AbstractFunction {
     DrawnElement drawnElement = findDrawnElement(map.getAllDrawnElements(), guid);
     if (drawnElement != null) return drawnElement;
     throw new ParserException(
-        I18N.getText(
-            "macro.function.drawingFunction.unknownDrawing", functionName, guid.toString()));
+        I18N.getText("macro.function.drawable.unknownDrawable", functionName, guid.toString()));
+  }
+
+  /**
+   * Try and find a drawn element, using its {@link Drawable}'s {@link GUID} or case-insensitive
+   * <code>name</code>.
+   *
+   * <p>Warning: If name is used, and there are multiple drawables with the same name on the same
+   * map, only the first one encountered will be returned
+   *
+   * @param functionName this is used in the exception message
+   * @param zone the map to search for the template
+   * @param drawnElementRef either the name, or the id
+   * @return the template's drawn element, or null if not found
+   */
+  public static DrawnElement findDrawnElement(
+      String functionName, Zone zone, String drawnElementRef) throws ParserException {
+
+    DrawnElement drawnElement = null;
+
+    GUID guid = null;
+    try {
+      guid = GUID.valueOf(drawnElementRef);
+    } catch (Exception e) {
+      // wasn't a GUID after all, OK to ignore
+    }
+
+    for (DrawnElement de : zone.getAllDrawnElements()) {
+      AbstractDrawing d = (AbstractDrawing) de.getDrawable();
+      if (d.getId().equals(guid)) {
+        drawnElement = de;
+        break;
+      } else if (drawnElementRef.equalsIgnoreCase(d.getName())) {
+        drawnElement = de;
+        break;
+      }
+    }
+
+    if (drawnElement != null) return drawnElement;
+    throw new ParserException(
+        I18N.getText("macro.function.drawable.unknownDrawable", functionName, drawnElementRef));
   }
 
   private DrawnElement findDrawnElement(List<DrawnElement> drawableList, GUID guid) {
@@ -236,6 +328,22 @@ public class DrawingFunctions extends AbstractFunction {
   }
 
   /**
+   * Get the name of the drawing (if it has one).
+   *
+   * @param functionName this is used in the exception message
+   * @param zone the zone that should contain the drawing
+   * @param guid the id of the drawing
+   * @return the drawing name
+   * @throws ParserException the exception
+   */
+  protected String getDrawingName(String functionName, Zone zone, GUID guid)
+      throws ParserException {
+    DrawnElement de = getDrawnElement(functionName, zone, guid);
+    AbstractDrawing ad = (AbstractDrawing) de.getDrawable();
+    return ad.getName() == null ? "" : ad.getName();
+  }
+
+  /**
    * Converts the selected drawing element into a JSON string.
    *
    * @param functionName this is used in the exception message
@@ -260,8 +368,58 @@ public class DrawingFunctions extends AbstractFunction {
     dinfo.addProperty("isEraser", el.getPen().isEraser() ? BigDecimal.ONE : BigDecimal.ZERO);
     dinfo.addProperty("penWidth", el.getPen().getThickness());
     dinfo.add("path", pathToJSON(d));
-    if (el.getDrawable() instanceof AbstractTemplate t) {
-      dinfo.addProperty("templateSize", t.getRadius());
+    dinfo.addProperty(
+        "isTemplate",
+        el.getDrawable() instanceof AbstractTemplate ? BigDecimal.ONE : BigDecimal.ZERO);
+
+    if (el.getDrawable() instanceof AbstractTemplate at) {
+      dinfo.addProperty("templateSize", at.getRadius());
+      JsonObject template = new JsonObject();
+      if (!(el.getDrawable() instanceof WallTemplate)) {
+        template.addProperty("radius", at.getRadius());
+      }
+      JsonObject vertex = new JsonObject();
+      vertex.addProperty("x", at.getVertex().x);
+      vertex.addProperty("y", at.getVertex().y);
+      template.add("vertex", vertex);
+
+      // order is important here as some templates extend others, so do them first.
+      switch (at) {
+        case BlastTemplate bt -> {
+          template.addProperty("direction", bt.getDirection().toString());
+          JsonObject controlOffset = new JsonObject();
+          controlOffset.addProperty("x", bt.getOffsetX());
+          controlOffset.addProperty("y", bt.getOffsetY());
+          template.add("controlOffset", controlOffset);
+        }
+        case ConeTemplate ct -> template.addProperty("direction", ct.getDirection().toString());
+        case WallTemplate wt -> {
+          JsonArray pathInfo = new JsonArray();
+          for (CellPoint cp : wt.getPath()) {
+            JsonObject pointInfo = new JsonObject();
+            pointInfo.addProperty("x", cp.x);
+            pointInfo.addProperty("y", cp.y);
+            pathInfo.add(pointInfo);
+          }
+          template.add("wallPath", pathInfo);
+        }
+        case LineTemplate lt -> {
+          JsonObject pathVertex = new JsonObject();
+          pathVertex.addProperty("x", lt.getPathVertex().x);
+          pathVertex.addProperty("y", lt.getPathVertex().y);
+          template.add("pathVertex", pathVertex);
+        }
+        case LineCellTemplate lct -> {
+          JsonObject pathVertex = new JsonObject();
+          pathVertex.addProperty("x", lct.getPathVertex().x);
+          pathVertex.addProperty("y", lct.getPathVertex().y);
+          template.add("pathVertex", pathVertex);
+        }
+        default -> {}
+      }
+      if (!template.isEmpty()) {
+        dinfo.add("template", template);
+      }
     }
 
     return dinfo;
@@ -269,10 +427,18 @@ public class DrawingFunctions extends AbstractFunction {
 
   private JsonObject boundsToJSON(Zone map, AbstractDrawing d) {
     JsonObject binfo = new JsonObject();
-    binfo.addProperty("x", d.getBounds(map).x);
-    binfo.addProperty("y", d.getBounds(map).y);
-    binfo.addProperty("width", d.getBounds(map).width);
-    binfo.addProperty("height", d.getBounds(map).height);
+    // templates have a BOUNDS_PADDING so use the area bounds instead for those
+    if (d instanceof AbstractTemplate) {
+      binfo.addProperty("x", d.getArea(map).getBounds().x);
+      binfo.addProperty("y", d.getArea(map).getBounds().y);
+      binfo.addProperty("width", d.getArea(map).getBounds().width);
+      binfo.addProperty("height", d.getArea(map).getBounds().height);
+    } else {
+      binfo.addProperty("x", d.getBounds(map).x);
+      binfo.addProperty("y", d.getBounds(map).y);
+      binfo.addProperty("width", d.getBounds(map).width);
+      binfo.addProperty("height", d.getBounds(map).height);
+    }
     return binfo;
   }
 
@@ -394,8 +560,9 @@ public class DrawingFunctions extends AbstractFunction {
     }
   }
 
-  protected void setDrawingName(Zone map, GUID guid, String name) throws ParserException {
-    DrawnElement de = getDrawnElement("setDrawingName", map, guid);
+  protected void setDrawingName(String functionName, Zone map, GUID guid, String name)
+      throws ParserException {
+    DrawnElement de = getDrawnElement(functionName, map, guid);
     AbstractDrawing ad = (AbstractDrawing) de.getDrawable();
 
     if (name != null) {
@@ -415,20 +582,72 @@ public class DrawingFunctions extends AbstractFunction {
    * @param pen the replacement pen.
    * @throws ParserException if the drawing is not found.
    */
-  protected void setPen(String functionName, Zone map, GUID guid, Object pen)
-      throws ParserException {
-    if (!(pen instanceof Pen))
-      throw new ParserException(
-          I18N.getText("macro.function.drawingFunction.invalidPen", functionName));
-    Pen p = new Pen((Pen) pen);
+  protected void setPen(String functionName, Zone map, GUID guid, Pen pen) throws ParserException {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
     DrawnElement de = findDrawnElement(drawableList, guid);
     if (de != null) {
-      de.setPen(p);
+      de.setPen(new Pen(pen));
       return;
     }
     throw new ParserException(
-        I18N.getText(
-            "macro.function.drawingFunction.unknownDrawing", functionName, guid.toString()));
+        I18N.getText("macro.function.drawable.unknownDrawable", functionName, guid.toString()));
+  }
+
+  /**
+   * Get the bounds of the drawing / template.
+   *
+   * <p>See {@link AbstractTemplate} for details about <code>BOUNDS_PADDING</code> and why it should
+   * be ignored here.
+   *
+   * @param functionName this is used in the exception message
+   * @param guid the guid of the drawn element
+   * @return the bounds
+   * @see AbstractTemplate
+   */
+  protected java.awt.Rectangle getDrawingBounds(String functionName, Zone zone, GUID guid)
+      throws ParserException {
+
+    DrawnElement de = getDrawnElement(functionName, zone, guid);
+
+    Drawable d = de.getDrawable();
+    if (d instanceof AbstractTemplate) {
+      // AbstractTemplates have BOUNDS_PADDING applied to the drawable so use area bounds instead
+      return d.getArea(zone).getBounds();
+    } else {
+      return d.getBounds(zone);
+    }
+  }
+
+  /**
+   * Get a single selected drawing or template relevant to the respective {@link DrawingPointerTool}
+   * or {@link TemplatePointerTool}.
+   *
+   * @param functionName this is used in the exception message
+   * @param zone the map
+   * @return the selected drawn element
+   */
+  public DrawnElement getSingleSelectedDrawnElement(String functionName, Zone zone)
+      throws ParserException {
+
+    List<GUID> selectedDrawables = new ArrayList<>();
+
+    // get a list of selected drawings depending on the selected tool
+    Object selectedTool = MapTool.getFrame().getToolbox().getSelectedTool().getClass();
+    if (selectedTool.equals(TemplatePointerTool.class)) {
+      selectedDrawables = TemplatePointerTool.getSelectedDrawables();
+    } else if (selectedTool.equals(DrawingPointerTool.class)) {
+      selectedDrawables = DrawingPointerTool.getSelectedDrawables();
+    }
+
+    // if only one is selected, return that
+    if (selectedDrawables.size() == 1) {
+      return zone.getDrawnElement(selectedDrawables.getFirst());
+    } else if (selectedDrawables.size() > 1) {
+      throw new ParserException(
+          I18N.getText("macro.function.drawable.noSingleSelectedDrawable", functionName));
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.drawable.noSelectedDrawable", functionName));
+    }
   }
 }

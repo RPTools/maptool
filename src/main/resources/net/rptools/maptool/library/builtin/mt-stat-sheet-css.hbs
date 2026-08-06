@@ -1,5 +1,33 @@
+/* MapTool Theme Stat Sheet CSS 0.2
+
+   =========================
+   Table of Contents
+   =========================
+   01. Theme Variables
+   02. Base Elements
+   03. Typography
+   04. Input Controls
+   05. Scrollbars
+   06. Other Elements
+   07. Ids & Classes
+   ========================= */
+
+/* =========================
+   01. Theme Variables
+   ========================= */
 
 :root {
+
+  --mt-theme-name: {{preferences.themeName}};
+  --mt-theme-color-scheme: {{preferences.themeColorScheme}};
+
+  --mt-theme-font-size: {{fontSize}};
+  --mt-theme-font-family: {{fontFamily}};
+
+  --mt-theme-color-foreground: {{foregroundColor}};
+  --mt-theme-color-background: {{backgroundColor}};
+  --mt-theme-color-foreground-disabled: {{foregroundColorDisabled}};
+
   --mt-theme-color-actions-blue: {{themeColor.actionsBlue}};
   --mt-theme-color-actions-blue-dark: {{themeColor.actionsBlueDark}};
   --mt-theme-color-actions-green: {{themeColor.actionsGreen}};
@@ -23,13 +51,6 @@
   --mt-theme-color-objects-yellow: {{themeColor.objectsYellow}};
   --mt-theme-color-objects-yellow-dark: {{themeColor.objectsYellowDark}};
 
-  --mt-theme-font-size: {{fontSize}};
-  --mt-theme-font-family: {{fontFamily}};
-
-  --mt-theme-color-foreground: {{foregroundColor}};
-  --mt-theme-color-background: {{backgroundColor}};
-  --mt-theme-color-foreground-disabled: {{foregroundColorDisabled}};
-
   --mt-theme-color-button-start-background: {{button.startBackgroundColor}};
   --mt-theme-color-button-end-background: {{button.endBackgroundColor}};
   --mt-theme-color-button-foreground: {{button.foregroundColor}};
@@ -39,6 +60,12 @@
   --mt-theme-color-button-background-hover: {{button.hoverBackgroundColor}};
   --mt-theme-color-button-disabled-border-size: {{button.disabledBorderSize}};
   --mt-theme-color-button-disabled-border-color: {{button.disabledBorderColor}};
+  --mt-theme-button-border-width: {{button.borderWidth}};
+  --mt-theme-button-shadow-width: {{button.shadowWidth}};
+  --mt-theme-button-shadow-color: {{button.shadowColor}};
+  --mt-theme-button-show-shadow: {{button.showShadow}};
+  --mt-theme-button-start-border-color: {{button.startBorderColor}};
+  --mt-theme-button-end-border-color: {{button.endBorderColor}};
 
   --mt-theme-color-text-input-foreground: {{textInput.foregroundColor}};
   --mt-theme-color-text-input-background: {{textInput.backgroundColor}};
@@ -63,16 +90,45 @@
   --mt-theme-h6-font-family: {{themeHeader.h6.fontFamily}};
   --mt-theme-h6-font-size: {{themeHeader.h6.fontSize}};
 
-
   --mt-theme-panel-background: {{panelBackgroundColor}};
   --mt-theme-panel-foreground: {{panelForegroundColor}};
 
+  --mt-theme-check-box-filled: {{checkBox.styleFilled}};
+  --mt-theme-check-box-foreground-color: {{checkBox.foregroundColor}};
+  --mt-theme-check-box-background-color: {{checkBox.backgroundColor}};
+  --mt-theme-check-box-border-color: {{checkBox.borderColor}};
+  --mt-theme-check-box-disabled-foreground-color: {{checkBox.disabledForegroundColor}};
+  --mt-theme-check-box-disabled-background-color: {{checkBox.disabledBackgroundColor}};
+  --mt-theme-check-box-disabled-border-color: {{checkBox.disabledBorderColor}};
+  --mt-theme-check-box-border-focus-color: {{checkBox.focusedBorderColor}};
+  --mt-theme-check-box-background-hover-color: {{checkBox.hoverBackgroundColor}};
+  --mt-theme-check-box-border-hover-color: {{checkBox.hoverBorderColor}};
+  --mt-theme-check-box-selected-background-hover-color: {{checkBox.hoverSelectedBackgroundColor}};
+  --mt-theme-check-box-selected-background-color: {{checkBox.selectedBackgroundColor}};
+  --mt-theme-check-box-selected-border-color: {{checkBox.selectedBorderColor}};
+
+  --mt-theme-component-link-color: {{component.linkColor}};
+  --mt-theme-component-focused-border-color: {{component.focusedBorderColor}};
+  --mt-theme-component-error-border-color: {{component.errorBorderColor}};
+  --mt-theme-component-error-focused-border-color: {{component.errorFocusedBorderColor}};
+  --mt-theme-component-success-border-color: {{component.successBorderColor}};
+  --mt-theme-component-success-focused-border-color: {{component.successFocusedBorderColor}};
+  --mt-theme-component-warning-border-color: {{component.warningBorderColor}};
+  --mt-theme-component-warning-focused-border-color: {{component.warningFocusedBorderColor}};
+
+  --mt-theme-meter-progress-bar-background-color: {{meterProgressBar.backgroundColor}};
+  --mt-theme-meter-progress-bar-foreground-color: {{meterProgressBar.foregroundColor}};
+
   --mt-theme-progress-bar-arc: {{progressBar.arc}};
   --mt-theme-progress-bar-background-color: {{progressBar.backgroundColor}};
+  --mt-theme-progress-bar-foreground-color: {{progressBar.foregroundColor}};
   --mt-theme-progress-font-family: {{progressBar.fontFamily}};
   --mt-theme-progress-font-size: {{progressBar.fontSize}};
 
+  --mt-theme-scroll-bar-width: {{scrollBar.width}};
   --mt-theme-scroll-bar-background-color: {{scrollBar.backgroundColor}};
+  --mt-theme-scroll-bar-button-arrow-color: {{scrollBar.buttonArrowColor}};
+  --mt-theme-scroll-bar-foreground-color: {{scrollBar.foregroundColor}};
   --mt-theme-scroll-bar-show-buttons: {{scrollBar.showButtons}};
   --mt-theme-scroll-bar-thumb-highlight-color: {{scrollBar.thumbHighlightColor}};
   --mt-theme-scroll-bar-thumb-arc: {{scrollBar.thumbArc}};
@@ -80,16 +136,65 @@
   --mt-theme-scroll-bar-thumb-shadow-color: {{scrollBar.thumbShadowColor}};
   --mt-theme-scroll-bar-thumb-dark-shadow-color: {{scrollBar.thumbDarkShadowColor}};
   --mt-theme-scroll-bar-thumb-color: {{scrollBar.thumbColor}};
-  --mt-theme-scroll-bar-thumb-insets-left: {{scrollBar.thumbInsetsLeft}};
   --mt-theme-scroll-bar-thumb-insets-top: {{scrollBar.thumbInsetsTop}};
-  --mt-theme-scroll-bar-thumb-insets-right: {{scrollBar.thumbInsetsRight}};
+  --mt-theme-scroll-bar-thumb-insets-left: {{scrollBar.thumbInsetsLeft}};
   --mt-theme-scroll-bar-thumb-insets-bottom: {{scrollBar.thumbInsetsBottom}};
+  --mt-theme-scroll-bar-thumb-insets-right: {{scrollBar.thumbInsetsRight}};
+  --mt-theme-scroll-bar-track-color: {{scrollBar.trackColor}};
+  --mt-theme-scroll-bar-track-insets-top: {{scrollBar.trackInsetsTop}};
+  --mt-theme-scroll-bar-track-insets-left: {{scrollBar.trackInsetsLeft}};
+  --mt-theme-scroll-bar-track-insets-bottom: {{scrollBar.trackInsetsBottom}};
+  --mt-theme-scroll-bar-track-insets-right: {{scrollBar.trackInsetsRight}};
 
+  --mt-theme-slider-background-color: {{slider.backgroundColor}};
+  --mt-theme-slider-disabled-thumb-color: {{slider.disabledThumbColor}};
+  --mt-theme-slider-disabled-track-color: {{slider.disabledTrackColor}};
+  --mt-theme-slider-thumb-color: {{slider.thumbColor}};
+  --mt-theme-slider-track-color: {{slider.trackColor}};
+
+  --mt-theme-text-area-background-color: {{textArea.backgroundColor}};
+  --mt-theme-text-area-foreground-color: {{textArea.foregroundColor}};
+
+  --mt-prefs-map-label-npc-background-color: {{preferences.npcBackgroundColor}};
+  --mt-prefs-map-label-npc-foreground-color: {{preferences.npcForegroundColor}};
+  --mt-prefs-map-label-npc-border-color: {{preferences.npcBorderColor}};
+  --mt-prefs-map-label-pc-background-color: {{preferences.pcBackgroundColor}};
+  --mt-prefs-map-label-pc-foreground-color: {{preferences.pcForegroundColor}};
+  --mt-prefs-map-label-pc-border-color: {{preferences.pcBorderColor}};
+  --mt-prefs-map-label-non-visible-background-color: {{preferences.nonVisibleBackgroundColor}};
+  --mt-prefs-map-label-non-visible-foreground-color: {{preferences.nonVisibleForegroundColor}};
+  --mt-prefs-map-label-non-visible-border-color: {{preferences.nonVisibleBorderColor}};
+  --mt-prefs-map-label-drawing-background-color: {{preferences.drawingBackgroundColor}};
+  --mt-prefs-map-label-drawing-foreground-color: {{preferences.drawingForegroundColor}};
+  --mt-prefs-map-label-drawing-border-color: {{preferences.drawingBorderColor}};
+  --mt-prefs-map-label-template-background-color: {{preferences.templateBackgroundColor}};
+  --mt-prefs-map-label-template-foreground-color: {{preferences.templateForegroundColor}};
+  --mt-prefs-map-label-template-border-color: {{preferences.templateBorderColor}};
+  --mt-prefs-map-label-show-border: {{preferences.mapLabelShowBorder}};
+  --mt-prefs-map-label-font-size: {{preferences.mapLabelFontSize}};
+  --mt-prefs-map-label-border-width: {{preferences.mapLabelBorderWidth}};
+  --mt-prefs-map-label-border-arc: {{preferences.mapLabelBorderArc}};
+
+  --mt-prefs-facing-arrow-background-color: {{preferences.facingArrowBackgroundColor}};
+  --mt-prefs-facing-arrow-border-color: {{preferences.facingArrowBorderColor}};
+  --mt-prefs-chat-notification-foreground-color: {{preferences.chatNotificationForegroundColor}};
+  --mt-prefs-trusted-prefix-background-color: {{preferences.trustedPrefixBackgroundColor}};
+  --mt-prefs-trusted-prefix-foreground-color: {{preferences.trustedPrefixForegroundColor}};
+
+  /* Utility variables */
+  --mt-border-width: var(--mt-theme-button-border-width);
+  --mt-border-default: var(--mt-border-width) solid var(--mt-theme-color-button-disabled-border-color);
+  --mt-focus-outline: var(--mt-border-width) solid var(--mt-theme-component-focused-border-color);
+  --mt-map-label-border-radius: calc(var(--mt-prefs-map-label-border-arc)/2 * 1px); /* border-radius = 1/2 border arc */
 
   font-size: var(--mt-theme-font-size);
   font-family: var(--mt-theme-font-family);
 }
 
+
+/* =========================
+   02. Base Elements
+   ========================= */
 
 body {
   position: fixed;
@@ -99,6 +204,241 @@ body {
   margin: 0px;
   background-color: rgba(0, 0, 0, 0); /* Needs to be transparent. */
 }
+
+p,
+table,
+input {
+   vertical-align: middle;
+   font-size: 1rem;
+}
+
+
+/* =========================
+   03. Typography
+   ========================= */
+
+/* Headings. */
+h1 {
+  font-family: var(--mt-theme-h1-font-family);
+  font-size: var(--mt-theme-h1-font-size);
+}
+
+h2 {
+  font-family: var(--mt-theme-h2-font-family);
+  font-size: var(--mt-theme-h2-font-size);
+}
+
+h3 {
+  font-family: var(--mt-theme-h3-font-family);
+  font-size: var(--mt-theme-h3-font-size);
+}
+
+h4 {
+  font-family: var(--mt-theme-h4-font-family);
+  font-size: var(--mt-theme-h4-font-size);
+}
+
+h5 {
+  font-family: var(--mt-theme-h5-font-family);
+  font-size: var(--mt-theme-h5-font-size);
+}
+
+h6 {
+  font-family: var(--mt-theme-h6-font-family);
+  font-size: var(--mt-theme-h6-font-size);
+}
+
+h1, h2, h3, h4, h5, h6 { margin-bottom: .5rem; }
+
+
+/* =========================
+   04. Input Controls
+   ========================= */
+
+/* Text input */
+input[type=text],
+textarea {
+  font-family: inherit;
+  color: var(--mt-theme-color-text-input-foreground);
+  background-color: var(--mt-theme-color-text-input-background);
+  border: var(--mt-theme-color-text-input-disabled-border-size) solid var(--mt-theme-color-text-input-disabled-border-color);
+}
+
+/* Input = Checkbox */
+input[type=checkbox] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.2em;
+  height: 1.2em;
+  color: var(--mt-theme-check-box-foreground-color);
+  background-color: var(--mt-theme-check-box-background-color);
+  border: var(--mt-border-width) solid var(--mt-theme-check-box-border-color);
+  border-radius: .15em;
+  box-sizing: border-box;
+
+  /* Center the checkmark */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Pure CSS checkmark */
+input[type="checkbox"]::after {
+  content: "";
+  width: 0.25em;
+  height: 0.65em;
+  border: solid var(--mt-theme-check-box-foreground-color);
+  border-width: 0 0.2em 0.2em 0;
+  transform: translate(0.05em, -0.05em) rotate(40deg);
+  transform-origin: center;
+  flex-shrink: 0;
+  display: none;
+}
+
+input[type="checkbox"]:checked::after {
+  display: block;
+}
+
+
+/* =========================
+   05. Scrollbars
+   ========================= */
+
+::-webkit-scrollbar {
+  background-color: var(--mt-theme-scroll-bar-background-color);
+}
+
+::-webkit-scrollbar:vertical {
+  width: var(--mt-theme-scroll-bar-width);
+}
+
+::-webkit-scrollbar:horizontal {
+  height: var(--mt-theme-scroll-bar-width);  /* intentionally using the scroll bar width for the height */
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--mt-theme-scroll-bar-thumb-color);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: calc(var(--mt-theme-scroll-bar-thumb-arc)/2 * 1px);
+  background-clip: padding-box;  /* insets workaround given that ::-webkit-scrollbar-thumb does not support padding */
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  border-width:
+    calc(var(--mt-theme-scroll-bar-thumb-insets-top) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-right) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-bottom) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-left) * 1px);
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  /* swap the variable order to match the horizontal axis layout */
+  border-width:
+    calc(var(--mt-theme-scroll-bar-thumb-insets-left) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-top) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-right) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-bottom) * 1px);
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--mt-theme-scroll-bar-track-color);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: calc(var(--mt-theme-scroll-bar-track-arc)/2 * 1px); /* border-radius = 1/2 border arc */
+  background-clip: padding-box;  /* insets workaround given that ::-webkit-scrollbar-track does not support padding */
+}
+
+::-webkit-scrollbar-track:vertical {
+  border-width:
+    calc(var(--mt-theme-scroll-bar-track-insets-top) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-right) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-bottom) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-left) * 1px);
+}
+
+::-webkit-scrollbar-track:horizontal {
+  /* swap the variable order to match the horizontal axis layout */
+  border-width:
+    calc(var(--mt-theme-scroll-bar-track-insets-left) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-top) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-right) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-bottom) * 1px);
+}
+
+
+/* =========================
+   06. Other Elements
+   ========================= */
+
+/* Fieldset */
+fieldset {
+  font-size: 1em;
+  padding: 0.5em;
+  border: var(--mt-border-default);
+  border-radius: 0.15em;
+  margin: 0.5em;
+}
+
+fieldset > legend {
+  font-family: inherit;
+  color: var(--mt-theme-component-link-color);
+}
+
+/* Horizontal Rule */
+hr {
+  border: none;
+  height: 1px;
+  background: var(--mt-theme-color-button-disabled-border-color);
+  margin: 1rem 0;
+}
+
+/* Meter */
+meter {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+meter::-webkit-meter-bar {
+  background: var(--mt-theme-meter-progress-bar-background-color);
+  border: none;
+}
+
+meter::-webkit-meter-optimum-value,
+meter::-webkit-meter-suboptimum-value,
+meter::-webkit-meter-even-less-good-value {
+  background: var(--mt-theme-meter-progress-bar-foreground-color);
+}
+
+
+/* Progress Bar */
+progress {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+progress::-webkit-progress-bar {
+  background-color: var(--mt-theme-progress-bar-background-color);
+  border-radius: calc(var(--mt-theme-progress-bar-arc) * 1px); /* border-radius = 1/2 border arc */
+}
+
+progress::-webkit-progress-value {
+  background-color: var(--mt-theme-progress-bar-foreground-color);
+}
+
+
+/* =========================
+   07. Ids & Classes
+   ========================= */
 
 #statSheet {
   background-color: var(--mt-theme-color-background);
@@ -160,50 +500,44 @@ body {
   transform: translate(0, -50%);
 }
 
-
-/* Headings. */
-h1 {
-  font-family: var(--mt-theme-h1-font-family);
-  font-size: var(--mt-theme-h1-font-size);
+.mt-map-label {
+  display: inline-block;
+  border-width: {{#if preferences.mapLabelShowBorder}}var(--mt-prefs-map-label-border-width){{else}}0{{/if}};
+  border-style: solid;
+  border-color: transparent;
+  border-radius: var(--mt-map-label-border-radius);
+  font-size: var(--mt-prefs-map-label-font-size);
+  padding: 4px;
+  margin: 1px;
+  text-align: center;
 }
 
-h2 {
-  font-family: var(--mt-theme-h2-font-family);
-  font-size: var(--mt-theme-h2-font-size);
+.mt-map-label-pc {
+  background: var(--mt-prefs-map-label-pc-background-color) !important;
+  border-color: var(--mt-prefs-map-label-pc-border-color) !important;
+  color: var(--mt-prefs-map-label-pc-foreground-color) !important;
 }
 
-h3 {
-  font-family: var(--mt-theme-h3-font-family);
-  font-size: var(--mt-theme-h3-font-size);
+.mt-map-label-npc {
+  background: var(--mt-prefs-map-label-npc-background-color) !important;
+  border-color: var(--mt-prefs-map-label-npc-border-color) !important;
+  color: var(--mt-prefs-map-label-npc-foreground-color) !important;
 }
 
-h4 {
-  font-family: var(--mt-theme-h4-font-family);
-  font-size: var(--mt-theme-h4-font-size);
+.mt-map-label-non-visible {
+  background: var(--mt-prefs-map-label-non-visible-background-color) !important;
+  border: var(--mt-prefs-map-label-non-visible-border-color) !important;
+  color: var(--mt-prefs-map-label-non-visible-foreground-color) !important;
 }
 
-h5 {
-  font-family: var(--mt-theme-h5-font-family);
-  font-size: var(--mt-theme-h5-font-size);
+.mt-map-label-drawing {
+  background: var(--mt-prefs-map-label-drawing-background-color) !important;
+  border-color: var(--mt-prefs-map-label-drawing-border-color) !important;
+  color: var(--mt-prefs-map-label-drawing-foreground-color) !important;
 }
 
-h6 {
-  font-family: var(--mt-theme-h6-font-family);
-  font-size: var(--mt-theme-h6-font-size);
-}
-
-h1, h2, h3, h4, h5, h6 { margin-bottom: .5rem; }
-
-p,
-table,
-input {
-  vertical-align: middle;
-  font-size: 1rem;
-}
-
-/* Text input */
-input[type=text] {
-  color: var(--mt-theme-color-text-input-foreground);
-  background-color: var(--mt-theme-color-text-input-background);
-  border: var(--mt-theme-color-text-input-disabled-border-size) solid var(--mt-theme-color-text-input-disabled-border-color);
+.mt-map-label-template {
+  background: var(--mt-prefs-map-label-template-background-color) !important;
+  border-color: var(--mt-prefs-map-label-template-border-color) !important;
+  color: var(--mt-prefs-map-label-template-foreground-color) !important;
 }

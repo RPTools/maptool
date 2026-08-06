@@ -20,6 +20,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import net.rptools.lib.CodeTimer;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel.TokenPosition;
 import net.rptools.maptool.client.ui.zone.renderer.RenderHelper;
@@ -30,16 +31,18 @@ import org.apache.log4j.Logger;
 
 public class FacingArrowRenderer {
   private static final Logger log = LogManager.getLogger(FacingArrowRenderer.class);
+  private static final double tailX = -0.25;
+  private static final double dovetailX = -0.15;
+  private static final double tailY = .35;
 
   /** An arrow facing horizontally to the positive x-axis, with its point at (0, 0). */
-  private static final Path2D UNIT_ARROW;
+  public static final Path2D UNIT_ARROW;
 
   static {
-    final double tailX = -0.25;
-    final double tailY = .35;
     UNIT_ARROW = new Path2D.Double();
     UNIT_ARROW.moveTo(0, 0);
     UNIT_ARROW.lineTo(tailX, -tailY);
+    UNIT_ARROW.lineTo(dovetailX, 0);
     UNIT_ARROW.lineTo(tailX, tailY);
     UNIT_ARROW.closePath();
   }
@@ -48,11 +51,16 @@ public class FacingArrowRenderer {
   private final Zone zone;
 
   private final ArrayList<Color> figureFillColours = new ArrayList<>();
-  private final Color fillColour = Color.YELLOW;
-  private final Color borderColour = Color.DARK_GRAY;
+  private Color fillColour = AppPreferences.facingArrowBGColour.get();
+  private Color borderColour = AppPreferences.facingArrowBorderColour.get();
+
+  {
+    AppPreferences.facingArrowBGColour.onChange(color -> fillColour = color);
+    AppPreferences.facingArrowBorderColour.onChange(color -> borderColour = color);
+  }
 
   public FacingArrowRenderer(RenderHelper renderHelper, Zone zone) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("FacingArrowRenderer");
     this.zone = zone;
     for (int i = 0; i <= 90; i++) {
       figureFillColours.add(new Color(1 - 0.5f / 90f * i, 1 - 0.5f / 90f * i, 0));
@@ -68,19 +76,22 @@ public class FacingArrowRenderer {
     var tokenShape = token.getShape();
 
     timer.start("FacingArrowRenderer-preCheck");
-    if (!token.hasFacing()) {
-      return;
-    }
-    final var forceFacing = AppPreferences.forceFacingArrow.get();
-    if (!forceFacing) {
-      if (TokenShape.TOP_DOWN.equals(tokenShape)) {
+    try {
+      if (!token.hasFacing()) {
         return;
       }
-      if (TokenShape.FIGURE.equals(tokenShape) && token.getHasImageTable()) {
-        return;
+      final var forceFacing = AppPreferences.forceFacingArrow.get();
+      if (!forceFacing) {
+        if (TokenShape.TOP_DOWN.equals(tokenShape)) {
+          return;
+        }
+        if (TokenShape.FIGURE.equals(tokenShape) && token.getHasImageTable()) {
+          return;
+        }
       }
+    } finally {
+      timer.stop("FacingArrowRenderer-preCheck");
     }
-    timer.stop("FacingArrowRenderer-preCheck");
 
     timer.start("FacingArrowRenderer-render");
     renderHelper.render(
@@ -95,7 +106,7 @@ public class FacingArrowRenderer {
     var timer = CodeTimer.get();
     timer.start("FacingArrowRenderer-paintArrow");
     try {
-      final var isIsometric = zone.getGrid().isIsometric();
+      final var isIsometric = zone.getGrid().getType().isIsometric();
 
       timer.start("FacingArrowRenderer-calculateTransform");
       int angle = Math.floorMod(facing + (isIsometric ? 45 : 0), 360);
@@ -117,7 +128,9 @@ public class FacingArrowRenderer {
       timer.stop("FacingArrowRenderer-fill");
 
       timer.start("FacingArrowRenderer-draw");
+      tokenG.setRenderingHints(ImageUtil.getRenderingHintsQuality());
       tokenG.setColor(borderColour);
+      tokenG.setStroke(new BasicStroke(0.85f));
       tokenG.draw(facingArrow);
       timer.stop("FacingArrowRenderer-draw");
     } catch (Exception e) {

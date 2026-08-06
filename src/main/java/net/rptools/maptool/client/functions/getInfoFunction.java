@@ -36,18 +36,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.CategorizedLights;
-import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.GridFactory;
-import net.rptools.maptool.model.Light;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.LookupTable;
-import net.rptools.maptool.model.ShapeType;
-import net.rptools.maptool.model.SightType;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.server.ServerPolicy;
@@ -170,7 +159,7 @@ public class getInfoFunction extends AbstractFunction {
 
     JsonObject ginfo = new JsonObject();
     Grid grid = zone.getGrid();
-    ginfo.addProperty("type", GridFactory.getGridType(grid));
+    ginfo.addProperty("type", grid.getType().toString());
     ginfo.addProperty("color", String.format("%h", zone.getGridColor()));
     ginfo.addProperty("units per cell", zone.getUnitsPerCell());
     ginfo.addProperty("cell height", zone.getGrid().getCellHeight());
@@ -422,15 +411,20 @@ public class getInfoFunction extends AbstractFunction {
       state.addProperty("isShowOwner", bto.isShowOwner() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("isShowOthers", bto.isShowOthers() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty(
-          "isImageOverlay", (bto instanceof ImageTokenOverlay) ? BigDecimal.ONE : BigDecimal.ZERO);
+          "isImageOverlay",
+          (bto instanceof AbstractImageTokenOverlay) ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("mouseOver", bto.isMouseover() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("opacity", bto.getOpacity());
       state.addProperty("order", bto.getOrder());
-      if (bto instanceof FlowColorDotTokenOverlay) {
-        state.addProperty("gridSize", ((FlowColorDotTokenOverlay) bto).getGrid());
+
+      if (bto instanceof AbstractFlowShapeTokenOverlay flow) {
+        state.addProperty("gridSize", flow.getGrid());
       }
-      if (bto instanceof CornerImageTokenOverlay) {
-        state.addProperty("corner", ((CornerImageTokenOverlay) bto).getCorner().name());
+      if (bto instanceof FlowImageTokenOverlay flow) {
+        state.addProperty("gridSize", flow.getGrid());
+      }
+      if (bto instanceof CornerImageTokenOverlay cornerImage) {
+        state.addProperty("corner", cornerImage.getCorner().name());
       }
 
       sgroup.add(state);
@@ -472,6 +466,28 @@ public class getInfoFunction extends AbstractFunction {
       sightInfo.add(sightType.getName(), si);
     }
     cinfo.add("sight", sightInfo);
+
+    JsonObject haloInfo = new JsonObject();
+    for (CategorizedHalos.Category category : c.getCategorizedHalos().getCategories()) {
+      JsonArray chinfo = new JsonArray();
+      for (Halo h : category.halos()) {
+        JsonObject hsinfo = new JsonObject();
+        hsinfo.addProperty("name", h.getName());
+        hsinfo.addProperty("gm", h.isGMOnly());
+        hsinfo.addProperty("owner", h.isOwnerOnly());
+        hsinfo.addProperty("inner", h.isInner());
+        hsinfo.addProperty("facing", h.isFacingWithToken());
+        hsinfo.addProperty("scale", h.isScaleWithToken());
+        JsonArray hpinfo = new JsonArray();
+        for (HaloPart hp : h.getHaloParts()) {
+          hpinfo.add(gson.toJsonTree(hp));
+        }
+        hsinfo.add("haloParts", hpinfo);
+        chinfo.add(hsinfo);
+      }
+      haloInfo.add(category.name(), chinfo);
+    }
+    cinfo.add("halos", haloInfo);
 
     JsonObject barinfo = new JsonObject();
     for (BarTokenOverlay tbo : c.getTokenBarsMap().values()) {

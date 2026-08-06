@@ -18,10 +18,11 @@ import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.TexturePaint;
 import java.awt.image.BufferedImage;
+import net.rptools.maptool.client.ui.Scale;
 import net.rptools.noiselib.PerlinNoise;
 
 /**
- * This class is used to generate a image from a noise function that can be used to break up
+ * This class is used to generate an image from a noise function that can be used to break up
  * repeating patterns in other images.
  */
 public class DrawableNoise {
@@ -62,9 +63,6 @@ public class DrawableNoise {
   /** The alpha used to apply this noise to other images. */
   private float noiseAlpha;
 
-  /** Flags if the noise "image" needs recalculation or not. */
-  private boolean needsRecalc = true;
-
   /** The seed used to generate the noise. */
   private long noiseSeed;
 
@@ -73,14 +71,12 @@ public class DrawableNoise {
 
   /** Recalculate the noise image. */
   private void recalc() {
-    needsRecalc = false;
     int[] array = new int[WIDTH * HEIGHT];
-    int alpha = (int) (noiseAlpha * 255) << 24;
     for (int x = 0; x < WIDTH; x++) {
       for (int y = 0; y < HEIGHT; y++) {
         double noiseVal = perlinNoise.noise(x / WIDTH_DIVISOR, y / HEIGHT_DIVISOR);
         int colVal = (int) (255 * noiseVal);
-        array[y * WIDTH + x] = colVal | (colVal << 8) | (colVal << 16) | alpha;
+        array[y * WIDTH + x] = colVal | (colVal << 8) | (colVal << 16) | (0xFF << 24);
       }
     }
     noiseImage.setRGB(0, 0, WIDTH, HEIGHT, array, 0, WIDTH);
@@ -114,34 +110,12 @@ public class DrawableNoise {
   }
 
   /**
-   * Sets the alpha level that is used to apply the noise.
-   *
-   * @param alpha the alpha level that is used to apply the noise.
-   */
-  public void setNoiseAlpha(float alpha) {
-    noiseAlpha = alpha;
-    needsRecalc = true;
-    recalc();
-  }
-
-  /**
-   * Returns the seed used to generate the noise..
+   * Returns the seed used to generate the noise.
    *
    * @return The seed used to generate the noise.
    */
   public long getNoiseSeed() {
     return noiseSeed;
-  }
-
-  /**
-   * Sets the seed that is used to generate the noise.
-   *
-   * @param seed the seed that is used to generate the noise.
-   */
-  public void setNoiseSeed(long seed) {
-    noiseSeed = seed;
-    perlinNoise = new PerlinNoise(seed);
-    recalc();
   }
 
   /**
@@ -162,6 +136,10 @@ public class DrawableNoise {
             (int) (HEIGHT * scale)));
   }
 
+  public Paint getPaint(Scale scale) {
+    return getPaint(scale.getOffsetX(), scale.getOffsetY(), scale.getScale());
+  }
+
   /**
    * Sets the seed and alpha value for the noise.
    *
@@ -169,14 +147,11 @@ public class DrawableNoise {
    * @param alpha The alpha used to apply the noise.
    */
   public void setNoiseValues(long seed, float alpha) {
-    if (seed != noiseSeed || alpha != noiseAlpha) {
-      needsRecalc = true;
-    }
-
-    noiseSeed = seed;
     noiseAlpha = alpha;
 
-    if (needsRecalc) {
+    if (seed != noiseSeed) {
+      noiseSeed = seed;
+      perlinNoise = new PerlinNoise(noiseSeed);
       recalc();
     }
   }

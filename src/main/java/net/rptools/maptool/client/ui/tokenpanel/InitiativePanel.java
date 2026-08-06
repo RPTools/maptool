@@ -177,7 +177,16 @@ public class InitiativePanel extends JPanel
     initPanelButtonsDisabled = MapTool.getCampaign().isInitiativePanelButtonsDisabled();
 
     // Set up the list with an empty model
-    displayList = new JList<TokenInitiative>();
+    displayList =
+        new JList<TokenInitiative>() {
+          @Override
+          public boolean getScrollableTracksViewportWidth() {
+            // Make sure the width of the list always tracks with the width of the panel. Without
+            // this, the scroll pane won't shrink the JList past a certain point depending on its
+            // content's preferred size, which is not what we want.
+            return true;
+          }
+        };
     model = new InitiativeListModel();
     displayList.setModel(model);
     setList(new InitiativeList(null));
@@ -188,7 +197,13 @@ public class InitiativePanel extends JPanel
     displayList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     displayList.addListSelectionListener(this);
     displayList.addMouseListener(new MouseHandler());
-    add(new JScrollPane(displayList), BorderLayout.CENTER);
+
+    var scrollPane =
+        new JScrollPane(
+            displayList,
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    add(scrollPane, BorderLayout.CENTER);
 
     // Set the keyboard mapping
     InputMap imap = displayList.getInputMap();

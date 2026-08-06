@@ -15,6 +15,8 @@
 package net.rptools.maptool.model.drawing;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.awt.*;
 import java.awt.image.ImageObserver;
 import net.rptools.maptool.client.MapTool;
@@ -46,7 +48,6 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
   }
 
   protected AbstractDrawing(AbstractDrawing other) {
-    // The only thing we don't preserve is the ID.
     this.id = other.id;
     this.layer = other.layer;
     this.name = other.name;
@@ -55,10 +56,10 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
   @Override
   public void draw(Zone zone, Graphics2D g, Pen pen) {
     if (pen == null) {
-      pen = Pen.DEFAULT;
+      pen = new Pen();
     }
     Stroke oldStroke = g.getStroke();
-    g.setStroke(new BasicStroke(pen.getThickness(), pen.getStrokeCap(), pen.getStrokeJoin()));
+    g.setStroke(pen.getStroke());
 
     Composite oldComposite = g.getComposite();
     if (pen.isEraser()) {
@@ -66,24 +67,19 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
     } else if (pen.getOpacity() != 1) {
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
     }
-    if (pen.getBackgroundMode() == Pen.MODE_SOLID) {
-      if (pen.getBackgroundPaint() != null) {
-        g.setPaint(pen.getBackgroundPaint().getPaint(this));
-      } else {
-        // **** Legacy support for 1.1
-        g.setColor(new Color(pen.getBackgroundColor()));
-      }
+
+    var backgroundPaint = pen.getBackgroundPaint();
+    if (backgroundPaint != null) {
+      g.setPaint(backgroundPaint.getPaint(this));
       drawBackground(zone, g);
     }
-    if (pen.getForegroundMode() == Pen.MODE_SOLID) {
-      if (pen.getPaint() != null) {
-        g.setPaint(pen.getPaint().getPaint(this));
-      } else {
-        // **** Legacy support for 1.1
-        g.setColor(new Color(pen.getColor()));
-      }
+
+    var foregroundPaint = pen.getPaint();
+    if (foregroundPaint != null) {
+      g.setPaint(foregroundPaint.getPaint(this));
       draw(zone, g);
     }
+
     g.setComposite(oldComposite);
     g.setStroke(oldStroke);
   }
@@ -150,11 +146,20 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("name=").append(getName()).append(";");
-    sb.append("layer=").append(getLayer()).append(";");
-    sb.append("id=").append(getId()).append(";");
-    return sb.toString();
+    return "name=" + getName() + ";" + "layer=" + getLayer() + ";" + "id=" + getId() + ";";
+  }
+
+  public String toNonLocalisedString() {
+    return "name=" + getName() + ";" + "layer=" + getLayer().name() + ";" + "id=" + getId() + ";";
+  }
+
+  public JsonObject toJson() {
+    JsonObject jo = new JsonObject();
+    String nm = getName();
+    jo.add("name", new JsonPrimitive(nm == null ? "" : nm));
+    jo.add("layer", new JsonPrimitive(getLayer().name()));
+    jo.add("id", new JsonPrimitive(getId().toString()));
+    return jo;
   }
 
   ////

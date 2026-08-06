@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+	<rect width="16" height="16" style="clip-rule:evenodd;fill:none;stroke-linejoin:round;stroke-miterlimit:2"/>
+	<path d="m2 3 2-1h2v12h-2v-10l-2 1z" style="fill:#6e6e6e;paint-order:markers stroke fill"/>
+	<rect transform="rotate(45)" x="12.435" y="-6.3891" width="2" height="8.5355" style="clip-rule:evenodd;fill-rule:evenodd;fill:#6e6e6e;stroke-linejoin:round;stroke-miterlimit:2;stroke-width:.92388"/>
+	<rect transform="rotate(-45)" x="1.1212" y="9.167" width="2" height="8.5355" style="clip-rule:evenodd;fill-rule:evenodd;fill:#6e6e6e;stroke-linejoin:round;stroke-miterlimit:2;stroke-width:.92388"/>
+</svg>

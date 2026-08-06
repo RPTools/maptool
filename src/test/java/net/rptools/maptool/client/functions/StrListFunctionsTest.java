@@ -28,7 +28,7 @@ public class StrListFunctionsTest {
   private String delim = ",";
 
   private List<Object> toParms(Object... parms) {
-    ArrayList result = new ArrayList<Object>();
+    List<Object> result = new ArrayList<>();
     for (Object arg : parms) {
       if (arg instanceof Integer) arg = new BigDecimal((Integer) arg);
       result.add(arg);

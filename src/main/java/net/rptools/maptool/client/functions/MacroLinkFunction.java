@@ -242,7 +242,7 @@ public class MacroLinkFunction extends AbstractFunction {
     if (macroName.toLowerCase().endsWith("@this")) {
       macroName =
           macroName.substring(0, macroName.length() - 4)
-              + MapTool.getParser().getMacroSource().getLocation();
+              + MapTool.getParser().getMacroSource().getCallableLocation();
     }
     return "macro://" + macroName + "/" + who + "/" + target + "?" + encode(args);
   }

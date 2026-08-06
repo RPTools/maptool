@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 16 16">
+	<g id="Show-Token-Names">
+		<rect width="16" height="16" style="fill:none"/>
+		<path d="m1 1v14h14v-14zm2 2h10v10h-10z" style="fill:#389fd6"/>
+		<path d="m8 4c2.208 0 4 1.792 4 4s-1.792 4-4 4-4-1.792-4-4 1.792-4 4-4zm0 1c1.656 0 3 1.344 3 3s-1.344 3-3 3-3-1.344-3-3 1.344-3 3-3z" style="clip-rule:evenodd;fill-rule:evenodd;fill:#6e6e6e"/>
+	</g>
+</svg>

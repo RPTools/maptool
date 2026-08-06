@@ -42,6 +42,7 @@ import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
@@ -603,19 +604,12 @@ public class TokenBarController
         } // endif
 
         // Handle images
-        MD5Key[] assetIds = null;
-        if (bar instanceof TwoImageBarTokenOverlay) {
-          assetIds =
-              new MD5Key[] {
-                ((TwoImageBarTokenOverlay) bar).getBottomAssetId(),
-                ((TwoImageBarTokenOverlay) bar).getTopAssetId()
-              };
+        var assetIds = bar.getAssetIds();
+        if (bar instanceof TwoImageBarTokenOverlay two) {
           type = 0;
-        } else if (bar instanceof SingleImageBarTokenOverlay) {
-          assetIds = new MD5Key[] {((SingleImageBarTokenOverlay) bar).getAssetId()};
+        } else if (bar instanceof SingleImageBarTokenOverlay one) {
           type = 1;
-        } else if (bar instanceof MultipleImageBarTokenOverlay) {
-          assetIds = ((MultipleImageBarTokenOverlay) bar).getAssetIds();
+        } else if (bar instanceof MultipleImageBarTokenOverlay many) {
           type = 2;
         }
         DefaultListModel<MD5Key> model = new DefaultListModel<>();
@@ -738,6 +732,8 @@ public class TokenBarController
       BarTokenOverlay overlay = model.getElementAt(i);
       overlay.setOrder(i);
       states.put(overlay.getName(), overlay);
+
+      MapToolUtil.uploadAssetIds(overlay.getAssetIds());
     }
     campaign.getTokenBarsMap().clear();
     campaign.getTokenBarsMap().putAll(states);

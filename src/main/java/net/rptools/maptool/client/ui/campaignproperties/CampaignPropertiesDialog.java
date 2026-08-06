@@ -42,16 +42,9 @@ import net.rptools.maptool.client.swing.*;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.CategorizedLights;
-import net.rptools.maptool.model.Sights;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.server.proto.CampaignPropertiesDto;
-import net.rptools.maptool.util.AuraSyntax;
-import net.rptools.maptool.util.LightSyntax;
-import net.rptools.maptool.util.PersistenceUtil;
-import net.rptools.maptool.util.SightSyntax;
+import net.rptools.maptool.util.*;
 import org.apache.commons.text.*;
 
 public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDialogView> {
@@ -71,6 +64,14 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
 
   private JEditorPane getAuraPanel() {
     return (JEditorPane) getComponent("auraPanel");
+  }
+
+  private JEditorPane getHaloPanel() {
+    return (JEditorPane) getComponent("haloPanel");
+  }
+
+  private JEditorPane getHaloHelp() {
+    return (JEditorPane) getComponent("haloHelp");
   }
 
   private JEditorPane getAuraHelp() {
@@ -142,6 +143,12 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
           }
         };
 
+    JEditorPane sightHelp = getSightHelp();
+    sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+    sightHelp.addHyperlinkListener(hyperLinkListener);
+    sightHelp.setText(helpText[0]);
+    sightHelp.setCaretPosition(0);
+
     JEditorPane lightHelp = getLightHelp();
     lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     lightHelp.addHyperlinkListener(hyperLinkListener);
@@ -154,11 +161,11 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
     auraHelp.setText(helpText[2]);
     auraHelp.setCaretPosition(0);
 
-    JEditorPane sightHelp = getSightHelp();
-    sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-    sightHelp.addHyperlinkListener(hyperLinkListener);
-    sightHelp.setText(helpText[0]);
-    sightHelp.setCaretPosition(0);
+    JEditorPane haloHelp = getHaloHelp();
+    haloHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+    haloHelp.addHyperlinkListener(hyperLinkListener);
+    haloHelp.setText(helpText[3]);
+    haloHelp.setCaretPosition(0);
   }
 
   private void initAddRepoButton() {
@@ -239,6 +246,11 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
     getAuraPanel().setText(auraText);
     getAuraPanel().setCaretPosition(0);
 
+    String haloText =
+        new HaloSyntax().stringifyCategorizedHalos(campaignProperties.getCategorizedHalos());
+    getHaloPanel().setText(haloText);
+    getHaloPanel().setCaretPosition(0);
+
     tokenStatesController.copyCampaignToUI(campaignProperties);
     tokenBarController.copyCampaignToUI(campaignProperties);
   }
@@ -272,6 +284,11 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
         new AuraSyntax().parseCategorizedAuras(getAuraPanel().getText(), existingLightSources);
     lights.addAll(auras);
     campaign.setLightSources(lights);
+
+    CategorizedHalos oldCategorizedHalos = campaign.getCategorizedHalos();
+    CategorizedHalos newCategorizedHalos =
+        new HaloSyntax().parseCategorizedHalos(getHaloPanel().getText(), oldCategorizedHalos);
+    campaign.setCategorizedHalos(newCategorizedHalos);
 
     Sights sightMap = commitSightMap(getSightPanel().getText());
     campaign.setSightTypes(sightMap);
@@ -423,7 +440,7 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
    *
    * @return Map of keys to translations
    */
-  private Map<String, String> createSightLightHelpTextMap() {
+  private Map<String, String> createSightLightHaloHelpTextMap() {
     Map<String, String> parameters = new HashMap<>();
     /* cell formatting string */
     parameters.put("alignCellCenter", " align=center");
@@ -438,6 +455,7 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
     helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^sight.example.")));
     helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^light.example.")));
     helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^auras.example.")));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^halos.example.")));
 
     /* Generate parameter map from list */
     for (String key : helpKeys) {
@@ -451,6 +469,11 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
         I18N.getText(
             "sightLight.wikiLinkReferral",
             "<a href=\"https://wiki.rptools.info/index.php/Introduction_to_Lights_and_Sights\">https://wiki.rptools.info/index.php/Introduction_to_Lights_and_Sights</a>"));
+    parameters.put(
+        "wikiLinkReferralHalos",
+        I18N.getText(
+            "sightLight.wikiLinkReferral.halos",
+            "<a href=\"https://wiki.rptools.info/index.php/Introduction_to_Halos\">https://wiki.rptools.info/index.php/Introduction_to_Halos</a>"));
 
     var optionShapeDescription =
         I18N.getText(
@@ -467,6 +490,32 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
     }
     parameters.put("optionDescriptionShape", optionShapeDescription);
 
+    var optionShapeDescriptionHalos =
+        I18N.getText(
+            "sightLight.optionDescription.halos.shape",
+            "<code>CIRCLE</code>",
+            "<code>ARC</code>",
+            "<code>CHORD</code>",
+            "<code>PIE</code>",
+            "<code>TRIANGLE</code>",
+            "<code>SQUARE</code>",
+            "<code>POLYGON</code>",
+            "<code>STAR</code>",
+            "<code>GRID</code>",
+            "<code>FOOTPRINT</code>",
+            "<code>TOKEN</code>",
+            "<code>OUTLINE</code>",
+            "<code>MBL</code>",
+            "<code>VBLCOVER</code>",
+            "<code>VBLHILL</code>",
+            "<code>VBLPIT</code>",
+            "<code>VBLWALL</code>");
+    if (MapTool.getLanguage().toLowerCase().startsWith("en")) {
+      /* remove translated version of words for English locales. */
+      optionShapeDescriptionHalos = optionShapeDescriptionHalos.replaceAll("\\s*[(][^)]+[)]", "");
+    }
+    parameters.put("optionDescriptionShapeHalos", optionShapeDescriptionHalos);
+
     parameters.put(
         "optionDescriptionPersonalLightComponentColor",
         I18N.getText("sightLight.optionDescription.personalLight.component.color", "#rrggbb"));
@@ -476,6 +525,19 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
             "sightLight.optionDescription.auraRestriction",
             "<code>gm</code>",
             "<code>owner</code>"));
+    parameters.put(
+        "optionDescriptionRestrictionHalos",
+        I18N.getText(
+            "sightLight.optionDescription.halos.restriction",
+            "<code>GM</code>",
+            "<code>OWNER</code>"));
+    parameters.put(
+        "optionDescriptionDefaultWidthHalos",
+        I18N.getText("action.preferences") + " " + I18N.getText("Preferences.label.halo.width"));
+    parameters.put(
+        "structureListItemGroupNameHalos",
+        I18N.getText(
+            "sightLight.structure.listItem.groupName", I18N.getText("token.popup.menu.halos")));
 
     /* everything else */
     helpKeys = I18N.getMatchingKeys("sightLight");
@@ -494,21 +556,26 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
    * @return String[]
    */
   private String[] generateHelpText() {
-    Map<String, String> parameters = createSightLightHelpTextMap();
+    Map<String, String> parameters = createSightLightHaloHelpTextMap();
     /* html building blocks */
     String wikiLink = "<font size=4>${wikiLinkReferral}</font><br>";
+    String wikiLinkHalos = "<font size=4>${wikiLinkReferralHalos}</font><br>";
     String structureListStart =
         """
             <h1>${subheadingStructure}</h1>
             <ul compact>
             <li>${structureListItemLines}</li>
-            <li>${structureListItemMeasurement}</li>
             <li>${structureListItemDefaults}</li>
             <li>${structureListItemComments}</li>
             <li>${structureListItemLetterCase}</li>
             """;
+    String structureListSight =
+        """
+            <li>${structureListItemMeasurement}</li>
+            """;
     String structureListLight =
         """
+            <li>${structureListItemMeasurement}</li>
             <li>${structureListItemMultipleLights}<sup>1</sup></li>
             <li>${structureListItemGroupName}</li>
             <li>${structureListItemGroupedNames}</li>
@@ -517,20 +584,29 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
             """;
     String structureListAuras =
         """
-                <li>${structureListItemMultipleAuras}<sup>1</sup></li>
-                <li>${structureListItemGroupName}</li>
-                <li>${structureListItemGroupedNames}</li>
-                <li>${structureListItemGroups}</li>
-                <li>${structureListItemSorting}</li>
-                """;
+            <li>${structureListItemMeasurement}</li>
+            <li>${structureListItemMultipleAuras}<sup>1</sup></li>
+            <li>${structureListItemGroupName}</li>
+            <li>${structureListItemGroupedNames}</li>
+            <li>${structureListItemGroups}</li>
+            <li>${structureListItemSorting}</li>
+            """;
+    String structureListHalos =
+        """
+            <li>${structureListItemMultipleHalos}<sup>1</sup></li>
+            <li>${structureListItemGroupNameHalos}</li>
+            <li>${structureListItemGroupedNames}</li>
+            <li>${structureListItemGroups}</li>
+            <li>${structureListItemSorting}</li>
+            """;
     String structureListClose = "</ul>";
     String syntaxHeading = "<h1>${subheadingDefinitionSyntax}</h1>";
     String syntaxSight =
         """
-              <pre><font size="3">
-              [ ${syntaxLabelName} ] <b>:</b> [ ${optionLabelShape} [ arc= ] [ width= ] [ offset= ]] [ distance= ] [ scale ] [ ${optionLabelMagnifier} ] ([ ${optionLabelPersonalLight} ])...<sup>1</sup>
-              </font></pre>
-              """;
+           <pre><font size="3">
+           [ ${syntaxLabelName} ] <b>:</b> [ ${optionLabelShape} [ arc= ] [ width= ] [ offset= ]] [ distance= ] [ scale ] [ ${optionLabelMagnifier} ] ([ ${optionLabelPersonalLight} ])...<sup>1</sup>
+           </font></pre>
+           """;
     String syntaxLight =
         """
             <pre><font size="3">
@@ -541,12 +617,20 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
             """;
     String syntaxAuras =
         """
-                <pre><font size="3">
-                ${syntaxLabelGroupName}
-                -------
-                [ ${syntaxLabelName} ] : [ scale ] [ ignores-vbl ] ([ ${optionLabelRestriction} ] [ ${optionLabelShape} [ arc= ] [ width= ] [ offset= ]] [ ${optionLabelRange}|${optionLabelColor} ])...<sup>1</sup>
-                </font></pre>
-                """;
+            <pre><font size="3">
+           ${syntaxLabelGroupName}
+           -------
+           [ ${syntaxLabelName} ] : [ scale ] [ ignores-vbl ] ([ ${optionLabelRestriction} ] [ ${optionLabelShape} [ arc= ] [ width= ] [ offset= ]] [ ${optionLabelRange}|${optionLabelColor} ])...<sup>1</sup>
+           </font></pre>
+           """;
+    String syntaxHalos =
+        """
+           <pre><font size="3">
+           ${syntaxLabelGroupName}
+           -------
+           [ ${syntaxLabelName} ] : [ facing ] [ inner ] [ scale ] [ ${optionLabelRestriction} ] ( [ fill ] [ flipH ] [ flipV ] [ ${optionLabelShape} [ angle= ] [ offset= ] [ rotate= ] [ scaleX= ] [ scaleY= ] [vertices= ] [ mini= ] [miniStart= ] [miniStop= ] [miniRotate= ] [miniSpin= ] [ ${optionLabelHalosWidth}|${optionLabelColor}|${optionLabelHalosDashPattern} ])...<sup>1</sup>
+           </font></pre>
+           """;
     /*
      * Tabular options presentation
      * Columns are; Option Name, Option Type, Description, Default Value, Example
@@ -761,6 +845,214 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
               <td${alignCellCenter}><code>+100</code></td>
             </tr>
             """;
+    String optionsTableHalosRows =
+        """
+                <h2>${syntaxLabelOptions}</h2>
+                <table border=1 cellpadding=3 cellspacing=0>
+                <tr>
+                  <th>${columnHeadingOption}</th>
+                  <th>${columnHeadingOptionType}</th>
+                  <th>${columnHeadingOptionDescription}</th>
+                  <th>${phraseMultipleEntriesAllowed}</th>
+                  <th>${columnHeadingOptionDefaultValue}</th>
+                  <th>${wordExample}</th>
+                </tr>
+                <tr>
+                  <th>${syntaxLabelName}</th>
+                  <td${alignCellCenter}>${wordString}</td>
+                  <td>${optionDescriptionName}</td>
+                  <td></td>
+                  <td${alignCellCenter}>&mdash;</td>
+                  <td${alignCellCenter}>Target</td>
+                </tr>
+                <tr>
+                  <th><code>facing</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionHalosFacing}</td>
+                  <td>${wordNo}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>FACING</code></td>
+                </tr>
+                <tr>
+                  <th><code>inner</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionHalosInner}</td>
+                  <td>${wordNo}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>INNER</code></td>
+                </tr>
+                <tr>
+                  <th><code>scale</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionHalosScale}</td>
+                  <td>${wordNo}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>SCALE</code></td>
+                </tr>
+                <tr>
+                  <th>${optionLabelRestriction}</th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionRestrictionHalos}</td>
+                  <td>${wordNo}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>GM</code></td>
+                </tr>
+                <tr>
+                  <th><code>fill</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionHalosFill}</td>
+                  <td>${wordNo}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>FILL</code></td>
+                </tr>
+                <tr>
+                  <th><code>flipH</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionHalosFlipH}</td>
+                  <td>${wordNo}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>FLIPH</code></td>
+                </tr>
+                <tr>
+                  <th><code>flipV</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionHalosFlipV} </td>
+                  <td>${wordNo}</td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>FLIPV</code></td>
+                </tr>
+                <tr>
+                  <th>${optionLabelShape}<sup>2</sup></th>
+                  <td${alignCellCenter}>${optionTypeKeyword}</td>
+                  <td>${optionDescriptionShapeHalos}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}><code>grid</code></td>
+                  <td${alignCellCenter}><code>circles</code></td>
+                </tr>
+                <tr>
+                  <th><code>angle=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+                  <td>${optionDescriptionHalosAngle}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>angle=30</code></td>
+                </tr>
+                <tr>
+                  <th><code>offset=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+                  <td>${optionDescriptionHalosOffset}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>offset=5.5</code></td>
+                </tr>
+                <tr>
+                  <th><code>rotate=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+                  <td>${optionDescriptionHalosRotate}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>rotate=45</code></td>
+                </tr>
+                <tr>
+                  <th><code>scaleX=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+                  <td>${optionDescriptionHalosScaleX}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>1 (${wordUnused})</td>
+                  <td${alignCellCenter}><code>scaleX=1.5</code></td>
+                </tr>
+                <tr>
+                  <th><code>scaleY=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+                  <td>${optionDescriptionHalosScaleY}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>1 (${wordUnused})</td>
+                  <td${alignCellCenter}><code>scaleY=0.5</code></td>
+                </tr>
+                <tr>
+                  <th><code>vertices=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
+                  <td>${optionDescriptionHalosVertices}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>points=5</code></td>
+                </tr>
+                <tr>
+                  <th><code>mini=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}) (${wordInteger})</td>
+                  <td>${optionDescriptionHalosMini}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>mini=5</code></td>
+                </tr>
+                <tr>
+                  <th><code>miniStart=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}) (${wordInteger})</td>
+                  <td>${optionDescriptionHalosMiniStart}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>miniStart=4</code></td>
+                </tr>
+                <tr>
+                  <th><code>miniStop=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}) (${wordInteger})</td>
+                  <td>${optionDescriptionHalosMiniStop}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>miniStop=9</code></td>
+                </tr>
+                <tr>
+                  <th><code>miniRotate=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+                  <td>${optionDescriptionHalosMiniRotate}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>miniRotate=45</code></td>
+                </tr>
+                <tr>
+                  <th><code>miniSpin=</code></th>
+                  <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+                  <td>${optionDescriptionHalosMiniSpin}</td>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td${alignCellCenter}>1 (${wordUnused})</td>
+                  <td${alignCellCenter}><code>miniSpin=0</code></td>
+                </tr>
+                <!--
+                  -- ******************* Halo Components *******************
+                  -->
+                <tr>
+                  <th>${columnHeadingOptionComponent}</th>
+                  <td${alignCellCenter}>${optionTypeSpecial} (${wordString})</td>
+                  <th>${wordSyntax}&nbsp;&#10233;&nbsp;${optionLabelHalosWidth}|${optionLabelColor}|(${optionLabelHalosDashPattern})&nbsp;&#10233;&nbsp;0|#rrggbb|(n,m,...)</th>
+                  <td>${wordYes} <sup>3</sup></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th>${optionLabelHalosWidth}</th>
+                  <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionHalosWidth}</td>
+                  <td></td>
+                  <td${alignCellCenter}>${optionDescriptionDefaultWidthHalos}</td>
+                  <td${alignCellCenter}><code>10</code></td>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th>${optionLabelHalosColor}</th>
+                  <td>${optionDescriptionHalosColor}</td>
+                  <td></td>
+                  <td${alignCellCenter}>&mdash;</td>
+                  <td${alignCellCenter}><code>#a1b2c3</code></td>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th>${optionLabelHalosDashPattern}<sup>4</sup></th>
+                  <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionHalosDashPattern}<sup>5</sup></td>
+                  <td></td>
+                  <td${alignCellCenter}>${wordUnused}</td>
+                  <td${alignCellCenter}><code>(10,5,2,5)</code></td>
+                </tr>
+            """;
     String optionsTableEnd =
         """
             </table>
@@ -785,12 +1077,22 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
             """;
     String footnotesAuras =
         """
-                <ol>
-                <li>${footnoteMultipleLights}</li>
-                <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
-                <li>${footnoteMultipleRangeColour}</li>
-                </ol>
-                """;
+           <ol>
+             <li>${footnoteMultipleLights}</li>
+             <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
+             <li>${footnoteMultipleRangeColour}</li>
+           </ol>
+           """;
+    String footnotesHalos =
+        """
+           <ol>
+             <li>${footnoteMultipleLights}</li>
+             <li>${footnoteHalosShapes1}</li>
+             <li>${footnoteMultipleHalosShapes1} ${footnoteMultipleHalosShapes2}</li>
+             <li>${footnoteHalosDashPattern1}</li>
+             <li>${footnoteHalosDashPattern2} ${footnoteHalosDashPattern3}</li>
+             </ol>
+           """;
     String examplesHeading =
         """
             <hr>
@@ -830,34 +1132,34 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
             """;
     String examplesAuras =
         """
-                <pre><font size="3">
-                ${aurasExampleGroupName}
-                ----
-                - ${sightExampleComment}
-                ${aurasExampleNameGmRedSquare}: square GM 2.5#ff0000
-                ${aurasExampleNameGmRed}: GM 7.5#ff0000
-                ${aurasExampleNameOwner}: owner 7.5#00ff00
-                ${aurasExampleNameAllPlayers}: 7.5#0000ff
-                ${aurasExampleNameSideFields}: cone arc=90 12.5#6666ff offset=90  12.5#aadd00 offset=-90  12.5#aadd00 offset=180  12.5#bb00aa
-                ${aurasExampleNameDonutHole}: circle 20 40#ffff00
-                ${aurasExampleNameDonutCone}: cone arc=30 10 20#ffff00
-                ${aurasExampleNameRangeCircles} 30/60/90: circle 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000
-                ${aurasExampleNameRangeArcs} 30/60/90: cone arc=135 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000
-                ${aurasExampleNameLineOfSight}: beam width=0.4 150#ffff00
-                </font></pre>
-                <dl>
-                  <dt>${aurasExampleNameGmRedSquare}</dt><dd>${aurasExampleTextGmRedSquare}</dd>
-                  <dt>${aurasExampleNameGmRed}</dt><dd>${aurasExampleTextGmRed}</dd>
-                  <dt>${aurasExampleNameOwner}</dt><dd>${aurasExampleTextOwner}</dd>
-                  <dt>${aurasExampleNameAllPlayers}</dt><dd>${aurasExampleTextAllPlayers}</dd>
-                  <dt>${aurasExampleNameSideFields}</dt><dd>${aurasExampleTextSideFields}</dd>
-                  <dt>${aurasExampleNameDonutHole}</dt><dd>${aurasExampleTextDonutHole}</dd>
-                  <dt>${aurasExampleNameDonutCone}</dt><dd>${aurasExampleTextDonutCone}</dd>
-                  <dt>${aurasExampleNameRangeCircles}</dt><dd>${aurasExampleTextRangeCircles}</dd>
-                  <dt>${aurasExampleNameRangeArcs}</dt><dd>${aurasExampleTextRangeArcs}</dd>
-                  <dt>${aurasExampleNameLineOfSight}</dt><dd>${aurasExampleTextLineOfSight}</dd>
-                </dl>
-                """;
+           <pre><font size="3">
+           ${aurasExampleGroupName}
+           ----
+           - ${sightExampleComment}
+           ${aurasExampleNameGmRedSquare}: square GM 2.5#ff0000
+           ${aurasExampleNameGmRed}: GM 7.5#ff0000
+           ${aurasExampleNameOwner}: owner 7.5#00ff00
+           ${aurasExampleNameAllPlayers}: 7.5#0000ff
+           ${aurasExampleNameSideFields}: cone arc=90 12.5#6666ff offset=90  12.5#aadd00 offset=-90  12.5#aadd00 offset=180  12.5#bb00aa
+           ${aurasExampleNameDonutHole}: circle 20 40#ffff00
+           ${aurasExampleNameDonutCone}: cone arc=30 10 20#ffff00
+           ${aurasExampleNameRangeCircles} 30/60/90: circle 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000
+           ${aurasExampleNameRangeArcs} 30/60/90: cone arc=135 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000
+           ${aurasExampleNameLineOfSight}: beam width=0.4 150#ffff00
+           </font></pre>
+           <dl>
+             <dt>${aurasExampleNameGmRedSquare}</dt><dd>${aurasExampleTextGmRedSquare}</dd>
+             <dt>${aurasExampleNameGmRed}</dt><dd>${aurasExampleTextGmRed}</dd>
+             <dt>${aurasExampleNameOwner}</dt><dd>${aurasExampleTextOwner}</dd>
+             <dt>${aurasExampleNameAllPlayers}</dt><dd>${aurasExampleTextAllPlayers}</dd>
+             <dt>${aurasExampleNameSideFields}</dt><dd>${aurasExampleTextSideFields}</dd>
+             <dt>${aurasExampleNameDonutCone}</dt><dd>${aurasExampleTextDonutCone}</dd>
+             <dt>${aurasExampleNameRangeCircles}</dt><dd>${aurasExampleTextRangeCircles}</dd>
+             <dt>${aurasExampleNameRangeArcs}</dt><dd>${aurasExampleTextRangeArcs}</dd>
+             <dt>${aurasExampleNameLineOfSight}</dt><dd>${aurasExampleTextLineOfSight}</dd>
+           </dl>
+           """;
+    String examplesHalos = wikiLinkHalos; // Provide the reference to the wiki!
     String htmlLight =
         "<html><body>"
             + wikiLink
@@ -893,6 +1195,7 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
         "<html><body>"
             + wikiLink
             + structureListStart
+            + structureListSight
             + structureListClose
             + syntaxHeading
             + syntaxSight
@@ -904,10 +1207,26 @@ public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDia
             + examplesSight
             + "</body></html>";
 
+    String htmlHalos =
+        "<html><body>"
+            + wikiLinkHalos
+            + structureListStart
+            + structureListHalos
+            + structureListClose
+            + syntaxHeading
+            + syntaxHalos
+            + optionsTableHalosRows
+            + optionsTableEnd
+            + footnotesHalos
+            + examplesHeading
+            + examplesHalos
+            + "</body></html>";
+
     StringSubstitutor substitute = new StringSubstitutor(parameters);
     String sightResult = substitute.replace(htmlSight);
     String lightResult = substitute.replace(htmlLight);
     String aurasResult = substitute.replace(htmlAuras);
-    return new String[] {sightResult, lightResult, aurasResult};
+    String halosResult = substitute.replace(htmlHalos);
+    return new String[] {sightResult, lightResult, aurasResult, halosResult};
   }
 }

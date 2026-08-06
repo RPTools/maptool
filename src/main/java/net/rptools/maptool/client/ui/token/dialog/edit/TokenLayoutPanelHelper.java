@@ -22,6 +22,7 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -38,8 +39,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.ImageSupport;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Support class that does much of the heavy lifting for TokenLayoutPanel. Links control components
@@ -49,14 +48,13 @@ import org.apache.logging.log4j.Logger;
  * @author 2024 - Reverend/Bubblobill
  */
 class TokenLayoutPanelHelper {
-  private static final Logger log = LogManager.getLogger(TokenLayoutPanelHelper.class);
   protected static final double MAX_ZOOM = 3d;
   protected static final double MIN_ZOOM = 0.3d;
   protected static final double MAX_SCALE = 3d;
   protected static final double MIN_SCALE = 0.1d;
 
   protected TokenLayoutPanelHelper(
-      AbeillePanel parentAbeillePanel, TokenLayoutRenderPanel renderPane, AbstractButton okBtn) {
+      AbeillePanel<?> parentAbeillePanel, TokenLayoutRenderPanel renderPane, AbstractButton okBtn) {
     parent = parentAbeillePanel;
     renderPanel = renderPane;
     renderPanel.setHelper(this);
@@ -94,6 +92,10 @@ class TokenLayoutPanelHelper {
 
   private void init() {
     getSizeCombo().addItemListener(sizeListener);
+    getFlippedXCB().addChangeListener(e -> setTokenFlipX(getFlippedXCB().isSelected()));
+    getFlippedYCB().addChangeListener(e -> setTokenFlipY(getFlippedYCB().isSelected()));
+    getFlippedIsoCB().addChangeListener(e -> setTokenFlipIso(getFlippedIsoCB().isSelected()));
+
     initButtons();
     initSpinners();
     initSliders();
@@ -105,7 +107,7 @@ class TokenLayoutPanelHelper {
   private static final UIDefaults UI_DEFAULTS = UIManager.getDefaults();
   private static final double DEFAULT_FONT_SIZE = UI_DEFAULTS.getFont("defaultFont").getSize2D();
   protected Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-  private boolean noGrid = GridFactory.getGridType(grid).equals(GridFactory.NONE);
+  private boolean noGrid = grid.getType().isNone();
   private int gridSize = grid.getSize();
   private double cellHeight = grid.getCellHeight();
   private double cellWidth = grid.getCellWidth();
@@ -118,10 +120,10 @@ class TokenLayoutPanelHelper {
   protected Rectangle2D footprintBounds;
   protected RenderBits renderBits = new RenderBits();
 
-  AbeillePanel parent;
+  AbeillePanel<?> parent;
   private JRootPane parentRoot;
   private final TokenLayoutRenderPanel renderPanel;
-  private JComboBox sizeCombo;
+  private JComboBox<?> sizeCombo;
   private JSpinner anchorXSpinner, anchorYSpinner, scaleSpinner, zoomSpinner;
   private JSlider anchorXSlider, anchorYSlider, scaleSlider, zoomSlider;
   private AbstractButton okButton;
@@ -136,8 +138,33 @@ class TokenLayoutPanelHelper {
 
   private final String helpText = assembleHelpText();
 
-  private JComboBox getSizeCombo() {
-    if (sizeCombo == null) sizeCombo = (JComboBox) parent.getComponent("size");
+  private JCheckBox flippedIsoCB;
+  private JCheckBox flippedXCB;
+  private JCheckBox flippedYCB;
+
+  public JCheckBox getFlippedIsoCB() {
+    if (flippedIsoCB == null) {
+      flippedIsoCB = parent.getCheckBox("@isFlippedIso");
+    }
+    return flippedIsoCB;
+  }
+
+  public JCheckBox getFlippedXCB() {
+    if (flippedXCB == null) {
+      flippedXCB = parent.getCheckBox("@isFlippedX");
+    }
+    return flippedXCB;
+  }
+
+  public JCheckBox getFlippedYCB() {
+    if (flippedYCB == null) {
+      flippedYCB = parent.getCheckBox("@isFlippedY");
+    }
+    return flippedYCB;
+  }
+
+  private JComboBox<?> getSizeCombo() {
+    if (sizeCombo == null) sizeCombo = (JComboBox<?>) parent.getComponent("size");
     return sizeCombo;
   }
 
@@ -261,9 +288,8 @@ class TokenLayoutPanelHelper {
   private static final Function<Integer, Number> PERCENT_SLIDER_TO_SPINNER =
       i ->
           i <= 0
-              ? MathUtil.mapToRange(((Number) i).doubleValue(), -200.0, 0.0, 0.0, 1.0)
-              : Math.max(
-                  MathUtil.mapToRange(((Number) i).doubleValue(), 0.0, 200.0, 1.0, 3.0), 0.05);
+              ? MathUtil.mapToRange(i.doubleValue(), -200.0, 0.0, 0.0, 1.0)
+              : Math.max(MathUtil.mapToRange(i.doubleValue(), 0.0, 200.0, 1.0, 3.0), 0.05);
 
   private static final Function<Number, Integer> PERCENT_SPINNER_TO_SLIDER =
       d ->
@@ -293,14 +319,7 @@ class TokenLayoutPanelHelper {
     setToken(originalToken, true);
   }
 
-  private final PropertyChangeListener controlListener =
-      evt -> {
-        if (evt.getPropertyName().toLowerCase().contains("value")) {
-          flagAsDirty();
-        } else if (evt.getPropertyName().toLowerCase().contains("flip")) {
-          storeFlipDirections();
-        }
-      };
+  private final PropertyChangeListener controlListener = evt -> flagAsDirty();
 
   private final FocusListener focusListener =
       new FocusListener() {
@@ -312,6 +331,14 @@ class TokenLayoutPanelHelper {
 
         @Override
         public void focusLost(FocusEvent e) {
+          if (e.getComponent() instanceof JFormattedTextField formattedTextField) {
+            try {
+              formattedTextField.commitEdit();
+            } catch (ParseException pe) {
+              // Edited value is invalid, revert the spinner to the last valid value,
+              formattedTextField.setValue(formattedTextField.getValue());
+            }
+          }
           ((JComponent) e.getComponent()).getRootPane().setDefaultButton((JButton) okButton);
         }
       };
@@ -334,10 +361,7 @@ class TokenLayoutPanelHelper {
 
   /** Mark the rendering panel in need of repainting */
   protected void flagAsDirty() {
-    Rectangle panelBounds = getRenderPanel().getBounds();
-    RepaintManager.currentManager(getRenderPanel())
-        .addDirtyRegion(
-            getRenderPanel(), panelBounds.x, panelBounds.y, panelBounds.width, panelBounds.height);
+    getRenderPanel().flagAsDirty();
   }
 
   protected void setTokenImageId(MD5Key tokenImageKey) {
@@ -363,8 +387,8 @@ class TokenLayoutPanelHelper {
 
   protected void setToken(Token token, boolean useDefaults) {
     grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-    boolean isoGrid = grid.isIsometric();
-    noGrid = GridFactory.getGridType(grid).equals(GridFactory.NONE);
+    boolean isoGrid = grid.getType().isIsometric();
+    noGrid = grid.getType().isNone();
     renderBits = new RenderBits();
     gridSize = grid.getSize();
     cellHeight = grid.getCellHeight();
@@ -472,6 +496,7 @@ class TokenLayoutPanelHelper {
     double xFix = -aggregateBounds.getCenterX();
     double yFix = -aggregateBounds.getCenterY();
     cellCentres.replaceAll(pt -> new Point2D.Double(pt.getX() + xFix, pt.getY() + yFix));
+    flagAsDirty();
   }
 
   private void setCentredFootprintBounds() {
@@ -499,6 +524,7 @@ class TokenLayoutPanelHelper {
               gridSize * factor,
               gridSize * factor);
     }
+    flagAsDirty();
   }
 
   /** Link the spinners to the sliders and join them in matrimonial bliss */
@@ -525,11 +551,6 @@ class TokenLayoutPanelHelper {
             PERCENT_SLIDER_TO_SPINNER);
     zoomPair.setFloor(MIN_SCALE);
     zoomPair.setCeiling(MAX_SCALE);
-
-    anchorXPair.addPropertyChangeListener(evt -> flagAsDirty());
-    anchorYPair.addPropertyChangeListener(evt -> flagAsDirty());
-    scalePair.addPropertyChangeListener(evt -> flagAsDirty());
-    zoomPair.addPropertyChangeListener(evt -> flagAsDirty());
   }
 
   private void initSpinners() {
@@ -819,7 +840,6 @@ class TokenLayoutPanelHelper {
      * @return Flipped bufferedImage
      */
     private BufferedImage getFlippedImage(BufferedImage bi) {
-      log.debug("getFlippedImage - flipStates: " + flipDirections);
       ImageSupport.FlipDirection direction =
           ImageSupport.FlipDirection.getFlipDirection(
               flipDirections.contains(ImageSupport.FlipDirection.HORIZONTAL),
@@ -835,8 +855,7 @@ class TokenLayoutPanelHelper {
     }
 
     private Shape createGridShape(boolean trueSize) {
-      return Grid.createGridShape(
-          GridFactory.getGridType(grid), (trueSize ? grid.getSize() : grid.getSize() - 8));
+      return Grid.createGridShape(grid.getType(), (trueSize ? grid.getSize() : grid.getSize() - 8));
     }
 
     /** Itty bitty cross to show the dead-centre of the footprint */

@@ -267,7 +267,14 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getUpdateWallDataMsg());
           sendToClients(id, msg);
         }
-
+        case UPDATE_LOOKUP_TABLE_MSG -> {
+          handle(msg.getUpdateLookupTableMsg());
+          sendToClients(id, msg);
+        }
+        case DELETE_LOOKUP_TABLE_MSG -> {
+          handle(msg.getDeleteLookupTableMsg());
+          sendToClients(id, msg);
+        }
         default -> log.warn(msgType + " not handled.");
       }
       log.debug("from " + id + " handled: " + msgType);
@@ -742,6 +749,21 @@ public class ServerMessageHandler implements MessageHandler {
           var wall = Wall.fromDto(updateWallDataMsg.getWall());
 
           zone.updateWall(wall);
+        });
+  }
+
+  private void handle(PutLookupTableMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var table = LookupTable.fromDto(msg.getTable());
+          server.getCampaign().getLookupTableMap().put(table.getName(), table);
+        });
+  }
+
+  private void handle(DeleteLookupTableMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          server.getCampaign().getLookupTableMap().remove(msg.getTableName());
         });
   }
 

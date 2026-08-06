@@ -19,18 +19,12 @@ message DrawnElementDto {
 }
 
 message PenDto {
-  enum mode {
-    MODE_SOLID = 0;
-    MODE_TRANSPARENT = 1;
-  }
-  mode foreground_mode = 1;
-  DrawablePaintDto foreground_color = 2;
-  mode background_mode = 3;
-  DrawablePaintDto background_color = 4;
-  float thickness = 5;
-  bool eraser = 6;
-  bool square_cap = 7;
-  float opacity = 8;
+  DrawablePaintDto foreground_paint = 1;
+  DrawablePaintDto background_paint = 2;
+  float thickness = 3;
+  bool eraser = 4;
+  bool square_cap = 5;
+  float opacity = 6;
 }
 
 message DrawableDto {

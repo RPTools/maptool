@@ -369,11 +369,11 @@ public final class WallTopology implements Topology {
 
     var firstIsForeign = !graph.containsVertex(first.id());
     if (firstIsForeign) {
-      throw new RuntimeException("Unable unable vertices: first vertex does not exist!");
+      throw new RuntimeException("Unable to merge vertices: first vertex does not exist!");
     }
     var secondIsForeign = !graph.containsVertex(second.id());
     if (secondIsForeign) {
-      throw new RuntimeException("Unable unable vertices: second vertex does not exist!");
+      throw new RuntimeException("Unable to merge vertices: second vertex does not exist!");
     }
 
     if (first.equals(second)) {

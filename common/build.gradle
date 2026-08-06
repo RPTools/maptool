@@ -11,12 +11,15 @@ dependencies {
 
     implementation(libs.bundles.log4j)
     implementation(libs.slf4j.simple)
+    implementation(libs.flexmark.all)
     implementation(libs.apache.commons.logging)
-
+    implementation(libs.apache.commons.lang)
+    implementation(libs.icu4j)
     implementation(libs.gson)
 
     implementation(libs.bundles.imageio)
-    implementation(libs.batik)
+    implementation(libs.bundles.batik)
+    implementation(libs.jsvg)
 
     implementation(libs.apache.commons.io)
 

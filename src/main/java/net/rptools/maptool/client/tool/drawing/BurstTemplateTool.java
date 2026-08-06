@@ -65,7 +65,8 @@ public class BurstTemplateTool extends RadiusTemplateTool {
    */
   @Override
   protected ZonePoint getCellAtMouse(MouseEvent e) {
-    ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+    ZonePoint mouse =
+        new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
     CellPoint cp = renderer.getZone().getGrid().convert(mouse);
     return renderer.getZone().getGrid().convert(cp);
   }

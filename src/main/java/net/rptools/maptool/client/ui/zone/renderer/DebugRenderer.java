@@ -26,7 +26,7 @@ public class DebugRenderer {
   private final Color[] palette;
 
   public DebugRenderer(RenderHelper renderHelper) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("DebugRenderer");
     palette =
         new Color[] {Color.red, Color.green, Color.blue, Color.magenta, Color.orange, Color.yellow};
   }

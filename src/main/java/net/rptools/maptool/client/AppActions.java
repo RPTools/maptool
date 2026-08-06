@@ -30,6 +30,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -41,7 +43,9 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.ModelVersionManager;
 import net.rptools.lib.OsDetection;
+import net.rptools.maptool.client.AppUpdate.ReleaseInfo;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.FacingTool;
@@ -86,6 +90,7 @@ import net.rptools.maptool.util.*;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -179,38 +184,49 @@ public class AppActions {
         }
       };
 
-  public static final ClientAction EXPORT_SCREENSHOT =
-      new ZoneClientAction("action.exportScreenShotAs") {
-        @Override
-        protected void executeAction(@Nonnull ZoneRenderer renderer) {
-          try {
-            ExportDialog d = MapTool.getCampaign().getExportDialog();
-            d.setVisible(true);
-            MapTool.getCampaign().setExportDialog(d);
-          } catch (Exception ex) {
-            MapTool.showError("Cannot create the ExportDialog object", ex);
-          }
-        }
-      };
+  private static final class ExportScreenshotAction extends ZoneClientAction {
+    private final boolean forceSaveAs;
 
-  public static final Action EXPORT_SCREENSHOT_LAST_LOCATION =
-      new ZoneClientAction(
-          "action.exportScreenShot", withMenuShortcut(KeyStroke.getKeyStroke("shift S"))) {
-        @Override
-        protected void executeAction(@Nonnull ZoneRenderer renderer) {
-          ExportDialog d = MapTool.getCampaign().getExportDialog();
-          if (d == null || d.getExportLocation() == null || d.getExportSettings() == null) {
-            // Can't do a save.. so try "save as"
-            EXPORT_SCREENSHOT.executeAction();
-          } else {
-            try {
-              d.screenCapture();
-            } catch (Exception ex) {
-              MapTool.showError("msg.error.failedExportingImage", ex);
-            }
-          }
+    public ExportScreenshotAction(boolean forceSaveAs) {
+      super(forceSaveAs ? "action.exportScreenShotAs" : "action.exportScreenShot");
+      this.forceSaveAs = forceSaveAs;
+    }
+
+    @Override
+    protected void executeAction(@Nonnull ZoneRenderer renderer) {
+      var campaign = MapTool.getCampaign();
+      var exportLocation = campaign.getExportLocation();
+      var exportSettings = campaign.getExportSettings();
+
+      var doSaveAs = forceSaveAs || exportLocation == null || exportSettings == null;
+
+      var dialog = new ExportDialog(renderer);
+      dialog.setExportSettings(exportSettings);
+      dialog.setExportLocation(exportLocation);
+
+      if (doSaveAs) {
+        try {
+          dialog.setVisible(true);
+
+          // Save the new settings for future use comparison.
+          campaign.setExportLocation(dialog.getExportLocation());
+          campaign.setExportSettings(dialog.getExportSettings());
+        } catch (Exception ex) {
+          MapTool.showError("Cannot create the ExportDialog object", ex);
         }
-      };
+      } else {
+        try {
+          dialog.screenCapture();
+        } catch (Exception ex) {
+          MapTool.showError("msg.error.failedExportingImage", ex);
+        }
+      }
+    }
+  }
+
+  public static final ClientAction EXPORT_SCREENSHOT = new ExportScreenshotAction(true);
+
+  public static final Action EXPORT_SCREENSHOT_LAST_LOCATION = new ExportScreenshotAction(false);
 
   public static final Action EXPORT_CAMPAIGN_REPO =
       new TranslatedClientAction("admin.exportCampaignRepo") {
@@ -366,6 +382,11 @@ public class AppActions {
       new TranslatedClientAction("action.addDefaultTables") {
 
         @Override
+        public boolean isAvailable() {
+          return MapTool.getPlayer().isGM();
+        }
+
+        @Override
         protected void executeAction() {
           try {
             // Load the defaults
@@ -385,7 +406,11 @@ public class AppActions {
 
             MapTool.getCampaign().mergeCampaignProperties(properties);
 
-            MapTool.getFrame().repaint();
+            for (LookupTable table : properties.getLookupTableMap().values()) {
+              MapTool.serverCommand().putLookupTable(table);
+            }
+
+            MapTool.getFrame().getLookupTablePanel().refreshStructure();
 
           } catch (IOException ioe) {
             MapTool.showError("msg.error.failedAddingDefaultTables", ioe);
@@ -831,9 +856,11 @@ public class AppActions {
           ScreenPoint screenPoint = renderer.getPointUnderMouse();
           if (screenPoint == null) {
             // Pick the middle of the map
-            screenPoint = ScreenPoint.fromZonePoint(renderer, renderer.getCenterPoint());
+            var centerPoint = renderer.getCenterPoint();
+            screenPoint =
+                renderer.getViewModel().getZoneScale().toScreenSpace(centerPoint.x, centerPoint.y);
           }
-          ZonePoint zonePoint = screenPoint.convertToZone(renderer);
+          ZonePoint zonePoint = screenPoint.convertToZone(renderer.getViewModel().getZoneScale());
           pasteTokens(zonePoint, renderer.getActiveLayer());
           keepIdsOnPaste = false; // once pasted, subsequent paste should have new ids
           renderer.repaint();
@@ -1623,11 +1650,37 @@ public class AppActions {
     }
   }
 
+  public static final Action TOGGLE_SHOW_TOKEN_HALOS =
+      new TranslatedClientAction(
+          "action.showTokenHalos", withMenuShortcut(KeyStroke.getKeyStroke("Q"))) {
+        {
+          putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SHOW_TOKEN_HALOS));
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.isShowTokenHalos();
+        }
+
+        @Override
+        protected void executeAction() {
+          AppState.setShowTokenHalos(!AppState.isShowTokenHalos());
+          if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
+            MapTool.getFrame().getCurrentZoneRenderer().repaint();
+          }
+        }
+      };
+
   public static final Action TOGGLE_SHOW_TOKEN_NAMES =
       new TranslatedClientAction(
           "action.showNames", withMenuShortcut(KeyStroke.getKeyStroke("T"))) {
         {
           putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SHOW_TOKEN_NAMES));
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.isShowTokenNames();
         }
 
         @Override
@@ -1781,7 +1834,10 @@ public class AppActions {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer != null) {
             Dimension size = renderer.getSize();
-            renderer.zoomIn(size.width / 2, size.height / 2);
+
+            var viewModel = renderer.getViewModel();
+            viewModel.setZoneScale(
+                viewModel.getZoneScale().zoomedIn(size.width / 2, size.height / 2));
             renderer.maybeForcePlayersView();
           }
         }
@@ -1800,7 +1856,10 @@ public class AppActions {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer != null) {
             Dimension size = renderer.getSize();
-            renderer.zoomOut(size.width / 2, size.height / 2);
+
+            var viewModel = renderer.getViewModel();
+            viewModel.setZoneScale(
+                viewModel.getZoneScale().zoomedOut(size.width / 2, size.height / 2));
             renderer.maybeForcePlayersView();
           }
         }
@@ -1818,22 +1877,26 @@ public class AppActions {
         @Override
         protected void executeAction() {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-          if (renderer != null) {
-            // Revert to last zoom if we have one, but don't if the user has manually
-            // changed the scale since the last reset zoom (one to one index)
-            if (lastZoom != null
-                && renderer.getScale() == renderer.getZoneScale().getOneToOneScale()) {
-              // Go back to the previous zoom
-              renderer.setScale(lastZoom);
-
-              // But make sure the next time we'll go back to 1:1
-              lastZoom = null;
-            } else {
-              lastZoom = renderer.getScale();
-              renderer.zoomReset(renderer.getWidth() / 2, renderer.getHeight() / 2);
-            }
-            renderer.maybeForcePlayersView();
+          if (renderer == null) {
+            return;
           }
+
+          var viewModel = renderer.getViewModel();
+          var zoneScale = viewModel.getZoneScale();
+
+          // Revert to last zoom if we have one, but don't if the user has manually
+          // changed the scale since the last reset zoom (one to one index)
+          if (lastZoom != null && zoneScale.getScale() == zoneScale.getOneToOneScale()) {
+            // Go back to the previous zoom
+            viewModel.setZoneScale(zoneScale.withCenteredScale(lastZoom, renderer.getSize()));
+            // But make sure the next time we'll go back to 1:1
+            lastZoom = null;
+          } else {
+            lastZoom = zoneScale.getScale();
+            viewModel.setZoneScale(
+                zoneScale.withCenteredScale(zoneScale.getOneToOneScale(), renderer.getSize()));
+          }
+          renderer.maybeForcePlayersView();
         }
       };
 
@@ -1889,6 +1952,30 @@ public class AppActions {
         }
       };
 
+  public static final Action TOGGLE_TOKEN_CONTEXT_LOCK =
+      new TranslatedClientAction("action.toggleTokenContextMenuLock") {
+
+        @Override
+        public boolean isAvailable() {
+          return MapTool.getPlayer().isGM();
+        }
+
+        @Override
+        public boolean isSelected() {
+          return MapTool.getServerPolicy().isTokenContextLocked();
+        }
+
+        @Override
+        protected void executeAction() {
+          var client = MapTool.getClient();
+
+          ServerPolicy policy = client.getServerPolicy();
+          policy.setIsTokenContextLocked(!policy.isTokenContextLocked());
+
+          client.setServerPolicy(policy);
+          client.getServerCommand().setServerPolicy(policy);
+        }
+      };
   public static final Action START_SERVER =
       new TranslatedClientAction("action.serverStart") {
 
@@ -1929,6 +2016,7 @@ public class AppActions {
           policy.setPlayersReceiveCampaignMacros(serverProps.getPlayersReceiveCampaignMacros());
           policy.setHiddenMapSelectUI(serverProps.getMapSelectUIHidden());
           policy.setIsTokenEditorLocked(serverProps.getLockTokenEditOnStart());
+          policy.setIsTokenContextLocked(serverProps.getLockTokenContextOnStart());
           policy.setIsMovementLocked(serverProps.getLockPlayerMovementOnStart());
           policy.setDisablePlayerAssetPanel(serverProps.getPlayerLibraryLock());
 
@@ -2332,16 +2420,16 @@ public class AppActions {
         MapTool.setCampaign(campaign.campaign, campaign.currentZoneId);
         ZoneRenderer current = MapTool.getFrame().getCurrentZoneRenderer();
         if (current != null) {
-          if (campaign.currentView != null) {
-            current.setZoneScale(campaign.currentView);
-          }
-          current.getZoneScale().reset();
+          Scale scale = campaign.currentView == null ? new Scale() : campaign.currentView;
+          scale = scale.withResetZoomLevel();
+          current.getViewModel().setZoneScale(scale);
         }
         MapTool.getAutoSaveManager().tidy();
 
         // UI related stuff
         MapTool.getFrame().getCommandPanel().clearAllIdentities();
         MapTool.getFrame().resetPanels();
+        MapTool.getFrame().getLookupTablePanel().updateView();
 
       } catch (Throwable t) {
         if (t.getCause() instanceof AppState.FailedToAcquireLockException) {
@@ -3190,23 +3278,93 @@ public class AppActions {
 
   /** This class provides an action that displays a url from I18N */
   public static class OpenUrlAction extends TranslatedClientAction {
+    private final String url;
 
-    public OpenUrlAction(String key) {
+    public OpenUrlAction(String key, String url, Icons icon) {
       super(key);
+      this.url = url;
 
-      // The constructor method will load the "key", "key.accel", and "key.description".
-      // The value of "key" will be used as the menu text, the accelerator is not
-      // used,
-      // and the description will be the destination URL. Only the Help menu uses
-      // these objects and
-      // only the Help menu expects that field to be set...
+      // Show the URL as hover text.
+      putValue(Action.SHORT_DESCRIPTION, url);
+      putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(icon));
     }
 
     @Override
     protected void executeAction() {
-      if (getValue(Action.SHORT_DESCRIPTION) != null) {
-        MapTool.showDocument((String) getValue(Action.SHORT_DESCRIPTION));
+      MapTool.showDocument(url);
+    }
+  }
+
+  public static class CheckForUpdatesAction extends TranslatedClientAction {
+    public CheckForUpdatesAction() {
+      super("action.helpurl.checkForUpdates");
+    }
+
+    @Override
+    protected void executeAction() {
+      Object[] options = {I18N.getText("Button.cancel")};
+      var optionPane =
+          new JOptionPane(
+              I18N.getText("Update.checking.message"),
+              JOptionPane.PLAIN_MESSAGE,
+              JOptionPane.DEFAULT_OPTION,
+              null,
+              options,
+              options[0]);
+      var dialog =
+          optionPane.createDialog(MapTool.getFrame(), I18N.getText("Update.checking.title"));
+      dialog.pack();
+
+      var worker =
+          AppUpdate.getLatestRelease()
+              .thenApplyAsync(
+                  r -> {
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                    return r;
+                  },
+                  SwingUtilities::invokeLater)
+              .toCompletableFuture();
+
+      // Blocks
+      dialog.setVisible(true);
+      // In case it is still running.
+      worker.cancel(true);
+
+      if (!optionPane.getValue().equals(JOptionPane.UNINITIALIZED_VALUE)) {
+        // The user canceled rather than the worker closing the dialog.
+        return;
       }
+
+      Optional<ReleaseInfo> release;
+      try {
+        release = worker.get();
+      } catch (CancellationException | InterruptedException e) {
+        log.info("Cancelled update check", e);
+        release = Optional.empty();
+      } catch (ExecutionException e) {
+        log.warn("Failed to find latest release", e);
+        release = Optional.empty();
+      }
+
+      release
+          .filter(
+              r -> {
+                String runningVersion = AppUpdate.getImplementationVersion();
+                // If we can't find a current version, give the user a chance to install
+                // anyways. Only skip if the latest version is not newer than the current.
+                return StringUtils.isBlank(runningVersion)
+                    || ModelVersionManager.isBefore(runningVersion, r.version());
+              })
+          .ifPresentOrElse(
+              r -> {
+                if (AppUpdate.confirmUpdate(r, false)) {
+                  AppUpdate.downloadFile(r.assetUrl(), r.assetSize());
+                }
+              },
+              () ->
+                  JOptionPane.showMessageDialog(
+                      MapTool.getFrame(), I18N.getText("Update.noNewerRelease")));
     }
   }
 

@@ -14,162 +14,45 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Stroke;
-import java.awt.geom.Line2D;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.server.Mapper;
-import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import java.awt.Shape;
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Draw an X over a token.
  *
  * @author jgorrell
  */
-public class XTokenOverlay extends BooleanTokenOverlay {
-
-  /** Color for the X */
-  private Color color;
-
-  /** Stroke used to draw the line */
-  private BasicStroke stroke;
-
-  /** Default constructor needed for XML encoding/decoding */
-  public XTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, 5);
-  }
+public final class XTokenOverlay extends AbstractShapeTokenOverlay {
 
   /**
-   * Create a X token overlay with the given name.
+   * Create an X token overlay with the given name.
    *
-   * @param aName Name of this token overlay.
-   * @param aColor The color of this token overlay.
-   * @param aWidth The width of the lines in this token overlay.
+   * @param name Name of this token overlay.
+   * @param color The color of this token overlay.
+   * @param strokeWidth The width of the lines in this token overlay.
    */
-  public XTokenOverlay(String aName, Color aColor, int aWidth) {
-    super(aName);
-    if (aColor == null) {
-      aColor = Color.RED;
-    }
-    color = aColor;
-    if (aWidth <= 0) {
-      aWidth = 3;
-    }
-    stroke = new BasicStroke(aWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
+  public XTokenOverlay(String name, Color color, int strokeWidth) {
+    super(name, color, strokeWidth);
   }
 
-  /**
-   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     Rectangle)
-   */
+  public XTokenOverlay(XTokenOverlay other) {
+    super(other);
+  }
+
   @Override
-  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
-    Color tempColor = g.getColor();
-    g.setColor(color);
-    Stroke tempStroke = g.getStroke();
-    g.setStroke(stroke);
-    Composite tempComposite = g.getComposite();
-    if (getOpacity() != 100) {
-      g.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
-    }
-    g.draw(new Line2D.Double(0, 0, bounds.width, bounds.height));
-    g.draw(new Line2D.Double(0, bounds.height, bounds.width, 0));
-    g.setColor(tempColor);
-    g.setStroke(tempStroke);
-    g.setComposite(tempComposite);
+  public XTokenOverlay clone() {
+    return new XTokenOverlay(this);
   }
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
   @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new XTokenOverlay(getName(), getColor(), getWidth());
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
-  }
-
-  /**
-   * Get the color for this XTokenOverlay.
-   *
-   * @return Returns the current value of color.
-   */
-  public Color getColor() {
-    return color;
-  }
-
-  /**
-   * Get the stroke for this XTokenOverlay.
-   *
-   * @return Returns the current value of stroke.
-   */
-  public BasicStroke getStroke() {
-    return stroke;
-  }
-
-  /**
-   * Set the value of color for this XTokenOverlay.
-   *
-   * @param aColor The color to set.
-   */
-  public void setColor(Color aColor) {
-    color = aColor;
-  }
-
-  /**
-   * Get the width for this XTokenOverlay.
-   *
-   * @return Returns the current value of width.
-   */
-  public int getWidth() {
-    return (int) stroke.getLineWidth();
-  }
-
-  /**
-   * Set the value of width for this XTokenOverlay.
-   *
-   * @param aWidth The width to set.
-   */
-  public void setWidth(int aWidth) {
-    if (aWidth <= 0) {
-      aWidth = 3;
-    }
-    stroke = new BasicStroke(aWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
-  }
-
-  protected void fillFrom(BooleanTokenOverlayDto dto) {
-    fillFrom(dto.getCommon());
-    color = new Color(dto.getColor(), true);
-    stroke = Mapper.map(dto.getStroke());
-  }
-
-  protected BooleanTokenOverlayDto.Builder getDto() {
-    var dto = BooleanTokenOverlayDto.newBuilder();
-    dto.setCommon(getCommonDto());
-    dto.setColor(color.getRGB());
-    dto.setStroke(Mapper.map(stroke));
-    return dto;
-  }
-
-  public static XTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new XTokenOverlay();
-    overlay.fillFrom(dto);
-    return overlay;
-  }
-
-  public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.X).build();
+  public Shape getShape(Rectangle2D bounds) {
+    var path = new Path2D.Double();
+    path.moveTo(bounds.getMinX(), bounds.getMinY());
+    path.lineTo(bounds.getMaxX(), bounds.getMaxY());
+    path.moveTo(bounds.getMinX(), bounds.getMaxY());
+    path.lineTo(bounds.getMaxX(), bounds.getMinY());
+    return path;
   }
 }

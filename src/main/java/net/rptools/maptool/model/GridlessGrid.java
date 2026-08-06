@@ -54,6 +54,11 @@ public class GridlessGrid extends Grid {
       };
 
   @Override
+  public GridType getType() {
+    return GridType.None;
+  }
+
+  @Override
   protected List<TokenFootprint> createFootprints() {
     return List.of(
         new TokenFootprint(new GUID("C0A80F0EBEFED0A20100000080800E0E"), "-11", false, 0.086),

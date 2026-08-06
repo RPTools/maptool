@@ -15,68 +15,39 @@
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.awt.Shape;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Paint a square so that it doesn't overlay any other states being displayed in the same grid.
  *
  * @author Jay
  */
-public class FlowColorSquareTokenOverlay extends FlowColorDotTokenOverlay {
-
-  /** Default constructor needed for XML encoding/decoding */
-  public FlowColorSquareTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, -1);
-  }
+public final class FlowColorSquareTokenOverlay extends AbstractFlowShapeTokenOverlay {
 
   /**
    * Create a new dot token overlay
    *
-   * @param aName Name of the token overlay
-   * @param aColor Color of the dot
-   * @param aGrid Size of the overlay grid for this state. All states with the same grid size share
-   *     the same overlay.
+   * @param name Name of the token overlay
+   * @param color Color of the dot
+   * @param gridSize Size of the overlay grid for this state. All states with the same grid size
+   *     share the same overlay.
    */
-  public FlowColorSquareTokenOverlay(String aName, Color aColor, int aGrid) {
-    super(aName, aColor, aGrid);
+  public FlowColorSquareTokenOverlay(String name, Color color, int gridSize) {
+    super(name, color, gridSize);
   }
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
+  public FlowColorSquareTokenOverlay(FlowColorSquareTokenOverlay other) {
+    super(other);
+  }
+
   @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new FlowColorSquareTokenOverlay(getName(), getColor(), getGrid());
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
+  public FlowColorSquareTokenOverlay clone() {
+    return new FlowColorSquareTokenOverlay(this);
   }
 
-  /**
-   * @see FlowColorDotTokenOverlay#getShape(java.awt.Rectangle, net.rptools.maptool.model.Token)
-   */
   @Override
-  public Shape getShape(Rectangle bounds, Token token) {
-    return getFlow().getStateBounds2D(bounds, token, getName());
-  }
-
-  public static FlowColorSquareTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new FlowColorSquareTokenOverlay();
-    overlay.fillFrom(dto);
-    return overlay;
-  }
-
-  public BooleanTokenOverlayDto toDto() {
-    return getDto()
-        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_COLOR_SQUARE)
-        .build();
+  public Shape getShape(Rectangle2D bounds) {
+    return bounds;
   }
 }

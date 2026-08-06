@@ -30,7 +30,6 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
@@ -47,6 +46,48 @@ import org.apache.logging.log4j.Logger;
  * @author trevor
  */
 public abstract class Grid implements Cloneable {
+  public enum GridType {
+    Square,
+    Isometric,
+    HexVertical,
+    HexHorizontal,
+    None;
+
+    public boolean isHex() {
+      return this == HexVertical || this == HexHorizontal;
+    }
+
+    public boolean isIsometric() {
+      return this == Isometric;
+    }
+
+    public boolean isNone() {
+      return this == None;
+    }
+
+    public String toString() {
+      return switch (this) {
+        case Square -> "Square";
+        case Isometric -> "Isometric";
+        case HexVertical -> "Vertical Hex";
+        case HexHorizontal -> "Horizontal Hex";
+        case None -> "None";
+      };
+    }
+
+    public static GridType fromString(String string) {
+      return switch (string) {
+        case "Square" -> Square;
+        case "Isometric" -> Isometric;
+        case "Vertical Hex" -> HexVertical;
+        case "Horizontal Hex" -> HexHorizontal;
+        case "None" -> None;
+        default ->
+            throw new IllegalArgumentException(
+                String.format("\"%s\" is not a valid grid type", string));
+      };
+    }
+  }
 
   /**
    * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm
@@ -81,7 +122,7 @@ public abstract class Grid implements Cloneable {
     setOffset(grid.offsetX, grid.offsetY);
   }
 
-  public static Shape createGridShape(String gridType, double size) {
+  public static Shape createGridShape(GridType gridType, double size) {
     final Shape gridShape;
     int sides = 0;
     double startAngle = 0;
@@ -92,29 +133,23 @@ public abstract class Grid implements Cloneable {
     final double root2 = Math.sqrt(2d);
     final double root3 = Math.sqrt(3d);
     switch (gridType) {
-      case GridFactory.HEX_HORI -> {
+      case HexHorizontal -> {
         sides = 6;
         startAngle = Math.TAU / 12;
         hScale = vScale = root3 / 3d;
       }
-      case GridFactory.HEX_VERT -> {
+      case HexVertical -> {
         sides = 6;
         hScale = vScale = root3 / 3d;
       }
-      case GridFactory.ISOMETRIC -> {
+      case Isometric -> {
         sides = 4;
         vScale = 0.5;
       }
-      case GridFactory.ISOMETRIC_HEX -> {
-        sides = 6;
-        startAngle = Math.TAU / 24;
-        hScale = vScale = root3 / 3d;
-        skew = Math.toRadians(30d);
-      }
-      case GridFactory.NONE -> {
+      case None -> {
         return new Ellipse2D.Double(-size / 2d, -size / 2d, size, size);
       }
-      case GridFactory.SQUARE -> {
+      case Square -> {
         sides = 4;
         hScale = vScale = root2 / 2d;
         startAngle = Math.TAU / 8d;
@@ -142,6 +177,8 @@ public abstract class Grid implements Cloneable {
     return this;
   }
 
+  public abstract GridType getType();
+
   protected synchronized Map<Integer, Area> getGridShapeCache() {
     return gridShapeCache;
   }
@@ -159,10 +196,6 @@ public abstract class Grid implements Cloneable {
           "gridShape {} is not singular, this is unexpected and could affect performance.",
           gridRadius);
     }
-  }
-
-  public void drawCoordinatesOverlay(Graphics2D g, ZoneRenderer renderer) {
-    // Do nothing -- my default
   }
 
   /**
@@ -272,16 +305,8 @@ public abstract class Grid implements Cloneable {
     return footprintList;
   }
 
-  public boolean isIsometric() {
-    return false;
-  }
-
   public boolean useMetric() {
     return false; // only square & iso use metrics
-  }
-
-  public boolean isHex() {
-    return false;
   }
 
   @Override
@@ -346,10 +371,6 @@ public abstract class Grid implements Cloneable {
   }
 
   public abstract GridCapabilities getCapabilities();
-
-  public int getTokenSpace() {
-    return getSize();
-  }
 
   public double getCellWidth() {
     return 0;
@@ -476,10 +497,10 @@ public abstract class Grid implements Cloneable {
    * <p>This is used to rotate cones and beams according to the on-grid angle. The result is the
    * number of clockwise degrees measured from the positive x-axis of the grid.
    *
-   * <p>This method exists because {@link net.rptools.maptool.model.Token#getFacing()} is a measure
-   * of the on-screen angle of the token's facing, i.e., how many degrees from the positive x-axis
-   * of the screen. For most grids this is the same as measuring the number of degress from the
-   * positive x-axis of the grid, which is what is should be.
+   * <p>This method exists because {@link Token#getFacing()} is a measure of the on-screen angle of
+   * the token's facing, i.e., how many degrees from the positive x-axis of the screen. For most
+   * grids this is the same as measuring the number of degress from the positive x-axis of the grid,
+   * which is what is should be.
    *
    * <p>Things are different for isometric grids. Since they are rotated, the on-screen facing does
    * not agree with the on-grid facing - there is a 45° offset. When building shapes, we need the
@@ -499,10 +520,9 @@ public abstract class Grid implements Cloneable {
    *
    * <p>This method expressly does not add in the footprint bit that cone lights are expected to
    * have. This part cannot be freely transformed, so it is done separately in {@link
-   * #getFootprintShapedAreaForCone(java.awt.Rectangle)}.
+   * #getFootprintShapedAreaForCone(Rectangle)}.
    *
-   * @param shape The shape. Can be any shape except {@link
-   *     net.rptools.maptool.model.ShapeType#GRID}.
+   * @param shape The shape. Can be any shape except {@link ShapeType#GRID}.
    * @param tokenFacingAngle The angle on-screen that the token is facing. Used for cones and beams
    *     to provide the main axis of the shape.
    * @param visionRange The range to which the token can see. Determines the size of the shape.
@@ -586,7 +606,7 @@ public abstract class Grid implements Cloneable {
   /**
    * Called by SightType and Light class to return a vision area based upon a specified distance
    *
-   * @param shape The shape of the light. Can be any {@link net.rptools.maptool.model.ShapeType}
+   * @param shape The shape of the light. Can be any {@link ShapeType}
    * @param token Used to position the shape and to provide footprint
    * @param range How far the shape should extends from the origin. If {@code 0}, the zone's vision
    *     range is used.
@@ -614,7 +634,7 @@ public abstract class Grid implements Cloneable {
       // Test for gridless maps
       var cellShape = getCellShape();
       if (cellShape == null) {
-        double tokenBoundsWidth = token.getBounds(zone).getWidth() / 2;
+        double tokenBoundsWidth = token.getFootprintBounds(zone).getWidth() / 2;
         visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
       } else {
         // For grids, this will be the same, but for Hex's we'll use the smaller side depending on
@@ -682,17 +702,6 @@ public abstract class Grid implements Cloneable {
   private void fireGridChanged() {
     getGridShapeCache().clear();
     new MapToolEventBus().getMainEventBus().post(new GridChanged(this.zone));
-  }
-
-  /**
-   * Draws the grid scaled to the renderer's scale and within the renderer's boundaries.
-   *
-   * @param renderer the {@link ZoneRenderer} that represents the screen view.
-   * @param g the {@link Graphics2D} class used for drawing.
-   * @param bounds the bounds of the drawing area.
-   */
-  public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    // Do nothing
   }
 
   /**
@@ -1012,18 +1021,6 @@ public abstract class Grid implements Cloneable {
     }
 
     return gridArea;
-  }
-
-  /**
-   * Generates a set of {@link Point} used to create a grid area that only includes the outer most
-   * edge of cells
-   *
-   * @param radius The maximum radius to generate the ring of cell points for this range
-   * @return a {@link HashSet} that includes all cells that only equal in distance to the given
-   *     radius
-   */
-  protected Set<Point> generateRing(int radius) {
-    return generateRadius(radius, radius);
   }
 
   /**

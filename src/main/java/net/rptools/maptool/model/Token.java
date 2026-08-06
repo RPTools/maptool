@@ -28,7 +28,6 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Transparency;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -43,9 +42,7 @@ import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
-import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
@@ -222,7 +219,10 @@ public class Token implements Cloneable {
     flipY,
     flipIso,
     setSpeechName,
-    removeFacing
+    removeFacing,
+    clearHalos,
+    removeHalo,
+    addHalo,
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -335,6 +335,9 @@ public class Token implements Cloneable {
    * <p>The elements should be unique, i.e., no two should reference the same light source.
    */
   private List<AttachedLightSource> lightSourceList = new ArrayList<>();
+
+  /** All halos attached to the token. */
+  private LinkedHashSet<GUID> haloIdSet = new LinkedHashSet<>();
 
   private String sightType;
   private boolean hasSight;
@@ -471,6 +474,10 @@ public class Token implements Cloneable {
     uniqueLightSources.putAll(token.uniqueLightSources);
     lightSourceList.addAll(token.lightSourceList);
 
+    if (token.haloIdSet != null) {
+      haloIdSet.addAll(token.haloIdSet);
+    }
+
     state.putAll(token.state);
     getPropertyMap().clear();
     getPropertyMap().putAll(token.propertyMapCI);
@@ -603,11 +610,6 @@ public class Token implements Cloneable {
     } else {
       return height;
     }
-  }
-
-  public boolean isMarker() {
-    return getLayer().isMarkerLayer()
-        && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
   }
 
   public String getPropertyType() {
@@ -991,6 +993,83 @@ public class Token implements Cloneable {
     return Collections.unmodifiableList(lightSourceList);
   }
 
+  public void addHalo(GUID haloId) {
+    haloIdSet.add(haloId);
+  }
+
+  public void removeGMOnlyHalos(Campaign campaign) {
+    CategorizedHalos ch = campaign.getCategorizedHalos();
+    Iterator<GUID> i = haloIdSet.iterator();
+    while (i.hasNext()) {
+      Halo halo = ch.getHalo(i.next());
+      if (halo != null) {
+        if (halo.isGMOnly()) {
+          i.remove();
+        }
+      }
+    }
+  }
+
+  public void removeOwnerOnlyHalos(Campaign campaign) {
+    CategorizedHalos ch = campaign.getCategorizedHalos();
+    Iterator<GUID> i = haloIdSet.iterator();
+    while (i.hasNext()) {
+      Halo halo = ch.getHalo(i.next());
+      if (halo != null) {
+        if (halo.isOwnerOnly()) {
+          i.remove();
+        }
+      }
+    }
+  }
+
+  public boolean hasHalos() {
+    return !haloIdSet.isEmpty();
+  }
+
+  public boolean hasGMOnlyHalos(Campaign campaign) {
+    CategorizedHalos ch = campaign.getCategorizedHalos();
+    for (GUID id : haloIdSet) {
+      Halo halo = ch.getHalo(id);
+      if (halo != null) {
+        if (halo.isGMOnly()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public boolean hasOwnerOnlyHalos(Campaign campaign) {
+    CategorizedHalos ch = campaign.getCategorizedHalos();
+    for (GUID id : haloIdSet) {
+      Halo halo = ch.getHalo(id);
+      if (halo != null) {
+        if (halo.isOwnerOnly()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public void removeHalo(GUID haloId) {
+    haloIdSet.remove(haloId);
+  }
+
+  /** Clear the list of halos */
+  public void clearHalos() {
+    haloIdSet.clear();
+  }
+
+  public boolean hasHalo(GUID id) {
+    return haloIdSet.contains(id);
+  }
+
+  public Set<GUID> getHalos() {
+    return Collections.unmodifiableSet(haloIdSet);
+  }
+
   public synchronized void addOwner(String playerId) {
     ownerType = OWNER_TYPE_LIST;
     ownerList.add(playerId);
@@ -1135,22 +1214,53 @@ public class Token implements Cloneable {
     return assetId;
   }
 
-  public MD5Key getTokenImageAssetId() {
-    if (!getHasImageTable() || !hasFacing() || getImageTableName() == null)
-      return getImageAssetId();
-
-    LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(getImageTableName());
-    if (lookupTable == null) return getImageAssetId();
-
-    try {
-      LookupTable.LookupEntry result = lookupTable.getLookup(String.valueOf(getFacing()));
-      if (result != null) return result.getImageId();
-
-    } catch (ParserException p) {
-      /* do nothing  */
+  /**
+   * Looks up the token's facing in the token's image table.
+   *
+   * <p>If the token does not have an image table, or does not have its facing set, or otherwise
+   * cannot find an image ID from the lookup table, this method return {@code null}.
+   *
+   * @return The image ID from the image table, or {@code null} if none can be found.
+   */
+  private @Nullable MD5Key lookupImageTableByFacing() {
+    if (!getHasImageTable() || !hasFacing() || getImageTableName() == null) {
+      return null;
     }
 
-    return getImageAssetId();
+    LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(getImageTableName());
+    if (lookupTable == null) {
+      return null;
+    }
+
+    LookupTable.LookupEntry result;
+    try {
+      result = lookupTable.getLookup(String.valueOf(getFacing()));
+    } catch (ParserException p) {
+      return null;
+    }
+    if (result == null) {
+      return null;
+    }
+
+    MD5Key imageId = result.getImageId();
+    if (imageId == null) {
+      return null;
+    }
+
+    return imageId;
+  }
+
+  /**
+   * Looks up the token's facing in the token's image table.
+   *
+   * <p>If the token does not have an image table, or does not have its facing set, or otherwise
+   * cannot find an image ID from the lookup table, this method returns same result as {@link
+   * #getImageAssetId()}.
+   *
+   * @return The image ID from the image table.
+   */
+  public MD5Key getTokenImageAssetId() {
+    return Objects.requireNonNullElseGet(lookupImageTableByFacing(), this::getImageAssetId);
   }
 
   /**
@@ -1339,9 +1449,10 @@ public class Token implements Cloneable {
    * Return the area of the token for the requested type of topology.
    *
    * @param topologyType The type of topology to return.
-   * @return the current topology of the token.
+   * @return the current topology of the token, or {@code null} if the token does not have topology
+   *     of type {@code topologyType}.
    */
-  public Area getMaskTopology(Zone.TopologyType topologyType) {
+  public @Nullable Area getMaskTopology(Zone.TopologyType topologyType) {
     return switch (topologyType) {
       case WALL_VBL -> vbl;
       case HILL_VBL -> hillVbl;
@@ -1354,11 +1465,13 @@ public class Token implements Cloneable {
   /**
    * Transform the token's topology according to the token's scale, position, rotation and flipping.
    *
+   * @param zone The zone in which the token resides.
    * @param topologyType The type of topology to transform.
-   * @return the transformed topology for the token
+   * @return the transformed topology for the token, or {@code null} if the token does not have
+   *     topology of type {@code topologyType}.
    */
-  public Area getTransformedMaskTopology(Zone.TopologyType topologyType) {
-    return getTransformedMaskTopology(getMaskTopology(topologyType));
+  public @Nullable Area getTransformedMaskTopology(Zone zone, Zone.TopologyType topologyType) {
+    return getTransformedMaskTopology(zone, getMaskTopology(topologyType));
   }
 
   /**
@@ -1416,73 +1529,17 @@ public class Token implements Cloneable {
    * @author Jamz
    * @since 1.4.1.5
    */
-  public Area getTransformedMaskTopology(Area areaToTransform) {
+  public Area getTransformedMaskTopology(Zone zone, Area areaToTransform) {
     if (areaToTransform == null) {
       return null;
     }
 
-    Rectangle footprintBounds = getBounds(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+    Rectangle footprintBounds = getFootprintBounds(zone);
     Dimension imgSize = new Dimension(getWidth(), getHeight());
-    AwtUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
-    // Lets account for ISO images
-    double iso_ho = 0;
-    if (getShape() == TokenShape.FIGURE) {
-      double th = getHeight() * (double) footprintBounds.width / getWidth();
-      iso_ho = footprintBounds.height - th;
-      footprintBounds =
-          new Rectangle(
-              footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
-    }
+    var imageTransform = TokenUtil.getRenderTransform(zone, this, imgSize, footprintBounds);
 
-    // Lets figure in offset if image is not free size/native size aka snapToScale
-    int offsetx = 0;
-    int offsety = 0;
-    if (isSnapToScale()) {
-      offsetx =
-          imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 : 0;
-      offsety =
-          imgSize.height < footprintBounds.height
-              ? (footprintBounds.height - imgSize.height) / 2
-              : 0;
-    }
-    double tx = footprintBounds.x + offsetx;
-    double ty = footprintBounds.y + offsety + iso_ho;
-
-    // Apply the coordinate translation
-    AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
-
-    double scalerX = isSnapToScale() ? ((double) imgSize.width) / getWidth() : scaleX;
-    double scalerY = isSnapToScale() ? ((double) imgSize.height) / getHeight() : scaleY;
-
-    // Apply the rotation transformation...
-    if (getShape() == Token.TokenShape.TOP_DOWN && hasFacing()) {
-      // Find the center x,y coords of the rectangle
-      double rx = getWidth() / 2.0 * scalerX - getAnchor().getX();
-      double ry = getHeight() / 2.0 * scalerY - getAnchor().getY();
-
-      atArea.concatenate(
-          AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-    }
-    // Apply the scale transformation
-    atArea.concatenate(AffineTransform.getScaleInstance(scalerX, scalerY));
-
-    // Lets account for flipped images...
-    if (isFlippedX) {
-      atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
-      atArea.concatenate(AffineTransform.getTranslateInstance(-getWidth(), 0));
-    }
-
-    if (isFlippedY) {
-      atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
-      atArea.concatenate(AffineTransform.getTranslateInstance(0, -getHeight()));
-    }
-
-    if (getIsFlippedIso()) {
-      return new Area(atArea.createTransformedShape(IsometricGrid.isoArea(areaToTransform)));
-    }
-
-    return new Area(atArea.createTransformedShape(areaToTransform));
+    return new Area(imageTransform.createTransformedShape(areaToTransform));
   }
 
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
@@ -1497,7 +1554,7 @@ public class Token implements Cloneable {
     return name;
   }
 
-  public Rectangle getBounds(Zone zone) {
+  public Rectangle getFootprintBounds(Zone zone) {
     Grid grid = zone.getGrid();
     TokenFootprint footprint = getFootprint(grid);
     Rectangle footprintBounds =
@@ -1510,7 +1567,7 @@ public class Token implements Cloneable {
     if (!isSnapToScale()) {
       w = getWidth() * scaleX;
       h = getHeight() * scaleY;
-      if (grid.isIsometric() && getShape() == Token.TokenShape.FIGURE) {
+      if (grid.getType().isIsometric() && getShape() == Token.TokenShape.FIGURE) {
         // Native size figure tokens need to follow iso rules
         h = (w / 2);
       }
@@ -1535,6 +1592,48 @@ public class Token implements Cloneable {
     return footprintBounds;
   }
 
+  public Rectangle getImageBounds(Zone zone) {
+    Grid grid = zone.getGrid();
+    TokenFootprint footprint = getFootprint(grid);
+    Rectangle footprintBounds =
+        footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
+
+    double w;
+    double h;
+
+    // Sizing
+    if (!isSnapToScale()) {
+      w = getWidth() * scaleX;
+      h = getHeight() * scaleY;
+      if (grid.getType().isIsometric() && getShape() == Token.TokenShape.FIGURE) {
+        // Native size figure tokens need to follow iso rules
+        h = (w / 2);
+      }
+    } else {
+      w = footprintBounds.width * footprint.getScale() * sizeScale;
+      h = footprintBounds.height * footprint.getScale() * sizeScale;
+    }
+    // Positioning
+    if (!isSnapToGrid()) {
+      footprintBounds.x = getX();
+      footprintBounds.y = getY();
+    } else {
+      if (getLayer().isSnapToGridAtCenter()) {
+        // Center it on the footprint
+        footprintBounds.x -= (int) ((w - footprintBounds.width) / 2d);
+        footprintBounds.y -= (int) ((h - footprintBounds.height) / 2d);
+      }
+    }
+    footprintBounds.width = (int) w; // perhaps make this a double
+    footprintBounds.height = (int) h;
+
+    // Offset
+    footprintBounds.x += anchorX;
+    footprintBounds.y += anchorY;
+
+    return footprintBounds;
+  }
+
   /**
    * Return the drag anchor of the token.
    *
@@ -1555,7 +1654,7 @@ public class Token implements Cloneable {
         dragAnchorY = getY() + (int) centerOffset.y;
       } else {
         // Anchor at the layout center.
-        Rectangle tokenBounds = getBounds(zone);
+        Rectangle tokenBounds = getFootprintBounds(zone);
         dragAnchorX = tokenBounds.x + tokenBounds.width / 2 - anchorX;
         dragAnchorY = tokenBounds.y + tokenBounds.height / 2 - anchorY;
       }
@@ -1580,23 +1679,6 @@ public class Token implements Cloneable {
 
     setX(newDragAnchorPosition.x - offsetX);
     setY(newDragAnchorPosition.y - offsetY);
-  }
-
-  /**
-   * Like {@link #getDragAnchor(Zone)}, but assume the token is in cell {@code cellPoint}.
-   *
-   * @param zone The zone that the token lives in.
-   * @param cellPoint The cell in which the token should pretend to be located.
-   * @return The drag anchor the token would have if located at {@code cellPoint}.
-   */
-  public ZonePoint getDragAnchorAsIfLocatedInCell(Zone zone, CellPoint cellPoint) {
-    ZonePoint anchor = getDragAnchor(zone);
-    ZonePoint nearestGridCellVertex = zone.getGrid().convert(zone.getGrid().convert(anchor));
-    ZonePoint targetCellVertex = zone.getGrid().convert(cellPoint);
-
-    return new ZonePoint(
-        targetCellVertex.x + (anchor.x - nearestGridCellVertex.x),
-        targetCellVertex.y + (anchor.y - nearestGridCellVertex.y));
   }
 
   /**
@@ -1644,7 +1726,7 @@ public class Token implements Cloneable {
    */
   private Point2D.Double getSnapToUnsnapOffset(Zone zone) {
     double offsetX, offsetY;
-    Rectangle tokenBounds = getBounds(zone);
+    Rectangle tokenBounds = getFootprintBounds(zone);
     Grid grid = zone.getGrid();
     if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().isSnapToGridAtCenter()) {
       if (!getLayer().isSnapToGridAtCenter() || isSnapToScale()) {
@@ -1663,7 +1745,7 @@ public class Token implements Cloneable {
 
         offsetX = footprintOffsetX / 2.0 - cellOffset.width * cellsX;
         offsetY = footprintOffsetY / 2.0 - cellOffset.height * cellsY;
-        if (grid.isHex() && "large".equalsIgnoreCase(footprint.getName())) {
+        if (grid.getType().isHex() && "large".equalsIgnoreCase(footprint.getName())) {
           // Merudo: not sure why this special case is needed.
           offsetX = offsetX - Math.min(grid.getCellWidth(), grid.getCellHeight()) / 2;
           offsetY = offsetY - Math.min(grid.getCellWidth(), grid.getCellHeight()) / 2;
@@ -2600,6 +2682,9 @@ public class Token implements Cloneable {
       }
     }
 
+    if (haloIdSet == null) {
+      haloIdSet = new LinkedHashSet<>();
+    }
     if (macroPropertiesMap == null) {
       macroPropertiesMap = new HashMap<>();
     }
@@ -2926,6 +3011,15 @@ public class Token implements Cloneable {
         lightChanged = true;
         addLightSource(GUID.valueOf(parameters.get(0).getLightSourceId()));
         break;
+      case clearHalos:
+        clearHalos();
+        break;
+      case removeHalo:
+        removeHalo(GUID.valueOf(parameters.get(0).getHaloId()));
+        break;
+      case addHalo:
+        addHalo(GUID.valueOf(parameters.get(0).getHaloId()));
+        break;
       case setHasSight:
         if (hasLightSources()) {
           lightChanged = true;
@@ -3057,6 +3151,7 @@ public class Token implements Cloneable {
         dto.getLightSourcesList().stream()
             .map(AttachedLightSource::fromDto)
             .collect(Collectors.toList()));
+    dto.getHaloGuidsList().stream().forEach(id -> token.haloIdSet.add(new GUID(id)));
     token.sightType = dto.hasSightType() ? dto.getSightType().getValue() : null;
     token.hasSight = dto.getHasSight();
     token.hasImageTable = dto.getHasImageTable();
@@ -3186,6 +3281,7 @@ public class Token implements Cloneable {
         uniqueLightSources.values().stream().map(LightSource::toDto).collect(Collectors.toList()));
     dto.addAllLightSources(
         lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
+    dto.addAllHaloGuids(haloIdSet.stream().map(GUID::toString).collect(Collectors.toList()));
     if (sightType != null) {
       dto.setSightType(StringValue.of(sightType));
     }

@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.swing;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.beans.*;
 import java.text.ParseException;
 import java.util.EnumSet;
@@ -26,7 +28,6 @@ import javax.swing.event.SwingPropertyChangeSupport;
 import net.rptools.lib.MathUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Utility class for linking a numeric JSpinner, JSlider, and a variable. The slider and spinner are
@@ -54,8 +55,10 @@ public class SpinnerSliderPaired {
     this(spinner, slider, null);
   }
 
+  private static final Logger log = LogManager.getLogger(SpinnerSliderPaired.class);
+
   public SpinnerSliderPaired(JSpinner spinner, JSlider slider, Consumer<Number> propertySetter) {
-    this(spinner, slider, propertySetter, Number::intValue, (i) -> ((Number) i).doubleValue());
+    this(spinner, slider, propertySetter, Number::intValue, Integer::doubleValue);
     log.debug("spinner-slider pair using default relationship.");
   }
 
@@ -66,8 +69,8 @@ public class SpinnerSliderPaired {
       Function<Number, Integer> spinnerToSlider,
       Function<Integer, Number> sliderToSpinner) {
     // set functional relationship
-    setSpinnerToSlider(spinnerToSlider);
-    setSliderToSpinner(sliderToSpinner);
+    setSpinnerToSliderFunction(spinnerToSlider);
+    setSliderToSpinnerFunction(sliderToSpinner);
     // set the controls
     setLinkedSpinner(spinner);
     setLinkedSlider(slider);
@@ -79,25 +82,23 @@ public class SpinnerSliderPaired {
     getLinkedSpinner().setModel(commonModel.spinnerModelDelegate);
   }
 
-  private static final Logger log = LogManager.getLogger(SpinnerSliderPaired.class);
-
-  protected SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this);
-  protected VetoableChangeSupport vcs = new VetoableChangeSupport(this);
-
+  @SuppressWarnings("unused")
   public void addVetoableChangeListener(VetoableChangeListener listener) {
-    vcs.addVetoableChangeListener(listener);
+    this.commonModel.modelVCS.addVetoableChangeListener(listener);
   }
 
-  protected void removeVetoableChangeListener(VetoableChangeListener listener) {
-    vcs.addVetoableChangeListener(listener);
+  @SuppressWarnings("unused")
+  public void removeVetoableChangeListener(VetoableChangeListener listener) {
+    this.commonModel.modelVCS.addVetoableChangeListener(listener);
   }
 
   public void addPropertyChangeListener(PropertyChangeListener listener) {
-    pcs.addPropertyChangeListener(listener);
+    this.commonModel.modelPCS.addPropertyChangeListener(listener);
   }
 
-  protected void removePropertyChangeListener(PropertyChangeListener listener) {
-    pcs.removePropertyChangeListener(listener);
+  @SuppressWarnings("unused")
+  public void removePropertyChangeListener(PropertyChangeListener listener) {
+    this.commonModel.modelPCS.removePropertyChangeListener(listener);
   }
 
   private JSpinner linkedSpinner;
@@ -111,14 +112,44 @@ public class SpinnerSliderPaired {
     return linkedSlider;
   }
 
-  private void setLinkedSlider(@NotNull JSlider slider) {
+  private void setLinkedSlider(JSlider slider) {
     this.linkedSlider = slider;
+    this.linkedSlider.addPropertyChangeListener(
+        "value",
+        pce -> {
+          try {
+            this.commonModel.modelVCS.fireVetoableChange(pce);
+            this.commonModel.modelPCS.firePropertyChange(pce);
+          } catch (PropertyVetoException ignored) {
+          }
+        });
   }
 
   private void setLinkedSpinner(JSpinner spinner) {
     this.linkedSpinner = spinner;
+    this.linkedSpinner.addPropertyChangeListener(
+        "value",
+        pce -> {
+          try {
+            this.commonModel.modelVCS.fireVetoableChange(pce);
+            this.commonModel.modelPCS.firePropertyChange(pce);
+          } catch (PropertyVetoException ignored) {
+          }
+        });
+    ((JSpinner.DefaultEditor) this.linkedSpinner.getEditor())
+        .getTextField()
+        .addPropertyChangeListener(
+            "value",
+            pce -> {
+              try {
+                this.commonModel.modelVCS.fireVetoableChange(pce);
+                this.commonModel.modelPCS.firePropertyChange(pce);
+              } catch (PropertyVetoException ignored) {
+              }
+            });
   }
 
+  @SuppressWarnings("unused")
   // option to set the spinner to loop/wrap at end values
   public void setModelWraps(boolean b) {
     commonModel.modelWraps = b;
@@ -130,10 +161,12 @@ public class SpinnerSliderPaired {
   private Supplier<Number> propertyGetter;
   private String propertyName = "Property";
 
+  @SuppressWarnings("unused")
   public Consumer<Number> getPropertySetter() {
     return propertySetter;
   }
 
+  @SuppressWarnings("unused")
   public Supplier<Number> getPropertyGetter() {
     return propertyGetter;
   }
@@ -167,26 +200,29 @@ public class SpinnerSliderPaired {
   // Instance of NumericModel that ties the two controls together
   private final NumericModel commonModel = new NumericModel();
   // function that defines the value conversion from slider to spinner, defaults to 1:1
-  private Function<Integer, Number> sliderToSpinner = i -> ((Number) i).doubleValue();
+  private Function<Integer, Number> sliderToSpinner = Integer::doubleValue;
   // function that defines the value conversion from spinner to slider
   private Function<Number, Integer> spinnerToSlider = Number::intValue;
 
-  public void setSpinnerToSlider(Function<Number, Integer> function) {
+  public void setSpinnerToSliderFunction(Function<Number, Integer> function) {
     spinnerToSlider = function;
   }
 
-  public void setSliderToSpinner(Function<Integer, Number> function) {
+  public void setSliderToSpinnerFunction(Function<Integer, Number> function) {
     sliderToSpinner = function;
   }
 
+  @SuppressWarnings("unused")
   public Number getPairNextValue() {
     return commonModel.getModelNextValue();
   }
 
+  @SuppressWarnings("unused")
   public Number getPairPreviousValue() {
     return commonModel.getModelPreviousValue();
   }
 
+  @SuppressWarnings("unused")
   public int getPairSliderValue() {
     return commonModel.getModelNumber(true).intValue();
   }
@@ -199,14 +235,17 @@ public class SpinnerSliderPaired {
     commonModel.incrementModelValue(n);
   }
 
+  @SuppressWarnings("unused")
   public void setPairMaximum(Number n) {
     commonModel.setModelMaximum(n);
   }
 
+  @SuppressWarnings("unused")
   public void setPairMinimum(Number n) {
     commonModel.setModelMinimum(n);
   }
 
+  @SuppressWarnings("unused")
   public void setPairStepSize(Number n) {
     commonModel.setModelStepSize(n);
   }
@@ -225,7 +264,13 @@ public class SpinnerSliderPaired {
 
   // The shared model - two delegates controlled from above
   private class NumericModel {
-    private NumericModel() {}
+    protected SwingPropertyChangeSupport modelPCS;
+    protected VetoableChangeSupport modelVCS;
+
+    private NumericModel() {
+      modelPCS = new SwingPropertyChangeSupport(this);
+      modelVCS = new VetoableChangeSupport(this);
+    }
 
     private boolean modelWraps = false;
     private double floor;
@@ -267,13 +312,21 @@ public class SpinnerSliderPaired {
       getLinkedSlider().addChangeListener(sliderChangeListener);
       getLinkedSlider()
           .addMouseWheelListener(
-              e -> {
-                sliderModelDelegate.setValue(
-                    Math.clamp(
-                        sliderModelDelegate.getValue()
-                            + (int) Math.round(e.getPreciseWheelRotation()),
-                        spinnerToSlider.apply(floor),
-                        spinnerToSlider.apply(ceiling)));
+              e ->
+                  sliderModelDelegate.setValue(
+                      Math.clamp(
+                          sliderModelDelegate.getValue()
+                              + (int) Math.round(e.getPreciseWheelRotation()),
+                          spinnerToSlider.apply(floor),
+                          spinnerToSlider.apply(ceiling))));
+      getLinkedSpinner()
+          .getEditor()
+          .addFocusListener(
+              new FocusAdapter() {
+                @Override
+                public void focusLost(FocusEvent e) {
+                  commitEdit(getLinkedSpinner());
+                }
               });
     }
 
@@ -295,6 +348,7 @@ public class SpinnerSliderPaired {
     }
 
     private void setModelValue(Number n, Source s) {
+      // keep track of what changes have been made. Stop when spinner and slider have been done.
       if (!s.equals(Source.OTHER)
           && sources.contains(Source.SPINNER)
           && sources.contains(Source.SLIDER)) {
@@ -324,12 +378,11 @@ public class SpinnerSliderPaired {
         newVal = Math.clamp(newVal, floor, ceiling);
       }
 
-      setProperty(newVal);
-
-      PropertyChangeEvent pce = new PropertyChangeEvent(this, "value", currentVal, newVal);
+      PropertyChangeEvent pce = new PropertyChangeEvent(s, "value", currentVal, newVal);
 
       try {
-        vcs.fireVetoableChange(pce);
+        modelVCS.fireVetoableChange(pce);
+        setProperty(newVal);
         if (s.equals(Source.OTHER)) {
           sources.add(Source.SPINNER);
           spinnerModelDelegate.setValue(newVal);
@@ -340,7 +393,7 @@ public class SpinnerSliderPaired {
         } else {
           return;
         }
-        pcs.firePropertyChange(pce);
+        modelPCS.firePropertyChange(pce);
       } catch (PropertyVetoException ignored) {
       }
     }
@@ -472,16 +525,21 @@ public class SpinnerSliderPaired {
     private final ChangeListener spinnerEditListener =
         e -> {
           JSpinner spinner = (JSpinner) e.getSource();
-          try {
-            spinner.commitEdit();
-          } catch (ParseException pe) {
-            // Edited value is invalid, revert the spinner to the last valid value,
-            JComponent editor = spinner.getEditor();
-            if (editor instanceof JSpinner.NumberEditor) {
-              ((JSpinner.NumberEditor) editor).getTextField().setValue(spinner.getValue());
-            }
-          }
+          commitEdit(spinner);
         };
+
+    private void commitEdit(JSpinner spinner) {
+      try {
+        spinner.commitEdit();
+        spinnerModelDelegate.setValue(spinner.getModel().getValue());
+      } catch (ParseException pe) {
+        // Edited value is invalid, revert the spinner to the last valid value,
+        JComponent editor = spinner.getEditor();
+        if (editor instanceof JSpinner.NumberEditor) {
+          ((JSpinner.NumberEditor) editor).getTextField().setValue(spinner.getValue());
+        }
+      }
+    }
   }
 
   @Override

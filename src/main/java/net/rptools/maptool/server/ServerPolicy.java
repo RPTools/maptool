@@ -30,6 +30,7 @@ public class ServerPolicy {
   private boolean strictTokenMovement;
   private boolean isMovementLocked;
   private boolean isTokenEditorLocked;
+  private boolean isTokenContextLocked;
   private boolean playersCanRevealVision;
   private boolean gmRevealsVisionForUnownedTokens;
   private boolean useIndividualViews;
@@ -57,6 +58,7 @@ public class ServerPolicy {
     this.strictTokenMovement = other.strictTokenMovement;
     this.isMovementLocked = other.isMovementLocked;
     this.isTokenEditorLocked = other.isTokenEditorLocked;
+    this.isTokenContextLocked = other.isTokenContextLocked;
     this.playersCanRevealVision = other.playersCanRevealVision;
     this.gmRevealsVisionForUnownedTokens = other.gmRevealsVisionForUnownedTokens;
     this.useIndividualViews = other.useIndividualViews;
@@ -98,8 +100,16 @@ public class ServerPolicy {
     return isTokenEditorLocked;
   }
 
+  public boolean isTokenContextLocked() {
+    return isTokenContextLocked;
+  }
+
   public void setIsTokenEditorLocked(boolean locked) {
     isTokenEditorLocked = locked;
+  }
+
+  public void setIsTokenContextLocked(boolean locked) {
+    isTokenContextLocked = locked;
   }
 
   public void setPlayersCanRevealVision(boolean flag) {
@@ -274,6 +284,8 @@ public class ServerPolicy {
     sinfo.addProperty(
         "token editor locked", isTokenEditorLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(
+        "token context locked", isTokenContextLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty(
         "restricted impersonation", isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(
         "individual views", isUseIndividualViews() ? BigDecimal.ONE : BigDecimal.ZERO);
@@ -325,6 +337,7 @@ public class ServerPolicy {
     policy.strictTokenMovement = dto.getUseStrictTokenManagement();
     policy.isMovementLocked = dto.getIsMovementLocked();
     policy.isTokenEditorLocked = dto.getIsTokenEditorLocked();
+    policy.isTokenContextLocked = dto.getIsTokenContextLocked();
     policy.playersCanRevealVision = dto.getPlayersCanRevealVision();
     policy.gmRevealsVisionForUnownedTokens = dto.getGmRevealsVisionForUnownedTokens();
     policy.useIndividualViews = dto.getUseIndividualViews();
@@ -347,6 +360,7 @@ public class ServerPolicy {
     dto.setUseStrictTokenManagement(strictTokenMovement);
     dto.setIsMovementLocked(isMovementLocked);
     dto.setIsTokenEditorLocked(isTokenEditorLocked);
+    dto.setIsTokenContextLocked(isTokenContextLocked);
     dto.setPlayersCanRevealVision(playersCanRevealVision);
     dto.setGmRevealsVisionForUnownedTokens(gmRevealsVisionForUnownedTokens);
     dto.setUseIndividualViews(useIndividualViews);

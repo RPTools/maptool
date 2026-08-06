@@ -76,7 +76,8 @@ public class ConeTemplateTool extends RadiusTemplateTool {
 
     // Set the direction based on the mouse location too
     ZonePoint vertex = template.getVertex();
-    ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+    ZonePoint mouse =
+        new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
     ((ConeTemplate) template)
         .setDirection(RadiusTemplate.Direction.findDirection(mouse.x, mouse.y, vertex.x, vertex.y));
   }

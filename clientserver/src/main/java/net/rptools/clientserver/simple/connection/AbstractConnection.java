@@ -15,7 +15,6 @@
 package net.rptools.clientserver.simple.connection;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,12 +32,22 @@ import org.apache.logging.log4j.Logger;
 public abstract class AbstractConnection implements Connection {
   private static final Logger log = LogManager.getLogger(AbstractConnection.class);
 
+  private final String id;
   private final AtomicBoolean closed = new AtomicBoolean(false);
   private final BlockingQueue<byte[]> outQueue = new LinkedBlockingQueue<>();
 
   private final List<DisconnectHandler> disconnectHandlers = new CopyOnWriteArrayList<>();
   private final List<ActivityListener> listeners = new CopyOnWriteArrayList<>();
   private final List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<>();
+
+  protected AbstractConnection(String id) {
+    this.id = id;
+  }
+
+  @Override
+  public final String getId() {
+    return id;
+  }
 
   @Override
   public final void close() {
@@ -113,95 +122,6 @@ public abstract class AbstractConnection implements Connection {
   protected final void dispatchCompressedMessage(byte[] compressedMessage) {
     var message = inflate(compressedMessage);
     dispatchMessage(message);
-  }
-
-  protected final void writeMessage(OutputStream out, byte[] message) throws IOException {
-    int length = message.length;
-
-    notifyListeners(ActivityListener.Direction.Outbound, ActivityListener.State.Start, length, 0);
-
-    out.write(length >> 24);
-    out.write(length >> 16);
-    out.write(length >> 8);
-    out.write(length);
-
-    for (int i = 0; i < message.length; i++) {
-      out.write(message[i]);
-
-      if (i != 0 && i % ActivityListener.CHUNK_SIZE == 0) {
-        notifyListeners(
-            ActivityListener.Direction.Outbound, ActivityListener.State.Progress, length, i);
-      }
-    }
-    out.flush();
-    notifyListeners(
-        ActivityListener.Direction.Outbound, ActivityListener.State.Complete, length, length);
-  }
-
-  protected final byte[] readMessage(InputStream in) throws IOException {
-    int b32 = in.read();
-    int b24 = in.read();
-    int b16 = in.read();
-    int b8 = in.read();
-
-    if (b32 < 0) {
-      throw new IOException("Stream closed");
-    }
-    int length = (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
-
-    notifyListeners(ActivityListener.Direction.Inbound, ActivityListener.State.Start, length, 0);
-
-    byte[] ret = new byte[length];
-    for (int i = 0; i < length; i++) {
-      ret[i] = (byte) in.read();
-
-      if (i != 0 && i % ActivityListener.CHUNK_SIZE == 0) {
-        notifyListeners(
-            ActivityListener.Direction.Inbound, ActivityListener.State.Progress, length, i);
-      }
-    }
-    notifyListeners(
-        ActivityListener.Direction.Inbound, ActivityListener.State.Complete, length, length);
-    return ret;
-  }
-
-  private ByteBuffer messageBuffer = null;
-
-  protected final byte[] readMessage(ByteBuffer part) {
-    if (messageBuffer == null) {
-      int length = part.getInt();
-      notifyListeners(ActivityListener.Direction.Inbound, ActivityListener.State.Start, length, 0);
-
-      if (part.remaining() == length) {
-        var ret = new byte[length];
-        part.get(ret);
-        notifyListeners(
-            ActivityListener.Direction.Inbound, ActivityListener.State.Complete, length, length);
-        return ret;
-      }
-
-      messageBuffer = ByteBuffer.allocate(length);
-    }
-
-    messageBuffer.put(part);
-    notifyListeners(
-        ActivityListener.Direction.Inbound,
-        ActivityListener.State.Progress,
-        messageBuffer.capacity(),
-        messageBuffer.position());
-
-    if (messageBuffer.capacity() == messageBuffer.position()) {
-      notifyListeners(
-          ActivityListener.Direction.Inbound,
-          ActivityListener.State.Complete,
-          messageBuffer.capacity(),
-          messageBuffer.capacity());
-      var ret = messageBuffer.array();
-      messageBuffer = null;
-      return ret;
-    }
-
-    return null;
   }
 
   protected final void fireDisconnect() {

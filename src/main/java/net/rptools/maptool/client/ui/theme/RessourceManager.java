@@ -17,10 +17,7 @@ package net.rptools.maptool.client.ui.theme;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.TreeSet;
 import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -33,7 +30,7 @@ public class RessourceManager {
   private static final HashMap<Icons, String> classicIcons =
       new HashMap<>() {
         {
-          // This icons don't exist in classic.
+          // These icons don't exist in classic.
           put(Icons.ACTION_EXPORT, null);
           put(Icons.ACTION_IMPORT, null);
           put(Icons.ACTION_TARGET_ADD, null);
@@ -49,6 +46,7 @@ public class RessourceManager {
           put(Icons.ACTION_CLOSE, IMAGE_DIR + "collapse.png");
           put(Icons.ACTION_COPY, IMAGE_DIR + "page_copy.png");
           put(Icons.ACTION_DELETE, IMAGE_DIR + "delete.png");
+          put(Icons.ACTION_ACCEPT, IMAGE_DIR + "currentIndicator.png");
           put(Icons.ACTION_EDIT, IMAGE_DIR + "pencil.png");
           put(Icons.ACTION_NEW, IMAGE_DIR + "add.png");
           put(Icons.ACTION_NEW_SMALL, IMAGE_DIR + "add_sm.png");
@@ -129,12 +127,14 @@ public class RessourceManager {
           put(Icons.GRID_SQUARE, IMAGE_DIR + "gridSquare.png");
           put(Icons.INITIATIVE_CURRENT_INDICATOR, IMAGE_DIR + "currentIndicator.png");
           put(Icons.MAPTOOL, IMAGE_DIR + "maptool_icon.png");
+          put(Icons.MENU_DISCORD, IMAGE_DIR + "discord.svg");
           put(Icons.MENU_DOCUMENTATION, IMAGE_DIR + "book_open.png");
           put(Icons.MENU_FORUMS, IMAGE_DIR + "marker.png");
           put(Icons.MENU_FRAMEWORKS, IMAGE_DIR + "minilogo.png");
           put(Icons.MENU_NETWORK_SETUP, IMAGE_DIR + "download.png");
           put(Icons.MENU_SCRIPTING, IMAGE_DIR + "pencil.png");
           put(Icons.MENU_SHOW_GRIDS, IMAGE_DIR + "grid.gif");
+          put(Icons.MENU_SHOW_TOKEN_HALOS, IMAGE_DIR + "halos.png");
           put(Icons.MENU_SHOW_TOKEN_NAMES, IMAGE_DIR + "names.png");
           put(Icons.MENU_TUTORIALS, IMAGE_DIR + "tutorial.jpg");
           put(Icons.STATUSBAR_ASSET_CACHE, IMAGE_DIR + "asset-status.png");
@@ -149,6 +149,11 @@ public class RessourceManager {
           put(Icons.STATUSBAR_SERVER_RUNNING, IMAGE_DIR + "computer_server.png");
           put(Icons.STATUSBAR_TRANSMIT_OFF, IMAGE_DIR + "activityOff.png");
           put(Icons.STATUSBAR_TRANSMIT_ON, IMAGE_DIR + "transmitOn.png");
+          put(Icons.TABLEPANEL_TABLE_PICK_ONCE, IMAGE_DIR + "pick-once.png");
+          put(Icons.TABLEPANEL_TABLE_PLAYER_LOOKUP, IMAGE_DIR + "zoom.png");
+          put(Icons.TABLEPANEL_TABLE_PLAYER_VISIBLE, IMAGE_DIR + "visible.png");
+          put(Icons.TABLEPANEL_VIEW_ICONS, IMAGE_DIR + "panel-icons-view.png");
+          put(Icons.TABLEPANEL_VIEW_DETAILS, IMAGE_DIR + "panel-details-view.png");
           put(Icons.TOOLBAR_DRAW_BOX, IMAGE_DIR + "tool/draw-blue-box.png");
           put(Icons.TOOLBAR_DRAW_DELETE, IMAGE_DIR + "delete.png");
           put(Icons.TOOLBAR_DRAW_DIAMOND, IMAGE_DIR + "tool/draw-blue-diamond.png");
@@ -157,6 +162,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_DRAW_OFF, IMAGE_DIR + "tool/draw-blue-off.png");
           put(Icons.TOOLBAR_DRAW_ON, IMAGE_DIR + "tool/draw-blue.png");
           put(Icons.TOOLBAR_DRAW_OVAL, IMAGE_DIR + "tool/draw-blue-circle.png");
+          put(Icons.TOOLBAR_DRAW_POINTER, IMAGE_DIR + "tool/pointer-red.png");
           put(Icons.TOOLBAR_DRAW_TEXT, IMAGE_DIR + "tool/text-blue.png");
           put(Icons.TOOLBAR_FOG_EXPOSE_BOX, IMAGE_DIR + "tool/fog-blue-rect.png");
           put(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, IMAGE_DIR + "tool/fog-blue-diamond.png");
@@ -183,6 +189,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TEMPLATE_LINE_CELL, IMAGE_DIR + "tool/temp-blue-cell-line.png");
           put(Icons.TOOLBAR_TEMPLATE_OFF, IMAGE_DIR + "tool/temp-blue-off.png");
           put(Icons.TOOLBAR_TEMPLATE_ON, IMAGE_DIR + "tool/temp-blue.png");
+          put(Icons.TOOLBAR_TEMPLATE_POINTER, IMAGE_DIR + "tool/pointer-red.png");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS, IMAGE_DIR + "tool/temp-blue-vertex-radius.png");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS_CELL, IMAGE_DIR + "tool/temp-blue-cell-radius.png");
           put(Icons.TOOLBAR_TEMPLATE_WALL, IMAGE_DIR + "tool/temp-blue-wall.png");
@@ -295,6 +302,7 @@ public class RessourceManager {
         {
           put(Icons.ACTION_COPY, ROD_ICONS + "edit/Duplicate.svg");
           put(Icons.ACTION_DELETE, ROD_ICONS + "edit/Delete.svg");
+          put(Icons.ACTION_ACCEPT, ROD_ICONS + "edit/Accept.svg");
           put(Icons.ACTION_EDIT, ROD_ICONS + "edit/Edit.svg");
           put(Icons.ACTION_EXPORT, ROD_ICONS + "edit/Export.svg");
           put(Icons.ACTION_IMPORT, ROD_ICONS + "edit/Import.svg");
@@ -317,6 +325,7 @@ public class RessourceManager {
           put(Icons.ADD_RESSOURCE_LOCAL, ROD_ICONS + "folder.svg");
           put(Icons.ASSETPANEL_HEROLABS, ROD_ICONS + "hero-lab-icon.svg");
           put(Icons.ASSETPANEL_HEROLABS_FOLDER, ROD_ICONS + "hero_lab_folder.svg");
+          put(Icons.ASSETPANEL_SEARCH, ROD_ICONS + "misc/Zoom.svg");
           put(Icons.CHAT_HIDE_TYPING_NOTIFICATION, ROD_ICONS + "misc/Hide Typing notification.svg");
           put(Icons.CHAT_SCROLL_LOCK_ON, ROD_ICONS + "misc/Scroll Lock.svg");
           put(Icons.CHAT_SHOW_TYPING_NOTIFICATION, ROD_ICONS + "misc/Show Typing notification.svg");
@@ -360,12 +369,14 @@ public class RessourceManager {
           put(Icons.GRID_NONE, ROD_ICONS + "cross.svg");
           put(Icons.GRID_SQUARE, ROD_ICONS + "gridSquare.svg");
           put(Icons.MAPTOOL, ROD_ICONS + "maptool_icon.svg");
+          put(Icons.MENU_DISCORD, ROD_ICONS + "menu/Discord.svg");
           put(Icons.MENU_DOCUMENTATION, ROD_ICONS + "menu/Documentation.svg");
           put(Icons.MENU_FORUMS, ROD_ICONS + "menu/Forums.svg");
           put(Icons.MENU_FRAMEWORKS, ROD_ICONS + "menu/Frameworks.svg");
           put(Icons.MENU_NETWORK_SETUP, ROD_ICONS + "menu/Network Setup.svg");
           put(Icons.MENU_SCRIPTING, ROD_ICONS + "menu/Macro Scripting.svg");
           put(Icons.MENU_SHOW_GRIDS, ROD_ICONS + "menu/Show Grids.svg");
+          put(Icons.MENU_SHOW_TOKEN_HALOS, ROD_ICONS + "menu/Show Token Halos.svg");
           put(Icons.MENU_SHOW_TOKEN_NAMES, ROD_ICONS + "menu/Show Token Names.svg");
           put(Icons.MENU_TUTORIALS, ROD_ICONS + "menu/Tutorials.svg");
           put(Icons.PROPERTIES_TABLE_ALPHABETIC, ROD_ICONS + "misc/Alphabetic.svg");
@@ -389,6 +400,11 @@ public class RessourceManager {
           put(Icons.STATUSBAR_SERVER_RUNNING, ROD_ICONS + "bottom/Server Status - Running.svg");
           put(Icons.STATUSBAR_TRANSMIT_OFF, ROD_ICONS + "bottom/Send Data - Inactive.svg");
           put(Icons.STATUSBAR_TRANSMIT_ON, ROD_ICONS + "bottom/Send Data - Active.svg");
+          put(Icons.TABLEPANEL_TABLE_PICK_ONCE, ROD_ICONS + "misc/Pick Once.svg");
+          put(Icons.TABLEPANEL_TABLE_PLAYER_LOOKUP, ROD_ICONS + "misc/Zoom.svg");
+          put(Icons.TABLEPANEL_TABLE_PLAYER_VISIBLE, ROD_ICONS + "Visible.svg");
+          put(Icons.TABLEPANEL_VIEW_ICONS, ROD_ICONS + "misc/Panel Icons View.svg");
+          put(Icons.TABLEPANEL_VIEW_DETAILS, ROD_ICONS + "misc/Panel Details View.svg");
           put(Icons.TOOLBAR_DRAW_BOX, ROD_ICONS + "ribbon/Draw Rectangle_2.svg");
           put(Icons.TOOLBAR_DRAW_DELETE, ROD_ICONS + "ribbon/Delete Drawing.svg");
           put(Icons.TOOLBAR_DRAW_DIAMOND, ROD_ICONS + "ribbon/Draw Diamond_2.svg");
@@ -397,6 +413,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_DRAW_OFF, ROD_ICONS + "ribbon/Drawing Tools.svg");
           put(Icons.TOOLBAR_DRAW_ON, ROD_ICONS + "ribbon/Drawing Tools.svg");
           put(Icons.TOOLBAR_DRAW_OVAL, ROD_ICONS + "ribbon/Draw Oval_2.svg");
+          put(Icons.TOOLBAR_DRAW_POINTER, ROD_ICONS + "ribbon/Drawing Pointer Tool.svg");
           put(Icons.TOOLBAR_DRAW_TEXT, ROD_ICONS + "ribbon/Add Text Label to Map.svg");
           put(Icons.TOOLBAR_FOG_EXPOSE_BOX, ROD_ICONS + "ribbon/Draw Rectangle.svg");
           put(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, ROD_ICONS + "ribbon/Draw Diamond.svg");
@@ -428,6 +445,7 @@ public class RessourceManager {
               ROD_ICONS + "ribbon/Line Template Centered on Grid.svg");
           put(Icons.TOOLBAR_TEMPLATE_OFF, ROD_ICONS + "ribbon/Cone Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_ON, ROD_ICONS + "ribbon/Cone Template.svg");
+          put(Icons.TOOLBAR_TEMPLATE_POINTER, ROD_ICONS + "ribbon/Template Pointer Tool.svg");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS, ROD_ICONS + "ribbon/Radius Template.svg");
           put(
               Icons.TOOLBAR_TEMPLATE_RADIUS_CELL,
@@ -592,63 +610,5 @@ public class RessourceManager {
     RESULT ressourceObject = creator.create(ressourcePath);
     cache.put(cachekey, ressourceObject);
     return ressourceObject;
-  }
-
-  public static void main(String[] args) {
-    checkMissingIcons(classicIcons, rodIcons);
-  }
-
-  private static void checkMissingIcons(
-      HashMap<Icons, String> classicIcons, HashMap<Icons, String> rodIcons) {
-    var missing = new TreeSet<Icons>();
-    for (var key : classicIcons.keySet()) {
-      if (rodIcons.containsKey(key)) {
-        continue;
-      }
-      missing.add(key);
-    }
-
-    System.out.println("Missing icons:");
-    for (var key : missing) {
-      System.out.println(key + " classic: " + classicIcons.get(key));
-    }
-  }
-
-  public static void checkMissingFiles() {
-    String basedir = "C:\\Users\\tkunze\\Source\\maptool\\src\\main\\resources\\";
-    for (String value : images.values()) {
-      if (value == null) {
-        continue;
-      }
-
-      var source = Path.of(basedir, value);
-      var target = Path.of(basedir, IMAGE_DIR, "images", source.getFileName().toString());
-
-      if (Files.notExists(source)) {
-        System.out.println(value + " is missing!");
-      }
-    }
-    for (String value : classicIcons.values()) {
-      if (value == null) {
-        continue;
-      }
-
-      var source = Path.of(basedir, value);
-
-      if (Files.notExists(source)) {
-        System.out.println(value + " is missing!");
-      }
-    }
-    for (String value : rodIcons.values()) {
-      if (value == null) {
-        continue;
-      }
-
-      var source = Path.of(basedir, value);
-
-      if (Files.notExists(source)) {
-        System.out.println(value + " is missing!");
-      }
-    }
   }
 }

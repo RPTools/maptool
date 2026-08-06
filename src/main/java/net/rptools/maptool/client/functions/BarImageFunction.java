@@ -68,34 +68,29 @@ public class BarImageFunction extends AbstractFunction {
 
     StringBuilder assetId = new StringBuilder("asset://");
 
-    if (over instanceof SingleImageBarTokenOverlay) {
-      assetId.append(((SingleImageBarTokenOverlay) over).getAssetId().toString());
-
-    } else if (over instanceof TwoImageBarTokenOverlay) {
-      if (value != null) {
-        if (value.doubleValue() > 0.5) {
-          assetId.append(((TwoImageBarTokenOverlay) over).getTopAssetId().toString());
-        } else {
-          assetId.append(((TwoImageBarTokenOverlay) over).getBottomAssetId().toString());
-        }
+    if (over instanceof SingleImageBarTokenOverlay one) {
+      assetId.append(one.getAssetId().toString());
+    } else if (over instanceof TwoImageBarTokenOverlay two) {
+      if (value != null && value.doubleValue() > 0.5) {
+        assetId.append(two.getTopAssetId().toString());
       } else {
-        assetId.append(((TwoImageBarTokenOverlay) over).getBottomAssetId().toString());
+        assetId.append(two.getBottomAssetId().toString());
       }
-    } else if (over instanceof MultipleImageBarTokenOverlay) {
+    } else if (over instanceof MultipleImageBarTokenOverlay many) {
       int increment = 0;
-      int max_increments = ((MultipleImageBarTokenOverlay) over).getAssetIds().length;
+      int max_increments = many.getAssetIds().size();
       if (value != null) {
-        increment = Math.max(Math.min(over.findIncrement(value.doubleValue()), max_increments), 0);
+        increment = Math.clamp(over.findIncrement(value.doubleValue()), 0, max_increments);
       }
-      assetId.append(((MultipleImageBarTokenOverlay) over).getAssetIds()[increment].toString());
+      assetId.append(many.getAssetIds().get(increment).toString());
     } else {
       throw new ParserException(
           I18N.getText("macro.function.barImage.notImage", functionName, barName));
     }
-    // control flow should be the same with this code being outside of the if statement
+
     if (size != null && size.intValue() != 0) {
       assetId.append("-");
-      int i = Math.max(Math.min(size.intValue(), 500), 1);
+      int i = Math.clamp(size.intValue(), 1, 500);
       assetId.append(i);
     }
     return assetId.toString();

@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Stream;
+import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -62,6 +63,9 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
   /** Is the panel HTML5 or HTML3.2. */
   private boolean isHTML5;
+
+  /** The icon reference for the frame */
+  private String iconRef = null;
 
   /**
    * Runs a javascript on a frame.
@@ -127,7 +131,8 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param scrollReset whether the scrollbar should be reset.
    * @param isHTML5 whether it should use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param val a value that can be returned by getFrameProperties().
-   * @param htmlContent the html contnent to display in the frame.
+   * @param htmlContent the html content to display in the frame.
+   * @param iconRef the icon reference for the frame.
    * @return the HTMLFrame that is displayed.
    */
   public static HTMLFrame showFrame(
@@ -140,7 +145,8 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       boolean scrollReset,
       boolean isHTML5,
       Object val,
-      HTMLContent htmlContent)
+      HTMLContent htmlContent,
+      String iconRef)
       throws ParserException {
     HTMLFrame frame;
 
@@ -164,14 +170,14 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       }
 
       // Only set size on creation so we don't override players resizing.
-      frame = new HTMLFrame(name, width, height, isHTML5);
+      frame = new HTMLFrame(name, width, height, isHTML5, iconRef);
       frames.put(name, frame);
 
       frame.getDockingManager().showFrame(name);
       // Jamz: why undock frames to center them?
       if (!frame.isDocked()) center(name);
     }
-    frame.updateContents(htmlContent, title, tabTitle, temp, scrollReset, isHTML5, val);
+    frame.updateContents(htmlContent, title, tabTitle, temp, scrollReset, isHTML5, val, iconRef);
     return frame;
   }
 
@@ -217,14 +223,20 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param width the width of the frame
    * @param height the height of the frame
    * @param isHTML5 whether the frame is HTML5 (JavaFx)
+   * @param iconRef the icon reference for the frame
    */
-  private HTMLFrame(String name, int width, int height, boolean isHTML5) {
-    super(name, RessourceManager.getSmallIcon(Icons.WINDOW_HTML));
+  private HTMLFrame(String name, int width, int height, boolean isHTML5, String iconRef) {
+    super(name, iconRef == null ? RessourceManager.getSmallIcon(Icons.WINDOW_HTML) : null);
     this.name = name;
     this.isHTML5 = isHTML5;
     width = width < 100 ? 400 : width;
     height = height < 50 ? 200 : height;
     setPreferredSize(new Dimension(width, height));
+
+    // update the icon if one was provided
+    if (iconRef != null) {
+      updateIcon(iconRef);
+    }
 
     addHTMLPanel(isHTML5);
 
@@ -284,6 +296,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param scrollReset whether the scrollbar should be reset
    * @param isHTML5 whether the frame should support HTML5 (JavaFX)
    * @param val the value to put in the frame
+   * @param iconRef the icon for the frame
    */
   public void updateContents(
       HTMLContent htmlContent,
@@ -292,7 +305,8 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       boolean temp,
       boolean scrollReset,
       boolean isHTML5,
-      Object val) {
+      Object val,
+      String iconRef) {
     if (this.isHTML5 != isHTML5) {
       this.isHTML5 = isHTML5;
       panel.removeFromContainer(this); // remove previous panel
@@ -304,7 +318,48 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     setTabTitle(tabTitle);
     setTemporary(temp);
     setValue(val);
+    updateIcon(iconRef);
     panel.updateContents(htmlContent, scrollReset);
+  }
+
+  /**
+   * Sets the icon on a specific frame.
+   *
+   * @param name The name of the frame.
+   * @param iconRef The icon reference.
+   */
+  public static void setIcon(String name, String iconRef) {
+    if (frames.containsKey(name)) {
+      if (!Objects.equals(frames.get(name).iconRef, iconRef)) {
+        frames.get(name).updateIcon(iconRef);
+      }
+    }
+  }
+
+  /**
+   * Update the frame icon if necessary.
+   *
+   * @param iconRef The icon reference for the frame.
+   */
+  public void updateIcon(String iconRef) {
+    if (!Objects.equals(this.iconRef, iconRef)) {
+      // only update the icon there is an actual change
+      // N.B. if the icon is set via HTML it may flicker (same as setting the title via HTML)
+      if (iconRef != null && !iconRef.isEmpty()) {
+        // get the icon for the supplied icon reference
+        ImageIcon newIcon = HTMLFrameFactory.getScaledImageIcon(iconRef);
+        if (newIcon != null) {
+          this.iconRef = iconRef;
+          this.setFrameIcon(newIcon);
+        }
+      } else {
+        // set to the default icon
+        this.iconRef = null;
+        this.setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_HTML));
+      }
+    } else {
+      // no update needed
+    }
   }
 
   /** Run all callback macros for "onChangeSelection". */
@@ -355,6 +410,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
       frameProperties.addProperty("title", frame.getTitle());
       frameProperties.addProperty("tabtitle", frame.getTabTitle());
+      frameProperties.addProperty("icon", frame.iconRef);
       frameProperties.addProperty("html5", FunctionUtil.getDecimalForBoolean(frame.isHTML5));
       frameProperties.addProperty(
           "temporary", FunctionUtil.getDecimalForBoolean(frame.getTemporary()));
@@ -418,21 +474,21 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (e instanceof HTMLActionEvent.FormActionEvent) {
-      HTMLActionEvent.FormActionEvent fae = (HTMLActionEvent.FormActionEvent) e;
+    if (e instanceof HTMLActionEvent.FormActionEvent fae) {
       MacroLinkFunction.runMacroLink(fae.getAction() + fae.getData());
     }
-    if (e instanceof HTMLActionEvent.RegisterMacroActionEvent) {
-      HTMLActionEvent.RegisterMacroActionEvent rmae = (HTMLActionEvent.RegisterMacroActionEvent) e;
+    if (e instanceof HTMLActionEvent.RegisterMacroActionEvent rmae) {
       macroCallbacks.put(rmae.getType(), rmae.getMacro());
     }
-    if (e instanceof HTMLActionEvent.ChangeTitleActionEvent) {
-      String newTitle = ((HTMLActionEvent.ChangeTitleActionEvent) e).getNewTitle();
+    if (e instanceof HTMLActionEvent.ChangeTitleActionEvent ctae) {
+      String newTitle = ctae.getNewTitle();
       this.setTitle(newTitle);
       this.setTabTitle(newTitle);
     }
-    if (e instanceof HTMLActionEvent.MetaTagActionEvent) {
-      HTMLActionEvent.MetaTagActionEvent mtae = (HTMLActionEvent.MetaTagActionEvent) e;
+    if (e instanceof HTMLActionEvent.ChangeIconActionEvent ciae) {
+      updateIcon(ciae.getNewIconRef());
+    }
+    if (e instanceof HTMLActionEvent.MetaTagActionEvent mtae) {
       if (mtae.getName().equalsIgnoreCase("onChangeToken")
           || mtae.getName().equalsIgnoreCase("onChangeSelection")
           || mtae.getName().equalsIgnoreCase("onChangeImpersonated")) {

@@ -15,7 +15,7 @@
 package net.rptools.maptool.client;
 
 import java.awt.geom.Point2D;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.model.ZonePoint;
 
 public class ScreenPoint extends Point2D.Double {
@@ -23,35 +23,28 @@ public class ScreenPoint extends Point2D.Double {
     super(x, y);
   }
 
-  public static Point2D.Double convertToZone2d(ZoneRenderer renderer, double x, double y) {
-    double scale = renderer.getScale();
-    return new Point2D.Double(
-        (x - renderer.getViewOffsetX()) / scale, (y - renderer.getViewOffsetY()) / scale);
-  }
-
   /**
    * Translate the point from screen x,y to zone x,y.
    *
-   * @param renderer the {@link ZoneRenderer} for the "screen view" of the {@link
-   *     net.rptools.maptool.model.Zone}.
+   * @param zoneScale the "screen view" of the {@link net.rptools.maptool.model.Zone}.
    * @param x the x screen co-ordinate.
    * @param y the y screen co-ordinate.
    * @return the {@link ZonePoint} representing the screen point.
    */
-  public static ZonePoint convertToZone(ZoneRenderer renderer, double x, double y) {
-    var doublePrecision = convertToZone2d(renderer, x, y);
-    return new ZonePoint((int) Math.floor(doublePrecision.x), (int) Math.floor(doublePrecision.y));
+  private static ZonePoint convertToZone(Scale zoneScale, double x, double y) {
+    var doublePrecision = zoneScale.toWorldSpace(x, y);
+    return new ZonePoint(
+        (int) Math.floor(doublePrecision.getX()), (int) Math.floor(doublePrecision.getY()));
   }
 
   /**
    * Translate the point from screen x,y to zone x,y.
    *
-   * @param renderer the {@link ZoneRenderer} for the "screen view" of the {@link
-   *     net.rptools.maptool.model.Zone}
+   * @param scale the "screen view" of the {@link net.rptools.maptool.model.Zone}
    * @return the {@link ZonePoint} representing the screen point.
    */
-  public ZonePoint convertToZone(ZoneRenderer renderer) {
-    return convertToZone(renderer, this.x, this.y);
+  public ZonePoint convertToZone(Scale scale) {
+    return convertToZone(scale, this.x, this.y);
   }
 
   /**
@@ -59,67 +52,27 @@ public class ScreenPoint extends Point2D.Double {
    * zone point required is on the "zone point grid" as opposed to the area of zone space designated
    * by the zone point.
    *
-   * @param renderer the {@link ZoneRenderer} for the "screen view" of the {@link
-   *     net.rptools.maptool.model.Zone}.
+   * @param zoneScale the "screen view" of the {@link net.rptools.maptool.model.Zone}.
    * @return the {@link ZonePoint} representing the screen point.
    */
-  public ZonePoint convertToZoneRnd(ZoneRenderer renderer) {
-    double scale = renderer.getScale();
-    double rndAdj = 0.5 * scale;
-    return convertToZone(renderer, this.x + rndAdj, this.y + rndAdj);
-  }
-
-  public static ScreenPoint fromZonePoint(ZoneRenderer renderer, ZonePoint zp) {
-    return fromZonePoint(renderer, zp.x, zp.y);
-  }
-
-  public static ScreenPoint fromZonePoint(ZoneRenderer renderer, double x, double y) {
-    return renderer.getZoneScale().toScreenSpace(x, y);
+  public ZonePoint convertToZoneRnd(Scale zoneScale) {
+    double rndAdj = 0.5 * zoneScale.getScale();
+    return convertToZone(zoneScale, this.x + rndAdj, this.y + rndAdj);
   }
 
   /**
    * Converts a ZonePoint to a screen coordinate (ScreenPoint) and rounding both axis values to
    * longs.
    *
-   * @param renderer the ZoneRenderer to use for scaling the coordinate
+   * @param zoneScale the "screen view" of the {@link net.rptools.maptool.model.Zone}.
    * @param x X axis coordinate
    * @param y Y axis coordinate
    * @return new ScreenPoint
    */
-  public static ScreenPoint fromZonePointRnd(ZoneRenderer renderer, double x, double y) {
-    ScreenPoint sp = fromZonePoint(renderer, x, y);
+  public static ScreenPoint fromZonePointRnd(Scale zoneScale, double x, double y) {
+    ScreenPoint sp = zoneScale.toScreenSpace(x, y);
     sp.x = Math.round(sp.x);
     sp.y = Math.round(sp.y);
-    return sp;
-  }
-
-  /**
-   * Same as {@link #fromZonePointRnd(ZoneRenderer, double, double)} but always rounds up.
-   *
-   * @param renderer the ZoneRenderer to use for scaling the coordinate
-   * @param x X axis coordinate
-   * @param y Y axis coordinate
-   * @return new ScreenPoint
-   */
-  public static ScreenPoint fromZonePointHigh(ZoneRenderer renderer, double x, double y) {
-    ScreenPoint sp = fromZonePoint(renderer, x, y);
-    sp.x = Math.ceil(sp.x);
-    sp.y = Math.ceil(sp.y);
-    return sp;
-  }
-
-  /**
-   * Same as {@link #fromZonePointRnd(ZoneRenderer, double, double)} but always rounds down.
-   *
-   * @param renderer the ZoneRenderer to use for scaling the coordinate
-   * @param x X axis coordinate
-   * @param y Y axis coordinate
-   * @return new ScreenPoint
-   */
-  public static ScreenPoint fromZonePointLow(ZoneRenderer renderer, double x, double y) {
-    ScreenPoint sp = fromZonePoint(renderer, x, y);
-    sp.x = Math.floor(sp.x);
-    sp.y = Math.floor(sp.y);
     return sp;
   }
 

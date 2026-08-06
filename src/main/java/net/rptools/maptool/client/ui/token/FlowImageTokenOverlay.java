@@ -14,10 +14,15 @@
  */
 package net.rptools.maptool.client.ui.token;
 
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import net.rptools.maptool.server.proto.FlowImageTokenOverlayDto;
+import net.rptools.maptool.util.ImageManager;
 
 /**
  * An overlay that allows multiple images to be placed on the token so that they do not interfere
@@ -25,7 +30,8 @@ import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
  *
  * @author Jay
  */
-public class FlowImageTokenOverlay extends ImageTokenOverlay {
+public final class FlowImageTokenOverlay extends AbstractImageTokenOverlay {
+  private static final int DEFAULT_GRID_SIZE = 3;
 
   /** Size of the grid used to place a token with this state. */
   private int grid;
@@ -33,22 +39,31 @@ public class FlowImageTokenOverlay extends ImageTokenOverlay {
   /** Flow used to define position of states */
   private transient TokenOverlayFlow flow;
 
-  /** Needed for serialization */
-  public FlowImageTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, null, -1);
-  }
-
   /**
    * Create the image overlay flow for the name, asset and grid
    *
    * @param name Name of the new state
    * @param assetId Asset displayed for the state
-   * @param aGrid Size of the overlay grid for this state. All states with the same grid size share
-   *     the same overlay.
+   * @param gridSize Size of the overlay grid for this state. All states with the same grid size
+   *     share the same overlay.
    */
-  public FlowImageTokenOverlay(String name, MD5Key assetId, int aGrid) {
+  public FlowImageTokenOverlay(String name, MD5Key assetId, int gridSize) {
     super(name, assetId);
-    grid = aGrid;
+
+    if (gridSize <= 0) {
+      gridSize = DEFAULT_GRID_SIZE;
+    }
+    this.grid = gridSize;
+  }
+
+  public FlowImageTokenOverlay(FlowImageTokenOverlay other) {
+    super(other);
+    this.grid = other.grid;
+  }
+
+  @Override
+  public FlowImageTokenOverlay clone() {
+    return new FlowImageTokenOverlay(this);
   }
 
   /**
@@ -56,33 +71,29 @@ public class FlowImageTokenOverlay extends ImageTokenOverlay {
    *
    * @return Flow used to position the states
    */
-  protected TokenOverlayFlow getFlow() {
-    if (flow == null && grid > 0) flow = TokenOverlayFlow.getInstance(grid);
+  private TokenOverlayFlow getFlow() {
+    if (flow == null) {
+      flow = TokenOverlayFlow.getInstance(grid);
+    }
     return flow;
   }
 
-  /**
-   * @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token)
-   */
   @Override
-  public Rectangle getImageBounds(Rectangle bounds, Token token) {
-    return getFlow().getStateBounds(bounds, token, getName());
-  }
+  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
+    BufferedImage image = ImageManager.getImageAndWait(getAssetId());
 
-  /**
-   * @see BooleanTokenOverlay#clone()
-   */
-  @Override
-  public Object clone() {
-    BooleanTokenOverlay overlay = new FlowImageTokenOverlay(getName(), getAssetId(), grid);
-    overlay.setOrder(getOrder());
-    overlay.setGroup(getGroup());
-    overlay.setMouseover(isMouseover());
-    overlay.setOpacity(getOpacity());
-    overlay.setShowGM(isShowGM());
-    overlay.setShowOwner(isShowOwner());
-    overlay.setShowOthers(isShowOthers());
-    return overlay;
+    var imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
+    AwtUtil.fitInto(imageBounds, bounds);
+
+    var gridCellBounds = getFlow().getStateBounds2D(imageBounds, token, getName());
+
+    // Paint it at the right location
+    int width = (int) gridCellBounds.getWidth();
+    int height = (int) gridCellBounds.getHeight();
+    int x = (int) gridCellBounds.getMinX();
+    int y = (int) gridCellBounds.getMinY();
+
+    g.drawImage(image, x, y, width, height, null);
   }
 
   /**
@@ -92,17 +103,16 @@ public class FlowImageTokenOverlay extends ImageTokenOverlay {
     return grid;
   }
 
-  public static FlowImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new FlowImageTokenOverlay();
-    overlay.fillFrom(dto);
-    overlay.grid = dto.getGridSize();
-    return overlay;
+  public FlowImageTokenOverlayDto toFlowImageDto() {
+    var dto = FlowImageTokenOverlayDto.newBuilder();
+    dto.setAssetId(getAssetId().toString());
+    dto.setGridSize(grid);
+    return dto.build();
   }
 
-  public BooleanTokenOverlayDto toDto() {
-    return getDto()
-        .setGridSize(grid)
-        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_IMAGE)
-        .build();
+  public static FlowImageTokenOverlay fromDto(FlowImageTokenOverlayDto dto) {
+    var assetId = new MD5Key(dto.getAssetId());
+    var gridSize = dto.getGridSize();
+    return new FlowImageTokenOverlay(DEFAULT_STATE_NAME, assetId, gridSize);
   }
 }

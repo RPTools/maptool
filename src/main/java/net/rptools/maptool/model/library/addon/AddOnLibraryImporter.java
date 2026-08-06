@@ -248,9 +248,9 @@ public class AddOnLibraryImporter {
       String path = METADATA_DIR + entry.getName();
       try (InputStream inputStream = zip.getInputStream(entry)) {
         byte[] bytes = inputStream.readAllBytes();
-        MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
-        Asset asset =
-            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
+        var assetName = namespace + "/" + path;
+        MediaType mediaType = Asset.getMediaType(assetName, bytes);
+        Asset asset = Type.fromMediaType(mediaType, assetName).getFactory().apply(assetName, bytes);
         addAsset(asset);
         pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }
@@ -277,9 +277,9 @@ public class AddOnLibraryImporter {
       String path = entry.getName().substring(CONTENT_DIRECTORY.length());
       try (InputStream inputStream = zip.getInputStream(entry)) {
         byte[] bytes = inputStream.readAllBytes();
-        MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
-        Asset asset =
-            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
+        var assetName = namespace + "/" + path;
+        MediaType mediaType = Asset.getMediaType(assetName, bytes);
+        Asset asset = Type.fromMediaType(mediaType, assetName).getFactory().apply(assetName, bytes);
         addAsset(asset);
         pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }

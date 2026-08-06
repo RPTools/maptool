@@ -44,6 +44,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.server.proto.AssetDto;
 import net.rptools.maptool.server.proto.AssetDtoType;
+import net.rptools.maptool.util.HandlebarsUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
@@ -61,6 +62,8 @@ public final class Asset {
     IMAGE(false, "", Asset::createImageAsset), // extension is determined from format.
     /** The {@code Asset} is an audio file. */
     AUDIO(false, "", Asset::createAudioAsset), // extension is determined from format.
+    /** The {@code Asset} is a Handlebars template. */
+    HANDLEBARS(true, "hbs", Asset::createHandlebarsAsset),
     /** The {@code Asset} is an HTML string. */
     HTML(true, "html", Asset::createHTMLAsset),
     /** The {@code Asset} is some generic data. */
@@ -161,7 +164,12 @@ public final class Asset {
         case "image" -> Type.IMAGE;
         case "text" ->
             switch (subType) {
-              case "html" -> Type.HTML;
+              case "html" -> {
+                if (HandlebarsUtil.isAssetFileHandlebars(filename)) {
+                  yield Type.HANDLEBARS;
+                }
+                yield Type.HTML;
+              }
               case "markdown", "x-web-markdown" -> Type.MARKDOWN;
               case "javascript" -> Type.JAVASCRIPT;
               case "css" -> Type.CSS;
@@ -417,6 +425,18 @@ public final class Asset {
     MediaType mediaType = getMediaType(name, data);
     var factory = Type.fromMediaType(mediaType, file.getPath()).getFactory();
     return factory.apply(name, data);
+  }
+
+  /**
+   * Creates a Handlebars {@code Asset}.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param data The data for the {@code Asset}.
+   * @return the Handlebars {@code Asset}.
+   */
+  public static Asset createHandlebarsAsset(String name, byte[] data) {
+    return new Asset(
+        null, name, data, Type.HANDLEBARS, Type.HANDLEBARS.getDefaultExtension(), false);
   }
 
   /**

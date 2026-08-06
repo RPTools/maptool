@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.lib.CollectionUtil;
 import net.rptools.lib.MD5Key;
@@ -37,6 +38,7 @@ import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.RepaintZoneRequested;
 import net.rptools.maptool.client.events.ZoneLoaded;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.events.MapToolEventBus;
@@ -68,7 +70,7 @@ public class ZoneViewModel {
    */
   public record TokenPosition(Token token, Rectangle2D footprintBounds, Area transformedBounds) {
     public static TokenPosition fromToken(Token token, Zone zone) {
-      Rectangle2D footprintBounds = token.getBounds(zone);
+      Rectangle2D footprintBounds = token.getFootprintBounds(zone);
 
       final Area transformedBounds = new Area(footprintBounds);
       if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
@@ -90,6 +92,8 @@ public class ZoneViewModel {
 
   // region These are updated externally.
 
+  private @Nonnull Zone.Layer activeLayer = Zone.Layer.getDefaultPlayerLayer();
+  private Scale zoneScale = new Scale();
   private final ZoneView zoneView;
   private final SelectionModel selectionModel;
   private final List<GUID> highlightCommonMacros = new ArrayList<>();
@@ -104,11 +108,9 @@ public class ZoneViewModel {
   private @Nullable String loadingProgress = "";
 
   private PlayerView playerView = new PlayerView(Player.Role.PLAYER);
-  private Scale zoneScale = new Scale();
   private final Rectangle2D viewport = new Rectangle2D.Double();
   private Area visibleArea = new Area();
 
-  private final List<Token> selectedTokenList = new ArrayList<>();
   private final Set<GUID> movingTokens = new HashSet<>();
 
   private final Map<GUID, TokenPosition> tokenPositions = new HashMap<>();
@@ -116,7 +118,7 @@ public class ZoneViewModel {
   private final Map<Zone.Layer, List<TokenPosition>> tokenPositionsByLayer =
       CollectionUtil.newFilledEnumMap(Zone.Layer.class, l -> new LinkedList<>());
 
-  private final List<TokenPosition> markerList = new ArrayList<>();
+  private final List<Marker> markerList = new ArrayList<>();
   private final Map<Token, Set<Token>> tokenStackMap = new HashMap<>();
 
   private final Map<Zone.Layer, Set<GUID>> visibleTokensByLayer =
@@ -130,6 +132,10 @@ public class ZoneViewModel {
     this.zone = zone;
     this.zoneView = zoneView;
     this.selectionModel = selectionModel;
+  }
+
+  public void repaintNeeded() {
+    new MapToolEventBus().getMainEventBus().post(new RepaintZoneRequested(zone));
   }
 
   /** Marks the zone as not loaded, so that it ensures once again that all assets are loaded. */
@@ -154,6 +160,16 @@ public class ZoneViewModel {
 
   public Scale getZoneScale() {
     return zoneScale;
+  }
+
+  public void setZoneScale(Scale scale) {
+    if (!this.zoneScale.equals(scale)) {
+      this.zoneScale = scale;
+      MapTool.getFrame().getZoneRenderer(zone).invalidateCurrentViewCache();
+      MapTool.getFrame().getZoomStatusBar().update();
+      repaintNeeded();
+      // TODO Should we be calling renderer.maybeForcePlayersView() here?
+    }
   }
 
   public Rectangle2D getViewport() {
@@ -213,8 +229,14 @@ public class ZoneViewModel {
         tokenPositionsByLayer.getOrDefault(layer, Collections.emptyList()));
   }
 
-  public List<TokenPosition> getMarkerPositions() {
-    return Collections.unmodifiableList(markerList);
+  public @Nullable Marker getMarkerAt(int x, int y) {
+    var zonePoint = zoneScale.toWorldSpace(x, y);
+    for (var marker : markerList.reversed()) {
+      if (marker.bounds().contains(zonePoint)) {
+        return marker;
+      }
+    }
+    return null;
   }
 
   public Map<Token, Set<Token>> getTokenStackMap() {
@@ -222,7 +244,14 @@ public class ZoneViewModel {
   }
 
   public List<Token> getSelectedTokenList() {
-    return Collections.unmodifiableList(selectedTokenList);
+    var tokens = new ArrayList<Token>();
+    for (GUID g : selectionModel.getSelectedTokenIds()) {
+      final var token = zone.getToken(g);
+      if (token != null) {
+        tokens.add(token);
+      }
+    }
+    return tokens;
   }
 
   public Set<GUID> getVisibleTokens(Zone.Layer layer) {
@@ -252,24 +281,24 @@ public class ZoneViewModel {
     updateViewport();
     updatePlayerView();
     updateVisibleArea();
-    updateSelectedTokensList();
     updateMovingTokens();
     updateTokenPositions();
-    updateMarkerPositions();
+    updateMarkerList();
     updateTokenStacks();
     updateVisibleTokens();
     updateLightPosition();
   }
 
-  private void updateIsUsingGdxRenderer() {
-    isUsingGdxRenderer = MapTool.getFrame().getGdxPanel().isVisible();
-  }
-
   // What follows are "systems".
 
+  /** Updates {@link #isUsingGdxRenderer}. */
+  private void updateIsUsingGdxRenderer() {
+    isUsingGdxRenderer = false;
+  }
+
   /**
-   * If the zone is not already loaded, updates the loading status and emits {@link ZoneLoaded} if
-   * it becomes loaded.
+   * If the zone is not already loaded, updates the {@link #loadingProgress} and emits {@link
+   * ZoneLoaded} if it becomes loaded.
    */
   private void updateIsLoading() {
     if (loadingProgress == null) {
@@ -324,35 +353,25 @@ public class ZoneViewModel {
     }
   }
 
+  /** Updates {@link #viewport} based on {@link #zoneScale}. */
   private void updateViewport() {
     var renderer = MapTool.getFrame().getZoneRenderer(this.zone);
     if (renderer == null) {
       // No viewport.
-      zoneScale = new Scale();
       viewport.setFrame(0, 0, 0, 0);
       return;
     }
 
-    zoneScale = new Scale(renderer.getZoneScale());
     var screenBounds = new Rectangle2D.Double(0, 0, renderer.getWidth(), renderer.getHeight());
     viewport.setFrame(zoneScale.toWorldSpace(screenBounds));
   }
 
+  /** Updates {@link #visibleArea} based on {@link #playerView}. */
   private void updateVisibleArea() {
-    visibleArea = zoneView.getVisibleArea(playerView);
+    visibleArea = zoneView.getVisibility(playerView).visibleArea();
   }
 
-  private void updateSelectedTokensList() {
-    selectedTokenList.clear();
-
-    for (GUID g : selectionModel.getSelectedTokenIds()) {
-      final var token = zone.getToken(g);
-      if (token != null) {
-        selectedTokenList.add(token);
-      }
-    }
-  }
-
+  /** Updates {@link #playerView}. */
   private void updatePlayerView() {
     playerView = makePlayerView(MapTool.getPlayer().getEffectiveRole(), true);
   }
@@ -384,19 +403,54 @@ public class ZoneViewModel {
     }
   }
 
-  private void updateMarkerPositions() {
-    for (var list : tokenPositionsByLayer.values()) {
-      for (var tokenPosition : list) {
+  /**
+   * Updates {@link #markerList} based on {@link #playerView}, {@link #tokenPositionsByLayer}, and
+   * {@link #visibleTokensByLayer}
+   */
+  private void updateMarkerList() {
+    var isGM = playerView.isGMView();
+
+    markerList.clear();
+
+    for (var entry : tokenPositionsByLayer.entrySet()) {
+      var layer = entry.getKey();
+      if (!layer.isMarkerLayer()) {
+        // No markers in this layer, so don't bother iterating over them.
+        continue;
+      }
+
+      for (var tokenPosition : entry.getValue()) {
         var token = tokenPosition.token();
-        var playerCanSeeMarker =
-            MapTool.getPlayer().isGM() || !StringUtil.isEmpty(token.getNotes());
-        if (tokenPosition.token().isMarker() && playerCanSeeMarker) {
-          markerList.add(tokenPosition);
+        if (!visibleTokensByLayer.get(layer).contains(token.getId())) {
+          // No value in storing markers the player can't see.
+          continue;
+        }
+
+        var marker =
+            new Marker(
+                tokenPosition.transformedBounds(),
+                token.getName(),
+                isGM && !StringUtil.isEmpty(token.getGMName()) ? token.getGMName() : null,
+                StringUtil.isEmpty(token.getNotes())
+                    ? null
+                    : new Notes(token.getNotes(), token.getNotesType()),
+                StringUtil.isEmpty(token.getGMNotes()) || !isGM
+                    ? null
+                    : new Notes(token.getGMNotes(), token.getGmNotesType()),
+                token.getPortraitImage());
+
+        // A GM sees a marker if it has any notes or a portrait.
+        // A player sees a marker only if it has player notes.
+        if (marker.playerNotes() != null
+            || marker.imageKey() != null
+            || (isGM && marker.gmNotes() != null)) {
+          markerList.add(marker);
         }
       }
     }
   }
 
+  /** Updates {@link #tokenStackMap} based on {@link #tokenPositionsByLayer}. */
   private void updateTokenStacks() {
     tokenStackMap.clear();
     var tokenPositions = tokenPositionsByLayer.get(Zone.Layer.TOKEN);
@@ -432,12 +486,12 @@ public class ZoneViewModel {
     }
   }
 
+  /**
+   * Updates {@link #onScreenTokens} and {@link #visibleTokensByLayer} based on {@link
+   * #tokenPositionsByLayer}, {@link #viewport}, {@link #playerView}, and {@link #visibleArea}.
+   */
   private void updateVisibleTokens() {
-    double scale = 1;
-    var renderer = MapTool.getFrame().getZoneRenderer(this.zone);
-    if (renderer != null) {
-      scale = renderer.getZoneScale().getScale();
-    }
+    double scale = zoneScale.getScale();
 
     onScreenTokens.clear();
 
@@ -472,6 +526,7 @@ public class ZoneViewModel {
     }
   }
 
+  /** Updates {@link #movingTokens}. */
   private void updateMovingTokens() {
     movingTokens.clear();
 
@@ -485,6 +540,10 @@ public class ZoneViewModel {
     }
   }
 
+  /**
+   * Updates {@link #lightPositions} based on {@link #playerView}, {@link #tokenPositions}, and
+   * {@link #onScreenTokens}.
+   */
   private void updateLightPosition() {
     lightPositions.clear();
 

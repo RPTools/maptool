@@ -24,5 +24,7 @@ import net.rptools.maptool.model.Zone;
  * @param zone the zone for the event.
  * @param shiftDown is the shift key down.
  * @param controlDown is the control key down.
+ * @param altDown is the alt-key down.
  */
-public record TokenHoverExit(Token token, Zone zone, boolean shiftDown, boolean controlDown) {}
+public record TokenHoverExit(
+    Token token, Zone zone, boolean shiftDown, boolean controlDown, boolean altDown) {}

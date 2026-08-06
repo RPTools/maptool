@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import java.awt.*;
 import java.io.Serial;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,7 +31,6 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
    * in this class so we can register a cell editor for them.
    */
   public record LargeEditableText(String text) {}
-  ;
 
   @Serial private static final long serialVersionUID = 3256444702936019250L;
 
@@ -101,18 +99,16 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
 
   @Override
   public String getColumnName(int column) {
-    String cName = "";
-    String htmlWrap = "<html><table><th style=\"font-weight:normal;\">###</th></table></html>";
-    switch (column) {
-      case 0 -> cName = I18N.getText("campaignPropertiesTable.column.name");
-      case 1 -> cName = I18N.getText("campaignPropertiesTable.column.shortName");
-      case 2 -> cName = I18N.getText("campaignPropertiesTable.column.displayName");
-      case 3 -> cName = I18N.getText("campaignPropertiesTable.column.defaultValue");
-      case 4 -> cName = I18N.getText("campaignPropertiesTable.column.onStatSheet");
-      case 5 -> cName = I18N.getText("campaignPropertiesTable.column.gmStatSheet");
-      case 6 -> cName = I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
-    }
-    return htmlWrap.replace("###", cName);
+    return switch (column) {
+      case 0 -> I18N.getText("campaignPropertiesTable.column.name");
+      case 1 -> I18N.getText("campaignPropertiesTable.column.shortName");
+      case 2 -> I18N.getText("campaignPropertiesTable.column.displayName");
+      case 3 -> I18N.getText("campaignPropertiesTable.column.defaultValue");
+      case 4 -> I18N.getText("campaignPropertiesTable.column.onStatSheet");
+      case 5 -> I18N.getText("campaignPropertiesTable.column.gmStatSheet");
+      case 6 -> I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
+      default -> "";
+    };
   }
 
   @Override

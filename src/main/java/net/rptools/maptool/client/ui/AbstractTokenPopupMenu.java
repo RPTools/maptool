@@ -14,46 +14,21 @@
  */
 package net.rptools.maptool.client.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.Set;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.tool.*;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.CategorizedLights;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.Light;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.Lights;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TokenShape;
-import net.rptools.maptool.model.TokenFootprint;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.FileUtil;
 import net.rptools.maptool.util.PersistenceUtil;
 import org.apache.logging.log4j.LogManager;
@@ -227,6 +202,129 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     }
 
     return subMenu;
+  }
+
+  protected JMenu createHalosMenu() {
+    JMenu menu = new JMenu(I18N.getText("token.popup.menu.halos"));
+
+    boolean hasHalos = false;
+    boolean hasGmOnlyHalos = false;
+    boolean hasOwnerOnlyHalos = false;
+
+    for (GUID tokenGUID : selectedTokenSet) {
+      Token token = renderer.getZone().getToken(tokenGUID);
+      hasHalos |= token.hasHalos() || token.getHaloColor() != null;
+      hasGmOnlyHalos |= token.hasGMOnlyHalos(MapTool.getCampaign());
+      hasOwnerOnlyHalos |= token.hasOwnerOnlyHalos(MapTool.getCampaign());
+    }
+
+    if (hasHalos) {
+      menu.add(new ClearHalosAction());
+      if (hasGmOnlyHalos & MapTool.getPlayer().isGM()) {
+        menu.add(new ClearGMHalosOnlyAction());
+      }
+      if (hasOwnerOnlyHalos) {
+        menu.add(new ClearOwnerHalosOnlyAction());
+      }
+      menu.addSeparator();
+    }
+
+    menu.add(createHaloColorMenu());
+    menu.addSeparator();
+
+    for (CategorizedHalos.Category category :
+        MapTool.getCampaign().getCategorizedHalos().getCategories()) {
+      JMenu subMenu = createHaloCategoryMenu(category.name(), category.halos());
+      if (subMenu.getItemCount() != 0) {
+        menu.add(subMenu);
+      }
+    }
+    return menu;
+  }
+
+  protected JMenu createHaloCategoryMenu(String categoryName, Halos halos) {
+    JMenu subMenu = new JMenu(categoryName);
+
+    for (Halo halo : halos) {
+      // Don't include halos that are not visible to the player. Note that the
+      // player must be an owner to use the popup, so don't bother checking `::isOwner()`.
+      boolean include = MapTool.getPlayer().isGM() || !halo.isGMOnly();
+      if (include) {
+        JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(new ToggleHaloAction(halo));
+        menuItem.setSelected(tokenUnderMouse.hasHalo(halo.getId()));
+        subMenu.add(menuItem);
+      }
+    }
+    return subMenu;
+  }
+
+  protected JMenu createHaloColorMenu() {
+    return createColorAreaMenu(
+        "token.popup.menu.halo.simple",
+        getTokenUnderMouse().getHaloColor(),
+        SetHaloAction.class,
+        SetColorChooserAction.class);
+  }
+
+  private JMenu createColorAreaMenu(
+      String title,
+      Color selectedColor,
+      Class<SetHaloAction> standardColorActionClass,
+      Class<SetColorChooserAction> customColorActionClass) {
+    JMenu haloMenu = new JMenu(I18N.getText(title));
+    try {
+      Constructor<SetHaloAction> standardColorActionConstructor =
+          standardColorActionClass.getConstructor(
+              AbstractTokenPopupMenu.class,
+              ZoneRenderer.class,
+              Set.class,
+              Color.class,
+              String.class);
+      Constructor<SetColorChooserAction> customColorActionConstructor =
+          customColorActionClass.getConstructor(
+              AbstractTokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class);
+
+      JCheckBoxMenuItem noneMenu =
+          new JCheckBoxMenuItem(
+              standardColorActionConstructor.newInstance(
+                  this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")));
+      JCheckBoxMenuItem customMenu =
+          new JCheckBoxMenuItem(
+              customColorActionConstructor.newInstance(
+                  this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")));
+
+      if (selectedColor == null) {
+        noneMenu.setSelected(true);
+      } else {
+        customMenu.setSelected(true);
+      }
+      haloMenu.add(noneMenu);
+      haloMenu.add(customMenu);
+      haloMenu.add(new JSeparator());
+
+      Set<String> colorNames = MapToolUtil.getColorNames();
+      for (String name : colorNames) {
+        Color bgColor = MapToolUtil.getColor(name);
+        Color fgColor = ColorComboBoxRenderer.selectForegroundColor(bgColor);
+        String displayName = I18N.getString("Color.".concat(name));
+        if (displayName == null) {
+          displayName = name;
+        }
+        JCheckBoxMenuItem item =
+            new JCheckBoxMenuItem(
+                standardColorActionConstructor.newInstance(
+                    this, getRenderer(), selectedTokenSet, bgColor, displayName));
+
+        if (bgColor.equals(selectedColor)) {
+          item.setSelected(true);
+          customMenu.setSelected(false);
+        }
+        haloMenu.add(item);
+      }
+    } catch (Exception e) {
+      log.error("Error while building halo color selection menu");
+    }
+    return haloMenu;
   }
 
   protected Token getTokenUnderMouse() {
@@ -813,6 +911,178 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         renderer.getZone().putToken(token);
       }
       renderer.repaint();
+    }
+  }
+
+  public class ToggleHaloAction extends AbstractAction {
+    private final Halo halo;
+
+    public ToggleHaloAction(Halo halo) {
+      super(halo.getName());
+      this.halo = halo;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+      for (GUID tokenGUID : selectedTokenSet) {
+        Token token = renderer.getZone().getToken(tokenGUID);
+        if (token == null) {
+          continue;
+        }
+        if (token.hasHalo(halo.getId())) {
+          token.removeHalo(halo.getId());
+        } else {
+          token.addHalo(halo.getId());
+        }
+        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+
+        renderer.repaint();
+      }
+    }
+  }
+
+  public class ClearHalosAction extends AbstractAction {
+    public ClearHalosAction() {
+      super(I18N.getString("token.popup.menu.halos.clear"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+
+      for (GUID tokenGUID : selectedTokenSet) {
+        Token token = renderer.getZone().getToken(tokenGUID);
+
+        if (!AppUtil.playerOwns(token)) {
+          continue;
+        }
+
+        if (token.hasHalos()) {
+          token.clearHalos();
+        }
+        token.setHaloColor(null);
+        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+        MapTool.getFrame().updateTokenTree();
+      }
+      renderer.repaint();
+    }
+  }
+
+  public class ClearGMHalosOnlyAction extends AbstractAction {
+    public ClearGMHalosOnlyAction() {
+      super(I18N.getText("token.popup.menu.halos.clearGM"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+      for (GUID tokenGUID : selectedTokenSet) {
+        Token token = renderer.getZone().getToken(tokenGUID);
+        if (token.hasGMOnlyHalos(MapTool.getCampaign())) {
+          token.removeGMOnlyHalos(MapTool.getCampaign());
+        }
+        renderer.flush(token);
+        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+        renderer.getZone().putToken(token);
+      }
+      renderer.repaint();
+    }
+  }
+
+  public class ClearOwnerHalosOnlyAction extends AbstractAction {
+    public ClearOwnerHalosOnlyAction() {
+      super(I18N.getText("token.popup.menu.halos.clearOwner"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+      for (GUID tokenGUID : selectedTokenSet) {
+        Token token = renderer.getZone().getToken(tokenGUID);
+        if (token.hasOwnerOnlyHalos(MapTool.getCampaign())) {
+          token.removeOwnerOnlyHalos(MapTool.getCampaign());
+        }
+        renderer.flush(token);
+        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+        renderer.getZone().putToken(token);
+      }
+      renderer.repaint();
+    }
+  }
+
+  private class SetHaloAction extends AbstractAction {
+    private static final long serialVersionUID = 936075111485618012L;
+
+    protected Color color;
+    protected Set<GUID> tokenSet;
+    protected ZoneRenderer renderer;
+
+    public SetHaloAction(ZoneRenderer renderer, Set<GUID> tokenSet, Color color, String name) {
+      this.color = color;
+      this.tokenSet = tokenSet;
+      this.renderer = renderer;
+
+      putValue(Action.NAME, name);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      Zone zone = renderer.getZone();
+      for (GUID guid : tokenSet) {
+        Token token = zone.getToken(guid);
+
+        if (!AppUtil.playerOwns(token)) {
+          continue;
+        }
+        updateToken(token, color);
+        MapTool.serverCommand().putToken(zone.getId(), token);
+      }
+      MapTool.getFrame().updateTokenTree();
+      renderer.repaint();
+    }
+
+    protected void updateToken(Token token, Color color) {
+      token.setHaloColor(color);
+    }
+  }
+
+  private class SetColorChooserAction extends AbstractAction {
+    private static final long serialVersionUID = 2212977067043864272L;
+
+    protected Color currentColor;
+    protected Set<GUID> tokenSet;
+    protected ZoneRenderer renderer;
+
+    public SetColorChooserAction(ZoneRenderer renderer, Set<GUID> tokenSet, String name) {
+      this.tokenSet = tokenSet;
+      this.renderer = renderer;
+      this.currentColor = renderer.getZone().getToken(tokenSet.iterator().next()).getHaloColor();
+      putValue(Action.NAME, name);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      Color color = showColorChooserDialog();
+      if (color != null) {
+        Zone zone = renderer.getZone();
+        for (GUID guid : tokenSet) {
+          Token token = zone.getToken(guid);
+
+          if (!AppUtil.playerOwns(token)) {
+            continue;
+          }
+          updateToken(token, color);
+          MapTool.serverCommand().putToken(zone.getId(), token);
+        }
+        MapTool.getFrame().updateTokenTree();
+        renderer.repaint();
+      }
+    }
+
+    protected Color showColorChooserDialog() {
+      return JColorChooser.showDialog(
+          MapTool.getFrame().getContentPane(), "Choose Halo Color", currentColor);
+    }
+
+    protected void updateToken(Token token, Color color) {
+      token.setHaloColor(color);
     }
   }
 

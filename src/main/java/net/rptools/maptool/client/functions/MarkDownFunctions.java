@@ -22,6 +22,7 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughSubscriptExtensio
 import com.vladsch.flexmark.ext.gfm.strikethrough.SubscriptExtension;
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
 import com.vladsch.flexmark.ext.ins.InsExtension;
+import com.vladsch.flexmark.ext.macros.MacrosExtension;
 import com.vladsch.flexmark.ext.superscript.SuperscriptExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.ext.toc.TocExtension;
@@ -63,6 +64,7 @@ public class MarkDownFunctions extends AbstractFunction {
     ATTRIBUTES("ATTRIBUTES", AttributesExtension.create()),
     DEFINITION("DEFINITION", DefinitionExtension.create()),
     INS("INS", InsExtension.create()),
+    MACROS("MACROS", MacrosExtension.create()),
     STRIKETHROUGH("STRIKETHROUGH", StrikethroughExtension.create()),
     STRIKETHROUGHSUBSCRIPT("STRIKETHROUGHSUBSCRIPT", StrikethroughSubscriptExtension.create()),
     SUBSCRIPT("SUBSCRIPT", SubscriptExtension.create()),

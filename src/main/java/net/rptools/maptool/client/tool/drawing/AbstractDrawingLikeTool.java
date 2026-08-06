@@ -73,7 +73,7 @@ public abstract class AbstractDrawingLikeTool extends DefaultTool implements Zon
 
   protected ZonePoint getPoint(MouseEvent e) {
     ScreenPoint sp = new ScreenPoint(e.getX(), e.getY());
-    ZonePoint zp = sp.convertToZoneRnd(renderer);
+    ZonePoint zp = sp.convertToZoneRnd(renderer.getViewModel().getZoneScale());
     if (isSnapToCenter(e) && isLinearTool()) {
       // Only line tools will snap to center as the Alt key for rectangle, diamond and oval
       // is used for expand from center.
@@ -87,6 +87,7 @@ public abstract class AbstractDrawingLikeTool extends DefaultTool implements Zon
   /** Draws the shape measurement as part of the overlay. */
   protected void drawMeasurementOverlay(
       ZoneRenderer renderer, Graphics2D g, Measurement measurement) {
+    var scale = renderer.getViewModel().getZoneScale();
     switch (measurement) {
       case null -> {}
       case Measurement.Rectangular rectangular -> {
@@ -94,26 +95,19 @@ public abstract class AbstractDrawingLikeTool extends DefaultTool implements Zon
         ToolHelper.drawBoxedMeasurement(
             renderer,
             g,
-            ScreenPoint.fromZonePoint(renderer, rectangle.getX(), rectangle.getY()),
-            ScreenPoint.fromZonePoint(renderer, rectangle.getMaxX(), rectangle.getMaxY()));
+            scale.toScreenSpace(rectangle.getX(), rectangle.getY()),
+            scale.toScreenSpace(rectangle.getMaxX(), rectangle.getMaxY()));
       }
       case Measurement.LineSegment lineSegment -> {
-        var p1 =
-            ScreenPoint.fromZonePoint(renderer, lineSegment.p1().getX(), lineSegment.p1().getY());
-        var p2 =
-            ScreenPoint.fromZonePoint(renderer, lineSegment.p2().getX(), lineSegment.p2().getY());
+        var p1 = scale.toScreenSpace(lineSegment.p1().getX(), lineSegment.p1().getY());
+        var p2 = scale.toScreenSpace(lineSegment.p2().getX(), lineSegment.p2().getY());
         ToolHelper.drawMeasurement(renderer, g, p1, p2);
       }
       case Measurement.IsoRectangular isoRectangular -> {
         var north =
-            ScreenPoint.fromZonePoint(
-                renderer, isoRectangular.north().getX(), isoRectangular.north().getY());
-        var west =
-            ScreenPoint.fromZonePoint(
-                renderer, isoRectangular.west().getX(), isoRectangular.west().getY());
-        var east =
-            ScreenPoint.fromZonePoint(
-                renderer, isoRectangular.east().getX(), isoRectangular.east().getY());
+            scale.toScreenSpace(isoRectangular.north().getX(), isoRectangular.north().getY());
+        var west = scale.toScreenSpace(isoRectangular.west().getX(), isoRectangular.west().getY());
+        var east = scale.toScreenSpace(isoRectangular.east().getX(), isoRectangular.east().getY());
         ToolHelper.drawIsoRectangleMeasurement(renderer, g, north, west, east);
       }
     }

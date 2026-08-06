@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.model;
 
+import java.awt.Color;
 import java.awt.geom.Area;
 import java.io.Serial;
 import java.io.Serializable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.server.proto.LightDto;
 import net.rptools.maptool.server.proto.ShapeTypeDto;
@@ -58,6 +60,15 @@ public final class Light implements Serializable {
   @SuppressWarnings("ConstantConditions")
   @Serial
   private @Nonnull Object readResolve() {
+    // Prior to 1.19, the default D20 light sources had an alpha value of 0x64 instead of 0xff,
+    // despite users not being able to specify alpha and not changing how they are rendered. This
+    // can cause trouble when trying to manipulate colors on lights loaded from old campaigns.
+    var newPaint = paint;
+    if (paint instanceof DrawableColorPaint colorPaint) {
+      var opaqueColor = new Color(colorPaint.getColor(), false);
+      newPaint = new DrawableColorPaint(opaqueColor);
+    }
+
     // Rather than modifying the current object, we'll create a replacement that is definitely
     // initialized properly.
     return new Light(
@@ -66,7 +77,7 @@ public final class Light implements Serializable {
         radius,
         width,
         arcAngle,
-        paint,
+        newPaint,
         lumens == 0 ? 100 : lumens,
         isGM,
         ownerOnly);

@@ -38,6 +38,7 @@ public class ThemeHeader {
   }
 
   private final Header h1;
+
   private final Header h2;
 
   private final Header h3;

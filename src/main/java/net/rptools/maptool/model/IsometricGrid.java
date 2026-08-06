@@ -29,8 +29,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
@@ -38,12 +36,13 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.IsometricGridDto;
 
-public class IsometricGrid extends Grid {
+public final class IsometricGrid extends Grid {
   private static final BufferedImage pathHighlight =
       RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
 
-  public boolean isIsometric() {
-    return true;
+  @Override
+  public GridType getType() {
+    return GridType.Isometric;
   }
 
   @Override
@@ -382,136 +381,5 @@ public class IsometricGrid extends Grid {
   @Override
   protected void fillDto(GridDto.Builder dto) {
     dto.setIsometricGrid(IsometricGridDto.newBuilder());
-  }
-
-  @Override
-  public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    double scale = renderer.getScale();
-    double gridSize = getSize() * scale;
-    double isoHeight = getSize() * scale;
-    double isoWidth = getSize() * 2 * scale;
-    Path2D path = new Path2D.Double();
-
-    int offX = (int) (renderer.getViewOffsetX() % isoWidth + getOffsetX() * scale);
-    int offY = (int) (renderer.getViewOffsetY() % gridSize + getOffsetY() * scale);
-
-    int startCol = (int) ((int) (bounds.x / isoWidth) * isoWidth);
-    int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
-
-    for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
-      for (double col = startCol; col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
-        path.append(drawHatch(renderer, (int) (col + offX), (int) (row + offY)), false);
-      }
-    }
-
-    for (double row = startRow - (isoHeight / 2);
-        row < bounds.y + bounds.height + gridSize;
-        row += gridSize) {
-      for (double col = startCol - (isoWidth / 2);
-          col < bounds.x + bounds.width + isoWidth;
-          col += isoWidth) {
-        path.append(drawHatch(renderer, (int) (col + offX), (int) (row + offY)), false);
-      }
-    }
-    GridRenderer.drawGridShape(g, path);
-  }
-
-  private Shape drawHatch(ZoneRenderer renderer, int x, int y) {
-    double isoWidth = getSize() * renderer.getScale();
-    int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
-    Path2D path = new Path2D.Double();
-    path.append(
-        new Line2D.Double(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize),
-        false);
-    path.append(
-        new Line2D.Double(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize),
-        false);
-    return path;
-  }
-
-  /**
-   * Take a rectangular image, rotate it 45 degrees then reduce its resulting height by half.
-   *
-   * @param planImage the image to rotate and scale
-   * @return image in isometric format
-   */
-  public static BufferedImage isoImage(BufferedImage planImage) {
-    int nSize = (planImage.getWidth() + planImage.getHeight());
-    return resize(rotate(planImage), nSize, nSize / 2);
-  }
-
-  private static BufferedImage rotate(BufferedImage planImage) {
-    double sin = Math.abs(Math.sin(Math.toRadians(45)));
-    double cos = Math.abs(Math.cos(Math.toRadians(45)));
-
-    int w = planImage.getWidth(null), h = planImage.getHeight(null);
-
-    int neww = (int) Math.floor(w * cos + h * sin);
-    int newh = (int) Math.floor(h * cos + w * sin);
-
-    // Rotate image 45 degrees
-    BufferedImage rotateImage = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
-    Graphics2D g = rotateImage.createGraphics();
-    g.translate((neww - w) / 2, (newh - h) / 2);
-    g.rotate(Math.toRadians(45), w / 2f, h / 2f);
-    g.drawRenderedImage(planImage, null);
-    g.dispose();
-    // scale image to half height
-    return rotateImage;
-  }
-
-  private static BufferedImage resize(BufferedImage image, int newWidth, int newHeight) {
-    // Resize into a BufferedImage
-    BufferedImage bimg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-    Graphics2D bGr = bimg.createGraphics();
-    bGr.drawImage(image, 0, 0, newWidth, newHeight, null);
-    bGr.dispose();
-    return bimg;
-  }
-
-  /**
-   * Take a rectangular Area, rotate it 45 degrees then reduce its resulting height by half.
-   *
-   * @param planArea the area to rotate and scale
-   * @return Area in isometric format
-   */
-  public static Area isoArea(Area planArea) {
-    int nSize = (planArea.getBounds().width + planArea.getBounds().height);
-
-    return resize(rotate(planArea), nSize, nSize / 2);
-  }
-
-  private static Area rotate(Area planArea) {
-    double sin = Math.abs(Math.sin(Math.toRadians(45)));
-    double cos = Math.abs(Math.cos(Math.toRadians(45)));
-
-    int w = planArea.getBounds().width, h = planArea.getBounds().height;
-
-    int neww = (int) Math.floor(w * cos + h * sin);
-    int newh = (int) Math.floor(h * cos + w * sin);
-
-    double scaleX = 1f * neww / w;
-    double scaleY = 1f * newh / h;
-
-    int tx = (neww - w) / 2;
-    int ty = (newh - h) / 2;
-
-    // Rotate Area 45 degrees
-    AffineTransform atArea = AffineTransform.getScaleInstance(scaleX, scaleY);
-    atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
-    atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(45), w / 2f, h / 2f));
-
-    return new Area(atArea.createTransformedShape(planArea));
-  }
-
-  private static Area resize(Area planArea, int newWidth, int newHeight) {
-    // Resize into an Area
-    double w = planArea.getBounds().width, h = planArea.getBounds().height;
-    double scaleX = newWidth / w;
-    double scaleY = newHeight / h;
-
-    AffineTransform atArea = AffineTransform.getScaleInstance(scaleX, scaleY);
-
-    return new Area(atArea.createTransformedShape(planArea));
   }
 }

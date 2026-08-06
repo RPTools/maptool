@@ -37,6 +37,26 @@ public class HTMLActionEvent {
     }
   }
 
+  /** Action event for changing the icon of the container via a source path. */
+  public static class ChangeIconActionEvent extends ActionEvent {
+
+    private final String newIconRef;
+
+    ChangeIconActionEvent(Object source, String iconRef) {
+      super(source, 0, "changeIcon");
+      newIconRef = iconRef;
+    }
+
+    /**
+     * Gets the new icon href.
+     *
+     * @return the new icon href.
+     */
+    public String getNewIconRef() {
+      return newIconRef;
+    }
+  }
+
   public static class MetaTagActionEvent extends ActionEvent {
 
     private final String name;

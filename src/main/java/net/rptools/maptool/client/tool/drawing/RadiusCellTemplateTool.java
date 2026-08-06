@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
@@ -30,7 +29,6 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.RadiusCellTemplate;
 
@@ -126,7 +124,8 @@ public class RadiusCellTemplateTool extends AbstractTemplateTool implements Mous
    * @return The cell at the mouse point in screen coordinates.
    */
   protected ZonePoint getCellAtMouse(MouseEvent e) {
-    ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+    ZonePoint mouse =
+        new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
     CellPoint cp = renderer.getZone().getGrid().convert(mouse);
     return renderer.getZone().getGrid().convert(cp);
   }
@@ -168,24 +167,6 @@ public class RadiusCellTemplateTool extends AbstractTemplateTool implements Mous
   }
 
   /**
-   * Get the pen set up to paint the overlay.
-   *
-   * @return The pen used to paint the overlay.
-   */
-  protected Pen getPenForOverlay() {
-    // Get the pen and modify to only show a cursor and the boundary
-    Pen pen = getPen(); // new copy of pen, OK to modify
-    pen.setBackgroundMode(Pen.MODE_SOLID);
-    pen.setForegroundMode(Pen.MODE_SOLID);
-    pen.setThickness(3);
-    if (pen.isEraser()) {
-      pen.setEraser(false);
-      pen.setPaint(new DrawableColorPaint(Color.WHITE));
-    } // endif
-    return pen;
-  }
-
-  /**
    * Paint the radius value in feet.
    *
    * @param g Where to paint.
@@ -193,7 +174,7 @@ public class RadiusCellTemplateTool extends AbstractTemplateTool implements Mous
    */
   protected void paintRadius(Graphics2D g, ZonePoint p) {
     if (template.getRadius() > 0 && anchorSet) {
-      ScreenPoint centerText = ScreenPoint.fromZonePoint(renderer, p);
+      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(p.x, p.y);
       centerText.translate(CURSOR_WIDTH, -CURSOR_WIDTH);
       ToolHelper.drawMeasurement(
           g,
@@ -332,19 +313,6 @@ public class RadiusCellTemplateTool extends AbstractTemplateTool implements Mous
       return;
     }
     resetTool(null);
-  }
-
-  /**
-   * It is OK to modify the pen returned by this method
-   *
-   * @see AbstractTemplateTool#getPen()
-   */
-  @Override
-  protected Pen getPen() {
-    // Just paint the foreground
-    Pen pen = super.getPen();
-    pen.setBackgroundMode(Pen.MODE_SOLID);
-    return pen;
   }
 
   /**

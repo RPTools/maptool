@@ -20,6 +20,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
@@ -170,6 +171,11 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
    */
   public void setTopAssetId(MD5Key topAssetId) {
     this.topAssetId = topAssetId;
+  }
+
+  @Override
+  public List<MD5Key> getAssetIds() {
+    return List.of(this.topAssetId, this.bottomAssetId);
   }
 
   public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {

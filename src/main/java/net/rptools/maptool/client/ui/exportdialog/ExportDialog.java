@@ -23,10 +23,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +32,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
-import javax.imageio.event.IIOWriteProgressListener;
 import javax.swing.*;
 import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.LocalLocation;
@@ -61,81 +58,28 @@ import org.apache.logging.log4j.Logger;
  * <p>This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of
  * the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
  */
-public class ExportDialog extends JDialog implements IIOWriteProgressListener {
-
-  public enum Status {
-    OK,
-    CANCEL
-  }
-
-  private ExportDialog.Status status;
+public class ExportDialog extends JDialog {
 
   //
   // Dialog/ UI related vars
   //
   private static final Logger log = LogManager.getLogger(ExportDialog.class);
 
-  private static final ExportDialog instance = new ExportDialog();
-
   /** the modal panel the user uses to select the screenshot options */
   private static AbeillePanel interactPanel;
-
-  /** The modal panel showing screenshot progress */
-  private static JLabel progressLabel;
 
   /** The place the image will be sent to (file/FTP) */
   private Location exportLocation;
 
-  // These are convenience variables, which should be set
-  // each time the dialog is shown. It is safe to
-  // cache them like this since the dialog is modal.
-  // If this dialog is ever not modal, these need to be
-  // factored out.
-  private static Zone zone;
-  private static ZoneRenderer renderer;
-
-  // These are used to preserve zone settings because
-  // we'll change the Zone/ZoneRenderer temporarily to take the screenshot.
-  // These are static because we don't expect more than
-  // a single ExportDialog to ever be instanced.
-
-  // Pseudo-layers
-  private static Zone.VisionType savedVision;
-  private static boolean savedFog;
-  private static boolean savedBoard;
-  // for ZoneRenderer preservation
-  private static Rectangle origBounds;
-  private static Scale origScale;
-
-  /** set by preScreenshot, cleared by postScreenshot */
-  private boolean waitingForPostScreenshot = false;
-
-  /** Only doing this because I don't expect more than one instance of this modal dialog */
-  private static int instanceCount = 0;
-
-  //
-  // Vars for background rendering of the screenshot
-  //
-
-  /** 0-100: percentage of pixels written to destination */
-  private int renderPercent;
-
-  // 1. We shouldn't have to synchronize the names of variables manually
-  // 2. Specifying the name of a button in Abeille is the same as declaring a variable
-  // 3. This code is always the same for every form, aside from the var names
-  // 4. JAVA doesn't have a way to do abstract enumerated types, so we can't re-use the code except
-  // by copy/paste
-  // 5. Abeille seems to be abandonded at this point (July 2010). The owner replied as recently as
-  // July 2009, but
-  // seems not to have followed up.
-  //
+  private final Zone zone;
+  private final ZoneRenderer renderer;
 
   /**
    * This enum is for ALL the radio buttons in the dialog, regardless of their grouping.
    *
    * <p>The names of the enums should be the same as the button names.
    */
-  public enum ExportRadioButtons {
+  private enum ExportRadioButtons {
     // Format of enum declaration:
     // [Abeille Forms Designer button name] (default checked, default enabled)
     // Button Group 1 (not that it matters for this controller)
@@ -359,7 +303,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * should not have using the screenshot (such as revealing things under other things by disabling
    * layers). Players can basically only turn off tokens, to get an 'empty' version of the map.
    */
-  public static void enforceButtonRules() {
+  private static void enforceButtonRules() {
     if (!MapTool.getPlayer().isGM()) {
       ExportRadioButtons.VIEW_PLAYER.setChecked(true);
       ExportRadioButtons.VIEW_PLAYER.setEnabled(true);
@@ -395,12 +339,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     }
   }
 
-  public static ExportDialog getInstance() {
-    return instance;
-  }
-
-  private ExportDialog() {
+  public ExportDialog(ZoneRenderer renderer) {
     super(MapTool.getFrame(), I18N.getText("action.exportScreenShot.title"), true);
+
+    this.renderer = renderer;
+    this.zone = renderer.getZone();
 
     // The window uses about 1MB. Disposing frees this, but repeated uses
     // will cause more memory fragmentation.
@@ -412,7 +355,6 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     //
     // Initialize the panel and button actions
     //
-    createWaitPanel();
     interactPanel = new AbeillePanel(new ExportDialogView().getRootComponent());
     setLayout(new GridLayout());
     add(interactPanel);
@@ -436,7 +378,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
             "cancel",
             new AbstractAction() {
               public void actionPerformed(ActionEvent e) {
-                cancel();
+                dispose();
               }
             });
   }
@@ -444,10 +386,6 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   @Override
   public void setVisible(boolean b) {
     if (b) {
-      // Always call this first, since other methods may rely on zone or renderer being set.
-      setZone(MapTool.getFrame().getCurrentZoneRenderer().getZone());
-      setZoneRenderer(MapTool.getFrame().getCurrentZoneRenderer());
-
       // Set to interactive mode
       switchToInteractPanel();
 
@@ -455,36 +393,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       enforceButtonRules();
 
       SwingUtil.centerOver(this, MapTool.getFrame());
-    } else {
-      if (waitingForPostScreenshot) {
-        postScreenshot();
-      }
     }
     super.setVisible(b);
-  }
-
-  private void cancel() {
-    status = ExportDialog.Status.CANCEL;
-    setVisible(false);
-  }
-
-  //
-  // These get/set the convenience variables zone and renderer
-  //
-  public static void setZone(Zone zone) {
-    ExportDialog.zone = zone;
-  }
-
-  public static ZoneRenderer getZoneRenderer() {
-    return renderer;
-  }
-
-  public static void setZoneRenderer(ZoneRenderer renderer) {
-    ExportDialog.renderer = renderer;
-  }
-
-  public static Zone getZone() {
-    return zone;
   }
 
   private void exportButtonAction() {
@@ -535,7 +445,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     }
   }
 
-  public void browseButtonAction() {
+  private void browseButtonAction() {
     JFileChooser chooser = new JFileChooser();
     if (exportLocation instanceof LocalLocation) {
       chooser.setSelectedFile(((LocalLocation) exportLocation).getFile());
@@ -560,121 +470,60 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     if (type == null) {
       throw new Exception(I18N.getString("dialog.screenshot.error.invalidDialogSettings"));
     }
-    Player.Role role;
     try {
-      switch (type) {
-        case TYPE_CURRENT_VIEW:
-          // This uses the original screenshot code: I didn't want to touch it, so I need
-          // to pass it the same parameter it took before.
-          role = ExportRadioButtons.VIEW_GM.isChecked() ? Player.Role.GM : Player.Role.PLAYER;
-          BufferedImage screenCap = MapTool.takeMapScreenShot(renderer.makePlayerView(role, true));
-          // since old screenshot code doesn't throw exceptions, look for null
-          if (screenCap == null) {
-            throw new Exception(I18N.getString("dialog.screenshot.error.failedImageGeneration"));
-          }
-          MapTool.getFrame()
-              .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotStreaming"));
-          try (ByteArrayOutputStream imageOut = new ByteArrayOutputStream()) {
-            ImageIO.write(screenCap, "png", imageOut);
-            screenCap = null; // Free up the memory as soon as possible
-            MapTool.getFrame()
-                .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaving"));
-            exportLocation.putContent(
-                new BufferedInputStream(new ByteArrayInputStream(imageOut.toByteArray())));
-          }
-          MapTool.getFrame()
-              .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaved"));
-          break;
-        case TYPE_ENTIRE_MAP:
-          switchToWaitPanel();
-          if (interactPanel.getRadioButton("METHOD_BUFFERED_IMAGE").isSelected()
-              || interactPanel.getRadioButton("METHOD_IMAGE_WRITER").isSelected()) {
-            // Using a buffer in memory for the whole image
-            try {
-              final PlayerView view = preScreenshot();
-              final ImageWriter pngWriter = ImageIO.getImageWritersByFormatName("png").next();
-              MapTool.getFrame()
-                  .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotStreaming"));
+      // Using a buffer in memory for the whole image
+      try (var resetView = restoreZoneState()) {
+        if (!interactPanel.getRadioButton("METHOD_BUFFERED_IMAGE").isSelected()
+            && !interactPanel.getRadioButton("METHOD_IMAGE_WRITER").isSelected()) {
+          throw new Exception("Unknown rendering method!");
+        }
 
-              BufferedImage image;
-              if (interactPanel.getRadioButton("METHOD_BUFFERED_IMAGE").isSelected()) {
-                image =
-                    new BufferedImage(
-                        renderer.getWidth(), renderer.getHeight(), Transparency.OPAQUE);
-                final Graphics2D g = image.createGraphics();
-                renderer.renderZone(g, view);
-                g.dispose();
-              } else {
-                image = new ZoneImageGenerator(renderer, view);
-              }
-              // putContent() can consume quite a bit of time; really should have a progress
-              // meter of some kind here.
-              exportLocation.putContent(pngWriter, image);
-              if (image instanceof ZoneImageGenerator) {
-                log.debug("ZoneImageGenerator() stats: " + image.toString());
-              }
-              MapTool.getFrame()
-                  .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaving"));
-            } catch (Exception e) {
-              MapTool.getFrame()
-                  .setStatusMessage(
-                      I18N.getString("dialog.screenshot.error.failedImageGeneration"));
-            } finally {
-              postScreenshot();
-              MapTool.getFrame()
-                  .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaved"));
-            }
-          } else if (interactPanel.getRadioButton("METHOD_BACKGROUND").isSelected()) {
-            // We must call preScreenshot before creating the ZoneImageGenerator, because
-            // ZoneImageGenerator uses the ZoneRenderer's bounds to set itself up
+        var playerView =
+            renderer.makePlayerView(
+                ExportRadioButtons.VIEW_PLAYER.isChecked() ? Player.Role.PLAYER : Player.Role.GM,
+                false);
 
-            MapTool.showError("This doesn't work! Try one of the other methods.", null);
-            if (false) {
-              //
-              // Note: this implementation is the obvious way, which doesn't work, since
-              // ZoneRenderer is part of the Swing component chain, and the threads get deadlocked.
-              //
-              // The suggested implementation by
-              // "Reiger" at http://ubuntuforums.org/archive/index.php/t-1455270.html
-              // might work... except that it would have to be part of ZoneRenderer
-              //
-              // The only way to make this really work is to pull the renderZone function
-              // out of ZoneRenderer into a new class: call it ZoneRasterizer. Then make
-              // ZoneRenderer create an instance of it, and patch up the code to make it
-              // compatible. Then we can create an instance of ZoneRasterizer, and run it
-              // in a separate thread, since it won't lock in any of the functions that
-              // Swing uses.
-              //
-              class backscreenRender implements Runnable {
+        switchToWaitPanel();
+        setupZoneLayers();
 
-                public void run() {
-                  try {
-                    PlayerView view = preScreenshot();
-                    final ZoneImageGenerator zoneImageGenerator =
-                        new ZoneImageGenerator(renderer, view);
-                    final ImageWriter pngWriter = ImageIO.getImageWritersByFormatName("png").next();
-                    exportLocation.putContent(pngWriter, zoneImageGenerator);
-                    // postScreenshot is called by the callback imageComplete()
-                  } catch (Exception e) {
-                    assert false
-                        : "Unhandled Exception in renderOffScreen: '" + e.getMessage() + "'";
-                  }
-                }
-              }
-              backscreenRender p = new backscreenRender();
-              new Thread(p).start();
-              repaint();
-            }
-          } else {
-            throw new Exception("Unknown rendering method!");
-          }
-          break;
-        default:
-          throw new Exception(I18N.getString("dialog.screenshot.error.invalidDialogSettings"));
+        if (type == ExportRadioButtons.TYPE_ENTIRE_MAP) {
+          setRendererView(playerView);
+        }
+
+        doScreenshot(playerView);
+
+        MapTool.getFrame()
+            .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaved"));
+      } catch (Exception e) {
+        MapTool.getFrame()
+            .setStatusMessage(I18N.getString("dialog.screenshot.error.failedImageGeneration"));
       }
     } catch (OutOfMemoryError e) {
       MapTool.showError("screenCapture() caught: Out Of Memory", e);
     }
+  }
+
+  private void doScreenshot(PlayerView view) throws IOException {
+    final ImageWriter pngWriter = ImageIO.getImageWritersByFormatName("png").next();
+    MapTool.getFrame()
+        .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotStreaming"));
+
+    BufferedImage image;
+    if (interactPanel.getRadioButton("METHOD_BUFFERED_IMAGE").isSelected()) {
+      image = new BufferedImage(renderer.getWidth(), renderer.getHeight(), Transparency.OPAQUE);
+      final Graphics2D g = image.createGraphics();
+      renderer.renderZone(g, view);
+      g.dispose();
+    } else {
+      image = new ZoneImageGenerator(renderer, view);
+    }
+    // putContent() can consume quite a bit of time; really should have a progress
+    // meter of some kind here.
+    exportLocation.putContent(pngWriter, image);
+    if (image instanceof ZoneImageGenerator) {
+      log.debug("ZoneImageGenerator() stats: " + image.toString());
+    }
+    MapTool.getFrame().setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaving"));
   }
 
   public Map<String, Boolean> getExportSettings() {
@@ -725,16 +574,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * This is a preserves the layer settings on the Zone object. It should be followed by
    * restoreZone()
    */
-  private static void setupZoneLayers() throws OutOfMemoryError {
+  private void setupZoneLayers() {
     final Zone zone = renderer.getZone();
-
-    //
-    // Preserve settings
-    //
-    // pseudo-layers
-    savedVision = zone.getVisionType();
-    savedFog = zone.hasFog();
-    savedBoard = zone.drawBoard();
 
     //
     // set according to dialog options
@@ -743,8 +584,10 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     if (!ExportLayers.LAYER_VISIBILITY.isChecked()) {
       zone.setVisionType(Zone.VisionType.OFF);
     }
-    zone.setDrawBoard(ExportLayers.LAYER_BOARD.isChecked());
 
+    if (!ExportLayers.LAYER_BOARD.isChecked()) {
+      renderer.disableBoard();
+    }
     for (ExportLayers exportLayer : ExportLayers.values()) {
       if (exportLayer.associatedZoneLayer != null && !exportLayer.isChecked()) {
         renderer.disableLayer(exportLayer.associatedZoneLayer);
@@ -752,12 +595,20 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     }
   }
 
-  /** This restores the layer settings on the Zone object. It should follow setupZoneLayers(). */
-  private static void restoreZoneLayers() {
-    zone.setHasFog(savedFog);
-    zone.setVisionType(savedVision);
-    zone.setDrawBoard(savedBoard);
-    renderer.restoreLayers();
+  private AutoCloseable restoreZoneState() {
+    // Preserve settings of the zone and renderer.
+    Zone.VisionType savedVision = zone.getVisionType();
+    boolean savedFog = zone.hasFog();
+    var origBounds = renderer.getBounds();
+    var origScale = renderer.getViewModel().getZoneScale();
+
+    return () -> {
+      zone.setHasFog(savedFog);
+      zone.setVisionType(savedVision);
+      renderer.restoreLayers();
+      renderer.getViewModel().setZoneScale(origScale);
+      renderer.setBounds(origBounds);
+    };
   }
 
   /**
@@ -771,51 +622,33 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * revealed fog-of-war.
    *
    * <p>Must be followed by postScreenshot at some point, or the Zone will be messed up.
-   *
-   * @return the image to be saved
    */
-  private PlayerView preScreenshot() throws Exception, OutOfMemoryError {
-    assert (!waitingForPostScreenshot) : "preScreenshot() called twice in a row!";
-
-    // Save the original state of the renderer to restore later.
+  private void setRendererView(PlayerView view) throws Exception {
     // Create a place to put the image, and
     // set up the renderer to encompass the whole extents of the map.
-
-    origBounds = renderer.getBounds();
-    origScale = renderer.getZoneScale();
-
-    setupZoneLayers();
-    boolean viewAsPlayer = ExportRadioButtons.VIEW_PLAYER.isChecked();
 
     // First, figure out the 'extents' of the canvas
     // This will be later modified by the fog (for players),
     // and by the tiling texture (for re-importing)
-    //
-    Player.Role viewRole = viewAsPlayer ? Player.Role.PLAYER : Player.Role.GM;
-    PlayerView view = renderer.makePlayerView(viewRole, false);
     Rectangle extents = zoneExtents(view);
     try {
       // Clip to what the players know about (if applicable).
       // This keeps the player from exporting the map to learn which
       // direction has more 'stuff' in it.
-      if (viewAsPlayer && renderer.getZone().hasFog()) {
+      if (!view.isGMView() && renderer.getZone().hasFog()) {
         Rectangle fogE = renderer.getZone().getExposedArea(view).getBounds();
         if ((fogE.width < 0) || (fogE.height < 0)) {
-          MapTool.showError(
-              I18N.getString("dialog.screenshot.error.negativeFogExtents")); // Image is not
-          // clipped to
-          // show only
-          // fog-revealed
-          // areas!"));
+          // Image is not clipped to show only fog-revealed areas!
+          MapTool.showError(I18N.getString("dialog.screenshot.error.negativeFogExtents"));
         } else {
           extents = extents.intersection(fogE);
         }
       }
     } catch (Exception ex) {
-      throw (new Exception(I18N.getString("dialog.screenshot.error.noArea"), ex));
+      throw new Exception(I18N.getString("dialog.screenshot.error.noArea"), ex);
     }
     if ((extents == null) || (extents.width == 0) || (extents.height == 0)) {
-      throw (new Exception(I18N.getString("dialog.screenshot.error.noArea")));
+      throw new Exception(I18N.getString("dialog.screenshot.error.noArea"));
     }
 
     // If output includes the tiling 'board' texture, move the upper-left corner
@@ -824,42 +657,32 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // aligning on importing.
 
     boolean drawBoard = ExportLayers.LAYER_BOARD.isChecked();
-    if (drawBoard) {
-      DrawablePaint paint = renderer.getZone().getBackgroundPaint();
-      DrawableTexturePaint dummy = new DrawableTexturePaint();
-      int tileX = 0, tileY = 0;
-
-      if (paint.getClass() == dummy.getClass()) {
-        Image bgTexture =
-            ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getMD5Key());
-        tileX = bgTexture.getWidth(null);
-        tileY = bgTexture.getHeight(null);
-        int x = ((int) Math.floor((float) extents.x / tileX)) * tileX;
-        int y = ((int) Math.floor((float) extents.y / tileY)) * tileY;
-        extents.width = extents.width + (extents.x - x);
-        extents.height = extents.height + (extents.y - y);
-        extents.x = x;
-        extents.y = y;
-      }
+    if (drawBoard
+        && renderer.getZone().getBackgroundPaint() instanceof DrawableTexturePaint texturePaint) {
+      Image bgTexture = ImageManager.getImage(texturePaint.getAsset().getMD5Key());
+      int tileX = bgTexture.getWidth(null);
+      int tileY = bgTexture.getHeight(null);
+      int x = ((int) Math.floor((float) extents.x / tileX)) * tileX;
+      int y = ((int) Math.floor((float) extents.y / tileY)) * tileY;
+      extents.width = extents.width + (extents.x - x);
+      extents.height = extents.height + (extents.y - y);
+      extents.x = x;
+      extents.y = y;
     }
 
     // Rescale the bounds to match the view scale
-    double scale = renderer.getScale();
+    Scale originalZoneScale = renderer.getViewModel().getZoneScale();
+    double scale = originalZoneScale.getScale();
     extents.setLocation((int) (extents.x * scale), (int) (extents.y * scale));
     extents.setSize((int) (extents.width * scale), (int) (extents.height * scale));
 
     // Setup the renderer to use the new extents
-    Scale s = new Scale();
-    s.setOffset(-extents.x, -extents.y);
-    s.setScale(scale);
-    renderer.setZoneScale(s);
+    Scale s = originalZoneScale.withOffset(-extents.x, -extents.y);
+    renderer.getViewModel().setZoneScale(s);
     renderer.setBounds(extents);
-
-    waitingForPostScreenshot = true;
-    return view;
   }
 
-  public Rectangle fogExtents() {
+  private Rectangle fogExtents() {
     return zone.getExposedArea().getBounds();
   }
 
@@ -871,7 +694,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * @param view the player view
    * @return a new Rectangle with the bounding box of all the elements in the Zone
    */
-  public Rectangle zoneExtents(PlayerView view) {
+  private Rectangle zoneExtents(PlayerView view) {
     // Can't initialize extents to any set x/y values, because
     // we don't know if the actual map contains that x/y.
     // So we need a flag to say extents is 'unset', and the best I
@@ -923,7 +746,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // Note: order doesn't matter, so don't need to go back-to-front.
     for (Token element :
         zone.getTokensForLayers(layer -> view.isGMView() || layer.isVisibleToPlayers())) {
-      Rectangle drawnBounds = element.getBounds(zone);
+      Rectangle drawnBounds = element.getImageBounds(zone);
       if (element.hasFacing()) {
         // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
         // reason
@@ -970,15 +793,6 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     return extents;
   }
 
-  private void postScreenshot() {
-    assert waitingForPostScreenshot : "postScrenshot called without preScreenshot";
-
-    renderer.setBounds(origBounds);
-    renderer.setZoneScale(origScale);
-    restoreZoneLayers();
-    waitingForPostScreenshot = false;
-  }
-
   //
   // Panel related functions
   //
@@ -986,44 +800,4 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   private void switchToWaitPanel() {}
 
   private void switchToInteractPanel() {}
-
-  private void createWaitPanel() {
-    progressLabel = new JLabel();
-    imageProgress(null, 0);
-  }
-
-  //
-  // IIOWriteProgressListener Interface
-  //
-
-  /** Setup the progress meter. */
-  public void imageStarted(ImageWriter source, int imageIndex) {
-    renderPercent = 0;
-    progressLabel.setText(I18N.getText("exportDialog.msg.renderingWait" + renderPercent + "%"));
-    repaint();
-  }
-
-  /** Update the progress meter. */
-  public void imageProgress(ImageWriter source, float percentageDone) {
-    int oldPercent = renderPercent;
-    renderPercent = (int) (percentageDone * 100);
-    if (renderPercent > oldPercent) {
-      progressLabel.setText(I18N.getText("exportDialog.msg.renderingWait" + renderPercent + "%"));
-      repaint();
-    }
-  }
-
-  /** Close this dialog box upon completion of background thread renderer. */
-  public void imageComplete(ImageWriter source) {
-    postScreenshot();
-    dispose();
-  }
-
-  public void thumbnailStarted(ImageWriter source, int imageIndex, int thumbnailIndex) {}
-
-  public void thumbnailProgress(ImageWriter source, float percentageDone) {}
-
-  public void thumbnailComplete(ImageWriter source) {}
-
-  public void writeAborted(ImageWriter source) {}
 }

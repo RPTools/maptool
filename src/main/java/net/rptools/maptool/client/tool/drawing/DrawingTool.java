@@ -25,7 +25,6 @@ import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -114,28 +113,11 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
   }
 
   private boolean hasPaint(Pen pen) {
-    return pen.getForegroundMode() != Pen.MODE_TRANSPARENT
-        || pen.getBackgroundMode() != Pen.MODE_TRANSPARENT;
+    return pen.getPaint() != null || pen.getBackgroundPaint() != null;
   }
 
   private Pen getPen() {
-    Pen pen = new Pen(MapTool.getFrame().getPen());
-    pen.setEraser(isEraser());
-
-    ColorPicker picker = MapTool.getFrame().getColorPicker();
-    if (picker.isFillForegroundSelected()) {
-      pen.setForegroundMode(Pen.MODE_SOLID);
-    } else {
-      pen.setForegroundMode(Pen.MODE_TRANSPARENT);
-    }
-    if (picker.isFillBackgroundSelected()) {
-      pen.setBackgroundMode(Pen.MODE_SOLID);
-    } else {
-      pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
-    }
-    pen.setSquareCap(picker.isSquareCapSelected());
-    pen.setThickness(picker.getStrokeWidth());
-    return pen;
+    return MapTool.getFrame().getPen(isEraser());
   }
 
   private Drawable toDrawable(Shape shape) {
@@ -187,8 +169,7 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
   @Override
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     Graphics2D g2 = (Graphics2D) g.create();
-    g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-    g2.scale(renderer.getScale(), renderer.getScale());
+    g2.transform(renderer.getViewModel().getZoneScale().toScreenTransform());
 
     if (state != null) {
       // Linear tools are not filled until completed.
@@ -203,8 +184,9 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
           pen.setPaint(new DrawableColorPaint(Color.white));
           pen.setBackgroundPaint(new DrawableColorPaint(Color.white));
         }
-        if (isLinearTool()) {
-          pen.setForegroundMode(Pen.MODE_SOLID);
+        if (isLinearTool() && pen.getPaint() == null) {
+          // Make sure the user can see what they're drawing, even if it is a transparent line.
+          pen.setPaint(new DrawableColorPaint(Color.black));
         }
 
         drawable.draw(renderer.getZone(), g2, pen);

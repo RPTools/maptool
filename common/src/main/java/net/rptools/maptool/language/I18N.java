@@ -14,16 +14,13 @@
  */
 package net.rptools.maptool.language;
 
-import java.text.MessageFormat;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import com.ibm.icu.text.MessageFormat;
+import com.vladsch.flexmark.util.sequence.Escaping;
+import java.util.*;
 import java.util.regex.Pattern;
-import javax.swing.Action;
-import javax.swing.JMenu;
+import javax.swing.*;
 import net.rptools.lib.OsDetection;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,21 +32,24 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>As MapTool uses a base name for the string and extensions for alternate pieces (such as <code>
  * action.loadMap</code> as the base and <code>action.loadMap.accel</code> as the menu accelerator
- * key) there are different methods used to return the different components.
+ * key) different methods are used to return the different components.
  *
  * <p>The ResourceBundle name is <b>net.rptools.maptool.language.i18n</b>.
  *
  * @author tcroft
  */
+@SuppressWarnings("unused")
 public class I18N {
   private static final ResourceBundle BUNDLE;
   private static final Logger log = LogManager.getLogger(I18N.class);
   private static final String DESCRIPTION_EXTENSION = ".description";
-
+  private static final char MNEMONIC_MARKER = '&';
+  private static final Pattern MNEMONIC_PREFIX_PATTERN =
+      Pattern.compile(MNEMONIC_MARKER + "([a-z0-9])", Pattern.CASE_INSENSITIVE);
   private static Enumeration<String> keys;
 
   static {
-    // Put here to make breakpointing easier. :)
+    // Put here to make break-pointing easier. :)
     BUNDLE = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
     I18nTools report = new I18nTools(false);
   }
@@ -73,29 +73,22 @@ public class I18N {
   }
 
   /**
-   * Returns the description text for the given key. This text normally appears in the statusbar of
-   * the main application frame. The input key has the string DESCRIPTION_EXTENSION appended to it.
-   *
-   * @param key the key to use for the i18n lookup.
-   * @return the i81n version of the string.
-   */
-  public static String getDescription(String key) {
-    return getString(key + DESCRIPTION_EXTENSION);
-  }
-
-  /**
    * Returns the character to use as the menu mnemonic for the given key. This method searches the
-   * properties file for the given key. If the value contains an ampersand ("&amp;") the character
-   * following the ampersand is converted to uppercase and returned.
+   * properties file for the given key. Where the value contains an ampersand ("&amp;") the
+   * following character is converted to uppercase and returned.
    *
    * @param key the component to search for
    * @return the character to use as the mnemonic (as an <code>int</code>)
    */
-  public static int getMnemonic(String key) {
+  private static int getMnemonic(String key) {
     String value = getString(key);
-    if (value == null || value.length() < 2) return -1;
-
-    int index = value.indexOf('&');
+    if (value == null || value.length() < 2) {
+      return -1;
+    }
+    // replace HTML entities with characters to prevent spurious results - should not happen but
+    // this is not Utopia
+    value = replaceHtmlEntities(value, false);
+    int index = value.indexOf(MNEMONIC_MARKER);
     if (index != -1 && index + 1 < value.length()) {
       return Character.toUpperCase(value.charAt(index + 1));
     }
@@ -103,7 +96,18 @@ public class I18N {
   }
 
   /**
-   * Returns the String that results from a lookup within the properties file.
+   * Returns the description text for the given key. This text normally appears in the status-bar of
+   * the main application frame. The input key has the string DESCRIPTION_EXTENSION appended to it.
+   *
+   * @param key the key to use for the i18n lookup.
+   * @return the i81n version of the string.
+   */
+  private static String getDescription(String key) {
+    return getString(key + DESCRIPTION_EXTENSION);
+  }
+
+  /**
+   * Returns the String matching the key within the properties file.
    *
    * @param key the component to search for
    * @param bundle the resource bundle to get the i18n string from.
@@ -118,7 +122,7 @@ public class I18N {
   }
 
   /**
-   * Returns the String that results from a lookup within the properties file.
+   * Returns the String matching the key within the properties file.
    *
    * @param key the component to search for
    * @return the String found or <code>null</code>
@@ -132,9 +136,9 @@ public class I18N {
   }
 
   /**
-   * Returns the text associated with the given key after removing any menu mnemonic. So for the key
-   * <b>action.loadMap</b> that has the value {@code &Load Map} in the properties file, this method
-   * returns "Load Map".
+   * Returns the String matching the key within the properties file after removing any menu
+   * mnemonic. So for the key <b>action.loadMap</b> that has the value {@code &Load Map} in the
+   * properties file, this method returns "Load Map".
    *
    * @param key the component to search for
    * @return the String found with mnemonics removed, or the input key if not found
@@ -147,50 +151,114 @@ public class I18N {
 
     String value = getString(key);
     if (value == null) {
-      log.debug("Cannot find key '" + key + "' in properties file.");
+      log.debug("Cannot find key '{}' in properties file.", key);
       return key;
     }
-    return value.replaceAll("\\&", "");
+    // remove mnemonic marker and return value
+    return replaceHtmlEntities(value, true);
   }
 
   /**
-   * Functionally identical to {@link #getText(String key)} except that this one bundles the
-   * formatting calls into this code. This version of the method is truly only needed when the
-   * string being retrieved contains parameters. In MapTool, this commonly means the player's name
-   * or a filename. See the "Parameterized Strings" section of the <b>i18n.properties</b> file for
-   * example usage. Full documentation for this technique can be found under {@link
-   * MessageFormat#format}.
+   * To avoid breaking HTML encoded characters when dealing with &amp;, e.g. <code>
+   * &amp;lt;div&amp;gt;</code> for <code>&lt;div&gt;</code>, or returning a false positive for a
+   * mnemonic key, we need to replace entities with their actual characters first.
+   */
+  private static String replaceHtmlEntities(String string, boolean stripAmpersand) {
+    if (string.indexOf(MNEMONIC_MARKER) == -1) {
+      return string;
+    } else {
+      string = Escaping.unescapeString(string);
+      if (stripAmpersand) {
+        return MNEMONIC_PREFIX_PATTERN.matcher(string).replaceAll("$1");
+      }
+      return Escaping.escapeHtml(string, false);
+    }
+  }
+
+  /**
+   * Simple functionality to {@link #getText(String key)} using indexed argument replacement. Use
+   * this version where the target string pattern contains placeholders in the form <code>{n}</code>
+   * where n is an integer.
+   *
+   * <p>See the "Parameterised Strings" section of the <b>i18n.properties</b> file for example
+   * usage. Full documentation for this technique can be found under {@link
+   * MessageFormat#format(String, Object...)}.
    *
    * @param key the <code>propertyKey</code> to use for lookup in the properties file
-   * @param args parameters needed for formatting purposes
+   * @param args parameters (in order) needed for formatting purposes
    * @return the formatted String
    */
   public static String getText(String key, Object... args) {
     // If the key doesn't exist in the file, the key becomes the format and
     // nothing will be substituted; it's a little extra work, but is not the normal case
     // anyway.
-    String msg = MessageFormat.format(getText(key), args);
-    return msg;
+    return java.text.MessageFormat.format(getText(key), args);
   }
 
   /**
-   * Set all of the I18N values on an <code>Action</code> by retrieving said values from the
-   * properties file.
+   * Localised message with no argument substitution.
+   *
+   * @param key The key to look up for the message.
+   * @return The localised message text.
+   */
+  public static String getMessage(String key) {
+    return getMessage(key, new ArrayList<>());
+  }
+
+  /**
+   * Message composition for use with named arguments. Use when the message pattern string contains
+   * field names, for example: <code>
+   * Argument at index {paramIndex} to function {functionName} is invalid.</code>
+   *
+   * @param key The key to look up for the message.
+   * @param namedArguments List of pairs containing the parameter name and the substitution value.
+   * @return Localised message with parameter placeholders replaced.
+   */
+  public static String getMessage(String key, List<Pair<String, Object>> namedArguments) {
+    Map<String, Object> namedArgs = new HashMap<>();
+    for (Pair<String, Object> pair : namedArguments) {
+      namedArgs.put(pair.getKey(), pair.getValue());
+    }
+    return getMessage(key, namedArgs);
+  }
+
+  /**
+   * Message composition for use with named arguments. Use when the message pattern string contains
+   * field names, for example: <code>
+   * Argument at index {paramIndex} to function {functionName} is invalid.</code>
+   *
+   * @param key The key to look up for the message.
+   * @param namedArguments Map&lt;String, Object&gt; containing the parameter name and associated
+   *     value.
+   * @return Localised message with parameter placeholders replaced.
+   */
+  public static String getMessage(String key, Map<String, Object> namedArguments) {
+    try {
+      return MessageFormat.format(getText(key), namedArguments);
+    } catch (IllegalArgumentException iae) {
+      log.error(iae.getMessage(), iae);
+      return "";
+    }
+  }
+
+  /**
+   * Set all the I18N values on an <code>Action</code> by retrieving said values from the properties
+   * file.
    *
    * <p>Uses the <code>key</code> as the index for the properties file to set the <b>Action.NAME</b>
    * field of <b>action</b>.
    *
    * <p>The string used for the <b>NAME</b> is searched for an ampersand ("&amp;") to determine the
-   * mnemonic used by any menu item (no mnemonic is set if there is no ampersand). If there is one,
-   * the <b>Action.MNEMONIC_KEY</b> property is set.
+   * mnemonic used by any menu item (no mnemonic is set without an ampersand). Where it exists the
+   * <b>Action.MNEMONIC_KEY</b> property is set.
    *
    * <p>The <code>key</code> string has "<code>.accel</code>" appended to it and the properties file
-   * is searched again, this time to obtain a string representing the shortcut key. If there is one,
-   * the <b>Action.ACCELERATOR_KEY</b> property is set.
+   * is searched again, this time getting a string representing the shortcut key. Where found, the
+   * <b>Action.ACCELERATOR_KEY</b> property is set.
    *
    * <p>The <code>key</code> string has "<code>.description</code>" appended to it and the
-   * properties file is searched again, this time to obtain a string representing the status bar
-   * help message. If there is one, the <b>Action.SHORT_DESCRIPTION</b> property is set.
+   * properties file is searched again, this time to get a string representing the status bar help
+   * message. If found, the <b>Action.SHORT_DESCRIPTION</b> property is set.
    *
    * @param key String to use as an index into the <b>i18n.properties</b> file
    * @param action Action used to store the retrieved settings
@@ -226,7 +294,7 @@ public class I18N {
   public static List<String> getMatchingKeys(Pattern regex) {
     Enumeration<String> keys = BUNDLE.getKeys();
 
-    List<String> menuItemKeys = new LinkedList<String>();
+    List<String> menuItemKeys = new LinkedList<>();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();
       if (regex.matcher(key).find()) {
@@ -234,5 +302,15 @@ public class I18N {
       }
     }
     return menuItemKeys;
+  }
+
+  public static class MessageFactory extends AbstractMessageFactory {
+    protected MessageFactory(String i18nKey) {
+      super(i18nKey);
+    }
+
+    public static MessageFactory forKey(String i18nKey) {
+      return new MessageFactory(i18nKey);
+    }
   }
 }

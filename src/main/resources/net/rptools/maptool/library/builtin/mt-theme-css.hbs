@@ -1,6 +1,35 @@
-/* MapTool Theme CSS 0.1 */
+/* MapTool Theme CSS 0.2
+
+   =========================
+   Table of Contents
+   =========================
+   01. Theme Variables
+   02. Base Elements
+   03. Typography
+   04. Buttons
+   05. Form Controls
+   06. Form Validation
+   07. Scrollbars
+   08. Other Elements
+   09. Ids & Classes
+   ========================= */
+
+/* =========================
+   01. Theme Variables
+   ========================= */
 
 :root {
+
+  --mt-theme-name: {{preferences.themeName}};
+  --mt-theme-color-scheme: {{preferences.themeColorScheme}};
+
+  --mt-theme-font-size: {{fontSize}};
+  --mt-theme-font-family: {{fontFamily}};
+
+  --mt-theme-color-foreground: {{foregroundColor}};
+  --mt-theme-color-background: {{backgroundColor}};
+  --mt-theme-color-foreground-disabled: {{foregroundColorDisabled}};
+
   --mt-theme-color-actions-blue: {{themeColor.actionsBlue}};
   --mt-theme-color-actions-blue-dark: {{themeColor.actionsBlueDark}};
   --mt-theme-color-actions-green: {{themeColor.actionsGreen}};
@@ -24,55 +53,101 @@
   --mt-theme-color-objects-yellow: {{themeColor.objectsYellow}};
   --mt-theme-color-objects-yellow-dark: {{themeColor.objectsYellowDark}};
 
-  --mt-theme-font-size: {{fontSize}};
-  --mt-theme-font-family: {{fontFamily}};
-
-  --mt-theme-color-foreground: {{foregroundColor}};
-  --mt-theme-color-background: {{backgroundColor}};
-  --mt-theme-color-foreground-disabled: {{foregroundColorDisabled}};
-
   --mt-theme-color-button-start-background: {{button.startBackgroundColor}};
   --mt-theme-color-button-end-background: {{button.endBackgroundColor}};
   --mt-theme-color-button-foreground: {{button.foregroundColor}};
   --mt-theme-color-button-background-disabled: {{button.disabledBackgroundColor}};
   --mt-theme-color-button-foreground-disabled: {{button.disabledForegroundColor}};
   --mt-theme-color-button-pressed-background: {{button.pressedBackgroundColor}};
-  --mt-theme-color-button-background-hover: {{button.hoverBackgroundColor}};
   --mt-theme-color-button-disabled-border-size: {{button.disabledBorderSize}};
   --mt-theme-color-button-disabled-border-color: {{button.disabledBorderColor}};
+  --mt-theme-button-hover-background-color: {{button.hoverBackgroundColor}};
+  --mt-theme-button-hover-border-color: {{button.hoverBorderColor}};
+  --mt-theme-button-hover-foreground-color: {{button.hoverForegroundColor}};
+  --mt-theme-button-focused-background-color: {{button.focusedBackgroundColor}};
+  --mt-theme-button-focused-border-color: {{button.focusedBorderColor}};
+  --mt-theme-button-focused-foreground-color: {{button.focusedForegroundColor}};
+  --mt-theme-button-border-width: {{button.borderWidth}};
+  --mt-theme-button-shadow-width: {{button.shadowWidth}};
+  --mt-theme-button-shadow-color: {{button.shadowColor}};
+  --mt-theme-button-show-shadow: {{button.showShadow}};
+  --mt-theme-button-start-border-color: {{button.startBorderColor}};
+  --mt-theme-button-end-border-color: {{button.endBorderColor}};
 
   --mt-theme-color-text-input-foreground: {{textInput.foregroundColor}};
   --mt-theme-color-text-input-background: {{textInput.backgroundColor}};
   --mt-theme-color-text-input-disabled-border-size: {{textInput.disabledBorderSize}};
   --mt-theme-color-text-input-disabled-border-color: {{textInput.disabledBorderColor}};
+  --mt-theme-text-input-disabled-foreground-color: {{textInput.disabledForegroundColor}};
+  --mt-theme-text-input-disabled-background-color: {{textInput.disabledBackgroundColor}};
+  --mt-theme-text-input-placeholder-foreground-color: {{textInput.placeholderForegroundColor}};
 
   --mt-theme-h1-font-family: {{themeHeader.h1.fontFamily}};
   --mt-theme-h1-font-size: {{themeHeader.h1.fontSize}};
-
   --mt-theme-h2-font-family: {{themeHeader.h2.fontFamily}};
   --mt-theme-h2-font-size: {{themeHeader.h2.fontSize}};
-
   --mt-theme-h3-font-family: {{themeHeader.h3.fontFamily}};
   --mt-theme-h3-font-size: {{themeHeader.h3.fontSize}};
-
   --mt-theme-h4-font-family: {{themeHeader.h4.fontFamily}};
   --mt-theme-h4-font-size: {{themeHeader.h4.fontSize}};
-
   --mt-theme-h5-font-family: {{themeHeader.h5.fontFamily}};
   --mt-theme-h5-font-size: {{themeHeader.h5.fontSize}};
-
   --mt-theme-h6-font-family: {{themeHeader.h6.fontFamily}};
   --mt-theme-h6-font-size: {{themeHeader.h6.fontSize}};
 
   --mt-theme-panel-background: {{panelBackgroundColor}};
   --mt-theme-panel-foreground: {{panelForegroundColor}};
 
+  --mt-theme-check-box-filled: {{checkBox.styleFilled}};
+  --mt-theme-check-box-foreground-color: {{checkBox.foregroundColor}};
+  --mt-theme-check-box-background-color: {{checkBox.backgroundColor}};
+  --mt-theme-check-box-border-color: {{checkBox.borderColor}};
+  --mt-theme-check-box-disabled-foreground-color: {{checkBox.disabledForegroundColor}};
+  --mt-theme-check-box-disabled-background-color: {{checkBox.disabledBackgroundColor}};
+  --mt-theme-check-box-disabled-border-color: {{checkBox.disabledBorderColor}};
+  --mt-theme-check-box-border-focus-color: {{checkBox.focusedBorderColor}};
+  --mt-theme-check-box-background-hover-color: {{checkBox.hoverBackgroundColor}};
+  --mt-theme-check-box-border-hover-color: {{checkBox.hoverBorderColor}};
+  --mt-theme-check-box-selected-background-hover-color: {{checkBox.hoverSelectedBackgroundColor}};
+  --mt-theme-check-box-selected-background-color: {{checkBox.selectedBackgroundColor}};
+  --mt-theme-check-box-selected-border-color: {{checkBox.selectedBorderColor}};
+
+  --mt-theme-combo-box-background-color: {{comboBox.backgroundColor}};
+  --mt-theme-combo-box-foreground-color: {{comboBox.foregroundColor}};
+  --mt-theme-combo-box-button-arrow-color: {{comboBox.buttonArrowColor}};
+  --mt-theme-combo-box-button-background-color: {{comboBox.buttonBackgroundColor}};
+  --mt-theme-combo-box-button-disabled-arrow-color: {{comboBox.buttonDisabledArrowColor}};
+  --mt-theme-combo-box-button-hover-arrow-color: {{comboBox.buttonHoverArrowColor}};
+  --mt-theme-combo-box-button-pressed-arrow-color: {{comboBox.buttonPressedArrowColor}};
+  --mt-theme-combo-box-button-disabled-background-color: {{comboBox.disabledBackgroundColor}};
+  --mt-theme-combo-box-button-disabled-foreground-color: {{comboBox.disabledForegroundColor}};
+
+  --mt-theme-component-link-color: {{component.linkColor}};
+  --mt-theme-component-focused-border-color: {{component.focusedBorderColor}};
+  --mt-theme-component-error-border-color: {{component.errorBorderColor}};
+  --mt-theme-component-error-focused-border-color: {{component.errorFocusedBorderColor}};
+  --mt-theme-component-success-border-color: {{component.successBorderColor}};
+  --mt-theme-component-success-focused-border-color: {{component.successFocusedBorderColor}};
+  --mt-theme-component-warning-border-color: {{component.warningBorderColor}};
+  --mt-theme-component-warning-focused-border-color: {{component.warningFocusedBorderColor}};
+
+  --mt-theme-meter-progress-bar-background-color: {{meterProgressBar.backgroundColor}};
+  --mt-theme-meter-progress-bar-foreground-color: {{meterProgressBar.foregroundColor}};
+
   --mt-theme-progress-bar-arc: {{progressBar.arc}};
   --mt-theme-progress-bar-background-color: {{progressBar.backgroundColor}};
+  --mt-theme-progress-bar-foreground-color: {{progressBar.foregroundColor}};
   --mt-theme-progress-font-family: {{progressBar.fontFamily}};
   --mt-theme-progress-font-size: {{progressBar.fontSize}};
 
+  --mt-theme-scroll-bar-width: {{scrollBar.width}};
   --mt-theme-scroll-bar-background-color: {{scrollBar.backgroundColor}};
+  --mt-theme-scroll-bar-button-arrow-color: {{scrollBar.buttonArrowColor}};
+  --mt-theme-scroll-bar-foreground-color: {{scrollBar.foregroundColor}};
+  --mt-theme-scroll-bar-hover-button-background-color: {{scrollBar.hoverButtonBackgroundColor}};
+  --mt-theme-scroll-bar-hover-thumb-color: {{scrollBar.hoverThumbColor}};
+  --mt-theme-scroll-bar-hover-track-color: {{scrollBar.hoverTrackColor}};
+  --mt-theme-scroll-bar-pressed-thumb-color: {{scrollBar.pressedThumbColor}};
   --mt-theme-scroll-bar-show-buttons: {{scrollBar.showButtons}};
   --mt-theme-scroll-bar-thumb-highlight-color: {{scrollBar.thumbHighlightColor}};
   --mt-theme-scroll-bar-thumb-arc: {{scrollBar.thumbArc}};
@@ -80,18 +155,111 @@
   --mt-theme-scroll-bar-thumb-shadow-color: {{scrollBar.thumbShadowColor}};
   --mt-theme-scroll-bar-thumb-dark-shadow-color: {{scrollBar.thumbDarkShadowColor}};
   --mt-theme-scroll-bar-thumb-color: {{scrollBar.thumbColor}};
-  --mt-theme-scroll-bar-thumb-insets-left: {{scrollBar.thumbInsetsLeft}};
   --mt-theme-scroll-bar-thumb-insets-top: {{scrollBar.thumbInsetsTop}};
-  --mt-theme-scroll-bar-thumb-insets-right: {{scrollBar.thumbInsetsRight}};
+  --mt-theme-scroll-bar-thumb-insets-left: {{scrollBar.thumbInsetsLeft}};
   --mt-theme-scroll-bar-thumb-insets-bottom: {{scrollBar.thumbInsetsBottom}};
+  --mt-theme-scroll-bar-thumb-insets-right: {{scrollBar.thumbInsetsRight}};
+  --mt-theme-scroll-bar-track-color: {{scrollBar.trackColor}};
+  --mt-theme-scroll-bar-track-insets-top: {{scrollBar.trackInsetsTop}};
+  --mt-theme-scroll-bar-track-insets-left: {{scrollBar.trackInsetsLeft}};
+  --mt-theme-scroll-bar-track-insets-bottom: {{scrollBar.trackInsetsBottom}};
+  --mt-theme-scroll-bar-track-insets-right: {{scrollBar.trackInsetsRight}};
 
+  --mt-theme-slider-background-color: {{slider.backgroundColor}};
+  --mt-theme-slider-disabled-thumb-color: {{slider.disabledThumbColor}};
+  --mt-theme-slider-disabled-track-color: {{slider.disabledTrackColor}};
+  --mt-theme-slider-focus-color: {{slider.focusColor}};
+  --mt-theme-slider-thumb-color: {{slider.thumbColor}};
+  --mt-theme-slider-thumb-hover-color: {{slider.hoverThumbColor}};
+  --mt-theme-slider-thumb-pressed-color: {{slider.pressedThumbColor}};
+  --mt-theme-slider-track-color: {{slider.trackColor}};
+
+  --mt-theme-text-area-background-color: {{textArea.backgroundColor}};
+  --mt-theme-text-area-foreground-color: {{textArea.foregroundColor}};
+
+  --mt-prefs-map-label-npc-background-color: {{preferences.npcBackgroundColor}};
+  --mt-prefs-map-label-npc-foreground-color: {{preferences.npcForegroundColor}};
+  --mt-prefs-map-label-npc-border-color: {{preferences.npcBorderColor}};
+  --mt-prefs-map-label-pc-background-color: {{preferences.pcBackgroundColor}};
+  --mt-prefs-map-label-pc-foreground-color: {{preferences.pcForegroundColor}};
+  --mt-prefs-map-label-pc-border-color: {{preferences.pcBorderColor}};
+  --mt-prefs-map-label-non-visible-background-color: {{preferences.nonVisibleBackgroundColor}};
+  --mt-prefs-map-label-non-visible-foreground-color: {{preferences.nonVisibleForegroundColor}};
+  --mt-prefs-map-label-non-visible-border-color: {{preferences.nonVisibleBorderColor}};
+  --mt-prefs-map-label-drawing-background-color: {{preferences.drawingBackgroundColor}};
+  --mt-prefs-map-label-drawing-foreground-color: {{preferences.drawingForegroundColor}};
+  --mt-prefs-map-label-drawing-border-color: {{preferences.drawingBorderColor}};
+  --mt-prefs-map-label-template-background-color: {{preferences.templateBackgroundColor}};
+  --mt-prefs-map-label-template-foreground-color: {{preferences.templateForegroundColor}};
+  --mt-prefs-map-label-template-border-color: {{preferences.templateBorderColor}};
+  --mt-prefs-map-label-show-border: {{preferences.mapLabelShowBorder}};
+  --mt-prefs-map-label-font-size: {{preferences.mapLabelFontSize}};
+  --mt-prefs-map-label-border-width: {{preferences.mapLabelBorderWidth}};
+  --mt-prefs-map-label-border-arc: {{preferences.mapLabelBorderArc}};
+
+  --mt-prefs-facing-arrow-background-color: {{preferences.facingArrowBackgroundColor}};
+  --mt-prefs-facing-arrow-border-color: {{preferences.facingArrowBorderColor}};
+  --mt-prefs-chat-notification-foreground-color: {{preferences.chatNotificationForegroundColor}};
+  --mt-prefs-trusted-prefix-background-color: {{preferences.trustedPrefixBackgroundColor}};
+  --mt-prefs-trusted-prefix-foreground-color: {{preferences.trustedPrefixForegroundColor}};
+
+  /* Utility variables */
+  --mt-border-width: var(--mt-theme-button-border-width);
+  --mt-border-default: var(--mt-border-width) solid var(--mt-theme-color-button-disabled-border-color);
+  --mt-focus-outline: var(--mt-border-width) solid var(--mt-theme-component-focused-border-color);
+  --mt-map-label-border-radius: calc(var(--mt-prefs-map-label-border-arc)/2 * 1px); /* border-radius = 1/2 border arc */
+  --select-button-width: 2.2em;
 
   font-size: var(--mt-theme-font-size);
   font-family: var(--mt-theme-font-family);
 
+  /* Deprecations
+  ** keep for backwards compatibility in the absence of serving specific css versions
+  ** do not use going forward
+  ** repoint usage to superseding variables where applicable
+  */
+
+  /* Deprecated in 1.19 */
+  --mt-theme-color-button-background-hover: {{button.hoverBackgroundColor}}; /* superseded by --mt-theme-button-hover-background-color */
+
 }
 
-/* Headings. */
+/* =========================
+   02. Base Elements
+   ========================= */
+
+html {
+  overflow: hidden;  /* prevent scrollbars due to the ::-webkit-scrollbar viewport state limitation */
+  height: 100%;
+}
+
+body {
+  overflow: auto;    /* force scrollbars on the body element to workaround the ::-webkit-scrollbar viewport state limitation, user can override with `hidden` if scrolling handled elsewhere */
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  color: var(--mt-theme-panel-foreground);
+  background-color: var(--mt-theme-panel-background);
+  font-size: inherit;
+}
+
+p,
+table,
+input,
+label {
+  font-size: inherit;
+  vertical-align: middle;
+}
+
+a {
+  color: var(--mt-theme-component-link-color);
+}
+
+
+/* =========================
+   03. Typography
+   ========================= */
+
 h1 {
   font-family: var(--mt-theme-h1-font-family);
   font-size: var(--mt-theme-h1-font-size);
@@ -124,69 +292,687 @@ h6 {
 
 h1, h2, h3, h4, h5, h6 { margin-bottom: .5rem; }
 
-body {
-  color: var(--mt-theme-color-foreground);
-  background-color: var(--mt-theme-color-background);
-}
 
-p,
-table,
-input {
-  vertical-align: middle;
-  font-size: 1rem;
-}
 
-/* Button */
-button,
-input[type=submit],
-.mt-button {
+/* =========================
+   04. Buttons
+   ========================= */
+
+
+
+/* Buttons and Button-like */
+:is(
+  button,
+  input:is([type=button],[type=color],[type=image],[type=reset],[type=submit]),
+  .mt-button),
+  input[type=file]::file-selector-button {
   cursor: default;
   position: relative;
-  background: transparent;
+  background: linear-gradient(
+    to bottom,
+    var(--mt-theme-color-button-start-background),
+    var(--mt-theme-color-button-end-background)
+  ) padding-box,
+  linear-gradient(
+    to bottom,
+    var(--mt-theme-button-start-border-color),
+    var(--mt-theme-button-end-border-color)
+  ) border-box;
   color: var(--mt-theme-color-button-foreground);
   padding: .2em .5em;
   margin: 0;
   font-family: inherit;
   font-size: 1em;
   border-radius: .15em;
+  border: var(--mt-theme-button-border-width) solid transparent;  /* reserve the border space, but we actually use the background property to paint the border gradient */
+  box-shadow: {{#if button.showShadow}}0px var(--mt-theme-button-shadow-width) 0px var(--mt-theme-button-shadow-color);{{else}}none;{{/if}}
+}
+
+
+:is(
+  button,
+  input:is([type=button],[type=color],[type=image],[type=reset],[type=submit]),
+  .mt-button
+):enabled:hover,
+input[type=file]:enabled:hover::file-selector-button {
+  color: var(--mt-theme-button-hover-foreground-color);
+  background: var(--mt-theme-button-hover-background-color);
+  border-color: var(--mt-theme-button-hover-border-color);
+  box-shadow: {{#if button.showShadow}}0px var(--mt-theme-button-shadow-width) 0px var(--mt-theme-button-hover-border-color);{{else}}none;{{/if}}
+}
+
+:is(
+  button,
+  input:is([type=button],[type=color],[type=image],[type=reset],[type=submit]),
+  .mt-button
+):enabled:active,
+input[type=file]:enabled:active::file-selector-button {
+  color: var(--mt-theme-button-pressed-foreground-color);
+  background: var(--mt-theme-color-button-pressed-background);
+  border-color: var(--mt-theme-button-focused-border-color);
+  outline: var(--mt-theme-button-border-width) solid var(--mt-theme-button-focused-border-color);
+  box-shadow: {{#if button.showShadow}}0px var(--mt-theme-button-shadow-width) 0px var(--mt-theme-button-focused-border-color);{{else}}none;{{/if}}
+}
+
+:is(
+  button,
+  input:is([type=button],[type=color],[type=image],[type=reset],[type=submit]),
+  .mt-button
+):enabled:focus,
+input[type=file]:enabled:focus::file-selector-button {
+  color: var(--mt-theme-button-focused-foreground-color);
+  background: var(--mt-theme-button-focused-background-color);
+  border-color: var(--mt-theme-button-focused-border-color);
+  outline: var(--mt-theme-button-border-width) solid var(--mt-theme-button-focused-border-color);
+  box-shadow: {{#if button.showShadow}}0px var(--mt-theme-button-shadow-width) 0px var(--mt-theme-button-focused-border-color);{{else}}none;{{/if}}
+}
+
+:is(
+  button,
+  input:is([type=button],[type=color],[type=file],[type=image],[type=reset],[type=submit]),
+  .mt-button
+):disabled,
+input[type=file]:disabled::file-selector-button {
+  background-color: var(--mt-theme-color-button-background-disabled);
+  color: var(--mt-theme-color-button-foreground-disabled);
+  border: var(--mt-theme-color-button-disabled-border-size) solid var(--mt-theme-color-button-disabled-border-color);
+  box-shadow: {{#if button.showShadow}}0px var(--mt-theme-button-shadow-width) 0px var(--mt-theme-color-button-disabled-border-color);{{else}}none;{{/if}}
+}
+
+
+/* =========================
+   05. Form Controls
+   ========================= */
+
+/* Group of similar form control styles */
+:is(
+  input:is([type=date],[type=datetime-local],[type=email],[type=month],[type=number],[type=password],[type=search],[type=tel],[type=text],[type=time],[type=url],[type=week]),
+  select,
+  textarea
+) {
+  font-family: inherit;
+  font-size: 1em;
+  color: var(--mt-theme-color-text-input-foreground);
+  background-color: var(--mt-theme-color-text-input-background);
+  border: var(--mt-border-width) solid var(--mt-theme-color-button-disabled-border-color);
+  padding: .2em .5em;
+}
+
+:is(
+  input:is([type=date],[type=datetime-local],[type=email],[type=month],[type=number],[type=password],[type=search],[type=tel],[type=text],[type=time],[type=url],[type=week]),
+  select,
+  textarea
+):enabled:focus {
+  border: var(--mt-focus-outline);
+  outline: var(--mt-focus-outline);
+}
+
+is(
+input:is([type=date],[type=datetime-local],[type=email],[type=month],[type=number],[type=password],[type=search],[type=tel],[type=text],[type=time],[type=url],[type=week]),
+textarea
+)::placeholder {
+  color: var(--mt-theme-text-input-placeholder-foreground-color);
+}
+
+:is(
+input:is([type=date],[type=datetime-local],[type=email],[type=month],[type=number],[type=password],[type=search],[type=tel],[type=text],[type=time],[type=url],[type=week]),
+select,
+textarea
+):disabled {
+  color: var(--mt-theme-text-input-disabled-foreground-color);
+  background-color: var(--mt-theme-text-input-disabled-background-color);
+  border-color: var(--mt-theme-color-text-input-disabled-border-color);
+}
+
+:is(
+input:is([type=date],[type=datetime-local],[type=email],[type=month],[type=number],[type=password],[type=search],[type=tel],[type=text],[type=time],[type=url],[type=week]),
+select,
+textarea
+):disabled {
+  border-color: var(--mt-theme-color-button-disabled-border-color);
+}
+
+/* Input = Checkbox */
+input[type=checkbox] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.2em;
+  height: 1.2em;
+  color: var(--mt-theme-check-box-foreground-color);
+  background-color: var(--mt-theme-check-box-background-color);
+  border: var(--mt-border-width) solid var(--mt-theme-check-box-border-color);
+  border-radius: .15em;
+  box-sizing: border-box;
+
+  /* Center the checkmark */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+input[type="checkbox"]:enabled:hover {
+  background-color: var(--mt-theme-check-box-background-hover-color);
+  border-color: var(--mt-theme-check-box-border-hover-color);
+}
+
+input[type="checkbox"]:enabled:checked {
+  background-color: var(--mt-theme-check-box-selected-background-color);
+  border-color: var(--mt-theme-check-box-selected-border-color);
+}
+
+input[type="checkbox"]:enabled:checked:hover {
+  background-color: var(--mt-theme-check-box-selected-background-hover-color);
+  border-color: var(--mt-theme-check-box-border-hover-color);
+}
+
+input[type="checkbox"]:enabled:active,
+input[type="checkbox"]:enabled:active:checked,
+input[type="checkbox"]:enabled:focus,
+input[type="checkbox"]:enabled:focus:checked {
+  border-color: var(--mt-theme-check-box-border-focus-color);
+  outline: var(--mt-border-width) solid var(--mt-theme-check-box-border-focus-color);
+}
+
+
+/* Pure CSS checkmark */
+input[type="checkbox"]::after {
+  content: "";
+  width: 0.25em;
+  height: 0.65em;
+  border: solid var(--mt-theme-check-box-foreground-color);
+  border-width: 0 0.2em 0.2em 0;
+  transform: translate(0.05em, -0.05em) rotate(40deg);
+  transform-origin: center;
+  flex-shrink: 0;
+  display: none;
+}
+
+input[type="checkbox"]:checked::after {
+  display: block;
+}
+
+input[type="checkbox"]:disabled {
+  background-color: var(--mt-theme-check-box-disabled-background-color);
+  border-color: var(--mt-theme-check-box-disabled-border-color);
+}
+
+input[type="checkbox"]:disabled::after {
+  border-color: var(--mt-theme-check-box-disabled-foreground-color);
+}
+
+
+/* Input = File */
+input[type=file] {
+  font-family: inherit;
+  font-size: 1em;
+  color: var(--mt-theme-color-text-input-foreground);
+  background-color: transparent;
+  border: none;
+  padding: .2em .5em;
+}
+
+
+/* Input = Number */
+input[type="number"]::-webkit-inner-spin-button {
+  width: 1em;
+  height: 1em;
+  border-left: var(--mt-border-width) solid white;
+  margin-right: -0.2em;
+  background: linear-gradient(var(--mt-theme-color-button-foreground-disabled) 45%, transparent 45%, transparent 55%, var(--mt-theme-color-button-foreground-disabled) 55%);
+  clip-path: polygon(10% 50%, 10% 50%, 50% 100%, 90% 50%, 90% 50%, 50% 0%);
+}
+
+input[type="number"]:enabled:hover::-webkit-inner-spin-button {
+  background: linear-gradient(var(--mt-theme-slider-thumb-hover-color) 45%, transparent 45%, transparent 55%, var(--mt-theme-slider-thumb-hover-color) 55%);
+}
+
+input[type="number"]:enabled:active::-webkit-inner-spin-button {
+  background: linear-gradient(var(--mt-theme-slider-thumb-pressed-color) 45%, transparent 45%, transparent 55%, var(--mt-theme-slider-thumb-pressed-color) 55%);
+}
+
+/* Input = Radio */
+input[type="radio"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--mt-theme-check-box-background-color);
+  margin: 0 0.5em 0.5em 0;
+  font: inherit;
+  color: var(--mt-theme-check-box-foreground-color);
+  width: 1.3em;
+  height: 1.3em;
+  border: var(--mt-border-width) solid var(--mt-theme-check-box-border-color);
+  border-radius: 50%;
+  box-sizing: border-box;
+
+  /* Center the inner dot */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+input[type="radio"]:enabled:hover {
+  background-color: var(--mt-theme-check-box-background-hover-color);
+  border-color: var(--mt-theme-check-box-border-hover-color);
+}
+
+input[type="radio"]:enabled:checked {
+  background-color: var(--mt-theme-check-box-selected-background-color);
+  border-color: var(--mt-theme-check-box-selected-border-color);
+}
+
+input[type="radio"]:enabled:checked:hover {
+  background-color: var(--mt-theme-check-box-selected-background-hover-color);
+  border-color: var(--mt-theme-check-box-border-hover-color);
+}
+
+input[type="radio"]:enabled:active,
+input[type="radio"]:enabled:active:checked,
+input[type="radio"]:enabled:focus,
+input[type="radio"]:enabled:focus:checked {
+  border-color: var(--mt-theme-check-box-border-focus-color);
+  outline: var(--mt-border-width) solid var(--mt-theme-check-box-border-focus-color);
+}
+
+
+/* Pure CSS inner dot */
+input[type="radio"]::after {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 50%;
+  transform: scale(0);
+  transform-origin: center;
+  flex-shrink: 0;
+  background-color: var(--mt-theme-check-box-foreground-color);
+}
+
+input[type="radio"]:checked::after {
+  transform: scale(1);
+}
+
+input[type="radio"]:disabled {
+  background-color: var(--mt-theme-check-box-disabled-background-color);
+  border-color: var(--mt-theme-check-box-disabled-border-color);
+}
+
+input[type="radio"]:disabled::after {
+  border-color: var(--mt-theme-check-box-disabled-foreground-color);
+}
+
+
+/* Input = Range */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background-color: var(--mt-theme-slider-track-color);
+  border-radius: 0.15em;
+  border: none;
+  box-sizing: border-box; /* makes the slider thumb center vertically */
+  outline: none;
+  margin: 0;
+}
+
+input[type="range"]:enabled:focus,
+input[type="range"]:enabled:active {
+  border: none;
+  outline: var(--mt-border-width) solid var(--mt-theme-slider-focus-color);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background-color: var(--mt-theme-slider-thumb-color);
+  cursor: pointer;
+}
+
+input[type="range"]:enabled::-webkit-slider-thumb:hover {
+  background-color: var(--mt-theme-slider-thumb-hover-color);
+}
+
+input[type="range"]:enabled::-webkit-slider-thumb:active,
+input[type="range"]:enabled::-webkit-slider-thumb:focus {
+  transform: scale(1.15);
+  background-color: var(--mt-theme-slider-thumb-pressed-color);
+  outline: var(--mt-border-width) solid var(--mt-theme-slider-thumb-pressed-color);
+}
+
+
+input[type="range"]:disabled {
+  background-color: var(--mt-theme-slider-disabled-track-color);
+}
+
+input[type="range"]:disabled::-webkit-slider-thumb {
+  background-color: var(--mt-theme-slider-disabled-thumb-color);
+}
+
+
+/* Input = Search */
+input[type=search] {
+  -webkit-appearance: textfield;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 1em;
+  width: 1em;
+  background-color: var(--mt-theme-component-warning-border-color);
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+  cursor: pointer;
+}
+
+input[type="search"]:enabled:hover::-webkit-search-cancel-button {
+  background-color: var(--mt-theme-component-warning-focused-border-color);
+}
+
+input[type="search"]:disabled::-webkit-search-cancel-button {
+  background-color: var(--mt-theme-text-input-disabled-foreground-color);
+}
+
+/* Select */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: .2em calc(var(--select-button-width) + .5em) .2em .5em; /* make space for the arrow using right padding - this does not work however as not configurable for select */
+  background-image:
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='{{comboBox.buttonArrowColor}}' stroke='none'%3E %3Cpolygon points='2 6 12.5 18 22 6'/%3E%3C/svg%3E"), /* down arrow */
+    linear-gradient(to right, var(--mt-theme-combo-box-background-color) calc(100% - var(--select-button-width)), var(--mt-theme-combo-box-button-background-color) calc(100% - var(--select-button-width)));
+  background-origin: padding-box; /* target the padding area for positioning */
+  background-position: calc(100% - 0.7em) center, 0 0; /* position the arrow exactly relative to the inner content edge */
+  background-repeat: no-repeat;
+  background-size: 0.9em, 100% 100%;
+  box-sizing: border-box;
+  color: var(--mt-theme-combo-box-foreground-color);
+  width: 100%; /* due to limited styling on select (e.g. does not respond to padding), we are forced to set the width instead hoping the arrow does not overlap the option text */
+  outline: none;
+}
+
+select:hover {
+  background-image:
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='{{comboBox.buttonHoverArrowColor}}' stroke='none'%3E %3Cpolygon points='2 6 12.5 18 22 6'/%3E%3C/svg%3E"), /* down arrow */
+    linear-gradient(to right, var(--mt-theme-combo-box-background-color) calc(100% - var(--select-button-width)), var(--mt-theme-combo-box-button-background-color) calc(100% - var(--select-button-width)));
+}
+
+select:active {
+  background-image:
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='{{comboBox.buttonPressedArrowColor}}' stroke='none'%3E %3Cpolygon points='2 6 12.5 18 22 6'/%3E%3C/svg%3E"), /* down arrow */
+    linear-gradient(to right, var(--mt-theme-combo-box-background-color) calc(100% - var(--select-button-width)), var(--mt-theme-combo-box-button-background-color) calc(100% - var(--select-button-width)));
+}
+
+select[disabled] {
+  background-image:
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='{{comboBox.buttonDisabledArrowColor}}' stroke='none'%3E %3Cpolygon points='2 6 12.5 18 22 6'/%3E%3C/svg%3E"), /* down arrow */
+    linear-gradient(to right, var(--mt-theme-combo-box-disabled-background-color) calc(100% - var(--select-button-width)), var(--mt-theme-combo-box-button-disabled-background-color) calc(100% - var(--select-button-width)));
+  color: var(--mt-theme-combo-box-button-disabled-foreground-color);
+}
+
+/* Text Area */
+textarea:focus::-webkit-resizer {
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent var(--mt-theme-component-focused-border-color) var(--mt-theme-component-focused-border-color) transparent;
+  cursor: pointer;
+}
+
+textarea:disabled {
+  resize: none;
+}
+
+/* =========================
+   06. Form Validation
+   ========================= */
+
+:is(input, select, textarea):required:user-invalid {
+  border: var(--mt-border-width) solid var(--mt-theme-component-error-border-color);
+}
+
+:is(input, select, textarea):required:user-invalid:focus-visible {
+  outline: var(--mt-border-width) solid var(--mt-theme-component-error-focused-border-color);
+}
+
+:is(input, select, textarea):required:user-valid {
+  border: var(--mt-border-width) solid var(--mt-theme-component-success-border-color);
+}
+
+:is(input, select, textarea):required:user-valid:focus-visible {
+  outline: var(--mt-border-width) solid var(--mt-theme-component-success-focused-border-color);
+}
+
+
+/* =========================
+   07. Scrollbars
+   ========================= */
+
+/* NOTE:
+  JavaFX WebView does not consistently apply scrollbar hover/active states to viewport scrollbars.
+  Element scrollbars (body, textarea, div, etc.) behave correctly.
+*/
+
+::-webkit-scrollbar {
+  background-color: var(--mt-theme-scroll-bar-background-color);
+}
+
+::-webkit-scrollbar:vertical {
+  width: var(--mt-theme-scroll-bar-width);
+}
+
+::-webkit-scrollbar:horizontal {
+  height: var(--mt-theme-scroll-bar-width);  /* intentionally using the scroll bar width for the height */
+}
+
+::-webkit-scrollbar:hover {
+  {{! different themes respond to track hovers differently... if the track has insets we will not set the scrollbar background on hover}}
+  {{#if scrollBar.hasTrackInsets}}{{else}}background-color: var(--mt-theme-scroll-bar-hover-track-color);{{/if}}
+}
+
+::-webkit-scrollbar-button {
+  display: {{#if scrollBar.showButtons}}inline;{{else}}none;{{/if}}  /* n.b. `block` will show both inc/decr buttons at each button location */
+  background-repeat: no-repeat;
+  background-size: 90%;
+  background-position: center center;
+  width: var(--mt-theme-scroll-bar-width);
+  height: var(--mt-theme-scroll-bar-width);
+}
+
+::-webkit-scrollbar-button:hover {
+  background-color: var(--mt-theme-scroll-bar-hover-button-background-color);
+}
+
+::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='{{scrollBar.buttonArrowColor}}' stroke='none'%3E %3Cpolygon points='2 18 12.5 6 22 18'/%3E%3C/svg%3E"); /* up arrow */
+}
+
+::-webkit-scrollbar-button:vertical:increment {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='{{scrollBar.buttonArrowColor}}' stroke='none'%3E %3Cpolygon points='2 6 12.5 18 22 6'/%3E%3C/svg%3E"); /* down arrow */
+}
+
+::-webkit-scrollbar-button:horizontal:decrement {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='{{scrollBar.buttonArrowColor}}' stroke='none'%3E %3Cpolygon points='18 2 6 12.5 18 22'/%3E%3C/svg%3E"); /* left arrow */
+}
+
+::-webkit-scrollbar-button:horizontal:increment {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='{{scrollBar.buttonArrowColor}}' stroke='none'%3E %3Cpolygon points='6 2 18 12.5 6 22'/%3E%3C/svg%3E"); /* right arrow */
+}
+
+::-webkit-scrollbar-corner {
+  background-color: var(--mt-theme-scroll-bar-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--mt-theme-scroll-bar-thumb-color);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: calc(var(--mt-theme-scroll-bar-thumb-arc)/2 * 1px);
+  background-clip: padding-box;  /* insets workaround given that ::-webkit-scrollbar-thumb does not support padding */
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  border-width:
+    calc(var(--mt-theme-scroll-bar-thumb-insets-top) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-right) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-bottom) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-left) * 1px);
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  /* swap the variable order to match the horizontal axis layout */
+  border-width:
+    calc(var(--mt-theme-scroll-bar-thumb-insets-left) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-top) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-right) * 1px)
+    calc(var(--mt-theme-scroll-bar-thumb-insets-bottom) * 1px);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--mt-theme-scroll-bar-hover-thumb-color);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--mt-theme-scroll-bar-pressed-thumb-color);
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--mt-theme-scroll-bar-track-color);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: calc(var(--mt-theme-scroll-bar-track-arc)/2 * 1px); /* border-radius = 1/2 border arc */
+  background-clip: padding-box;  /* insets workaround given that ::-webkit-scrollbar-track does not support padding */
+}
+
+::-webkit-scrollbar-track:vertical {
+  border-width:
+    calc(var(--mt-theme-scroll-bar-track-insets-top) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-right) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-bottom) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-left) * 1px);
+}
+
+::-webkit-scrollbar-track:horizontal {
+  /* swap the variable order to match the horizontal axis layout */
+  border-width:
+    calc(var(--mt-theme-scroll-bar-track-insets-left) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-top) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-right) * 1px)
+    calc(var(--mt-theme-scroll-bar-track-insets-bottom) * 1px);
+}
+
+::-webkit-scrollbar-track:hover {
+  background-color: var(--mt-theme-scroll-bar-hover-track-color);
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+/* =========================
+   08. Other Elements
+   ========================= */
+
+/* Fieldset */
+fieldset {
+  font-size: 1em;
+  padding: 0.5em;
+  border: var(--mt-border-default);
+  border-radius: 0.15em;
+  margin: 0.5em;
+}
+
+fieldset > legend {
+  font-family: inherit;
+  color: var(--mt-theme-component-link-color);
+}
+
+/* Horizontal Rule */
+hr {
+  border: none;
+  height: 1px;
+  background: var(--mt-theme-color-button-disabled-border-color);
+  margin: 1rem 0;
+}
+
+/* Meter */
+meter {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+meter::-webkit-meter-bar {
+  background: var(--mt-theme-meter-progress-bar-background-color);
   border: none;
 }
 
-button::after,
-.mt-button::after {
-  position: absolute;
-  display: block;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  padding: 1px;
-  content: "";
-  border-radius: .15em;
-  background: linear-gradient(
-    var(--mt-theme-color-button-start-background),
-    var(--mt-theme-color-button-end-background)
-  );
-  z-index: -1;
+meter::-webkit-meter-optimum-value,
+meter::-webkit-meter-suboptimum-value,
+meter::-webkit-meter-even-less-good-value {
+  background: var(--mt-theme-meter-progress-bar-foreground-color);
 }
 
 
-button:active::after,
-input[type=submit]:active {
-  background:	var(--mt-theme-color-button-pressed-background);
+/* Progress Bar */
+progress {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+progress::-webkit-progress-bar {
+  background-color: var(--mt-theme-progress-bar-background-color);
+  border-radius: calc(var(--mt-theme-progress-bar-arc) * 1px); /* border-radius = 1/2 border arc */
+}
+
+progress::-webkit-progress-value {
+  background-color: var(--mt-theme-progress-bar-foreground-color);
 }
 
 
-button[disabled],
-input[type=submit][disabled] {
-  background: var(--mt-theme-color-button-background-disabled);
-  color: var(--mt-theme-color-button-foreground-disabled);
-  border: var(--mt-theme-color-button-disabled-border-size) solid var(--mt-theme-color-button-disabled-border-color);
+/* =========================
+   09. Ids & Classes
+   ========================= */
+
+.mt-map-label {
+  display: inline-block;
+  border-width: {{#if preferences.mapLabelShowBorder}}var(--mt-prefs-map-label-border-width){{else}}0{{/if}};
+  border-style: solid;
+  border-color: transparent;
+  border-radius: var(--mt-map-label-border-radius);
+  font-size: var(--mt-prefs-map-label-font-size);
+  padding: 4px;
+  margin: 1px;
+  text-align: center;
 }
 
-/* Text input */
-input[type=text] {
-  color: var(--mt-theme-color-text-input-foreground);
-  background-color: var(--mt-theme-color-text-input-background);
-  border: var(--mt-theme-color-text-input-disabled-border-size) solid var(--mt-theme-color-text-input-disabled-border-color);
+.mt-map-label-pc {
+  background: var(--mt-prefs-map-label-pc-background-color) !important;
+  border-color: var(--mt-prefs-map-label-pc-border-color) !important;
+  color: var(--mt-prefs-map-label-pc-foreground-color) !important;
+}
+
+.mt-map-label-npc {
+  background: var(--mt-prefs-map-label-npc-background-color) !important;
+  border-color: var(--mt-prefs-map-label-npc-border-color) !important;
+  color: var(--mt-prefs-map-label-npc-foreground-color) !important;
+}
+
+.mt-map-label-non-visible {
+  background: var(--mt-prefs-map-label-non-visible-background-color) !important;
+  border-color: var(--mt-prefs-map-label-non-visible-border-color) !important;
+  color: var(--mt-prefs-map-label-non-visible-foreground-color) !important;
+}
+
+.mt-map-label-drawing {
+  background: var(--mt-prefs-map-label-drawing-background-color) !important;
+  border-color: var(--mt-prefs-map-label-drawing-border-color) !important;
+  color: var(--mt-prefs-map-label-drawing-foreground-color) !important;
+}
+
+.mt-map-label-template {
+  background: var(--mt-prefs-map-label-template-background-color) !important;
+  border-color: var(--mt-prefs-map-label-template-border-color) !important;
+  color: var(--mt-prefs-map-label-template-foreground-color) !important;
 }

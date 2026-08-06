@@ -199,9 +199,8 @@ public class BoardTool extends DefaultTool {
   private void copyControlPanelToBoard() {
     boardPosition.x = (int) boardPositionXSpinner.getModel().getValue();
     boardPosition.y = (int) boardPositionYSpinner.getModel().getValue();
-    zone.setImageScaleX((float) boardScale.getX());
-    zone.setImageScaleY((float) boardScale.getY());
-    zone.setBoard(boardPosition);
+    zone.setBoard(
+        zone.getMapAssetId(), boardPosition, (float) boardScale.getX(), (float) boardScale.getY());
   }
 
   @Override
@@ -260,7 +259,13 @@ public class BoardTool extends DefaultTool {
   protected void detachFrom(ZoneRenderer renderer) {
     MapTool.getFrame().removeControlPanel();
     MapTool.serverCommand()
-        .setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
+        .setBoard(
+            zone.getId(),
+            zone.getMapAssetId(),
+            zone.getBoardX(),
+            zone.getBoardY(),
+            zone.getImageScaleX(),
+            zone.getImageScaleY());
     AppState.setShowGrid(oldShowGrid);
     super.detachFrom(renderer);
   }
@@ -271,7 +276,8 @@ public class BoardTool extends DefaultTool {
   @Override
   public void mousePressed(java.awt.event.MouseEvent e) {
     if (SwingUtilities.isLeftMouseButton(e)) {
-      ZonePoint zp = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+      ZonePoint zp =
+          new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
       Grid grid = renderer.getZone().getGrid();
       dragStart = new Point(zp.x - grid.getOffsetX(), zp.y - grid.getOffsetY());
       boardStart = new Point(boardPosition);
@@ -286,7 +292,8 @@ public class BoardTool extends DefaultTool {
   @Override
   public void mouseDragged(java.awt.event.MouseEvent e) {
     if (SwingUtilities.isLeftMouseButton(e)) {
-      ZonePoint zp = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+      ZonePoint zp =
+          new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
 
       dragOffset.width = zp.x - dragStart.x;
       dragOffset.height = zp.y - dragStart.y;
@@ -295,7 +302,7 @@ public class BoardTool extends DefaultTool {
       boardPosition.y = boardStart.y + dragOffset.height;
       snapBoard();
       updateGUI();
-      zone.setBoard(boardPosition);
+      zone.setBoardPosition(boardPosition);
     } else {
       super.mouseDragged(e);
     }
@@ -307,7 +314,7 @@ public class BoardTool extends DefaultTool {
     Right,
     Up,
     Down
-  };
+  }
 
   /** Constructs actions to attach to key-presses. */
   @SuppressWarnings("serial")
@@ -334,7 +341,7 @@ public class BoardTool extends DefaultTool {
           break;
       }
       updateGUI();
-      zone.setBoard(boardPosition);
+      zone.setBoardPosition(boardPosition);
     }
   }
 
@@ -372,7 +379,7 @@ public class BoardTool extends DefaultTool {
       setSnap(1, 1);
     }
     updateGUI();
-    zone.setBoard(boardPosition);
+    zone.setBoardPosition(boardPosition);
   }
 
   private class spinnerListener implements ChangeListener {

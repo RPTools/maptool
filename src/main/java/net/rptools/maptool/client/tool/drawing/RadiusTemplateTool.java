@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
@@ -30,7 +29,6 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.RadiusTemplate;
 
@@ -126,15 +124,21 @@ public class RadiusTemplateTool extends AbstractTemplateTool implements MouseMot
    * @return The cell at the mouse point in screen coordinates.
    */
   protected ZonePoint getCellAtMouse(MouseEvent e) {
+    var zoneScale = renderer.getViewModel().getZoneScale();
+
     // Find the cell that the mouse is in.
-    ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+    ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(zoneScale);
     CellPoint cp = renderer.getZone().getGrid().convert(mouse);
     ZonePoint working = renderer.getZone().getGrid().convert(cp);
 
     // If the mouse is over half way to the next vertex, move it there (both X & Y)
-    int grid = (int) (renderer.getZone().getGrid().getSize() * renderer.getScale());
-    if (mouse.x - working.x >= grid / 2) working.x += renderer.getZone().getGrid().getSize();
-    if (mouse.y - working.y >= grid / 2) working.y += renderer.getZone().getGrid().getSize();
+    int grid = (int) (renderer.getZone().getGrid().getSize() * zoneScale.getScale());
+    if (mouse.x - working.x >= grid / 2) {
+      working.x += renderer.getZone().getGrid().getSize();
+    }
+    if (mouse.y - working.y >= grid / 2) {
+      working.y += renderer.getZone().getGrid().getSize();
+    }
     return working;
   }
 
@@ -169,24 +173,6 @@ public class RadiusTemplateTool extends AbstractTemplateTool implements MouseMot
   }
 
   /**
-   * Get the pen set up to paint the overlay.
-   *
-   * @return The pen used to paint the overlay.
-   */
-  protected Pen getPenForOverlay() {
-    // Get the pen and modify to only show a cursor and the boundary
-    Pen pen = getPen(); // new copy of pen, OK to modify
-    pen.setBackgroundMode(Pen.MODE_SOLID);
-    pen.setForegroundMode(Pen.MODE_SOLID);
-    pen.setThickness(3);
-    if (pen.isEraser()) {
-      pen.setEraser(false);
-      pen.setPaint(new DrawableColorPaint(Color.WHITE));
-    } // endif
-    return pen;
-  }
-
-  /**
    * Paint the radius value in feet.
    *
    * @param g Where to paint.
@@ -194,7 +180,7 @@ public class RadiusTemplateTool extends AbstractTemplateTool implements MouseMot
    */
   protected void paintRadius(Graphics2D g, ZonePoint p) {
     if (template.getRadius() > 0 && anchorSet) {
-      ScreenPoint centerText = ScreenPoint.fromZonePoint(renderer, p);
+      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(p.x, p.y);
       centerText.translate(CURSOR_WIDTH, -CURSOR_WIDTH);
       ToolHelper.drawMeasurement(
           g,
@@ -333,19 +319,6 @@ public class RadiusTemplateTool extends AbstractTemplateTool implements MouseMot
       return;
     }
     resetTool(null);
-  }
-
-  /**
-   * It is OK to modify the pen returned by this method
-   *
-   * @see AbstractTemplateTool#getPen()
-   */
-  @Override
-  protected Pen getPen() {
-    // Just paint the foreground
-    Pen pen = super.getPen();
-    pen.setBackgroundMode(Pen.MODE_SOLID);
-    return pen;
   }
 
   /**
