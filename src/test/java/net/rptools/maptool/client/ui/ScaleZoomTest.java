@@ -26,7 +26,10 @@ import org.junit.jupiter.api.Test;
  * <p>The class is mostly regression tests. Magic numbers in this class were determined before fine
  * mouse-wheel zooming was implemented. That is: they were not chosen so they work with the fine
  * wheel changes, they were picked to check that the fine-wheel changes don't disturb existing
- * behaviour.
+ * behaviour.</p>
+ *
+ * <p>update: The addition of fine zooming changed some of the magic numbers after implementation of fine zoom, as
+ * a scale of 10 is now rounded to a closer zoom level. This is expected.</p>
  *
  * <p>The publicly visible parts of scale zooming are:
  *

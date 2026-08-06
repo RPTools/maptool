@@ -225,6 +225,14 @@ public class Scale implements Serializable {
     return withFineZoomLevel(fineZoomLevel - FINE_ZOOM_MULTIPLIER, x, y);
   }
 
+  public Scale zoomedInFine(int x, int y) {
+    return withFineZoomLevel(fineZoomLevel + 1, x, y);
+  }
+
+  public Scale zoomedOutFine(int x, int y) {
+    return withFineZoomLevel(fineZoomLevel - 1, x, y);
+  }
+
   public Point2D toWorldSpace(ScreenPoint screenPoint) {
     return new Point2D.Double((screenPoint.x - offsetX) / scale, (screenPoint.y - offsetY) / scale);
   }
