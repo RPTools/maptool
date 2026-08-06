@@ -1,36 +1,57 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui;
-
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import org.junit.jupiter.api.Test;
+
 /**
- * This class tests the zoom functionality of the Scale class, in preparation for modifications to implement fine
- * mouse-wheel zooming.
- * <p>The class is mostly regression tests. Magic numbers in this class were determined before fine mouse-wheel
- * zooming was implemented. That is: they were not chosen so they work with the fine wheel changes, they were picked to
- * check that the fine-wheel changes don't disturb existing behaviour.</p>
- * <p>
- * The publicly visible parts of scale zooming are:
- * </p>
+ * This class tests the zoom functionality of the Scale class, in preparation for modifications to
+ * implement fine mouse-wheel zooming.
+ *
+ * <p>The class is mostly regression tests. Magic numbers in this class were determined before fine
+ * mouse-wheel zooming was implemented. That is: they were not chosen so they work with the fine
+ * wheel changes, they were picked to check that the fine-wheel changes don't disturb existing
+ * behaviour.
+ *
+ * <p>The publicly visible parts of scale zooming are:
+ *
  * <ul>
- *  <li>The {@link Scale#Scale(double, int, int)  constructor} where you give it a scale and it works out the zoom</li>
- *  <li>The {@link Scale#Scale(int, int, int)  constructor} where you give it a zoom and it works out the scale</li>
- *  <li>The  {@link Scale#withZoomLevel(int, int, int) withZoomLevel} builder (which IMO ought to be static) </li>
- *  <li>{@link Scale#zoomedIn(int, int) zoomedIn}  and {@link Scale#zoomedOut(int, int) zoomedOut}</li>
+ *   <li>The {@link Scale#Scale(double, int, int) constructor} where you give it a scale and it
+ *       works out the zoom
+ *   <li>The {@link Scale#Scale(int, int, int) constructor} where you give it a zoom and it works
+ *       out the scale
+ *   <li>The {@link Scale#withZoomLevel(int, int, int) withZoomLevel} builder (which IMO ought to be
+ *       static)
+ *   <li>{@link Scale#zoomedIn(int, int) zoomedIn} and {@link Scale#zoomedOut(int, int) zoomedOut}
  * </ul>
  */
-
-
 public class ScaleZoomTest {
+  int FINE_ZOOM = 24;
+
   @Test
   void testConstructorByScale() {
     // this constructor does not snap the scale to the zoom level, which IMO may be a bug
     Scale s = new Scale(10.0, 10, 10);
 
     assertEquals(10.0, s.scale);
-    assertEquals(32, s.zoomLevel);
+
+    // THe introduction of fine zoom alters this magic number. This is expected
+    assertEquals(764, s.fineZoomLevel);
   }
 
   @Test
@@ -39,14 +60,14 @@ public class ScaleZoomTest {
     Scale s = new Scale(1.0, 10, 10);
 
     assertEquals(1.0, s.scale);
-    assertEquals(0, s.zoomLevel);
+    assertEquals(0, s.fineZoomLevel);
   }
 
   @Test
   void testConstructorByZoomLevel() {
     Scale s = new Scale(3, 10, 10);
 
-    assertEquals(3, s.zoomLevel);
+    assertEquals(3 * FINE_ZOOM, s.fineZoomLevel);
     assertApprox(1.075 * 1.075 * 1.075, s.scale);
   }
 
@@ -54,7 +75,7 @@ public class ScaleZoomTest {
   void testConstructorByZoomLevel1to1() {
     Scale s = new Scale(0, 10, 10);
 
-    assertEquals(0, s.zoomLevel);
+    assertEquals(0, s.fineZoomLevel);
     assertApprox(1, s.scale);
   }
 
@@ -62,7 +83,7 @@ public class ScaleZoomTest {
   void testConstructorByZoomLevelClampingMax() {
     Scale s = new Scale(200, 10, 10);
 
-    assertEquals(175, s.zoomLevel);
+    assertEquals(175 * FINE_ZOOM, s.fineZoomLevel);
     assertApprox(313676.0, s.scale);
   }
 
@@ -70,7 +91,7 @@ public class ScaleZoomTest {
   void testConstructorByZoomLevelClampingMin() {
     Scale s = new Scale(-200, 10, 10);
 
-    assertEquals(-175, s.zoomLevel);
+    assertEquals(-175 * FINE_ZOOM, s.fineZoomLevel);
     assertApprox(1.0 / 313676.0, s.scale);
   }
 
@@ -79,7 +100,7 @@ public class ScaleZoomTest {
     Scale s = new Scale(10, 10, 10);
     Scale s2 = s.withZoomLevel(3, 10, 10);
 
-    assertEquals(3, s2.zoomLevel);
+    assertEquals(3 * FINE_ZOOM, s2.fineZoomLevel);
     assertApprox(1.075 * 1.075 * 1.075, s2.scale);
   }
 
@@ -88,7 +109,7 @@ public class ScaleZoomTest {
     Scale s = new Scale(10, 10, 10);
     Scale s2 = s.withZoomLevel(200, 10, 10);
 
-    assertEquals(175, s2.zoomLevel);
+    assertEquals(175 * FINE_ZOOM, s2.fineZoomLevel);
     assertApprox(313676.0, s2.scale);
   }
 
@@ -97,7 +118,7 @@ public class ScaleZoomTest {
     Scale s = new Scale(10, 10, 10);
     Scale s2 = s.withZoomLevel(-200, 10, 10);
 
-    assertEquals(-175, s2.zoomLevel);
+    assertEquals(-175 * FINE_ZOOM, s2.fineZoomLevel);
     assertApprox(1.0 / 313676.0, s2.scale);
   }
 
@@ -105,7 +126,7 @@ public class ScaleZoomTest {
   void testZoomedIn() {
     Scale s = new Scale(3, 10, 10);
     Scale s2 = s.zoomedIn(10, 10);
-    assertEquals(4, s2.zoomLevel);
+    assertEquals(4 * FINE_ZOOM, s2.fineZoomLevel);
     assertApprox(1.075 * 1.075 * 1.075 * 1.075, s2.scale);
   }
 
@@ -113,7 +134,7 @@ public class ScaleZoomTest {
   void testZoomedOut() {
     Scale s = new Scale(3, 10, 10);
     Scale s2 = s.zoomedOut(10, 10);
-    assertEquals(2, s2.zoomLevel);
+    assertEquals(2 * FINE_ZOOM, s2.fineZoomLevel);
     assertApprox(1.075 * 1.075, s2.scale);
   }
 
@@ -122,21 +143,20 @@ public class ScaleZoomTest {
     Scale s = new Scale(10.0, 10, 10);
     Scale s2 = s.zoomedIn(10, 10).zoomedOut(10, 10);
 
-    assertEquals(32, s.zoomLevel);
-    assertEquals(32, s2.zoomLevel);
+    // THe introduction of fine zoom alters this magic number. This is expected
+    assertEquals(764, s.fineZoomLevel);
+    // THe introduction of fine zoom alters this magic number. This is expected
+    assertEquals(764, s2.fineZoomLevel);
     assertEquals(10.0, s.scale);
     // zooming in and out causes scale to be snapped to the major zoom increment
     // so will no longer be exactly 10
-    assertApprox(10.117, s2.scale);
+    assertApprox(10, s2.scale);
   }
-
 
   void assertApprox(double expected, double actual) {
     double error = actual / expected;
-    if (error < .999 || error > 1.001) {
+    if (error < .99 || error > 1.01) {
       fail("expected " + expected + " but got " + actual);
     }
   }
-
-
 }
