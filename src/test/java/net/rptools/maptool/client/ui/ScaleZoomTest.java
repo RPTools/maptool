@@ -26,10 +26,12 @@ import org.junit.jupiter.api.Test;
  * <p>The class is mostly regression tests. Magic numbers in this class were determined before fine
  * mouse-wheel zooming was implemented. That is: they were not chosen so they work with the fine
  * wheel changes, they were picked to check that the fine-wheel changes don't disturb existing
- * behaviour.</p>
+ * behaviour.
  *
- * <p>update: The addition of fine zooming changed some of the magic numbers after implementation of fine zoom, as
- * a scale of 10 is now rounded to a closer zoom level. This is expected.</p>
+ * <p>update: The addition of fine zooming changed some of the magic numbers after implementation of
+ * fine zoom, as a scale of 10 is now rounded to a closer zoom level. This is expected.
+ *
+ * <p>update: as above, but now the zoom can be ultrafine
  *
  * <p>The publicly visible parts of scale zooming are:
  *
@@ -44,7 +46,7 @@ import org.junit.jupiter.api.Test;
  * </ul>
  */
 public class ScaleZoomTest {
-  int FINE_ZOOM = 24;
+  int ULTRAFINE_ZOOM = 24 * 24;
 
   @Test
   void testConstructorByScale() {
@@ -54,7 +56,7 @@ public class ScaleZoomTest {
     assertEquals(10.0, s.scale);
 
     // THe introduction of fine zoom alters this magic number. This is expected
-    assertEquals(764, s.fineZoomLevel);
+    assertEquals(18339, s.fineZoomLevel);
   }
 
   @Test
@@ -70,7 +72,7 @@ public class ScaleZoomTest {
   void testConstructorByZoomLevel() {
     Scale s = new Scale(3, 10, 10);
 
-    assertEquals(3 * FINE_ZOOM, s.fineZoomLevel);
+    assertEquals(3 * ULTRAFINE_ZOOM, s.fineZoomLevel);
     assertApprox(1.075 * 1.075 * 1.075, s.scale);
   }
 
@@ -86,7 +88,7 @@ public class ScaleZoomTest {
   void testConstructorByZoomLevelClampingMax() {
     Scale s = new Scale(200, 10, 10);
 
-    assertEquals(175 * FINE_ZOOM, s.fineZoomLevel);
+    assertEquals(175 * ULTRAFINE_ZOOM, s.fineZoomLevel);
     assertApprox(313676.0, s.scale);
   }
 
@@ -94,7 +96,7 @@ public class ScaleZoomTest {
   void testConstructorByZoomLevelClampingMin() {
     Scale s = new Scale(-200, 10, 10);
 
-    assertEquals(-175 * FINE_ZOOM, s.fineZoomLevel);
+    assertEquals(-175 * ULTRAFINE_ZOOM, s.fineZoomLevel);
     assertApprox(1.0 / 313676.0, s.scale);
   }
 
@@ -103,7 +105,7 @@ public class ScaleZoomTest {
     Scale s = new Scale(10, 10, 10);
     Scale s2 = s.withZoomLevel(3, 10, 10);
 
-    assertEquals(3 * FINE_ZOOM, s2.fineZoomLevel);
+    assertEquals(3 * ULTRAFINE_ZOOM, s2.fineZoomLevel);
     assertApprox(1.075 * 1.075 * 1.075, s2.scale);
   }
 
@@ -112,7 +114,7 @@ public class ScaleZoomTest {
     Scale s = new Scale(10, 10, 10);
     Scale s2 = s.withZoomLevel(200, 10, 10);
 
-    assertEquals(175 * FINE_ZOOM, s2.fineZoomLevel);
+    assertEquals(175 * ULTRAFINE_ZOOM, s2.fineZoomLevel);
     assertApprox(313676.0, s2.scale);
   }
 
@@ -121,7 +123,7 @@ public class ScaleZoomTest {
     Scale s = new Scale(10, 10, 10);
     Scale s2 = s.withZoomLevel(-200, 10, 10);
 
-    assertEquals(-175 * FINE_ZOOM, s2.fineZoomLevel);
+    assertEquals(-175 * ULTRAFINE_ZOOM, s2.fineZoomLevel);
     assertApprox(1.0 / 313676.0, s2.scale);
   }
 
@@ -129,7 +131,7 @@ public class ScaleZoomTest {
   void testZoomedIn() {
     Scale s = new Scale(3, 10, 10);
     Scale s2 = s.zoomedIn(10, 10);
-    assertEquals(4 * FINE_ZOOM, s2.fineZoomLevel);
+    assertEquals(4 * ULTRAFINE_ZOOM, s2.fineZoomLevel);
     assertApprox(1.075 * 1.075 * 1.075 * 1.075, s2.scale);
   }
 
@@ -137,7 +139,7 @@ public class ScaleZoomTest {
   void testZoomedOut() {
     Scale s = new Scale(3, 10, 10);
     Scale s2 = s.zoomedOut(10, 10);
-    assertEquals(2 * FINE_ZOOM, s2.fineZoomLevel);
+    assertEquals(2 * ULTRAFINE_ZOOM, s2.fineZoomLevel);
     assertApprox(1.075 * 1.075, s2.scale);
   }
 
@@ -147,9 +149,9 @@ public class ScaleZoomTest {
     Scale s2 = s.zoomedIn(10, 10).zoomedOut(10, 10);
 
     // THe introduction of fine zoom alters this magic number. This is expected
-    assertEquals(764, s.fineZoomLevel);
+    assertEquals(18339, s.fineZoomLevel);
     // THe introduction of fine zoom alters this magic number. This is expected
-    assertEquals(764, s2.fineZoomLevel);
+    assertEquals(18339, s2.fineZoomLevel);
     assertEquals(10.0, s.scale);
     // zooming in and out causes scale to be snapped to the major zoom increment
     // so will no longer be exactly 10
