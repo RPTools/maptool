@@ -307,13 +307,19 @@ runtime {
 
         if (osdetector.os.is('osx')) {
             println "Setting MacOS installer options"
-            targetPlatformName = "mac"
+            def isArm = osdetector.arch.equals('aarch_64') || osdetector.arch.contains('arm') || osdetector.arch.contains('aarch')
+            def macArch = isArm ? 'apple-silicon' : 'intel'
+            def macJdkUrl = isArm ?
+                    'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.1_12.tar.gz' :
+                    'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz'
+
+            targetPlatformName = "mac-" + macArch
             imageOptions += ['--icon', 'package/macosx/' + project.name + developerRelease + '.icns']
             installerOptions += [
                     '--mac-package-name', project.name + developerRelease
             ]
-            targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz')
+            targetPlatform("mac-${macArch}") {
+                jdkHome = jdkDownload(macJdkUrl)
                 jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
