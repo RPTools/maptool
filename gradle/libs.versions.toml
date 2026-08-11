@@ -80,8 +80,8 @@ jide-shortcut = { group = "com.jidesoft", name = "jide-shortcut", version.ref = 
 
 # Syntax highlighting in macro editor
 fifesoft-rsyntaxtexxtarea = { group = "com.fifesoft", name = "rsyntaxtextarea", version = "3.6.0" }
-fifesoft-rstaui = { group = "com.fifesoft", name = "rstaui", version = "3.3.1" }
-fifesoft-autocomplete = { group = "com.fifesoft", name = "autocomplete", version = "3.3.1" }
+fifesoft-rstaui = { group = "com.fifesoft", name = "rstaui", version = "3.3.2" }
+fifesoft-autocomplete = { group = "com.fifesoft", name = "autocomplete", version = "3.3.2" }
 fifesoft-languagesupport = { group = "com.fifesoft", name = "languagesupport", version = "3.4.0" }
 
 # Themes
