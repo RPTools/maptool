@@ -47,12 +47,22 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
   /** a tabular view of {@link LookupTable}s' details */
   private LookupTableDetailsTablePanel detailsTablePanel;
 
+  /** cache edit panel instance so position and dimensions are retained within the session */
+  private EditLookupTablePanel editLookupTablePanel;
+
   /** manages the different views and so only one is visible as a time */
   private CardLayout viewLayout;
 
   public LookupTablePanel() {
     super(new LookupTablePaneView().getRootComponent());
     panelInit();
+  }
+
+  private EditLookupTablePanel getEditLookupTablePanel() {
+    if (editLookupTablePanel == null) {
+      editLookupTablePanel = new EditLookupTablePanel();
+    }
+    return editLookupTablePanel;
   }
 
   /** the view options */
@@ -134,7 +144,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
               if (detailsTable.columnAtPoint(e.getPoint()) == 0) {
                 lookupTableRoll(lookupTable);
               } else {
-                new EditLookupTablePanel().showDialog(lookupTable, false);
+                getEditLookupTablePanel().showDialog(lookupTable, false);
               }
             } else {
               lookupTableRoll(lookupTable);
@@ -219,7 +229,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
               }
               LookupTable lookupTable = new LookupTable(selected);
               lookupTable.setName("Copy of " + lookupTable.getName());
-              new EditLookupTablePanel().showDialog(lookupTable, true);
+              getEditLookupTablePanel().showDialog(lookupTable, true);
 
               imagePanel.clearSelection();
               refreshStructure();
@@ -236,7 +246,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
               if (lookupTable == null) {
                 return;
               }
-              new EditLookupTablePanel().showDialog(lookupTable, false);
+              getEditLookupTablePanel().showDialog(lookupTable, false);
               refreshData();
             });
   }
@@ -247,7 +257,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
     getNewButton()
         .addActionListener(
             e -> {
-              new EditLookupTablePanel().showDialog(new LookupTable(), true);
+              getEditLookupTablePanel().showDialog(new LookupTable(), true);
               imagePanel.clearSelection();
               refreshStructure();
             });
