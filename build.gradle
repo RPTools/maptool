@@ -418,7 +418,7 @@ dependencies {
     implementation(libs.jsonpath) {
         exclude group: 'net.minidev', module: 'json-smart'
     }
-    implementation("net.minidev:json-smart:2.5.2")
+    implementation("net.minidev:json-smart:2.6.0")
     // endregion
 
     implementation(libs.jsoup)
