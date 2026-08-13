@@ -35,6 +35,7 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
       List.of(
           DetailsTableColumn.IMAGE,
           DetailsTableColumn.NAME,
+          DetailsTableColumn.GROUP,
           DetailsTableColumn.PLAYER_VISIBLE,
           DetailsTableColumn.ALLOW_LOOKUP,
           DetailsTableColumn.PICK_ONCE,
@@ -45,7 +46,7 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
 
   /** Defines the details view columns visible for non-GMs and their sequence */
   private static final List<DetailsTableColumn> PLAYER_COLUMNS =
-      List.of(DetailsTableColumn.IMAGE, DetailsTableColumn.NAME);
+      List.of(DetailsTableColumn.IMAGE, DetailsTableColumn.NAME, DetailsTableColumn.GROUP);
 
   /**
    * Retries the set list of details view columns based on GM role or not
@@ -88,12 +89,26 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
         String.class,
         SwingConstants.LEFT,
         200,
-        Icons.WINDOW_TABLES,
+        null,
         null,
         null) {
       @Override
       Object getValue(LookupTable table) {
         return table.getName();
+      }
+    },
+    GROUP(
+        I18N.getText("Label.group"),
+        null,
+        String.class,
+        SwingConstants.LEFT,
+        100,
+        null,
+        null,
+        null) {
+      @Override
+      Object getValue(LookupTable table) {
+        return table.getGroup();
       }
     },
     PLAYER_VISIBLE(

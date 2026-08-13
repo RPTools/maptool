@@ -20,6 +20,7 @@ public class EditLookupTablePanelView {
 
   private JPanel mainPanel;
   private JTextField tableName;
+  private JTextField tableGroup;
   private JTextField defaultTableRoll;
   private JCheckBox isVisible;
   private JCheckBox allowLookup;
@@ -37,6 +38,10 @@ public class EditLookupTablePanelView {
 
   public JTextField getTableName() {
     return tableName;
+  }
+
+  public JTextField getTableGroup() {
+    return tableGroup;
   }
 
   public JTextField getDefaultTableRoll() {

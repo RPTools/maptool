@@ -34,6 +34,7 @@ public class LookupTable {
 
   private @Nonnull List<LookupEntry> entryList = new ArrayList<>();
   private @Nullable String name;
+  private @Nullable String group;
   private @Nullable String defaultRoll;
   private @Nullable MD5Key tableImage;
   private @Nonnull Boolean visible = true;
@@ -48,6 +49,7 @@ public class LookupTable {
 
   public LookupTable(LookupTable table) {
     name = table.name;
+    group = table.group;
     defaultRoll = table.defaultRoll;
     tableImage = table.tableImage;
     pickOnce = table.pickOnce;
@@ -92,6 +94,14 @@ public class LookupTable {
 
   public String getName() {
     return name;
+  }
+
+  public void setGroup(String group) {
+    this.group = group;
+  }
+
+  public String getGroup() {
+    return group;
   }
 
   /**
@@ -500,6 +510,9 @@ public class LookupTable {
     if (entryList == null) {
       entryList = new ArrayList<>();
     }
+    if (group == null) {
+      group = "";
+    }
     return this;
   }
 
@@ -535,6 +548,7 @@ public class LookupTable {
   public static LookupTable fromDto(LookupTableDto dto) {
     var table = new LookupTable();
     table.name = dto.hasName() ? dto.getName().getValue() : null;
+    table.group = dto.hasGroup() ? dto.getGroup().getValue() : null;
     table.entryList =
         dto.getEntriesList().stream().map(e -> LookupEntry.fromDto(e)).collect(Collectors.toList());
     table.defaultRoll = dto.hasDefaultRoll() ? dto.getDefaultRoll().getValue() : null;
@@ -550,6 +564,9 @@ public class LookupTable {
     dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
     if (name != null) {
       dto.setName(StringValue.of(name));
+    }
+    if (group != null) {
+      dto.setGroup(StringValue.of(group));
     }
     if (defaultRoll != null) {
       dto.setDefaultRoll(StringValue.of(defaultRoll));

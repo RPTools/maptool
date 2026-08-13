@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
@@ -67,7 +68,10 @@ public class LookupTableFunction extends AbstractFunction {
         "resetTablePicks",
         "getTablePickOnce",
         "setTablePickOnce",
-        "getTablePicksLeft");
+        "getTablePicksLeft",
+        "getTableGroup",
+        "setTableGroup",
+        "getTableGroups");
   }
 
   /** The singleton instance. */
@@ -100,6 +104,20 @@ public class LookupTableFunction extends AbstractFunction {
         return jsonArray;
       }
       return StringUtils.join(getTableList(MapTool.getPlayer().isGM()), delim);
+
+    } else if ("getTableGroups".equalsIgnoreCase(function)) {
+
+      FunctionUtil.checkNumberParam("getTableGroups", params, 0, 1);
+      String delim = ",";
+      if (params.size() > 0) {
+        delim = params.get(0).toString();
+      }
+      if ("json".equalsIgnoreCase(delim)) {
+        JsonArray jsonArray = new JsonArray();
+        getTableGroupList(MapTool.getPlayer().isGM()).forEach(jsonArray::add);
+        return jsonArray;
+      }
+      return StringUtils.join(getTableGroupList(MapTool.getPlayer().isGM()), delim);
 
     } else if ("getTableVisible".equalsIgnoreCase(function)) {
 
@@ -468,6 +486,25 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       return lookupTable.getPicksLeft();
 
+    } else if ("getTableGroup".equalsIgnoreCase(function)) {
+
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("getTableGroup", params, 1, 1);
+      String name = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      return lookupTable.getGroup();
+
+    } else if ("setTableGroup".equalsIgnoreCase(function)) {
+
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("setTableGroup", params, 2, 2);
+      String name = params.get(0).toString();
+      String group = params.get(1).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      lookupTable.setGroup(group);
+      processMutatedLookupTable(lookupTable, true);
+      return "";
+
     } else { // if tbl, table, tblImage or tableImage
       FunctionUtil.checkNumberParam(function, params, 1, 3);
       String name = params.get(0).toString();
@@ -583,6 +620,27 @@ public class LookupTableFunction extends AbstractFunction {
           .filter(LookupTable::getVisible)
           .forEachOrdered((lt) -> tables.add(lt.getName()));
     return tables;
+  }
+
+  /**
+   * If GM return all table groups otherwise only return groups for visible tables
+   *
+   * @param isGm does the calling function has GM privileges
+   * @return a list of table groups
+   */
+  private List<String> getTableGroupList(boolean isGm) {
+    return MapTool.getCampaign().getLookupTableMap().values().stream()
+        // If not GM, only keep visible tables
+        .filter(lt -> isGm || lt.getVisible())
+        // Get the group name from the table
+        .map(LookupTable::getGroup)
+        // Remove any null groups
+        .filter(Objects::nonNull)
+        // Remove duplicate groups
+        .distinct()
+        // Sort groups
+        .sorted()
+        .collect(Collectors.toList());
   }
 
   /**

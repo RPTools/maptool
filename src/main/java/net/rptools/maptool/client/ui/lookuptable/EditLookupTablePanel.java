@@ -193,6 +193,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
     super.bind(lookupTable);
 
     view.getTableName().setText(lookupTable.getName());
+    view.getTableGroup().setText(lookupTable.getGroup());
     view.getDefaultTableRoll()
         .setText(lookupTable.getPickOnce() ? "" : lookupTable.calculateRoll());
     tableImageAssetPanel.setImageId(lookupTable.getTableImage());
@@ -240,6 +241,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
       return false;
     }
     var isPickOnce = view.getPickOnce().isSelected();
+    String group = view.getTableGroup().getText().trim();
 
     // Before modifying the table, parse and validate all the entries to avoid partial modification
     // in case of error.
@@ -284,6 +286,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
     // save existing name for later removal from LookupTableMap
     String origname = lookupTable.getName();
     lookupTable.setName(name);
+    lookupTable.setGroup(group);
     lookupTable.setPickOnce(isPickOnce);
     lookupTable.setRoll(isPickOnce ? null : view.getDefaultTableRoll().getText());
     lookupTable.setTableImage(tableImageAssetPanel.getImageId());
