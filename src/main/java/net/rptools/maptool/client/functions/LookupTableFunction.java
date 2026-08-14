@@ -71,7 +71,9 @@ public class LookupTableFunction extends AbstractFunction {
         "getTablePicksLeft",
         "getTableGroup",
         "setTableGroup",
-        "getTableGroups");
+        "getTableGroups",
+        "getTableMetadata",
+        "setTableMetadata");
   }
 
   /** The singleton instance. */
@@ -487,7 +489,9 @@ public class LookupTableFunction extends AbstractFunction {
       return lookupTable.getPicksLeft();
 
     } else if ("getTableGroup".equalsIgnoreCase(function)) {
-
+      /*
+       * getTableGroup(tblName) - get the named table's group
+       */
       checkTrusted(function);
       FunctionUtil.checkNumberParam("getTableGroup", params, 1, 1);
       String name = params.get(0).toString();
@@ -495,13 +499,38 @@ public class LookupTableFunction extends AbstractFunction {
       return lookupTable.getGroup();
 
     } else if ("setTableGroup".equalsIgnoreCase(function)) {
-
+      /*
+       * getTableGroup(tblName, group) - set the named table's group
+       */
       checkTrusted(function);
       FunctionUtil.checkNumberParam("setTableGroup", params, 2, 2);
       String name = params.get(0).toString();
       String group = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.setGroup(group);
+      processMutatedLookupTable(lookupTable, true);
+      return "";
+
+    } else if ("getTableMetadata".equalsIgnoreCase(function)) {
+      /*
+       * getTableMetadata(tblName) - get the named table's metadata
+       */
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("getTableMetadata", params, 1, 1);
+      String name = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      return lookupTable.getMetadata();
+
+    } else if ("setTableMetadata".equalsIgnoreCase(function)) {
+      /*
+       * setTableMetadata(tblName, metadata) - set the named table's metadata
+       */
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("setTableMetadata", params, 2, 2);
+      String name = params.get(0).toString();
+      String metadata = params.get(1).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      lookupTable.setMetadata(metadata);
       processMutatedLookupTable(lookupTable, true);
       return "";
 

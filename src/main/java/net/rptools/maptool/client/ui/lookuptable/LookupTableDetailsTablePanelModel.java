@@ -42,7 +42,8 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
           DetailsTableColumn.ROLL,
           DetailsTableColumn.COUNT_ENTRIES,
           DetailsTableColumn.COUNT_VALUES,
-          DetailsTableColumn.COUNT_IMAGES);
+          DetailsTableColumn.COUNT_IMAGES,
+          DetailsTableColumn.METADATA);
 
   /** Defines the details view columns visible for non-GMs and their sequence */
   private static final List<DetailsTableColumn> PLAYER_COLUMNS =
@@ -207,6 +208,20 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
       @Override
       Object getValue(LookupTable table) {
         return table.getEntryImageCount();
+      }
+    },
+    METADATA(
+        I18N.getText("EditLookupTablePanel.tab.metadata"),
+        null,
+        Boolean.class,
+        SwingConstants.CENTER,
+        80,
+        null,
+        Icons.WINDOW_TABLES,
+        null) {
+      @Override
+      Object getValue(LookupTable table) {
+        return table.hasMetadata();
       }
     };
 
