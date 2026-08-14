@@ -112,7 +112,7 @@ apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", ve
 # needed for preference dialog at runtime
 apache-commons-beanutils = { group = "commons-beanutils", name = "commons-beanutils", version = "1.11.0" }
 # XPath parsing, used for UPNP
-apache-commons-jxpath = { group = "commons-jxpath", name = "commons-jxpath", version = "1.3" }
+apache-commons-jxpath = { group = "commons-jxpath", name = "commons-jxpath", version = "1.4.0" }
 # For determining file type
 apache-tika = { group = "org.apache.tika", name = "tika-core", version = "3.2.1" }
 
