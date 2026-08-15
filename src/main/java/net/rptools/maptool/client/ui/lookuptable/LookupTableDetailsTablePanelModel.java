@@ -100,7 +100,7 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
     },
     GROUP(
         I18N.getText("Label.group"),
-        null,
+        I18N.getText("LookupTablePanel.group.tooltip"),
         String.class,
         SwingConstants.LEFT,
         100,
@@ -212,16 +212,16 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
     },
     METADATA(
         I18N.getText("EditLookupTablePanel.tab.metadata"),
+        I18N.getText("LookupTablePanel.metadata.tooltip"),
+        String.class,
+        SwingConstants.LEFT,
+        100,
         null,
-        Boolean.class,
-        SwingConstants.CENTER,
-        80,
         null,
-        Icons.WINDOW_TABLES,
         null) {
       @Override
       Object getValue(LookupTable table) {
-        return table.hasMetadata();
+        return table.hasMetadata() ? table.getMetadataType() : "";
       }
     };
 

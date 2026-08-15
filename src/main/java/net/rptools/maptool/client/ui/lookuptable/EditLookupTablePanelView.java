@@ -35,6 +35,7 @@ public class EditLookupTablePanelView {
   private JLabel pickOnceIcon;
   private RSyntaxTextArea tableMetadata;
   private RTextScrollPane tableMetadataScrollPane;
+  private JComboBox<String> tableMetadataType;
 
   public JComponent getRootComponent() {
     return mainPanel;
@@ -94,5 +95,9 @@ public class EditLookupTablePanelView {
 
   public RTextScrollPane getTableMetadataScrollPane() {
     return tableMetadataScrollPane;
+  }
+
+  public JComboBox<String> getTableMetadataType() {
+    return tableMetadataType;
   }
 }
