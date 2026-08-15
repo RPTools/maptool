@@ -531,18 +531,6 @@ public class LookupTable {
     if (entryList == null) {
       entryList = new ArrayList<>();
     }
-    /* TODO B
-    if (group == null) {
-      group = "";
-    }
-    if (metadata == null) {
-      metadata = "";
-    }
-    if (metadata == null) {
-      metadata = SyntaxConstants.SYNTAX_STYLE_NONE;
-    }
-    */
-
     return this;
   }
 

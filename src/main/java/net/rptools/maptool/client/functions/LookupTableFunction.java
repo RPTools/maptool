@@ -46,6 +46,7 @@ public class LookupTableFunction extends AbstractFunction {
         "tblImage",
         "tableImage",
         "getTableNames",
+        "getTableGroups",
         "getTableRoll",
         "setTableRoll",
         "clearTable",
@@ -71,7 +72,6 @@ public class LookupTableFunction extends AbstractFunction {
         "getTablePicksLeft",
         "getTableGroup",
         "setTableGroup",
-        "getTableGroups",
         "getTableMetadata",
         "setTableMetadata");
   }
@@ -94,18 +94,25 @@ public class LookupTableFunction extends AbstractFunction {
       throws ParserException {
 
     if ("getTableNames".equalsIgnoreCase(function)) {
-
-      FunctionUtil.checkNumberParam("getTableNames", params, 0, 1);
+      /*
+          getTableNames(delim) - get all/visible table names
+          getTableNames(delim, group) - get all/visible table names in a named group
+      */
+      FunctionUtil.checkNumberParam("getTableNames", params, 0, 2);
       String delim = ",";
+      String group = null;
       if (params.size() > 0) {
         delim = params.get(0).toString();
       }
+      if (params.size() > 1) {
+        group = params.get(1).toString();
+      }
       if ("json".equalsIgnoreCase(delim)) {
         JsonArray jsonArray = new JsonArray();
-        getTableList(MapTool.getPlayer().isGM()).forEach(jsonArray::add);
+        getTableList(MapTool.getPlayer().isGM(), group).forEach(jsonArray::add);
         return jsonArray;
       }
-      return StringUtils.join(getTableList(MapTool.getPlayer().isGM()), delim);
+      return StringUtils.join(getTableList(MapTool.getPlayer().isGM(), group), delim);
 
     } else if ("getTableGroups".equalsIgnoreCase(function)) {
 
@@ -500,7 +507,7 @@ public class LookupTableFunction extends AbstractFunction {
 
     } else if ("setTableGroup".equalsIgnoreCase(function)) {
       /*
-       * getTableGroup(tblName, group) - set the named table's group
+       * setTableGroup(tblName, group) - set the named table's group
        */
       checkTrusted(function);
       FunctionUtil.checkNumberParam("setTableGroup", params, 2, 2);
@@ -636,18 +643,23 @@ public class LookupTableFunction extends AbstractFunction {
   }
 
   /**
-   * * If GM return all tables Otherwise only return visible tables
+   * * If GM return all tables otherwise only return visible tables, optionally filtered by table
+   * group
    *
-   * @param isGm boolean Does the calling function has GM privileges
+   * @param isGm boolean Does the calling function has GM privilege
+   * @param group String Only return tables in the group
    * @return a list of table names
    */
-  private List<String> getTableList(boolean isGm) {
+  private List<String> getTableList(boolean isGm, String group) {
     List<String> tables = new ArrayList<>();
-    if (isGm) tables.addAll(MapTool.getCampaign().getLookupTableMap().keySet());
-    else
-      MapTool.getCampaign().getLookupTableMap().values().stream()
-          .filter(LookupTable::getVisible)
-          .forEachOrdered((lt) -> tables.add(lt.getName()));
+    var stream = MapTool.getCampaign().getLookupTableMap().values().stream();
+    if (!isGm) {
+      stream = stream.filter(LookupTable::getVisible);
+    }
+    if (group != null) {
+      stream = stream.filter(lt -> lt.getGroup().equals(group));
+    }
+    stream.forEachOrdered((lt) -> tables.add(lt.getName()));
     return tables;
   }
 
