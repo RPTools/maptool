@@ -28,16 +28,16 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.SelectionModel;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.SelectionChanged;
+import net.rptools.maptool.eventBus.events.TokenEdited;
+import net.rptools.maptool.eventBus.events.TokenMacroChanged;
+import net.rptools.maptool.eventBus.events.TokenPanelChanged;
+import net.rptools.maptool.eventBus.events.TokensRemoved;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.tokens.TokenMacroChanged;
-import net.rptools.maptool.model.tokens.TokenPanelChanged;
-import net.rptools.maptool.model.zones.TokenEdited;
-import net.rptools.maptool.model.zones.TokensRemoved;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
   private boolean currentlyImpersonating = false;
@@ -156,7 +156,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   }
 
   @Subscribe
-  private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+  private void onSelectionChanged(SelectionChanged event) {
     SwingUtilities.invokeLater(
         () -> {
           reset();

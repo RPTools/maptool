@@ -49,7 +49,8 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.themes.*;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.ThemeLoadedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

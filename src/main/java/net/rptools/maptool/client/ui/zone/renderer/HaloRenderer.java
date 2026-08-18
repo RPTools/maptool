@@ -26,10 +26,10 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.GridChanged;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
-import net.rptools.maptool.model.zones.GridChanged;
 
 public class HaloRenderer {
   private final RenderHelper renderHelper;

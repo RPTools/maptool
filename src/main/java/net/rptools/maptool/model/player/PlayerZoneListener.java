@@ -16,10 +16,10 @@ package net.rptools.maptool.model.player;
 
 import com.google.common.eventbus.Subscribe;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.events.PlayerStatusChanged;
-import net.rptools.maptool.client.events.ZoneLoaded;
-import net.rptools.maptool.client.events.ZoneLoading;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.PlayerStatusChanged;
+import net.rptools.maptool.eventBus.events.ZoneLoaded;
+import net.rptools.maptool.eventBus.events.ZoneLoading;
 
 public class PlayerZoneListener {
   public PlayerZoneListener() {

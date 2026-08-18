@@ -35,7 +35,11 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.InitiativeListChanged;
+import net.rptools.maptool.eventBus.events.TokensAdded;
+import net.rptools.maptool.eventBus.events.TokensChanged;
+import net.rptools.maptool.eventBus.events.TokensRemoved;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.InitiativeList;
@@ -45,10 +49,6 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.zones.InitiativeListChanged;
-import net.rptools.maptool.model.zones.TokensAdded;
-import net.rptools.maptool.model.zones.TokensChanged;
-import net.rptools.maptool.model.zones.TokensRemoved;
 
 /**
  * This panel shows the initiative order inside of MapTools.

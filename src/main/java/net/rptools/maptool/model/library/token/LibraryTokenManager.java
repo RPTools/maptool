@@ -26,7 +26,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.TokenEdited;
+import net.rptools.maptool.eventBus.events.TokensAdded;
+import net.rptools.maptool.eventBus.events.TokensChanged;
+import net.rptools.maptool.eventBus.events.TokensRemoved;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
@@ -34,10 +38,6 @@ import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.LibraryNotValidException;
 import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
-import net.rptools.maptool.model.zones.TokenEdited;
-import net.rptools.maptool.model.zones.TokensAdded;
-import net.rptools.maptool.model.zones.TokensChanged;
-import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 
 /** Class that represents Lib:Token libraries. */

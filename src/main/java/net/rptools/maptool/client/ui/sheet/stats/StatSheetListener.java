@@ -18,8 +18,8 @@ import com.google.common.eventbus.Subscribe;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.events.TokenHoverEnter;
-import net.rptools.maptool.client.events.TokenHoverExit;
+import net.rptools.maptool.eventBus.events.TokenHoverEnter;
+import net.rptools.maptool.eventBus.events.TokenHoverExit;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 

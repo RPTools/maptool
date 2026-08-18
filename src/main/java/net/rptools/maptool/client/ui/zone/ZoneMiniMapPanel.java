@@ -30,12 +30,12 @@ import javax.swing.JPanel;
 import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.FogChanged;
+import net.rptools.maptool.eventBus.events.ZoneActivated;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.zones.FogChanged;
 import net.rptools.maptool.util.ImageManager;
 
 /** */

@@ -54,11 +54,11 @@ import net.rptools.maptool.client.tool.rig.Snap;
 import net.rptools.maptool.client.tool.rig.WallTopologyRig;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.WallTopologyChanged;
 import net.rptools.maptool.model.topology.Vertex;
 import net.rptools.maptool.model.topology.VisibilityType;
 import net.rptools.maptool.model.topology.Wall;
-import net.rptools.maptool.model.zones.WallTopologyChanged;
 import org.locationtech.jts.math.Vector2D;
 
 public class WallTopologyTool extends DefaultTool implements ZoneOverlay {

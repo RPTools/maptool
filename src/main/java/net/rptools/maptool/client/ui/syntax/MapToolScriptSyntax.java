@@ -22,7 +22,7 @@ import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
-import net.rptools.maptool.events.ZoneLoadedListener;
+import net.rptools.maptool.eventBus.ZoneLoadedListener;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.parser.function.Function;

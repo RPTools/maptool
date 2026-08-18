@@ -22,18 +22,18 @@ import javax.swing.*;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.events.ZoneActivated;
-import net.rptools.maptool.client.events.ZoneDeactivated;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.SelectionModel;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.SelectionChanged;
+import net.rptools.maptool.eventBus.events.TokensChanged;
+import net.rptools.maptool.eventBus.events.ZoneActivated;
+import net.rptools.maptool.eventBus.events.ZoneDeactivated;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.zones.TokensChanged;
 import net.rptools.parser.ParserException;
 
 public class HTMLFrameFactory {
@@ -239,7 +239,7 @@ public class HTMLFrameFactory {
     }
 
     @Subscribe
-    private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+    private void onSelectionChanged(SelectionChanged event) {
       if (event.zone() != currentZone) {
         return;
       }

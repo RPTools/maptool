@@ -28,8 +28,6 @@ import net.rptools.lib.AwtUtil;
 import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.events.ChatMessageAdded;
-import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -39,11 +37,13 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.ChatMessageAdded;
+import net.rptools.maptool.eventBus.events.PreferencesChanged;
+import net.rptools.maptool.eventBus.events.TokenEdited;
+import net.rptools.maptool.eventBus.events.TokenPanelChanged;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
-import net.rptools.maptool.model.tokens.TokenPanelChanged;
-import net.rptools.maptool.model.zones.TokenEdited;
 import net.rptools.maptool.util.ImageManager;
 
 public class CommandPanel extends JPanel {

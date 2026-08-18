@@ -17,8 +17,8 @@ package net.rptools.maptool.model.library.addon;
 import com.google.common.eventbus.Subscribe;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.macro.MacroManager;
-import net.rptools.maptool.model.library.AddOnsAddedEvent;
-import net.rptools.maptool.model.library.AddOnsRemovedEvent;
+import net.rptools.maptool.eventBus.events.AddOnsAddedEvent;
+import net.rptools.maptool.eventBus.events.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.LibraryManager;
 
 /** Listens for add on events and adds/removes slash commands from the macro manager. */

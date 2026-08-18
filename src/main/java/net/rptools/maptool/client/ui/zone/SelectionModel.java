@@ -21,13 +21,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.SelectionChanged;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 
 /** Models the current and historical selections for a ZoneRenderer. */
 public class SelectionModel {
-  public record SelectionChanged(Zone zone) {}
 
   /** The zone in which the selections are made. */
   private final Zone zone;

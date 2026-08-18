@@ -20,13 +20,13 @@ import java.util.ArrayList;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.events.PlayerConnected;
-import net.rptools.maptool.client.events.PlayerDisconnected;
-import net.rptools.maptool.client.events.PlayerStatusChanged;
-import net.rptools.maptool.client.events.ServerDisconnected;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.PlayerConnected;
+import net.rptools.maptool.eventBus.events.PlayerDisconnected;
+import net.rptools.maptool.eventBus.events.PlayerStatusChanged;
+import net.rptools.maptool.eventBus.events.ServerDisconnected;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player;
 

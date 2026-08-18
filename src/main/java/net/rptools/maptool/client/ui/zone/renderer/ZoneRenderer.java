@@ -42,7 +42,6 @@ import net.rptools.lib.CollectionUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.events.RepaintZoneRequested;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.ImageLabel;
@@ -60,14 +59,14 @@ import net.rptools.maptool.client.ui.zone.*;
 import net.rptools.maptool.client.ui.zone.renderer.tokenRender.FacingArrowRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.tokenRender.TokenRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
-import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.eventBus.MapToolEventBus;
+import net.rptools.maptool.eventBus.events.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
-import net.rptools.maptool.model.zones.*;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
@@ -2477,7 +2476,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
   }
 
   @Subscribe
-  private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+  private void onSelectionChanged(SelectionChanged event) {
     if (event.zone() != zone) {
       return;
     }
