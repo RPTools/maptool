@@ -41,7 +41,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-15-intel]
+        os: [windows-latest, ubuntu-latest, macos-15-intel, macos-15]
         java: ["21"]
         distribution: ["temurin"]
       fail-fast: false
