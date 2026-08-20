@@ -932,7 +932,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         timer.stop("tokens");
       }
       timer.start("unowned movement");
-      showBlockedMoves(g2d, view, getUnOwnedMovementSet(view));
+      showBlockedMoves(g2d, view, getUnOwnedMovementSet(view), false);
       timer.stop("unowned movement");
     }
 
@@ -966,7 +966,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       }
 
       timer.start("owned movement");
-      showBlockedMoves(g2d, view, getOwnedMovementSet(view));
+      showBlockedMoves(g2d, view, getOwnedMovementSet(view), true);
       timer.stop("owned movement");
 
       // Text associated with tokens being moved is added to a list to be drawn after, i.e. on top
@@ -1133,25 +1133,27 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     return movementSet;
   }
 
-  protected void showBlockedMoves(Graphics2D g, PlayerView view, Set<SelectionSet> movementSet) {
+  protected void showBlockedMoves(
+      Graphics2D g, PlayerView view, Set<SelectionSet> movementSet, boolean isLocal) {
     if (selectionSetMap.isEmpty()) {
       return;
     }
     g = (Graphics2D) g.create();
 
-    // Regardless of vision settings, no need to render beyond the fog.
+    // For local movement, clip only to hard FoW.
+    // For remote movement, clip to soft FoW / visible area.
     Area clearArea = null;
     if (!view.isGMView()) {
+      var visibility = zoneView.getVisibility(view);
       if (zone.hasFog()) {
-        clearArea = zoneView.getVisibility(view).clearArea();
+        clearArea = isLocal ? visibility.exposedArea() : visibility.clearArea();
       } else if (zoneView.isUsingVision()) {
-        clearArea = zoneView.getVisibility(view).visibleArea();
+        clearArea = isLocal ? clearArea : visibility.visibleArea();
       }
-
-      if (clearArea != null) {
-        var clip = clearArea.createTransformedArea(viewModel.getZoneScale().toScreenTransform());
-        g.clip(clip);
-      }
+    }
+    if (clearArea != null) {
+      var clip = clearArea.createTransformedArea(viewModel.getZoneScale().toScreenTransform());
+      g.clip(clip);
     }
 
     for (SelectionSet set : movementSet) {

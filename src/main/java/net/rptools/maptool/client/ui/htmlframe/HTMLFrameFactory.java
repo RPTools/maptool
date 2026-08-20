@@ -15,13 +15,22 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import com.google.common.eventbus.Subscribe;
+import java.awt.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.*;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.SelectionModel;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.zones.TokensChanged;
@@ -66,6 +75,7 @@ public class HTMLFrameFactory {
     boolean hasFrame = true;
     boolean closeButton = true;
     boolean scrollReset = false;
+    String iconRef = null;
 
     if (properties != null && !properties.isEmpty()) {
       String[] opts = properties.split(";");
@@ -153,10 +163,13 @@ public class HTMLFrameFactory {
           frameValue = value;
         } else if (keyLC.equals("tabtitle")) {
           tabTitle = value;
+        } else if (keyLC.equals("icon")) {
+          iconRef = value;
         }
       }
     }
     if (tabTitle == null) tabTitle = title; // if tabTitle not set, make it same as title
+
     if (frameType == FrameType.FRAME) {
       HTMLFrame.showFrame(
           name,
@@ -168,7 +181,8 @@ public class HTMLFrameFactory {
           scrollReset,
           isHTML5,
           frameValue,
-          htmlContent);
+          htmlContent,
+          iconRef);
     } else if (frameType == FrameType.DIALOG) {
       HTMLDialog.showDialog(
           name,
@@ -182,7 +196,8 @@ public class HTMLFrameFactory {
           scrollReset,
           isHTML5,
           frameValue,
-          htmlContent);
+          htmlContent,
+          iconRef);
     } else if (frameType == FrameType.OVERLAY) {
       MapTool.getFrame()
           .getOverlayPanel()
@@ -296,5 +311,48 @@ public class HTMLFrameFactory {
 
     return name.substring(0, AppConstants.INTERNAL_FRAME_PREFIX.length())
         .equalsIgnoreCase(AppConstants.INTERNAL_FRAME_PREFIX);
+  }
+
+  /**
+   * Try and get a scaled icon for the given asset URL.
+   *
+   * <p>Could be expanded to also handle data:/svgs, but that is for the future...
+   *
+   * @param assetRef the given asset id reference.
+   * @return an ImageIcon for the asset, the broken image for invalid assets, or null if not an
+   *     asset.
+   */
+  public static ImageIcon getScaledImageIcon(String assetRef) {
+    final Pattern ASSET_PATTERN =
+        Pattern.compile("^(.*)((?:asset|lib|Image):(//)?[0-9a-z-A-Z ./]+)");
+    Matcher matcher = ASSET_PATTERN.matcher(assetRef);
+
+    String assetIdStr;
+    // see if the value string for this item has an image URL inside it
+    if (matcher.find()) {
+      assetIdStr = matcher.group(2);
+      if (assetIdStr.startsWith("asset://")) {
+        assetIdStr = assetIdStr.substring(8);
+        MD5Key assetId = new MD5Key(assetIdStr);
+        Asset asset = AssetManager.getAsset(assetId);
+        if (asset == null) {
+          asset = AssetManager.requestAssetFromServer(assetId);
+        }
+        // if we have an asset, convert it to an icon and scale it
+        if (asset != null) {
+          ImageIcon imageIcon = new ImageIcon(RessourceManager.getImage(Images.BROKEN));
+          if (asset.getType() == Asset.Type.IMAGE) {
+            byte[] imageBytes = asset.getData();
+            if (imageBytes != null && imageBytes.length > 0) {
+              imageIcon = new ImageIcon(imageBytes);
+            }
+          }
+          Image scaledImage = imageIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+          scaledImage.getWidth(null); // force completion
+          return new ImageIcon(scaledImage);
+        }
+      }
+    }
+    return null;
   }
 }

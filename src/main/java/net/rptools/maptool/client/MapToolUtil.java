@@ -16,6 +16,7 @@ package net.rptools.maptool.client;
 
 import java.awt.Color;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -24,6 +25,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.rptools.lib.MD5Key;
 import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.utilities.RandomSuffixFactory;
 import net.rptools.maptool.language.I18N;
@@ -263,6 +265,15 @@ public class MapToolUtil {
 
   public static Set<String> getColorNames() {
     return COLOR_MAP.keySet();
+  }
+
+  public static void uploadAssetIds(Collection<MD5Key> assetIds) {
+    for (var assetId : assetIds) {
+      var asset = AssetManager.getAsset(assetId);
+      if (asset != null) {
+        uploadAsset(asset);
+      }
+    }
   }
 
   public static void uploadTexture(DrawablePaint paint) {

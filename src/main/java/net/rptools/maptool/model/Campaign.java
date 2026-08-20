@@ -29,10 +29,6 @@ import net.rptools.maptool.client.ui.ToolbarPanel;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
-import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
-import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
-import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.proto.CampaignDto;
 
@@ -610,34 +606,12 @@ public class Campaign implements Serializable {
   public Set<MD5Key> getAllAssetIds() {
 
     // Maps (tokens are implicit)
-    Set<MD5Key> assetSet = new HashSet<MD5Key>();
+    Set<MD5Key> assetSet = new HashSet<>();
     for (Zone zone : getZones()) {
       assetSet.addAll(zone.getAllAssetIds());
     }
 
-    // States
-    for (BooleanTokenOverlay overlay : getCampaignProperties().getTokenStatesMap().values()) {
-      if (overlay instanceof ImageTokenOverlay) {
-        assetSet.add(((ImageTokenOverlay) overlay).getAssetId());
-      }
-    }
-
-    // Bars
-    for (BarTokenOverlay overlay : getCampaignProperties().getTokenBarsMap().values()) {
-      if (overlay instanceof SingleImageBarTokenOverlay) {
-        assetSet.add(((SingleImageBarTokenOverlay) overlay).getAssetId());
-      } else if (overlay instanceof TwoImageBarTokenOverlay) {
-        assetSet.add(((TwoImageBarTokenOverlay) overlay).getTopAssetId());
-        assetSet.add(((TwoImageBarTokenOverlay) overlay).getBottomAssetId());
-      } else if (overlay instanceof MultipleImageBarTokenOverlay) {
-        assetSet.addAll(Arrays.asList(((MultipleImageBarTokenOverlay) overlay).getAssetIds()));
-      } // endif
-    }
-
-    // Tables
-    for (LookupTable table : getCampaignProperties().getLookupTableMap().values()) {
-      assetSet.addAll(table.getAllAssetIds());
-    }
+    assetSet.addAll(getCampaignProperties().getAllImageAssets());
 
     return assetSet;
   }

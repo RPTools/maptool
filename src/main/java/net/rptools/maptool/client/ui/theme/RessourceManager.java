@@ -30,7 +30,7 @@ public class RessourceManager {
   private static final HashMap<Icons, String> classicIcons =
       new HashMap<>() {
         {
-          // This icons don't exist in classic.
+          // These icons don't exist in classic.
           put(Icons.ACTION_EXPORT, null);
           put(Icons.ACTION_IMPORT, null);
           put(Icons.ACTION_TARGET_ADD, null);
@@ -149,6 +149,11 @@ public class RessourceManager {
           put(Icons.STATUSBAR_SERVER_RUNNING, IMAGE_DIR + "computer_server.png");
           put(Icons.STATUSBAR_TRANSMIT_OFF, IMAGE_DIR + "activityOff.png");
           put(Icons.STATUSBAR_TRANSMIT_ON, IMAGE_DIR + "transmitOn.png");
+          put(Icons.TABLEPANEL_TABLE_PICK_ONCE, IMAGE_DIR + "pick-once.png");
+          put(Icons.TABLEPANEL_TABLE_PLAYER_LOOKUP, IMAGE_DIR + "zoom.png");
+          put(Icons.TABLEPANEL_TABLE_PLAYER_VISIBLE, IMAGE_DIR + "visible.png");
+          put(Icons.TABLEPANEL_VIEW_ICONS, IMAGE_DIR + "panel-icons-view.png");
+          put(Icons.TABLEPANEL_VIEW_DETAILS, IMAGE_DIR + "panel-details-view.png");
           put(Icons.TOOLBAR_DRAW_BOX, IMAGE_DIR + "tool/draw-blue-box.png");
           put(Icons.TOOLBAR_DRAW_DELETE, IMAGE_DIR + "delete.png");
           put(Icons.TOOLBAR_DRAW_DIAMOND, IMAGE_DIR + "tool/draw-blue-diamond.png");
@@ -320,6 +325,7 @@ public class RessourceManager {
           put(Icons.ADD_RESSOURCE_LOCAL, ROD_ICONS + "folder.svg");
           put(Icons.ASSETPANEL_HEROLABS, ROD_ICONS + "hero-lab-icon.svg");
           put(Icons.ASSETPANEL_HEROLABS_FOLDER, ROD_ICONS + "hero_lab_folder.svg");
+          put(Icons.ASSETPANEL_SEARCH, ROD_ICONS + "misc/Zoom.svg");
           put(Icons.CHAT_HIDE_TYPING_NOTIFICATION, ROD_ICONS + "misc/Hide Typing notification.svg");
           put(Icons.CHAT_SCROLL_LOCK_ON, ROD_ICONS + "misc/Scroll Lock.svg");
           put(Icons.CHAT_SHOW_TYPING_NOTIFICATION, ROD_ICONS + "misc/Show Typing notification.svg");
@@ -394,6 +400,11 @@ public class RessourceManager {
           put(Icons.STATUSBAR_SERVER_RUNNING, ROD_ICONS + "bottom/Server Status - Running.svg");
           put(Icons.STATUSBAR_TRANSMIT_OFF, ROD_ICONS + "bottom/Send Data - Inactive.svg");
           put(Icons.STATUSBAR_TRANSMIT_ON, ROD_ICONS + "bottom/Send Data - Active.svg");
+          put(Icons.TABLEPANEL_TABLE_PICK_ONCE, ROD_ICONS + "misc/Pick Once.svg");
+          put(Icons.TABLEPANEL_TABLE_PLAYER_LOOKUP, ROD_ICONS + "misc/Zoom.svg");
+          put(Icons.TABLEPANEL_TABLE_PLAYER_VISIBLE, ROD_ICONS + "Visible.svg");
+          put(Icons.TABLEPANEL_VIEW_ICONS, ROD_ICONS + "misc/Panel Icons View.svg");
+          put(Icons.TABLEPANEL_VIEW_DETAILS, ROD_ICONS + "misc/Panel Details View.svg");
           put(Icons.TOOLBAR_DRAW_BOX, ROD_ICONS + "ribbon/Draw Rectangle_2.svg");
           put(Icons.TOOLBAR_DRAW_DELETE, ROD_ICONS + "ribbon/Delete Drawing.svg");
           put(Icons.TOOLBAR_DRAW_DIAMOND, ROD_ICONS + "ribbon/Draw Diamond_2.svg");

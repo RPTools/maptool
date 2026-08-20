@@ -64,7 +64,9 @@ public class MacroDialogFunctions extends AbstractFunction {
         "html.dialog",
         "html.frame5",
         "html.dialog5",
-        "html.overlay");
+        "html.overlay",
+        "setFrameIcon",
+        "setDialogIcon");
   }
 
   public static MacroDialogFunctions getInstance() {
@@ -186,6 +188,20 @@ public class MacroDialogFunctions extends AbstractFunction {
         case "html.overlay" -> showURL(name, url, opts, FrameType.OVERLAY, true);
         default -> throw new ParserException(I18N.getText("macro.function.html5.unknownType"));
       };
+    }
+    if (functionName.equalsIgnoreCase("setFrameIcon")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String name = parameters.get(0).toString();
+      String iconRef = parameters.get(1).toString();
+      HTMLFrame.setIcon(name, iconRef);
+      return "";
+    }
+    if (functionName.equalsIgnoreCase("setDialogIcon")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String name = parameters.get(0).toString();
+      String iconRef = parameters.get(1).toString();
+      HTMLDialog.setIcon(name, iconRef);
+      return "";
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));

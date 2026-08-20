@@ -31,6 +31,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
@@ -511,57 +512,81 @@ public class TokenStatesController
       formPanel.getCheckBox(SHOW_OTHERS).setSelected(s.isShowOthers());
 
       // Get most of the colors and all of the widths from the XTokenOverlay
-      OverlayType type = OverlayType.Image;
-      if (s instanceof XTokenOverlay xTokenOverlay) {
-        type = OverlayType.X;
-        formPanel.getSpinner(WIDTH).setValue(xTokenOverlay.getWidth());
-        ((ColorWell) formPanel.getComponent(COLOR)).setColor(xTokenOverlay.getColor());
-      } // endif
+      OverlayType type;
+      switch (s) {
+        case ColorDotTokenOverlay colorDotTokenOverlay -> {
+          type = OverlayType.Dot;
+          ((ColorWell) formPanel.getComponent(COLOR)).setColor(colorDotTokenOverlay.getColor());
+          formPanel
+              .getComboBox(CORNER)
+              .setSelectedIndex(colorDotTokenOverlay.getCorner().ordinal());
+        }
+        case ShadedTokenOverlay shadedTokenOverlay -> {
+          type = OverlayType.Shaded;
+          ((ColorWell) formPanel.getComponent(COLOR)).setColor(shadedTokenOverlay.getColor());
+        }
 
-      // Get the the flow grid for most components from FlowColorDotTokenOverlay
-      if (s instanceof FlowColorDotTokenOverlay flowColorDotTokenOverlay) {
-        type = OverlayType.GridDot;
-        int size = flowColorDotTokenOverlay.getGrid();
-        formPanel.getSpinner(FLOW_GRID).setValue(size + "x" + size);
-      } // endif
+        // region AbstractImageTokenOverlay
 
-      // Handle the
-      if (s instanceof CornerImageTokenOverlay cornerImageTokenOverlay) {
-        type = OverlayType.CornerImage;
-        formPanel
-            .getComboBox(CORNER)
-            .setSelectedIndex(cornerImageTokenOverlay.getCorner().ordinal());
-      } else if (s instanceof FlowImageTokenOverlay flowImageTokenOverlay) {
-        type = OverlayType.GridImage;
-        int size = flowImageTokenOverlay.getGrid(); // Still need grid size
-        formPanel.getSpinner(FLOW_GRID).setValue(size + "x" + size);
-      } else if (s instanceof ImageTokenOverlay) {
-        type = OverlayType.Image;
-      } else if (s instanceof ColorDotTokenOverlay colorDotTokenOverlay) {
-        type = OverlayType.Dot;
-        formPanel.getComboBox(CORNER).setSelectedIndex(colorDotTokenOverlay.getCorner().ordinal());
-      } else if (s instanceof OTokenOverlay) {
-        type = OverlayType.Circle;
-      } else if (s instanceof ShadedTokenOverlay shadedTokenOverlay) {
-        type = OverlayType.Shaded;
-        ((ColorWell) formPanel.getComponent(COLOR)).setColor(shadedTokenOverlay.getColor());
-      } else if (s instanceof CrossTokenOverlay) {
-        type = OverlayType.Cross;
-      } else if (s instanceof DiamondTokenOverlay) {
-        type = OverlayType.Diamond;
-      } else if (s instanceof FlowDiamondTokenOverlay) {
-        type = OverlayType.GridDiamond;
-      } else if (s instanceof YieldTokenOverlay) {
-        type = OverlayType.Yield;
-      } else if (s instanceof FlowYieldTokenOverlay) {
-        type = OverlayType.GridYield;
-      } else if (s instanceof TriangleTokenOverlay) {
-        type = OverlayType.Triangle;
-      } else if (s instanceof FlowTriangleTokenOverlay) {
-        type = OverlayType.GridTriangle;
-      } else if (s instanceof FlowColorSquareTokenOverlay) {
-        type = OverlayType.GridSquare;
-      } // endif
+        case AbstractImageTokenOverlay imageTokenOverlay0 -> {
+          switch (imageTokenOverlay0) {
+            case ImageTokenOverlay imageTokenOverlay -> {
+              type = OverlayType.Image;
+            }
+            case CornerImageTokenOverlay cornerImageTokenOverlay -> {
+              type = OverlayType.CornerImage;
+              formPanel
+                  .getComboBox(CORNER)
+                  .setSelectedIndex(cornerImageTokenOverlay.getCorner().ordinal());
+            }
+            case FlowImageTokenOverlay flowImageTokenOverlay -> {
+              type = OverlayType.GridImage;
+              int size = flowImageTokenOverlay.getGrid(); // Still need grid size
+              formPanel.getSpinner(FLOW_GRID).setValue(size + "x" + size);
+            }
+          }
+        }
+
+        // endregion
+
+        // region AbstractFlowShapeTokenOverlay
+
+        case AbstractFlowShapeTokenOverlay flowShapeTokenOverlay -> {
+          int size = flowShapeTokenOverlay.getGrid();
+          formPanel.getSpinner(FLOW_GRID).setValue(size + "x" + size);
+
+          type =
+              switch (flowShapeTokenOverlay) {
+                case FlowColorDotTokenOverlay flowColorDotTokenOverlay -> OverlayType.GridDot;
+                case FlowColorSquareTokenOverlay flowColorSquareTokenOverlay ->
+                    OverlayType.GridSquare;
+                case FlowDiamondTokenOverlay flowDiamondTokenOverlay -> OverlayType.GridDiamond;
+                case FlowTriangleTokenOverlay flowTriangleTokenOverlay -> OverlayType.GridTriangle;
+                case FlowYieldTokenOverlay flowYieldTokenOverlay -> OverlayType.GridYield;
+              };
+        }
+
+        // endregion
+
+        // region AbstractShapeTokenOverlay
+
+        case AbstractShapeTokenOverlay shapeTokenOverlay -> {
+          formPanel.getSpinner(WIDTH).setValue(shapeTokenOverlay.getWidth());
+          ((ColorWell) formPanel.getComponent(COLOR)).setColor(shapeTokenOverlay.getColor());
+
+          type =
+              switch (shapeTokenOverlay) {
+                case CrossTokenOverlay crossTokenOverlay -> OverlayType.Cross;
+                case DiamondTokenOverlay diamondTokenOverlay -> OverlayType.Diamond;
+                case OTokenOverlay oTokenOverlay -> OverlayType.Circle;
+                case TriangleTokenOverlay triangleTokenOverlay -> OverlayType.Triangle;
+                case YieldTokenOverlay yieldTokenOverlay -> OverlayType.Yield;
+                case XTokenOverlay xTokenOverlay -> OverlayType.X;
+              };
+        }
+
+          // endregion
+      }
 
       // Set the type and change components
       formPanel.getComboBox(TYPE).setSelectedIndex(type.ordinal());
@@ -665,6 +690,8 @@ public class TokenStatesController
       BooleanTokenOverlay overlay = (BooleanTokenOverlay) model.getElementAt(i);
       overlay.setOrder(i);
       states.put(overlay.getName(), overlay);
+
+      MapToolUtil.uploadAssetIds(overlay.getAssetIds());
     }
     campaign.getTokenStatesMap().clear();
     campaign.getTokenStatesMap().putAll(states);
@@ -747,9 +774,8 @@ public class TokenStatesController
       fName = fName.length() == 0 ? null : fName;
       if (updatedOverlay == null || fName != null) {
         assetId = loadAsssetFile(fName, formPanel);
-      } else {
-        if (updatedOverlay instanceof ImageTokenOverlay)
-          assetId = ((ImageTokenOverlay) updatedOverlay).getAssetId();
+      } else if (updatedOverlay instanceof AbstractImageTokenOverlay imageOverlay) {
+        assetId = imageOverlay.getAssetId();
       } // endif
 
       // Create all of the image overlays

@@ -411,15 +411,20 @@ public class getInfoFunction extends AbstractFunction {
       state.addProperty("isShowOwner", bto.isShowOwner() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("isShowOthers", bto.isShowOthers() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty(
-          "isImageOverlay", (bto instanceof ImageTokenOverlay) ? BigDecimal.ONE : BigDecimal.ZERO);
+          "isImageOverlay",
+          (bto instanceof AbstractImageTokenOverlay) ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("mouseOver", bto.isMouseover() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("opacity", bto.getOpacity());
       state.addProperty("order", bto.getOrder());
-      if (bto instanceof FlowColorDotTokenOverlay) {
-        state.addProperty("gridSize", ((FlowColorDotTokenOverlay) bto).getGrid());
+
+      if (bto instanceof AbstractFlowShapeTokenOverlay flow) {
+        state.addProperty("gridSize", flow.getGrid());
       }
-      if (bto instanceof CornerImageTokenOverlay) {
-        state.addProperty("corner", ((CornerImageTokenOverlay) bto).getCorner().name());
+      if (bto instanceof FlowImageTokenOverlay flow) {
+        state.addProperty("gridSize", flow.getGrid());
+      }
+      if (bto instanceof CornerImageTokenOverlay cornerImage) {
+        state.addProperty("corner", cornerImage.getCorner().name());
       }
 
       sgroup.add(state);

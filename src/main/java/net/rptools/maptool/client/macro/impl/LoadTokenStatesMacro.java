@@ -23,6 +23,7 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
@@ -72,6 +73,7 @@ public class LoadTokenStatesMacro implements Macro {
       List<BooleanTokenOverlay> overlays = (List<BooleanTokenOverlay>) decoder.readObject();
       decoder.close();
       for (BooleanTokenOverlay overlay : overlays) {
+        MapToolUtil.uploadAssetIds(overlay.getAssetIds());
         MapTool.getCampaign().getTokenStatesMap().put(overlay.getName(), overlay);
       } // endfor
       MapTool.addLocalMessage(I18N.getText("loadtokenstates.loaded", overlays.size()));

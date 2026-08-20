@@ -184,8 +184,6 @@ public class AppActions {
         }
       };
 
-  // region Screenshot export
-
   private static final class ExportScreenshotAction extends ZoneClientAction {
     private final boolean forceSaveAs;
 
@@ -384,6 +382,11 @@ public class AppActions {
       new TranslatedClientAction("action.addDefaultTables") {
 
         @Override
+        public boolean isAvailable() {
+          return MapTool.getPlayer().isGM();
+        }
+
+        @Override
         protected void executeAction() {
           try {
             // Load the defaults
@@ -403,7 +406,11 @@ public class AppActions {
 
             MapTool.getCampaign().mergeCampaignProperties(properties);
 
-            MapTool.getFrame().repaint();
+            for (LookupTable table : properties.getLookupTableMap().values()) {
+              MapTool.serverCommand().putLookupTable(table);
+            }
+
+            MapTool.getFrame().getLookupTablePanel().refreshStructure();
 
           } catch (IOException ioe) {
             MapTool.showError("msg.error.failedAddingDefaultTables", ioe);
@@ -2422,6 +2429,7 @@ public class AppActions {
         // UI related stuff
         MapTool.getFrame().getCommandPanel().clearAllIdentities();
         MapTool.getFrame().resetPanels();
+        MapTool.getFrame().getLookupTablePanel().updateView();
 
       } catch (Throwable t) {
         if (t.getCause() instanceof AppState.FailedToAcquireLockException) {

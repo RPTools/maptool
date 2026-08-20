@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+	<rect width="16" height="16" style="fill:none"/>
+	<rect x="2" y="1" width="5" height="4" style="fill:#389fd6;paint-order:fill markers stroke"/>
+	<rect x="2" y="6" width="5" height="1" style="clip-rule:evenodd;fill-rule:evenodd;fill:#6e6e6e;paint-order:fill markers stroke"/>
+	<rect x="9" y="1" width="5" height="4" style="clip-rule:evenodd;fill-rule:evenodd;fill:#389fd6;paint-order:fill markers stroke"/>
+	<rect x="9" y="6" width="5" height="1" style="clip-rule:evenodd;fill-rule:evenodd;fill:#6e6e6e;paint-order:fill markers stroke"/>
+	<rect x="2" y="9" width="5" height="4" style="clip-rule:evenodd;fill-rule:evenodd;fill:#389fd6;paint-order:fill markers stroke"/>
+	<rect x="2" y="14" width="5" height="1" style="clip-rule:evenodd;fill-rule:evenodd;fill:#6e6e6e;paint-order:fill markers stroke"/>
+	<rect x="9" y="9" width="5" height="4" style="clip-rule:evenodd;fill-rule:evenodd;fill:#389fd6;paint-order:fill markers stroke"/>
+	<rect x="9" y="14" width="5" height="1" style="clip-rule:evenodd;fill-rule:evenodd;fill:#6e6e6e;paint-order:fill markers stroke"/>
+</svg>

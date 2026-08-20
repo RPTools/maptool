@@ -36,7 +36,7 @@ public class LookupTableMacro extends AbstractMacro {
     StringBuilder sb = new StringBuilder();
 
     if (macro.trim().length() == 0) {
-      MapTool.addLocalMessage("lookuptable.specifyTable");
+      MapTool.addLocalMessage(I18N.getText("lookuptable.specifyTable"));
       return;
     }
     List<String> words = StringUtil.splitNextWord(macro);
@@ -90,7 +90,8 @@ public class LookupTableMacro extends AbstractMacro {
       }
       MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
     } catch (ParserException pe) {
-      MapTool.addLocalMessage("lookuptable.couldNotPerform" + pe.getMessage());
+      MapTool.addLocalMessage(
+          I18N.getText("lookuptable.couldNotPerform", tableName) + " " + pe.getMessage());
     }
   }
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.lookuptable.LookupTablePaneView">
-  <grid id="33eea" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="33eea" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="10" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="670" height="123"/>
+      <xy x="10" y="10" width="1252" height="123"/>
     </constraints>
     <properties>
       <name value="mainForm"/>
@@ -12,11 +12,11 @@
     <children>
       <component id="c5119" class="javax.swing.JLabel">
         <constraints>
-          <grid row="1" column="0" row-span="1" col-span="7" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="9" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <name value="imagePanel"/>
-          <text value="imagePanel"/>
+          <name value="viewCardContainerPanel"/>
+          <text value="viewCardContainerPanel"/>
         </properties>
       </component>
       <component id="50719" class="javax.swing.JButton">
@@ -83,16 +83,36 @@
           <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.export"/>
         </properties>
       </component>
+      <vspacer id="e553d">
+        <constraints>
+          <grid row="1" column="9" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
       <hspacer id="f338">
         <constraints>
           <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
       </hspacer>
-      <vspacer id="e553d">
+      <component id="9cb6a" class="javax.swing.JToggleButton">
         <constraints>
-          <grid row="1" column="7" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
-      </vspacer>
+        <properties>
+          <name value="viewIconsToggleButton"/>
+          <text value=""/>
+          <toolTipText value=""/>
+        </properties>
+      </component>
+      <component id="eb415" class="javax.swing.JToggleButton">
+        <constraints>
+          <grid row="0" column="8" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="viewDetailsToggleButton"/>
+          <text value=""/>
+          <toolTipText value=""/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>

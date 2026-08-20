@@ -42,6 +42,8 @@ import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.GenericDialogFactory;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.client.ui.ImageAssetPanel;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.LookupTable;
@@ -58,6 +60,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
   private final EditLookupTablePanelView view;
   private ImageAssetPanel tableImageAssetPanel;
   private int defaultRowHeight;
+  private boolean isNew;
 
   private EditLookupTablePanel(EditLookupTablePanelView view) {
     super(view.getRootComponent());
@@ -83,11 +86,18 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
   }
 
   public void showDialog(@Nullable LookupTable lookupTable, boolean isNew) {
+    this.isNew = isNew;
     var title =
         isNew || lookupTable == null
             ? I18N.getString("LookupTablePanel.msg.titleNew")
             : I18N.getString("LookupTablePanel.msg.titleEdit");
     dialogFactory.setDialogTitle(title);
+
+    view.getIsVisibleIcon()
+        .setIcon(RessourceManager.getSmallIcon(Icons.TABLEPANEL_TABLE_PLAYER_VISIBLE));
+    view.getAllowLookupIcon()
+        .setIcon(RessourceManager.getSmallIcon(Icons.TABLEPANEL_TABLE_PLAYER_LOOKUP));
+    view.getPickOnceIcon().setIcon(RessourceManager.getSmallIcon(Icons.TABLEPANEL_TABLE_PICK_ONCE));
 
     bind(lookupTable);
 
@@ -291,6 +301,10 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
     if (!name.equals(origname)) {
       // New name is not the same as the existing name
       MapTool.getCampaign().getLookupTableMap().remove(origname);
+      // if not a new table (i.e. create/duplicate) delete the previous named one from the server.
+      if (!isNew) {
+        MapTool.serverCommand().deleteLookupTable(origname);
+      }
     }
     // This will add it if it is new
     MapToolUtil.uploadAsset(AssetManager.getAsset(tableImageAssetPanel.getImageId()));

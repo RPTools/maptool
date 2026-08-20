@@ -17,8 +17,8 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.token.AbstractImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -59,9 +59,9 @@ public class StateImageFunction extends AbstractFunction {
       throw new ParserException(
           I18N.getText("macro.function.stateImage.unknownState", "getStateImage()", stateName));
     }
-    if (over instanceof ImageTokenOverlay) {
+    if (over instanceof AbstractImageTokenOverlay imageOverlay) {
       StringBuilder assetId = new StringBuilder("asset://");
-      assetId.append(((ImageTokenOverlay) over).getAssetId().toString());
+      assetId.append(imageOverlay.getAssetId().toString());
       if (size != null && size.intValue() != 0) {
         assetId.append("-");
         // Constrain it slightly, so its between 1 and 500 :)

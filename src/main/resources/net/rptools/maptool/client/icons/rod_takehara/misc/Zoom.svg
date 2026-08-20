@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+	<rect x="-1.8311e-6" width="16" height="16" style="clip-rule:evenodd;fill:none;stroke-linejoin:round;stroke-miterlimit:2"/>
+	<path d="m11 13c0.89666 0.55417 2.2546 1.7454 3 1 0.74536-0.74536-0.44583-2.1033-1-3-0.49566-0.802-2-2-2-2l-2 2s1.198 1.5043 2 2z" style="clip-rule:evenodd;fill-rule:evenodd;fill:#6e6e6e;stroke-linejoin:round;stroke-miterlimit:2;stroke-width:1.3663"/>
+	<circle transform="scale(1,-1)" cx="7" cy="-7.0002" r="4.325" style="fill:none;paint-order:markers stroke fill;stroke-linecap:square;stroke-miterlimit:.8;stroke-width:1.35;stroke:#6e6e6e"/>
+</svg>

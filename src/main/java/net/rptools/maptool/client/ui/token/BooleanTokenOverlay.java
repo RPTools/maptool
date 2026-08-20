@@ -31,10 +31,8 @@ import org.apache.logging.log4j.Logger;
 public abstract sealed class BooleanTokenOverlay extends AbstractTokenOverlay
     permits AbstractShapeTokenOverlay,
         AbstractFlowShapeTokenOverlay,
+        AbstractImageTokenOverlay,
         ColorDotTokenOverlay,
-        ImageTokenOverlay,
-        CornerImageTokenOverlay,
-        FlowImageTokenOverlay,
         ShadedTokenOverlay {
   private static final Logger log = LogManager.getLogger(BooleanTokenOverlay.class);
 

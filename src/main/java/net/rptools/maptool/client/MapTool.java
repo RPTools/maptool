@@ -927,6 +927,7 @@ public class MapTool {
 
     clientFrame.clearZoneRendererList();
     clientFrame.getInitiativePanel().setZone(null);
+    clientFrame.getLookupTablePanel().reset();
     clientFrame.clearTokenTree();
 
     // Find the map to place the player on first. If `defaultZoneId` was provided and is a
@@ -981,6 +982,7 @@ public class MapTool {
         .getInitiativePanel()
         .setInitPanelButtonsDisabled(campaign.isInitiativePanelButtonsDisabled());
     clientFrame.getInitiativePanel().updateView();
+    clientFrame.getLookupTablePanel().updateView();
 
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();

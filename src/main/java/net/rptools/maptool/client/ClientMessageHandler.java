@@ -288,7 +288,7 @@ public class ClientMessageHandler implements MessageHandler {
           ip.setInitUseReverseSort(properties.isInitiativeUseReverseSort());
           ip.setInitPanelButtonsDisabled(properties.isInitiativePanelButtonsDisabled());
           ip.updateView();
-          MapTool.getFrame().getLookupTablePanel().updateView();
+          MapTool.getFrame().getLookupTablePanel().refreshStructure();
         });
   }
 
@@ -1107,7 +1107,7 @@ public class ClientMessageHandler implements MessageHandler {
         () -> {
           var table = LookupTable.fromDto(msg.getTable());
           client.getCampaign().getLookupTableMap().put(table.getName(), table);
-          MapTool.getFrame().getLookupTablePanel().updateView();
+          MapTool.getFrame().getLookupTablePanel().refreshStructure();
         });
   }
 
@@ -1115,7 +1115,7 @@ public class ClientMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           client.getCampaign().getLookupTableMap().remove(msg.getTableName());
-          MapTool.getFrame().getLookupTablePanel().updateView();
+          MapTool.getFrame().getLookupTablePanel().refreshStructure();
         });
   }
 }

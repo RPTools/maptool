@@ -14,17 +14,14 @@
  */
 package net.rptools.maptool.client.ui.lookuptable;
 
-import java.awt.EventQueue;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -41,13 +38,35 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
   private static final long serialVersionUID = -4404834393567699280L;
   private static final Logger log = LogManager.getLogger(LookupTablePanel.class);
 
+  /** the panel which contains everything */
+  private JPanel viewContainer;
+
+  /** an icon and name label view for {@link LookupTable}s */
   private ImagePanel imagePanel;
+
+  /** a tabular view of {@link LookupTable}s' details */
+  private LookupTableDetailsTablePanel detailsTablePanel;
+
+  /** manages the different views and so only one is visible as a time */
+  private CardLayout viewLayout;
 
   public LookupTablePanel() {
     super(new LookupTablePaneView().getRootComponent());
     panelInit();
   }
 
+  /** the view options */
+  private enum ViewMode {
+    /** a view of {@code LookupTable} images and their names as labels. */
+    ICONS,
+    /** a tabular view of {@code LookupTable} details. */
+    DETAILS
+  }
+
+  /** the default view */
+  private ViewMode currentView = ViewMode.ICONS;
+
+  /** update the view */
   public void updateView() {
     getNewButton().setVisible(MapTool.getPlayer().isGM());
     getEditButton().setVisible(MapTool.getPlayer().isGM());
@@ -56,39 +75,100 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
     getDuplicateButton().setVisible(MapTool.getPlayer().isGM());
     getDeleteButton().setVisible(MapTool.getPlayer().isGM());
     revalidate();
-    repaint();
+
+    detailsTablePanel.refreshStructure(); // columns for GM/player differ
+    refreshData();
   }
 
-  public void initImagePanel() {
+  public void initViewCardContainerPanel() {
+
+    // create the image panel
     imagePanel = new ImagePanel();
     imagePanel.setModel(new LookupTableImagePanelModel(this));
     imagePanel.setSelectionMode(ImagePanel.SelectionMode.SINGLE);
     imagePanel.addMouseListener(
         new MouseAdapter() {
+          /** double-clicking the mouse should roll on the appropriate LookupTable */
           @Override
           public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
-              List<Object> ids = getImagePanel().getSelectedIds();
-              if (ids == null || ids.size() == 0) {
-                return;
-              }
-              LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(ids.get(0));
+              LookupTable lookupTable = getSelectedLookupTable();
               if (lookupTable == null) {
                 return;
               }
-              MapTool.getFrame()
-                  .getCommandPanel()
-                  .commitCommand("/tbl \"" + lookupTable.getName() + "\"");
+              lookupTableRoll(lookupTable);
             }
           }
         });
-    replaceComponent(
-        "mainForm",
-        "imagePanel",
+
+    // add scrolling to the image panel
+    JScrollPane imageScroll =
         new JScrollPane(
             imagePanel,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+    // create the table panel (which already caters for scrolling)
+    detailsTablePanel = new LookupTableDetailsTablePanel();
+    JTable detailsTable = detailsTablePanel.getDetailsTable();
+    detailsTable.addMouseListener(
+        new MouseAdapter() {
+          /**
+           * double-clicking the mouse on the table should:
+           *
+           * <ul>
+           *   <li>if a Player -> roll on the appropriate LookupTable
+           *   <li>if a GM -> edit the table, or roll on the table if the image column was the
+           *       target
+           */
+          @Override
+          public void mouseClicked(MouseEvent e) {
+            if (e.getClickCount() != 2) {
+              return;
+            }
+            LookupTable lookupTable = getSelectedLookupTable();
+            if (lookupTable == null) {
+              return;
+            }
+            if (MapTool.getPlayer().isGM()) {
+              if (detailsTable.columnAtPoint(e.getPoint()) == 0) {
+                lookupTableRoll(lookupTable);
+              } else {
+                new EditLookupTablePanel().showDialog(lookupTable, false);
+              }
+            } else {
+              lookupTableRoll(lookupTable);
+            }
+          }
+        });
+
+    viewLayout = new CardLayout();
+    viewContainer = new JPanel(viewLayout);
+
+    viewContainer.add(imageScroll, ViewMode.ICONS.name());
+    viewContainer.add(detailsTablePanel, ViewMode.DETAILS.name());
+
+    replaceComponent("mainForm", "viewCardContainerPanel", viewContainer);
+  }
+
+  /** Switch to the image panel icon view */
+  public void showIconsView() {
+    currentView = ViewMode.ICONS;
+    viewLayout.show(viewContainer, currentView.name());
+  }
+
+  /** Switch to the table panel details view */
+  public void showDetailsView() {
+    currentView = ViewMode.DETAILS;
+    viewLayout.show(viewContainer, currentView.name());
+  }
+
+  public ImagePanel getImagePanel() {
+    return imagePanel;
+  }
+
+  public LookupTableDetailsTablePanel getDetailsTablePanel() {
+    return detailsTablePanel;
   }
 
   public JButton getNewButton() {
@@ -111,10 +191,6 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
     return (JButton) getComponent("runButton");
   }
 
-  public ImagePanel getImagePanel() {
-    return imagePanel;
-  }
-
   public JButton getImportButton() {
     return (JButton) getComponent("importButton");
   }
@@ -123,24 +199,30 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
     return (JButton) getComponent("exportButton");
   }
 
+  public JToggleButton getViewIconsToggleButton() {
+    return (JToggleButton) getComponent("viewIconsToggleButton");
+  }
+
+  public JToggleButton getViewDetailsToggleButton() {
+    return (JToggleButton) getComponent("viewDetailsToggleButton");
+  }
+
   public void initDuplicateButton() {
     getDuplicateButton().setMargin(new Insets(0, 0, 0, 0));
     getDuplicateButton().setIcon(RessourceManager.getSmallIcon(Icons.ACTION_COPY));
     getDuplicateButton()
         .addActionListener(
             e -> {
-              List<Object> ids = getImagePanel().getSelectedIds();
-              if (ids == null || ids.isEmpty()) {
+              LookupTable selected = getSelectedLookupTable();
+              if (selected == null) {
                 return;
               }
-              LookupTable lookupTable =
-                  new LookupTable(MapTool.getCampaign().getLookupTableMap().get(ids.get(0)));
+              LookupTable lookupTable = new LookupTable(selected);
               lookupTable.setName("Copy of " + lookupTable.getName());
-
               new EditLookupTablePanel().showDialog(lookupTable, true);
 
               imagePanel.clearSelection();
-              repaint();
+              refreshStructure();
             });
   }
 
@@ -150,13 +232,12 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
     getEditButton()
         .addActionListener(
             e -> {
-              List<Object> ids = getImagePanel().getSelectedIds();
-              if (ids == null || ids.isEmpty()) {
+              LookupTable lookupTable = getSelectedLookupTable();
+              if (lookupTable == null) {
                 return;
               }
-              LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(ids.get(0));
-
               new EditLookupTablePanel().showDialog(lookupTable, false);
+              refreshData();
             });
   }
 
@@ -167,9 +248,8 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
         .addActionListener(
             e -> {
               new EditLookupTablePanel().showDialog(new LookupTable(), true);
-
               imagePanel.clearSelection();
-              repaint();
+              refreshStructure();
             });
   }
 
@@ -179,16 +259,14 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
     getDeleteButton()
         .addActionListener(
             e -> {
-              List<Object> ids = getImagePanel().getSelectedIds();
-              if (ids == null || ids.size() == 0) {
+              LookupTable lookupTable = getSelectedLookupTable();
+              if (lookupTable == null) {
                 return;
               }
-              LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(ids.get(0));
-
               if (MapTool.confirm("LookupTablePanel.confirm.delete", lookupTable.getName())) {
                 MapTool.serverCommand().deleteLookupTable(lookupTable.getName());
                 imagePanel.clearSelection();
-                repaint();
+                refreshStructure();
               }
             });
   }
@@ -205,7 +283,6 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
         .addActionListener(
             e -> {
               JFileChooser chooser = MapTool.getFrame().getLoadTableFileChooser();
-
               if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
                 return;
               }
@@ -223,7 +300,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
                     }
                     MapTool.serverCommand().putLookupTable(newTable);
                     imagePanel.clearSelection();
-                    imagePanel.repaint();
+                    refreshStructure();
                   });
             });
   }
@@ -240,7 +317,6 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
         .addActionListener(
             e -> {
               JFileChooser chooser = MapTool.getFrame().getSaveTableFileChooser();
-
               boolean tryAgain = true;
               while (tryAgain) {
                 if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
@@ -269,12 +345,10 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
                       }
                     }
                     try {
-                      List<Object> ids = getImagePanel().getSelectedIds();
-                      if (ids == null || ids.size() == 0) {
+                      LookupTable lookupTable = getSelectedLookupTable();
+                      if (lookupTable == null) {
                         return;
                       }
-                      LookupTable lookupTable =
-                          MapTool.getCampaign().getLookupTableMap().get(ids.get(0));
                       PersistenceUtil.saveTable(lookupTable, selectedFile);
                       MapTool.showInformation(
                           I18N.getText("LookupTablePanel.info.saved", selectedFile.getName()));
@@ -284,5 +358,88 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
                     }
                   });
             });
+  }
+
+  public void initToggleViewButtonGroup() {
+    JToggleButton viewIconsToggleButton = getViewIconsToggleButton();
+    JToggleButton viewDetailsToggleButton = getViewDetailsToggleButton();
+
+    viewIconsToggleButton.setMargin(new Insets(0, 0, 0, 0));
+    viewDetailsToggleButton.setMargin(new Insets(0, 0, 0, 0));
+
+    var iconViewIcon = RessourceManager.getSmallIcon(Icons.TABLEPANEL_VIEW_ICONS);
+    if (iconViewIcon != null) {
+      viewIconsToggleButton.setIcon(iconViewIcon);
+      viewIconsToggleButton.setText("");
+    } else {
+      viewIconsToggleButton.setText(I18N.getText("LookupTablePanel.viewIcons"));
+    }
+    var iconViewDetails = RessourceManager.getSmallIcon(Icons.TABLEPANEL_VIEW_DETAILS);
+    if (iconViewDetails != null) {
+      viewDetailsToggleButton.setIcon(iconViewDetails);
+      viewDetailsToggleButton.setText("");
+    } else {
+      viewDetailsToggleButton.setText(I18N.getText("LookupTablePanel.viewDetails"));
+    }
+
+    viewIconsToggleButton.setToolTipText(I18N.getText("LookupTablePanel.viewIcons.tooltip"));
+    viewDetailsToggleButton.setToolTipText(I18N.getText("LookupTablePanel.viewDetails.tooltip"));
+
+    ButtonGroup group = new ButtonGroup();
+    group.add(viewIconsToggleButton);
+    group.add(viewDetailsToggleButton);
+
+    viewIconsToggleButton.setSelected(true);
+
+    viewIconsToggleButton.addActionListener(e -> showIconsView());
+    viewDetailsToggleButton.addActionListener(e -> showDetailsView());
+  }
+
+  /**
+   * Retrieve the selected {@code LookupTable} from the appropriate panel
+   *
+   * @return the selected {@code LookupTable}
+   */
+  private LookupTable getSelectedLookupTable() {
+    if (currentView == ViewMode.DETAILS) {
+      return detailsTablePanel.getSelectedLookupTable();
+    }
+    return getSelectedLookupTableFromIcons();
+  }
+
+  /**
+   * Retrieve the selected {@link LookupTable} from the icons image panel
+   *
+   * @return the selected LookupTable
+   */
+  private LookupTable getSelectedLookupTableFromIcons() {
+    List<Object> ids = imagePanel.getSelectedIds();
+    if (ids == null || ids.isEmpty()) {
+      return null;
+    }
+    return MapTool.getCampaign().getLookupTableMap().get(ids.get(0));
+  }
+
+  /** Refresh the panel cards' inner panels which list the {@link LookupTable}s */
+  public void refreshData() {
+    detailsTablePanel.refreshData();
+    imagePanel.repaint();
+  }
+
+  /** Refresh the panel cards' inner panels which list the {@link LookupTable}s */
+  public void refreshStructure() {
+    detailsTablePanel.refreshStructure();
+    imagePanel.repaint();
+  }
+
+  /** Reset the panel */
+  public void reset() {
+    detailsTablePanel.reset();
+    imagePanel.repaint();
+  }
+
+  /** Perform a roll on the given {@link LookupTable} */
+  public void lookupTableRoll(LookupTable lookupTable) {
+    MapTool.getFrame().getCommandPanel().commitCommand("/tbl \"" + lookupTable.getName() + "\"");
   }
 }

@@ -118,7 +118,9 @@ public class AddTokenStateMacro implements Macro {
       MapTool.addLocalMessage(e.getMessage());
       return;
     }
+    MapToolUtil.uploadAssetIds(tokenOverlay.getAssetIds());
     MapTool.getCampaign().getTokenStatesMap().put(tokenOverlay.getName(), tokenOverlay);
+
     MapTool.addLocalMessage(I18N.getText("addtokenstate.added", tokenOverlay.getName()));
   }
 

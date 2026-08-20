@@ -34,6 +34,7 @@ public class CampaignManager {
    */
   public void clearCampaignData() {
     MapTool.getFrame().getOverlayPanel().removeAllOverlays();
+    MapTool.getFrame().getLookupTablePanel().reset();
     JSScriptEngine.resetContexts();
     new LibraryManager().deregisterAllLibraries();
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();

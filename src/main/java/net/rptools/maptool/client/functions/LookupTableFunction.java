@@ -119,7 +119,7 @@ public class LookupTableFunction extends AbstractFunction {
       boolean visible = FunctionUtil.getBooleanValue(visibleStr);
       if (visible != lookupTable.getVisible()) {
         lookupTable.setVisible(visible);
-        MapTool.serverCommand().putLookupTable(lookupTable);
+        processMutatedLookupTable(lookupTable, true);
       }
       return lookupTable.getVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
 
@@ -141,7 +141,7 @@ public class LookupTableFunction extends AbstractFunction {
       boolean allowLookup = FunctionUtil.getBooleanValue(access);
       if (allowLookup != lookupTable.getAllowLookup()) {
         lookupTable.setAllowLookup(FunctionUtil.getBooleanValue(access));
-        MapTool.serverCommand().putLookupTable(lookupTable);
+        processMutatedLookupTable(lookupTable, true);
       }
       return lookupTable.getAllowLookup() ? BigDecimal.ONE : BigDecimal.ZERO;
 
@@ -161,7 +161,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       if (!roll.equals(lookupTable.getRoll())) {
         lookupTable.setRoll(roll);
-        MapTool.serverCommand().putLookupTable(lookupTable);
+        processMutatedLookupTable(lookupTable, true);
       }
 
       return roll;
@@ -173,7 +173,7 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.clearEntries();
-      MapTool.serverCommand().putLookupTable(lookupTable);
+      processMutatedLookupTable(lookupTable, true);
       return "";
 
     } else if ("addTableEntry".equalsIgnoreCase(function)) {
@@ -190,7 +190,7 @@ public class LookupTableFunction extends AbstractFunction {
       }
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.addEntry(min, max, value, asset);
-      MapTool.serverCommand().putLookupTable(lookupTable);
+      processMutatedLookupTable(lookupTable, true);
       return "";
 
     } else if ("deleteTableEntry".equalsIgnoreCase(function)) {
@@ -205,7 +205,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupEntry entry = lookupTable.getLookup(roll);
       if (entry != null) {
         lookupTable.deleteEntry(entry);
-        MapTool.serverCommand().putLookupTable(lookupTable);
+        processMutatedLookupTable(lookupTable, true);
       }
       return "";
 
@@ -227,7 +227,7 @@ public class LookupTableFunction extends AbstractFunction {
       if (asset != null) {
         lookupTable.setTableImage(asset);
       }
-      MapTool.serverCommand().putLookupTable(lookupTable);
+      processMutatedLookupTable(lookupTable, false);
       return "";
 
     } else if ("deleteTable".equalsIgnoreCase(function)) {
@@ -238,6 +238,9 @@ public class LookupTableFunction extends AbstractFunction {
       // Ensure that the table exists.
       LookupTable lookupTable = getMaptoolTable(name, function);
       MapTool.serverCommand().deleteLookupTable(name);
+      if (MapTool.getFrame() != null) {
+        MapTool.getFrame().getLookupTablePanel().refreshStructure();
+      }
       return "";
 
     } else if ("getTableImage".equalsIgnoreCase(function)) {
@@ -259,7 +262,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       if (!Objects.equals(asset, lookupTable.getTableImage())) {
         lookupTable.setTableImage(asset);
-        MapTool.serverCommand().putLookupTable(lookupTable);
+        processMutatedLookupTable(lookupTable, true);
       }
       return "";
 
@@ -272,7 +275,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable oldTable = getMaptoolTable(oldName, function);
       LookupTable newTable = new LookupTable(oldTable);
       newTable.setName(newName);
-      MapTool.serverCommand().putLookupTable(newTable);
+      processMutatedLookupTable(newTable, false);
       return "";
 
     } else if ("setTableEntry".equalsIgnoreCase(function)) {
@@ -305,7 +308,7 @@ public class LookupTableFunction extends AbstractFunction {
       }
 
       if (changed) {
-        MapTool.serverCommand().putLookupTable(lookupTable);
+        processMutatedLookupTable(lookupTable, true);
       }
       return 1;
 
@@ -432,7 +435,7 @@ public class LookupTableFunction extends AbstractFunction {
       } else {
         lookupTable.resetPicks();
       }
-      MapTool.serverCommand().putLookupTable(lookupTable);
+      processMutatedLookupTable(lookupTable, true);
       return "";
 
     } else if ("setTablePickOnce".equalsIgnoreCase(function)) {
@@ -445,7 +448,7 @@ public class LookupTableFunction extends AbstractFunction {
       boolean pickOnce = FunctionUtil.getBooleanValue(pickOnceStr);
       if (pickOnce != lookupTable.getPickOnce()) {
         lookupTable.setPickOnce(pickOnce);
-        MapTool.serverCommand().putLookupTable(lookupTable);
+        processMutatedLookupTable(lookupTable, true);
       }
       return lookupTable.getPickOnce() ? BigDecimal.ONE : BigDecimal.ZERO;
 
@@ -547,6 +550,22 @@ public class LookupTableFunction extends AbstractFunction {
   private void checkTrusted(String functionName) throws ParserException {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+    }
+  }
+
+  /**
+   * Centralized update of the LookupTable on the server and refresh the LookupTablePanel.
+   *
+   * <p>note, the MTScript deleteTable function handles this differently
+   */
+  private void processMutatedLookupTable(LookupTable lookupTable, boolean dataOnlyChange) {
+    MapTool.serverCommand().putLookupTable(lookupTable);
+    if (MapTool.getFrame() != null) {
+      if (dataOnlyChange) {
+        MapTool.getFrame().getLookupTablePanel().refreshData();
+      } else {
+        MapTool.getFrame().getLookupTablePanel().refreshStructure();
+      }
     }
   }
 

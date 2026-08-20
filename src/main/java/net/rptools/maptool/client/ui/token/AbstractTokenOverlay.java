@@ -18,6 +18,8 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.Comparator;
+import java.util.List;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.proto.TokenOverlayDto;
@@ -256,6 +258,13 @@ public abstract class AbstractTokenOverlay implements Cloneable {
    * @see java.lang.Object#clone()
    */
   public abstract Object clone();
+
+  /**
+   * @return The keys for all assets required by the overlay.
+   */
+  public List<MD5Key> getAssetIds() {
+    return List.of();
+  }
 
   protected void fillFrom(TokenOverlayDto dto) {
     name = dto.getName();

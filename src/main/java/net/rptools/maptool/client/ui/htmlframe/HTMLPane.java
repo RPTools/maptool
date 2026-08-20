@@ -170,6 +170,18 @@ public class HTMLPane extends JEditorPane {
   }
 
   /**
+   * Handle an icon change.
+   *
+   * @param iconHref The icon to change to.
+   */
+  private void doChangeIcon(String iconHref) {
+    if (actionListeners != null) {
+      log.debug("changeIcon event: {}", iconHref);
+      actionListeners.actionPerformed(new HTMLActionEvent.ChangeIconActionEvent(this, iconHref));
+    }
+  }
+
+  /**
    * Handle a request to register a macro callback.
    *
    * @param type The type of event.
@@ -315,6 +327,8 @@ public class HTMLPane extends JEditorPane {
           } catch (IOException | ExecutionException | InterruptedException e) {
             // Do nothing
           }
+        } else if (rel.toString().equalsIgnoreCase("icon")) {
+          doChangeIcon(href.toString());
         } else if (type.toString().equalsIgnoreCase("macro")) {
           if (rel.toString().equalsIgnoreCase("onChangeImpersonated")) {
             doRegisterMacro("onChangeImpersonated", href.toString());

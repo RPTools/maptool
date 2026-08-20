@@ -33,18 +33,13 @@ import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.client.ui.token.ColorDotTokenOverlay;
 import net.rptools.maptool.client.ui.token.DiamondTokenOverlay;
-import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
-import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.OTokenOverlay;
 import net.rptools.maptool.client.ui.token.ShadedTokenOverlay;
-import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TriangleTokenOverlay;
-import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
@@ -669,20 +664,13 @@ public class CampaignProperties implements Serializable {
     }
 
     // States have images as well
-    for (AbstractTokenOverlay overlay : getTokenStatesMap().values()) {
-      if (overlay instanceof ImageTokenOverlay) set.add(((ImageTokenOverlay) overlay).getAssetId());
+    for (BooleanTokenOverlay overlay : getTokenStatesMap().values()) {
+      set.addAll(overlay.getAssetIds());
     }
 
     // Bars
     for (BarTokenOverlay overlay : getTokenBarsMap().values()) {
-      if (overlay instanceof SingleImageBarTokenOverlay) {
-        set.add(((SingleImageBarTokenOverlay) overlay).getAssetId());
-      } else if (overlay instanceof TwoImageBarTokenOverlay) {
-        set.add(((TwoImageBarTokenOverlay) overlay).getTopAssetId());
-        set.add(((TwoImageBarTokenOverlay) overlay).getBottomAssetId());
-      } else if (overlay instanceof MultipleImageBarTokenOverlay) {
-        set.addAll(Arrays.asList(((MultipleImageBarTokenOverlay) overlay).getAssetIds()));
-      }
+      set.addAll(overlay.getAssetIds());
     }
     return set;
   }

@@ -503,6 +503,35 @@ public class LookupTable {
     return this;
   }
 
+  /**
+   * Retrieves the number of table entries
+   *
+   * @return the number of tables entries
+   */
+  public int getEntryCount() {
+    return entryList.size();
+  }
+
+  /**
+   * Returns the number of entries that have an image assigned.
+   *
+   * @return count of entries with a non-null imageId
+   */
+  public long getEntryImageCount() {
+    return entryList.stream().filter(entry -> entry.getImageId() != null).count();
+  }
+
+  /**
+   * Returns the number of entries that have a value assigned.
+   *
+   * @return count of entries with a non-null value
+   */
+  public long getEntryValueCount() {
+    return entryList.stream()
+        .filter(entry -> entry.getValue() != null && !entry.getValue().isEmpty())
+        .count();
+  }
+
   public static LookupTable fromDto(LookupTableDto dto) {
     var table = new LookupTable();
     table.name = dto.hasName() ? dto.getName().getValue() : null;

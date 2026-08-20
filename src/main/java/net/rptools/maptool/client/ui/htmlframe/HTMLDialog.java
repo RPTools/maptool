@@ -26,6 +26,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -48,13 +50,13 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
   /** The input status of the dialog (input=true: automatically close on form submit) */
   private boolean input;
 
-  /** The value stored in the frame. */
+  /** The value stored in the dialog. */
   private Object value;
 
   /** Panel for HTML. */
   private HTMLPanelInterface panel;
 
-  /** The name of the frame. */
+  /** The name of the dialog. */
   private final String name;
 
   /** Can the dialog be resized? */
@@ -68,6 +70,9 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
 
   /** Is the panel HTML5 or HTML3.2. */
   private boolean isHTML5;
+
+  /** The icon reference for the dialog */
+  private String iconRef = null;
 
   @Override
   public Map<String, String> macroCallbacks() {
@@ -128,9 +133,16 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param width the width of the dialog
    * @param height the height of the dialog
    * @param isHTML5 whether the dialog should use HTML5 or HTML3.2
+   * @param iconRef the icon reference for the dialog
    */
   private HTMLDialog(
-      Frame parent, String name, boolean decorated, int width, int height, boolean isHTML5) {
+      Frame parent,
+      String name,
+      boolean decorated,
+      int width,
+      int height,
+      boolean isHTML5,
+      String iconRef) {
     super(parent, name, false);
     addWindowListener(
         new WindowAdapter() {
@@ -147,6 +159,11 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     width = width < 100 ? 400 : width;
     height = height < 50 ? 200 : height;
     setPreferredSize(new Dimension(width, height));
+
+    // update the icon if one was provided
+    if (iconRef != null) {
+      updateIcon(iconRef);
+    }
 
     // Creation of HTML panel.
     addHTMLPanel(decorated, isHTML5);
@@ -200,6 +217,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param isHTML5 whether the frame should support HTML5
    * @param value a value to be returned by getDialogProperties()
    * @param htmlContent the HTML to display in the dialog
+   * @param iconRef the icon reference for the dialog
    * @return the dialog
    */
   static HTMLDialog showDialog(
@@ -214,16 +232,18 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       boolean scrollReset,
       boolean isHTML5,
       Object value,
-      HTMLContent htmlContent) {
+      HTMLContent htmlContent,
+      String iconRef) {
     HTMLDialog dialog;
     if (dialogs.containsKey(name)) {
       dialog = dialogs.get(name);
     } else {
-      dialog = new HTMLDialog(MapTool.getFrame(), name, frame, width, height, isHTML5);
+      dialog = new HTMLDialog(MapTool.getFrame(), name, frame, width, height, isHTML5, iconRef);
       dialogs.put(name, dialog);
     }
+
     dialog.updateContents(
-        htmlContent, title, frame, input, temp, closeButton, scrollReset, isHTML5, value);
+        htmlContent, title, frame, input, temp, closeButton, scrollReset, isHTML5, value, iconRef);
 
     if (!dialog.isVisible()) {
       dialog.setVisible(true);
@@ -267,6 +287,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       dialogProperties.addProperty(
           "temporary", FunctionUtil.getDecimalForBoolean(dialog.getTemporary()));
       dialogProperties.addProperty("title", dialog.getTitle());
+      dialogProperties.addProperty("icon", dialog.iconRef);
       dialogProperties.addProperty(
           "visible", FunctionUtil.getDecimalForBoolean(dialog.isVisible()));
       dialogProperties.addProperty(
@@ -339,7 +360,8 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param closeButton whether to show a close button
    * @param scrollReset whether the scrollbar should be reset
    * @param isHTML5 whether to make the dialog HTML5 (JavaFX)
-   * @param val the value held in the frame
+   * @param val the value held in the dialog
+   * @param iconRef the icon reference for the dialog
    */
   private void updateContents(
       HTMLContent htmlContent,
@@ -350,7 +372,8 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       boolean closeButton,
       boolean scrollReset,
       boolean isHTML5,
-      Object val) {
+      Object val,
+      String iconRef) {
     if (this.isHTML5 != isHTML5) {
       this.isHTML5 = isHTML5;
       panel.removeFromContainer(this); // remove previous panel
@@ -368,6 +391,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     this.setTitle(title);
     macroCallbacks.clear();
     updateButton(closeButton);
+    updateIcon(iconRef);
     panel.updateContents(htmlContent, scrollReset);
   }
 
@@ -385,26 +409,66 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     revalidate();
   }
 
+  /**
+   * Sets the icon on a specific dialog.
+   *
+   * @param name The name of the dialog.
+   * @param iconRef the icon reference.
+   */
+  public static void setIcon(String name, String iconRef) {
+    if (dialogs.containsKey(name)) {
+      if (!Objects.equals(dialogs.get(name).iconRef, iconRef)) {
+        dialogs.get(name).updateIcon(iconRef);
+      }
+    }
+  }
+
+  /**
+   * Update the dialog icon if necessary.
+   *
+   * @param iconRef the icon reference for the dialog.
+   */
+  public void updateIcon(String iconRef) {
+    if (!Objects.equals(this.iconRef, iconRef)) {
+      // only update the icon there is an actual change
+      // N.B. if the icon is set via HTML it may flicker (same as setting the title via HTML)
+      if (iconRef != null && !iconRef.isEmpty()) {
+        // get the icon for the supplied icon source
+        ImageIcon newIcon = HTMLFrameFactory.getScaledImageIcon(iconRef);
+        if (newIcon != null) {
+          this.iconRef = iconRef;
+          this.setIconImage(newIcon.getImage());
+        }
+      } else {
+        // set to default icon
+        this.iconRef = null;
+        this.setIconImage(RessourceManager.getImage(Images.MAPTOOL_LOGO_MINI));
+      }
+    } else {
+      // no update needed
+    }
+  }
+
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (e instanceof HTMLActionEvent.FormActionEvent) {
+    if (e instanceof HTMLActionEvent.FormActionEvent fae) {
       if (input) {
         closeRequest();
       }
-      HTMLActionEvent.FormActionEvent fae = (HTMLActionEvent.FormActionEvent) e;
       MacroLinkFunction.runMacroLink(fae.getAction() + fae.getData());
     }
-    if (e instanceof HTMLActionEvent.ChangeTitleActionEvent) {
-      this.setTitle(((HTMLActionEvent.ChangeTitleActionEvent) e).getNewTitle());
+    if (e instanceof HTMLActionEvent.ChangeTitleActionEvent ctae) {
+      this.setTitle(ctae.getNewTitle());
     }
-    if (e instanceof HTMLActionEvent.RegisterMacroActionEvent) {
-      HTMLActionEvent.RegisterMacroActionEvent rmae = (HTMLActionEvent.RegisterMacroActionEvent) e;
+    if (e instanceof HTMLActionEvent.RegisterMacroActionEvent rmae) {
       macroCallbacks.put(rmae.getType(), rmae.getMacro());
     }
-
-    if (e instanceof HTMLActionEvent.MetaTagActionEvent) {
-      String name = ((HTMLActionEvent.MetaTagActionEvent) e).getName();
-      String content = ((HTMLActionEvent.MetaTagActionEvent) e).getContent();
+    if (e instanceof HTMLActionEvent.ChangeIconActionEvent ciae) {
+      updateIcon(ciae.getNewIconRef());
+    }
+    if (e instanceof HTMLActionEvent.MetaTagActionEvent mtae) {
+      String name = mtae.getName();
+      String content = mtae.getContent();
       if (name.equalsIgnoreCase("input")) {
         input = Boolean.parseBoolean(content);
       } else if (name.equalsIgnoreCase("closebutton")) {

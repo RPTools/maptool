@@ -30,11 +30,8 @@ import net.rptools.maptool.util.ImageManager;
  *
  * @author Jay
  */
-public final class FlowImageTokenOverlay extends BooleanTokenOverlay {
+public final class FlowImageTokenOverlay extends AbstractImageTokenOverlay {
   private static final int DEFAULT_GRID_SIZE = 3;
-
-  /** ID of the image displayed in the overlay. */
-  private MD5Key assetId;
 
   /** Size of the grid used to place a token with this state. */
   private int grid;
@@ -51,9 +48,7 @@ public final class FlowImageTokenOverlay extends BooleanTokenOverlay {
    *     share the same overlay.
    */
   public FlowImageTokenOverlay(String name, MD5Key assetId, int gridSize) {
-    super(name);
-
-    this.assetId = assetId;
+    super(name, assetId);
 
     if (gridSize <= 0) {
       gridSize = DEFAULT_GRID_SIZE;
@@ -63,17 +58,12 @@ public final class FlowImageTokenOverlay extends BooleanTokenOverlay {
 
   public FlowImageTokenOverlay(FlowImageTokenOverlay other) {
     super(other);
-    this.assetId = other.assetId;
     this.grid = other.grid;
   }
 
   @Override
   public FlowImageTokenOverlay clone() {
     return new FlowImageTokenOverlay(this);
-  }
-
-  public MD5Key getAssetId() {
-    return assetId;
   }
 
   /**
@@ -90,7 +80,7 @@ public final class FlowImageTokenOverlay extends BooleanTokenOverlay {
 
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
-    BufferedImage image = ImageManager.getImageAndWait(assetId);
+    BufferedImage image = ImageManager.getImageAndWait(getAssetId());
 
     var imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
     AwtUtil.fitInto(imageBounds, bounds);
@@ -115,7 +105,7 @@ public final class FlowImageTokenOverlay extends BooleanTokenOverlay {
 
   public FlowImageTokenOverlayDto toFlowImageDto() {
     var dto = FlowImageTokenOverlayDto.newBuilder();
-    dto.setAssetId(assetId.toString());
+    dto.setAssetId(getAssetId().toString());
     dto.setGridSize(grid);
     return dto.build();
   }
