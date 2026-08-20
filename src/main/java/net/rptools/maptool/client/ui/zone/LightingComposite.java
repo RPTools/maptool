@@ -26,8 +26,7 @@ import java.awt.image.WritableRaster;
 
 /**
  * A custom Composite class to replace AlphaComposite for the purposes of mixing lights, auras, and
- * other colored effects. <a
- * href="http://www.java2s.com/Code/Java/2D-Graphics-GUI/BlendCompositeDemo.htm">...</a>
+ * other colored effects.
  */
 public class LightingComposite implements Composite {
   /**
