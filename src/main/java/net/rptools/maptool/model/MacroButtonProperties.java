@@ -980,7 +980,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     return result.toString();
   }
 
-  // function found at http://www.rgagnon.com/javadetails/java-0448.html
+  // function found at https://www.rgagnon.com/javadetails/java-0448.html
   // to pad a string by inserting additional characters
   public static String paddingString(String s, int n, char c, boolean paddingLeft) {
     StringBuilder str = new StringBuilder(s);
