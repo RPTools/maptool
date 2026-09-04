@@ -332,10 +332,7 @@ public class MacroManager {
           details =
               MapTool.getParser()
                   .parseLine(
-                      new MapToolVariableResolver(tokenInContext),
-                      tokenInContext,
-                      details,
-                      macroExecutionContext);
+                      new MapToolVariableResolver(tokenInContext), details, macroExecutionContext);
           trustedPath = MapTool.getParser().isMacroPathTrusted();
         }
         context.addTransform(key + " " + details);

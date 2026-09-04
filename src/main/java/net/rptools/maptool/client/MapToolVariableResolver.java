@@ -320,11 +320,7 @@ public class MapToolVariableResolver implements VariableResolver {
         try {
           value =
               MapTool.getParser()
-                  .parseLine(
-                      new MapToolVariableResolver(tokenInContext),
-                      tokenInContext,
-                      result.toString(),
-                      null);
+                  .parseLine(new MapToolVariableResolver(tokenInContext), result.toString(), null);
         } catch (Exception e) {
           value = result.toString();
         }
