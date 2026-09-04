@@ -1944,7 +1944,10 @@ public class Token implements Cloneable {
           key,
           getName(),
           getId());
-      val = MapTool.getParser().parseLine(resolver, this, val.toString(), null);
+      if (resolver == null) {
+        resolver = new MapToolVariableResolver(this);
+      }
+      val = MapTool.getParser().parseLine(resolver, val.toString(), null);
     } catch (ParserException pe) {
       log.debug("Ignoring Parse Exception, continuing to evaluate {}", key);
       val = val.toString();
