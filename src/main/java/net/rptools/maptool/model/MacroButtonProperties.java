@@ -808,8 +808,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
             token.getName(),
             token.getId());
       }
-      return MapTool.getParser()
-          .parseLine(new MapToolVariableResolver(token), token, toolTip, context);
+      return MapTool.getParser().parseLine(new MapToolVariableResolver(token), toolTip, context);
     } catch (ParserException pe) {
       return toolTip;
     }
