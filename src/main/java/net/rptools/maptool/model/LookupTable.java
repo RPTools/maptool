@@ -27,6 +27,7 @@ import net.rptools.maptool.server.proto.LookupEntryDto;
 import net.rptools.maptool.server.proto.LookupTableDto;
 import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.parser.ParserException;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 public class LookupTable {
 
@@ -34,6 +35,7 @@ public class LookupTable {
 
   private @Nonnull List<LookupEntry> entryList = new ArrayList<>();
   private @Nullable String name;
+  private @Nullable String group;
   private @Nullable String defaultRoll;
   private @Nullable MD5Key tableImage;
   private @Nonnull Boolean visible = true;
@@ -41,6 +43,8 @@ public class LookupTable {
   // Flags a table as Pick Once, i.e. each entry can only be chosen once before the
   // table must be reset().
   private @Nonnull Boolean pickOnce = false;
+  private @Nullable String metadata;
+  private @Nullable String metadataType;
 
   public static final String NO_PICKS_LEFT = "NO_PICKS_LEFT";
 
@@ -48,12 +52,15 @@ public class LookupTable {
 
   public LookupTable(LookupTable table) {
     name = table.name;
+    group = table.group;
     defaultRoll = table.defaultRoll;
     tableImage = table.tableImage;
     pickOnce = table.pickOnce;
     visible = table.visible;
     allowLookup = table.allowLookup;
     entryList.addAll(table.entryList);
+    metadata = table.metadata;
+    metadataType = table.metadataType;
   }
 
   public String getRoll() {
@@ -92,6 +99,30 @@ public class LookupTable {
 
   public String getName() {
     return name;
+  }
+
+  public void setGroup(@Nullable String group) {
+    this.group = group;
+  }
+
+  public String getGroup() {
+    return group == null ? "" : group;
+  }
+
+  public void setMetadata(@Nullable String metadata) {
+    this.metadata = metadata;
+  }
+
+  public String getMetadata() {
+    return metadata == null ? "" : metadata;
+  }
+
+  public void setMetadataType(@Nullable String metadataType) {
+    this.metadataType = metadataType;
+  }
+
+  public @Nullable String getMetadataType() {
+    return metadataType == null ? SyntaxConstants.SYNTAX_STYLE_NONE : metadataType;
   }
 
   /**
@@ -532,9 +563,19 @@ public class LookupTable {
         .count();
   }
 
+  /**
+   * Returns if the table has any metadata or not.
+   *
+   * @return true/false
+   */
+  public boolean hasMetadata() {
+    return metadata != null && !metadata.isBlank();
+  }
+
   public static LookupTable fromDto(LookupTableDto dto) {
     var table = new LookupTable();
     table.name = dto.hasName() ? dto.getName().getValue() : null;
+    table.group = dto.hasGroup() ? dto.getGroup().getValue() : null;
     table.entryList =
         dto.getEntriesList().stream().map(e -> LookupEntry.fromDto(e)).collect(Collectors.toList());
     table.defaultRoll = dto.hasDefaultRoll() ? dto.getDefaultRoll().getValue() : null;
@@ -542,6 +583,8 @@ public class LookupTable {
     table.setVisible(dto.getVisible());
     table.setAllowLookup(dto.getAllowLookup());
     table.setPickOnce(dto.getPickOnce());
+    table.metadata = dto.hasMetadata() ? dto.getMetadata().getValue() : null;
+    table.metadataType = dto.hasMetadataType() ? dto.getMetadataType().getValue() : null;
     return table;
   }
 
@@ -550,6 +593,9 @@ public class LookupTable {
     dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
     if (name != null) {
       dto.setName(StringValue.of(name));
+    }
+    if (group != null) {
+      dto.setGroup(StringValue.of(group));
     }
     if (defaultRoll != null) {
       dto.setDefaultRoll(StringValue.of(defaultRoll));
@@ -560,6 +606,12 @@ public class LookupTable {
     dto.setVisible(visible);
     dto.setAllowLookup(allowLookup);
     dto.setPickOnce(pickOnce);
+    if (metadata != null) {
+      dto.setName(StringValue.of(metadata));
+    }
+    if (metadataType != null) {
+      dto.setName(StringValue.of(metadataType));
+    }
     return dto.build();
   }
 }

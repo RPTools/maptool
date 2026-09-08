@@ -15,11 +15,14 @@
 package net.rptools.maptool.client.ui.lookuptable;
 
 import javax.swing.*;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 public class EditLookupTablePanelView {
 
   private JPanel mainPanel;
   private JTextField tableName;
+  private JComboBox<String> tableGroup;
   private JTextField defaultTableRoll;
   private JCheckBox isVisible;
   private JCheckBox allowLookup;
@@ -30,6 +33,9 @@ public class EditLookupTablePanelView {
   private JLabel isVisibleIcon;
   private JLabel allowLookupIcon;
   private JLabel pickOnceIcon;
+  private RSyntaxTextArea tableMetadata;
+  private RTextScrollPane tableMetadataScrollPane;
+  private JComboBox<String> tableMetadataType;
 
   public JComponent getRootComponent() {
     return mainPanel;
@@ -37,6 +43,10 @@ public class EditLookupTablePanelView {
 
   public JTextField getTableName() {
     return tableName;
+  }
+
+  public JComboBox<String> getTableGroup() {
+    return tableGroup;
   }
 
   public JTextField getDefaultTableRoll() {
@@ -77,5 +87,17 @@ public class EditLookupTablePanelView {
 
   public JLabel getPickOnceIcon() {
     return pickOnceIcon;
+  }
+
+  public RSyntaxTextArea getTableMetadata() {
+    return tableMetadata;
+  }
+
+  public RTextScrollPane getTableMetadataScrollPane() {
+    return tableMetadataScrollPane;
+  }
+
+  public JComboBox<String> getTableMetadataType() {
+    return tableMetadataType;
   }
 }
