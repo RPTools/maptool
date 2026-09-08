@@ -28,39 +28,46 @@ public class Scale implements Serializable {
   private static final int MIN_ZOOM_LEVEL = -175;
   private static final int MAX_ZOOM_LEVEL = 175;
 
+  // mouse wheels tend to have 24 steps per wheel rotation.
+  private static final int FINE_ZOOM_MULTIPLIER = 24;
+  private static final int ULTRAFINE_ZOOM_MULTIPLIER = FINE_ZOOM_MULTIPLIER * 24;
+
   private final double oneToOneScale = 1; // Let this be configurable at some point
   private final double scaleIncrement = .075;
 
-  /** Calculated from {@link #scale} */
-  private transient int zoomLevel;
+  private final double logScaleIncrement = Math.log(1 + scaleIncrement);
+  private final double logFineScaleIncrement = logScaleIncrement / ULTRAFINE_ZOOM_MULTIPLIER;
 
-  private double scale;
+  /** Calculated from {@link #scale} */
+  transient int fineZoomLevel; // package private for unit testing
+
+  double scale; // package private for unit testing
   private int offsetX;
   private int offsetY;
 
   public Scale(double scale, int offsetX, int offsetY) {
-    var zoomLevel = zoomLevelForScale(scale);
-    if (zoomLevel < MIN_ZOOM_LEVEL) {
-      zoomLevel = MIN_ZOOM_LEVEL;
-      scale = scaleForZoomLevel(zoomLevel);
-    } else if (zoomLevel > MAX_ZOOM_LEVEL) {
-      zoomLevel = MAX_ZOOM_LEVEL;
-      scale = scaleForZoomLevel(zoomLevel);
+    var fineZoomLevel = fineZoomLevelForScale(scale);
+    if (fineZoomLevel < MIN_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER) {
+      fineZoomLevel = MIN_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER;
+      scale = scaleForFineZoomLevel(fineZoomLevel);
+    } else if (fineZoomLevel > MAX_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER) {
+      fineZoomLevel = MAX_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER;
+      scale = scaleForFineZoomLevel(fineZoomLevel);
     }
 
     this.scale = scale;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
-    this.zoomLevel = zoomLevel;
+    this.fineZoomLevel = fineZoomLevel;
   }
 
   public Scale(int zoomLevel, int offsetX, int offsetY) {
     zoomLevel = Math.clamp(zoomLevel, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
 
-    this.scale = scaleForZoomLevel(zoomLevel);
+    this.scale = scaleForFineZoomLevel(zoomLevel * ULTRAFINE_ZOOM_MULTIPLIER);
     this.offsetX = offsetX;
     this.offsetY = offsetY;
-    this.zoomLevel = zoomLevel;
+    this.fineZoomLevel = zoomLevel * ULTRAFINE_ZOOM_MULTIPLIER;
   }
 
   public Scale() {
@@ -95,21 +102,23 @@ public class Scale implements Serializable {
     return Objects.hash(scale, offsetX, offsetY, oneToOneScale, scaleIncrement);
   }
 
-  private int zoomLevelForScale(double scale) {
-    return (int) Math.round(Math.log(scale / oneToOneScale) / Math.log(1 + scaleIncrement));
+  private int fineZoomLevelForScale(double scale) {
+    return (int) Math.round(Math.log(scale / oneToOneScale) / logFineScaleIncrement);
   }
 
-  private double scaleForZoomLevel(int zoomLevel) {
-    return zoomLevel == 0 ? oneToOneScale : oneToOneScale * Math.pow(1 + scaleIncrement, zoomLevel);
+  private double scaleForFineZoomLevel(int zoomLevel) {
+    return zoomLevel == 0
+        ? oneToOneScale
+        : oneToOneScale * Math.exp(logFineScaleIncrement * zoomLevel);
   }
 
   private double clampScale(double newScale) {
-    var newZoomLevel = zoomLevelForScale(newScale);
-    if (newZoomLevel <= MIN_ZOOM_LEVEL) {
-      return scaleForZoomLevel(MIN_ZOOM_LEVEL);
+    var newZoomLevel = fineZoomLevelForScale(newScale);
+    if (newZoomLevel <= MIN_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER) {
+      return scaleForFineZoomLevel(MIN_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER);
     }
-    if (newZoomLevel >= MAX_ZOOM_LEVEL) {
-      return scaleForZoomLevel(MAX_ZOOM_LEVEL);
+    if (newZoomLevel >= MAX_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER) {
+      return scaleForFineZoomLevel(MAX_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER);
     }
     return newScale;
   }
@@ -182,7 +191,21 @@ public class Scale implements Serializable {
     var newScale =
         newZoomLevel == 0
             ? oneToOneScale
-            : oneToOneScale * Math.pow(1 + scaleIncrement, newZoomLevel);
+            : oneToOneScale * Math.exp(logScaleIncrement * newZoomLevel);
+
+    return withScale(newScale, x, y);
+  }
+
+  public Scale withFineZoomLevel(int newFineZoomLevel, int x, int y) {
+    newFineZoomLevel =
+        Math.clamp(
+            newFineZoomLevel,
+            MIN_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER,
+            MAX_ZOOM_LEVEL * ULTRAFINE_ZOOM_MULTIPLIER);
+    var newScale =
+        newFineZoomLevel == 0
+            ? oneToOneScale
+            : oneToOneScale * Math.exp(logFineScaleIncrement * newFineZoomLevel);
 
     return withScale(newScale, x, y);
   }
@@ -196,11 +219,27 @@ public class Scale implements Serializable {
   }
 
   public Scale zoomedIn(int x, int y) {
-    return withZoomLevel(zoomLevel + 1, x, y);
+    return withFineZoomLevel(fineZoomLevel + ULTRAFINE_ZOOM_MULTIPLIER, x, y);
   }
 
   public Scale zoomedOut(int x, int y) {
-    return withZoomLevel(zoomLevel - 1, x, y);
+    return withFineZoomLevel(fineZoomLevel - ULTRAFINE_ZOOM_MULTIPLIER, x, y);
+  }
+
+  public Scale zoomedInFine(int x, int y) {
+    return withFineZoomLevel(fineZoomLevel + FINE_ZOOM_MULTIPLIER, x, y);
+  }
+
+  public Scale zoomedOutFine(int x, int y) {
+    return withFineZoomLevel(fineZoomLevel - FINE_ZOOM_MULTIPLIER, x, y);
+  }
+
+  public Scale zoomedInUltrafine(int x, int y) {
+    return withFineZoomLevel(fineZoomLevel + 1, x, y);
+  }
+
+  public Scale zoomedOutUltrafine(int x, int y) {
+    return withFineZoomLevel(fineZoomLevel - 1, x, y);
   }
 
   public Point2D toWorldSpace(ScreenPoint screenPoint) {
