@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.swing;
+package net.rptools.maptool.client.swing.table;
 
 import java.awt.*;
 import javax.swing.*;
@@ -40,6 +40,7 @@ public class TextFieldEditorButtonTableCellEditor extends AbstractCellEditor
     textField.addActionListener(l -> fireEditingStopped());
     panel.add(textField);
     JButton button = new JButton("...");
+
     button.addActionListener(
         l ->
             MacroEditorDialog.createModalDialog(

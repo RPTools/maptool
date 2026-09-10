@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
+import com.jidesoft.grid.TableUtils;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
@@ -24,19 +25,19 @@ import java.util.List;
 import java.util.stream.Stream;
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
-import net.rptools.maptool.client.swing.TableCellRendererDecorator;
-import net.rptools.maptool.client.swing.TextFieldEditorButtonTableCellEditor;
+import net.rptools.maptool.client.swing.table.MultiLineTableHeaderRenderer;
+import net.rptools.maptool.client.swing.table.TextFieldEditorButtonTableCellEditor;
 import net.rptools.maptool.client.ui.campaignproperties.TokenPropertiesTableModel.LargeEditableText;
 import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
@@ -58,7 +59,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   public TokenPropertiesManagementPanel() {
     super(new TokenPropertiesManagementPanelView().getRootComponent());
-
     panelInit();
   }
 
@@ -72,7 +72,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         .forEach(
             (k, v) ->
                 tokenTypeMap.put(k, new ArrayList<>(v.stream().map(TokenProperty::new).toList())));
-    var ssManager = new StatSheetManager();
     tokenTypeMap
         .keySet()
         .forEach(
@@ -82,7 +81,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   }
 
   public void copyUIToCampaign(Campaign campaign) {
-
     campaign.getTokenTypeMap().clear();
     campaign.getTokenTypeMap().putAll(tokenTypeMap);
     campaign
@@ -146,7 +144,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     return (JComboBox) getComponent("statSheetLocationComboBox");
   }
 
-  public JComboBox getStatSheetComboBox() {
+  public JComboBox<StatSheet> getStatSheetComboBox() {
     return (JComboBox) getComponent("statSheetComboBox");
   }
 
@@ -372,9 +370,16 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   public void initPropertyTable() {
     var propertyTable = getTokenPropertiesTable();
+    propertyTable.setRowHeight(propertyTable.getRowHeight() + 8);
     propertyTable.setModel(new TokenPropertiesTableModel());
+
     propertyTable.setDefaultEditor(
         LargeEditableText.class, new TextFieldEditorButtonTableCellEditor());
+
+    propertyTable.setDefaultEditor(
+        Permissions.class, new DefaultCellEditor(new JComboBox<>(Permissions.values())));
+
+    propertyTable.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
     propertyTable
         .getSelectionModel()
         .addListSelectionListener(
@@ -432,7 +437,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   }
 
   public void initTypeList() {
-
     getTokenTypeList()
         .addListSelectionListener(
             e -> {
@@ -461,11 +465,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 getTypeDuplicateButton().setEnabled(true);
                 getTokenTypeName().setEditable(true);
                 // Can't delete the default property
-                if (propertyType.equals(defaultPropertyType)) {
-                  getTypeDeleteButton().setEnabled(false);
-                } else {
-                  getTypeDeleteButton().setEnabled(true);
-                }
+                getTypeDeleteButton().setEnabled(!propertyType.equals(defaultPropertyType));
                 getStatSheetComboBox().setEnabled(true);
                 populateStatSheetComboBoxes(propertyType);
                 if (!propertyType.equals(defaultPropertyType)) {
@@ -546,7 +546,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   }
 
   private void reset() {
-
     bind((String) null);
   }
 
@@ -606,7 +605,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
       String original, line;
       while ((original = reader.readLine()) != null) {
         line = original = original.trim();
-        if (line.length() == 0) {
+        if (line.isEmpty()) {
           continue;
         }
 
@@ -615,17 +614,17 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         // Prefix
         while (true) {
           if (line.startsWith("*")) {
-            property.setShowOnStatSheet(true);
+            property.setStatSheetViewPermission(Permissions.ALL);
             line = line.substring(1);
             continue;
           }
           if (line.startsWith("@")) {
-            property.setOwnerOnly(true);
+            property.setStatSheetViewPermission(Permissions.OWNER);
             line = line.substring(1);
             continue;
           }
           if (line.startsWith("#")) {
-            property.setGMOnly(true);
+            property.setStatSheetViewPermission(Permissions.GM);
             line = line.substring(1);
             continue;
           }
@@ -641,7 +640,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         int indexDefault = line.indexOf(':');
         if (indexDefault > 0) {
           String defaultVal = line.substring(indexDefault + 1).trim();
-          if (defaultVal.length() > 0) {
+          if (!defaultVal.isEmpty()) {
             property.setDefaultValue(defaultVal);
           }
 
@@ -659,7 +658,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
             throw new IllegalArgumentException("Missing parenthesis");
           }
           String shortName = line.substring(index + 1, indexClose).trim();
-          if (shortName.length() > 0) {
+          if (!shortName.isEmpty()) {
             property.setShortName(shortName);
           }
           line = line.substring(0, index);
@@ -720,7 +719,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     propertyTable.getTableHeader().setResizingAllowed(true);
 
     // Custom header that uses the column model to decide tooltips.
-    var header =
+    JTableHeader header =
         new JTableHeader(propertyTable.getColumnModel()) {
           @Override
           public String getToolTipText(MouseEvent event) {
@@ -728,22 +727,22 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
             return model.getColumnTooltipText(columnIndex);
           }
         };
+
     propertyTable.setTableHeader(header);
 
     // The custom renderer delegates to the default one.
-    var customHeaderRenderer = new TableCellRendererDecorator(header.getDefaultRenderer());
-    customHeaderRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-    customHeaderRenderer.setVerticalAlignment(SwingConstants.CENTER);
+    TableCellRenderer customHeaderRenderer = new MultiLineTableHeaderRenderer();
 
     for (int i = 0; i < propertyTable.getColumnCount(); i++) {
-      var column = propertyTable.getColumnModel().getColumn(i);
-
+      TableColumn column = propertyTable.getColumnModel().getColumn(i);
       column.setHeaderRenderer(customHeaderRenderer);
     }
+    TableUtils.autoResizeColumn(propertyTable, 3);
+    propertyTable.doLayout();
   }
 
-  private class TypeListModel extends AbstractListModel {
-    public Object getElementAt(int index) {
+  private class TypeListModel extends AbstractListModel<String> {
+    public String getElementAt(int index) {
       List<String> names = new ArrayList<String>(tokenTypeMap.keySet());
       Collections.sort(names);
       return names.get(index);

@@ -164,19 +164,19 @@ public class StatSheetContext {
   /** The notes of the token. */
   private final String notes;
 
-  /** The notes type of the token. */
+  /** The token notes type. */
   private final String notesType;
 
   /** The GM notes of the token. */
   private final String gmNotes;
 
-  /** The GM notes type of the token. */
+  /** The token's GM notes type. */
   private final String gmNotesType;
 
   /** The speech name of the token. */
   private final String speechName;
 
-  /** The type of the token. */
+  /** The token type. */
   private final String tokenType;
 
   /** True if the player is a GM. */
@@ -247,21 +247,10 @@ public class StatSheetContext {
         .getTokenPropertyList(token.getPropertyType())
         .forEach(
             tp -> {
-              if (tp.isShowOnStatSheet()) {
-                if (tp.isGMOnly() && !playerIsGm) {
-                  return;
-                }
-
-                if (tp.isOwnerOnly() && !playerOwns) {
-                  return;
-                }
-
+              if (tp.getStatSheetViewPermission().hasPermission(player, token)) {
                 Object value = token.getEvaluatedProperty(resolver, tp.getName());
-                if (value == null) {
-                  return;
-                }
-
-                if (value instanceof String sValue && sValue.isBlank()) {
+                //noinspection ConstantValue
+                if (value == null || value instanceof String sValue && sValue.isBlank()) {
                   return;
                 }
                 properties.add(
@@ -435,6 +424,15 @@ public class StatSheetContext {
   }
 
   /**
+   * Returns the handout asset of the token.
+   *
+   * @return The portrait asset of the token.
+   */
+  public String getHandout() {
+    return handoutAsset != null ? "asset://" + handoutAsset : null;
+  }
+
+  /**
    * Returns the label of the token.
    *
    * @return The label of the token.
@@ -515,9 +513,9 @@ public class StatSheetContext {
   }
 
   /**
-   * Returns the type of the token.
+   * Returns the token type.
    *
-   * @return The type of the token.
+   * @return The token type.
    */
   public String getTokenType() {
     return tokenType;

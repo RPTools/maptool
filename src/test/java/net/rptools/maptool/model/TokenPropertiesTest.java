@@ -37,21 +37,16 @@ public class TokenPropertiesTest {
   @BeforeEach
   public void setUp() {
     propsList = new ArrayList<>();
-    propsList.add(new TokenProperty("prop1", null, true, false, false, "10"));
-    propsList.add(new TokenProperty("prop2", null, true, false, false, "{prop2=prop1}"));
+    propsList.add(new TokenProperty("prop1", null, null, true, false, Permissions.NONE, "10"));
+    propsList.add(new TokenProperty("prop2", null, null, false, Permissions.ALL, "{prop2=prop1}"));
     propsList.add(
         new TokenProperty(
-            "jsonObj1",
-            null,
-            true,
-            false,
-            false,
-            "{\"sampleKey\": 5, \"otherKey\": \"theValue\"}"));
-    propsList.add(new TokenProperty("jsonObj2", null, true, false, false, "{\"prop3\"=other}"));
-    propsList.add(new TokenProperty("jsonObj3", null, true, false, false, "{prop3:other}"));
-    propsList.add(new TokenProperty("jsonArr1", null, true, false, false, "[4, 3]"));
-    propsList.add(new TokenProperty("plainStr1", null, true, false, false, "justAString"));
-    propsList.add(new TokenProperty("badJson", null, true, false, false, "{\"a\": 1}{\"b\": 2}"));
+            "jsonObj1", null, Permissions.ALL, "{\"sampleKey\": 5, \"otherKey\": \"theValue\"}"));
+    propsList.add(new TokenProperty("jsonObj2", null, Permissions.ALL, "{\"prop3\"=other}"));
+    propsList.add(new TokenProperty("jsonObj3", null, Permissions.ALL, "{prop3:other}"));
+    propsList.add(new TokenProperty("jsonArr1", null, Permissions.ALL, "[4, 3]"));
+    propsList.add(new TokenProperty("plainStr1", null, Permissions.ALL, "justAString"));
+    propsList.add(new TokenProperty("badJson", null, Permissions.ALL, "{\"a\": 1}{\"b\": 2}"));
     MapTool.getCampaign().putTokenType("testType", propsList);
 
     testToken = new Token();
