@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.events;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Zone;
 
-public record ZoneLoading(Zone zone) {}
+public record ZoneLoading(Zone zone) implements MTEvent {}

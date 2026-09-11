@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.events;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
@@ -27,4 +28,5 @@ import net.rptools.maptool.model.Zone;
  * @param altDown is the alt-key down.
  */
 public record TokenHoverExit(
-    Token token, Zone zone, boolean shiftDown, boolean controlDown, boolean altDown) {}
+    Token token, Zone zone, boolean shiftDown, boolean controlDown, boolean altDown)
+    implements MTEvent {}

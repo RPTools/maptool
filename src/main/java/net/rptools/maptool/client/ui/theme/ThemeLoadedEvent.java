@@ -15,5 +15,6 @@
 package net.rptools.maptool.client.ui.theme;
 
 import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
+import net.rptools.maptool.events.MTEvent;
 
-public record ThemeLoadedEvent(ThemeDetails themeDetails) {}
+public record ThemeLoadedEvent(ThemeDetails themeDetails) implements MTEvent {}

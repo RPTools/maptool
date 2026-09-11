@@ -14,4 +14,6 @@
  */
 package net.rptools.maptool.client.events;
 
-public record ServerDisconnected() {}
+import net.rptools.maptool.events.MTEvent;
+
+public record ServerDisconnected() implements MTEvent {}
