@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO" packages="net.rptools.maptool.client.ui.logger">
+<Configuration status="INFO">
+    <Properties>
+        <Property name="format.brief"
+              value="%d{ss.SSS} %highlight{%level{length=3}}{INFO=blue} (%F:%L) %msg%n"/>
+        <Property name="format.strong"
+              value="%d{mm.ss.SSS} %highlight{%level}{WARN=red bold, ERROR=red bg_bright_yellow bold, FATAL=bg_red bold bright_yellow} (%F:%L) - %msg%n"/>
+        <Property name="format.verbose"
+              value="%d{HH:mm.ss.SSS} %highlight{%level}{DEBUG=bg_bright_blue bright_yellow, TRACE=bg_yellow bright_blue} (%F:%L) - %msg%n"/>
+    </Properties>
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} (%F:%L) [%t] %-5level - %msg%n"/>
-        </Console>
+        <CONSOLE name="Console" target="SYSTEM_OUT" direct="true">
+            <PatternLayout>
+                <LevelPatternSelector defaultPattern="${format.strong}">
+                    <PatternMatch key="INFO" pattern="${format.brief}"/>
+                    <PatternMatch key="DEBUG" pattern="${format.verbose}"/>
+                    <PatternMatch key="TRACE" pattern="${format.verbose}"/>
+                </LevelPatternSelector>
+            </PatternLayout>
+        </CONSOLE>
         <RollingFile
                 name="LogFile"
                 fileName="${sys:MAPTOOL_LOGDIR}/maptool.log"
@@ -21,18 +35,18 @@
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
-        <JTextAreaAppender name="jtextarea-log" maxLines="5000">
+        <JTextAreaAppender name="JTextArea-log" maxLines="5000">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger - %msg%n"/>
         </JTextAreaAppender>
     </Appenders>
     <Loggers>
         <Logger name="MapToolConsole" level="INFO" additivity="false">
-            <AppenderRef ref="jtextarea-log" level="debug"/>
+            <AppenderRef ref="JTextArea-log" level="debug"/>
         </Logger>
         <Root level="INFO">
             <AppenderRef ref="Console" level="DEBUG"/>
             <AppenderRef ref="LogFile"/>
-            <AppenderRef ref="jtextarea-log" level="debug"/>
+            <AppenderRef ref="JTextArea-log" level="debug"/>
         </Root>
     </Loggers>
 </Configuration>
