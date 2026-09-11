@@ -169,6 +169,8 @@ compileJava.configure {
     // Keep the uninstrumented .class files out of the final destination directory. Otherwise we
     // might instrument the same file twice, resulting in duplicate methods.
     destinationDirectory = file("${layout.buildDirectory.get()}/classes/java/main-uninstrumented")
+    options.compilerArgs << '-Alog4j.graalvm.groupId=net.rptools'
+    options.compilerArgs << '-Alog4j.graalvm.artifactId=maptool'
 }
 
 def instrumentForms = tasks.register('instrumentForms', Sync) {
@@ -375,6 +377,7 @@ dependencies {
     implementation project(':clientserver')
     implementation project(':messages')
 
+    annotationProcessor(libs.log4j.core)
     implementation(libs.bundles.log4j)
     implementation(libs.slf4j.simple)
     implementation(libs.apache.commons.logging)
