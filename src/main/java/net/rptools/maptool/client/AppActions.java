@@ -3407,7 +3407,7 @@ public class AppActions {
       /*
        * There is some extra space appearing to the right of the images, which sounds
        * similar to what was reported in this bug (bottom half):
-       * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5047379 Removing the
+       * https://bugs.java.com/bugdatabase/JDK-5047379 Removing the
        * mnemonic will remove this extra space.
        */
       putValue(Action.SHORT_DESCRIPTION, htmlTip);
