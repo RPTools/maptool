@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.lookuptable;
 
 import javax.swing.*;
+import net.rptools.maptool.model.LookupTable;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -35,7 +36,7 @@ public class EditLookupTablePanelView {
   private JLabel pickOnceIcon;
   private RSyntaxTextArea tableMetadata;
   private RTextScrollPane tableMetadataScrollPane;
-  private JComboBox<String> tableMetadataType;
+  private JComboBox<LookupTable.SupportedMetadataType> tableMetadataType;
 
   public JComponent getRootComponent() {
     return mainPanel;
@@ -97,7 +98,7 @@ public class EditLookupTablePanelView {
     return tableMetadataScrollPane;
   }
 
-  public JComboBox<String> getTableMetadataType() {
+  public JComboBox<LookupTable.SupportedMetadataType> getTableMetadataType() {
     return tableMetadataType;
   }
 }

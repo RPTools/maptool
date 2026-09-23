@@ -73,7 +73,9 @@ public class LookupTableFunction extends AbstractFunction {
         "getTableGroup",
         "setTableGroup",
         "getTableMetadata",
-        "setTableMetadata");
+        "setTableMetadata",
+        "getTableMetadataType",
+        "setTableMetadataType");
   }
 
   /** The singleton instance. */
@@ -540,6 +542,42 @@ public class LookupTableFunction extends AbstractFunction {
       lookupTable.setMetadata(metadata);
       processMutatedLookupTable(lookupTable, true);
       return "";
+
+    } else if ("getTableMetadataType".equalsIgnoreCase(function)) {
+      /*
+       * getTableMetadataType(tblName) - get the named table's metadata MIME type
+       */
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("getTableMetadataType", params, 1, 1);
+      String name = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      return lookupTable.getMetadataType();
+
+    } else if ("setTableMetadataType".equalsIgnoreCase(function)) {
+      /*
+       * setTableMetadataType(tblName, metadataType) - set the named table's metadata MIME type
+       */
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("setTableMetadataType", params, 2, 2);
+      String name = params.get(0).toString();
+      String metadataType = params.get(1).toString();
+
+      if (LookupTable.SupportedMetadataType.fromMimeType(metadataType) != null) {
+        LookupTable lookupTable = getMaptoolTable(name, function);
+        lookupTable.setMetadataType(metadataType);
+        processMutatedLookupTable(lookupTable, true);
+        return "";
+      } else {
+        throw new ParserException(
+            function
+                + "(): "
+                + I18N.getText(
+                    "msg.error.tableMetadataMIMETypeUnsupported",
+                    name,
+                    metadataType,
+                    String.join(
+                        ", ", LookupTable.SupportedMetadataType.getSupportedMimeTypeStringList())));
+      }
 
     } else { // if tbl, table, tblImage or tableImage
       FunctionUtil.checkNumberParam(function, params, 1, 3);

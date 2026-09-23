@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.dicelib.expression.Result;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.LookupEntryDto;
 import net.rptools.maptool.server.proto.LookupTableDto;
 import net.rptools.maptool.util.ExpressionParserFactory;
@@ -570,6 +571,64 @@ public class LookupTable {
    */
   public boolean hasMetadata() {
     return metadata != null && !metadata.isBlank();
+  }
+
+  /**
+   * Enum is a central list of supported table metadata types used for:
+   *
+   * <ul>
+   *   <li>populating {@code EditLookupTablePanel}'s metadata type JComboBox
+   *   <li>validating the metadata type in {@code LookupTableFunction setTableMetadataType()}
+   */
+  public enum SupportedMetadataType {
+    NONE(SyntaxConstants.SYNTAX_STYLE_NONE),
+    CSV(SyntaxConstants.SYNTAX_STYLE_CSV),
+    HTML(SyntaxConstants.SYNTAX_STYLE_HTML),
+    JSON(SyntaxConstants.SYNTAX_STYLE_JSON),
+    MARKDOWN(SyntaxConstants.SYNTAX_STYLE_MARKDOWN),
+    XML(SyntaxConstants.SYNTAX_STYLE_XML);
+
+    private final String mimeType;
+
+    SupportedMetadataType(String mimeType) {
+      this.mimeType = mimeType;
+    }
+
+    public String getMimeType() {
+      return mimeType;
+    }
+
+    public String getDisplayName() {
+      return I18N.getText(mimeType);
+    }
+
+    @Override
+    public String toString() {
+      return mimeType;
+    }
+
+    /** Finds a matching enum by its exact MIME type string. */
+    public static SupportedMetadataType fromMimeType(String mimeType) {
+      if (mimeType == null) {
+        return null;
+      }
+      String cleanedMimeType = mimeType.toLowerCase().trim();
+      for (SupportedMetadataType style : values()) {
+        if (style.getMimeType().equals(cleanedMimeType)) {
+          return style;
+        }
+      }
+      return null;
+    }
+
+    /** Generates a comma-separated list of supported enum MIME types, useful for error feedback. */
+    public static String getSupportedMimeTypeStringList() {
+      StringJoiner joiner = new StringJoiner(", ");
+      for (SupportedMetadataType type : values()) {
+        joiner.add(type.getMimeType());
+      }
+      return joiner.toString();
+    }
   }
 
   public static LookupTable fromDto(LookupTableDto dto) {

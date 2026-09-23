@@ -222,17 +222,32 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
       System.err.println("Unable to load theme: " + themePath + " " + e);
     }
 
-    JComboBox<String> syntaxStyle = view.getTableMetadataType();
-    syntaxStyle.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
-    syntaxStyle.addItem(SyntaxConstants.SYNTAX_STYLE_CSV);
-    syntaxStyle.addItem(SyntaxConstants.SYNTAX_STYLE_HTML);
-    syntaxStyle.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
-    syntaxStyle.addItem(SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
-    syntaxStyle.addItem(SyntaxConstants.SYNTAX_STYLE_XML);
+    JComboBox<LookupTable.SupportedMetadataType> syntaxStyle = view.getTableMetadataType();
+    for (LookupTable.SupportedMetadataType type : LookupTable.SupportedMetadataType.values()) {
+      syntaxStyle.addItem(type);
+    }
+
+    /* Make the JComboBox display translated text */
+    syntaxStyle.setRenderer(
+        new DefaultListCellRenderer() {
+          @Override
+          public Component getListCellRendererComponent(
+              JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof LookupTable.SupportedMetadataType types) {
+              setText(types.getDisplayName());
+            }
+            return this;
+          }
+        });
 
     syntaxStyle.addActionListener(
         e -> {
-          rsta.setSyntaxEditingStyle((String) syntaxStyle.getSelectedItem());
+          LookupTable.SupportedMetadataType selectedMetadataType =
+              (LookupTable.SupportedMetadataType) syntaxStyle.getSelectedItem();
+          if (selectedMetadataType != null) {
+            rsta.setSyntaxEditingStyle(selectedMetadataType.getMimeType());
+          }
         });
   }
 
@@ -273,9 +288,11 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
     view.getResetPicks().setEnabled(lookupTable.getPickOnce());
 
     view.getTableMetadata().setText(lookupTable.getMetadata());
-    view.getTableMetadataType().setSelectedItem(lookupTable.getMetadataType());
+    LookupTable.SupportedMetadataType supportedMetadataType =
+        LookupTable.SupportedMetadataType.fromMimeType(lookupTable.getMetadataType());
+    view.getTableMetadataType().setSelectedItem(supportedMetadataType);
     if (view.getTableMetadataType().getSelectedItem() == null) {
-      view.getTableMetadataType().setSelectedItem(SyntaxConstants.SYNTAX_STYLE_NONE);
+      view.getTableMetadataType().setSelectedItem(LookupTable.SupportedMetadataType.NONE);
     }
 
     view.getTableName().requestFocusInWindow();
@@ -321,8 +338,9 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
     String group = selectedTableGroup == null ? "" : selectedTableGroup.toString();
 
     String metadata = view.getTableMetadata().getText().trim();
-    String metadataType =
-        Objects.requireNonNull(view.getTableMetadataType().getSelectedItem()).toString();
+    LookupTable.SupportedMetadataType selectedMetadataType =
+        (LookupTable.SupportedMetadataType) view.getTableMetadataType().getSelectedItem();
+    String metadataType = Objects.requireNonNull(selectedMetadataType).getMimeType();
 
     // Before modifying the table, parse and validate all the entries to avoid partial modification
     // in case of error.

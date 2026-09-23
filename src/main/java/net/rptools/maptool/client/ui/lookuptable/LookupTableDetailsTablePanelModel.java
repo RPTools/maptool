@@ -43,7 +43,7 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
           DetailsTableColumn.COUNT_ENTRIES,
           DetailsTableColumn.COUNT_VALUES,
           DetailsTableColumn.COUNT_IMAGES,
-          DetailsTableColumn.METADATA);
+          DetailsTableColumn.METADATA_TYPE);
 
   /** Defines the details view columns visible for non-GMs and their sequence */
   private static final List<DetailsTableColumn> PLAYER_COLUMNS =
@@ -68,6 +68,9 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
    *   <li>the column class
    *   <li>the column alignment
    *   <li>the preferred column width
+   *   <li>the column header icon
+   *   <li>the column row icon for true
+   *   <li>the column row icon for false
    */
   public enum DetailsTableColumn {
     IMAGE(
@@ -210,9 +213,9 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
         return table.getEntryImageCount();
       }
     },
-    METADATA(
-        I18N.getText("EditLookupTablePanel.tab.metadata"),
-        I18N.getText("LookupTablePanel.metadata.tooltip"),
+    METADATA_TYPE(
+        I18N.getText("LookupTablePanel.metadataType"),
+        I18N.getText("LookupTablePanel.metadataType.tooltip"),
         String.class,
         SwingConstants.LEFT,
         100,
@@ -221,7 +224,7 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
         null) {
       @Override
       Object getValue(LookupTable table) {
-        return table.hasMetadata() ? table.getMetadataType() : "";
+        return table.hasMetadata() ? I18N.getText(table.getMetadataType()) : "";
       }
     };
 
