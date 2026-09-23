@@ -234,8 +234,8 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
           public Component getListCellRendererComponent(
               JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            if (value instanceof LookupTable.SupportedMetadataType types) {
-              setText(types.getDisplayName());
+            if (value instanceof LookupTable.SupportedMetadataType type) {
+              setText(type.getDisplayName());
             }
             return this;
           }

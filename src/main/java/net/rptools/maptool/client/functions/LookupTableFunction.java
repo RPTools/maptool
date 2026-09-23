@@ -575,8 +575,7 @@ public class LookupTableFunction extends AbstractFunction {
                     "msg.error.tableMetadataMIMETypeUnsupported",
                     name,
                     metadataType,
-                    String.join(
-                        ", ", LookupTable.SupportedMetadataType.getSupportedMimeTypeStringList())));
+                    LookupTable.SupportedMetadataType.getSupportedMimeTypeStringList()));
       }
 
     } else { // if tbl, table, tblImage or tableImage
