@@ -322,11 +322,27 @@ public abstract class DefaultTool extends Tool
       direction = isKeyDown('z') == direction;
 
       var scale = renderer.getViewModel().getZoneScale();
-      if (direction) {
-        scale = scale.zoomedOut(e.getX(), e.getY());
+
+      if (!e.isControlDown()) {
+        if (direction) {
+          scale = scale.zoomedOut(e.getX(), e.getY());
+        } else {
+          scale = scale.zoomedIn(e.getX(), e.getY());
+        }
+      } else if (!e.isAltDown()) {
+        if (direction) {
+          scale = scale.zoomedOutFine(e.getX(), e.getY());
+        } else {
+          scale = scale.zoomedInFine(e.getX(), e.getY());
+        }
       } else {
-        scale = scale.zoomedIn(e.getX(), e.getY());
+        if (direction) {
+          scale = scale.zoomedOutUltrafine(e.getX(), e.getY());
+        } else {
+          scale = scale.zoomedInUltrafine(e.getX(), e.getY());
+        }
       }
+
       renderer.getViewModel().setZoneScale(scale);
       renderer.maybeForcePlayersView();
     }
