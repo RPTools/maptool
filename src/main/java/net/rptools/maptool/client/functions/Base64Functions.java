@@ -14,16 +14,23 @@
  */
 package net.rptools.maptool.client.functions;
 
+import static net.rptools.maptool.client.functions.TokenImage.getMD5Key;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tika.mime.MediaType;
 
 /**
  * Base64 functions to encode/decode strings.
@@ -39,7 +46,7 @@ public class Base64Functions extends AbstractFunction {
   private static final Base64Functions instance = new Base64Functions();
 
   private Base64Functions() {
-    super(1, 1, "base64.encode", "base64.decode");
+    super(1, 2, "base64.encode", "base64.encode.asset", "base64.decode");
   }
 
   public static Base64Functions getInstance() {
@@ -51,22 +58,25 @@ public class Base64Functions extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
-    checkParameters(functionName, parameters, 1, 1);
-
-    if (functionName.equalsIgnoreCase("base64.encode"))
+    if (functionName.equalsIgnoreCase("base64.encode")) {
+      checkParameters(functionName, parameters, 1, 1);
       return base64Encode(functionName, parameters);
-
-    if (functionName.equalsIgnoreCase("base64.decode"))
+    } else if (functionName.equalsIgnoreCase("base64.encode.asset")) {
+      checkParameters(functionName, parameters, 1, 2);
+      return base64EncodeAsset(functionName, parameters);
+    } else if (functionName.equalsIgnoreCase("base64.decode")) {
+      checkParameters(functionName, parameters, 1, 1);
       return base64Decode(functionName, parameters);
-    else
+    } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
   }
 
   /**
    * Encodes passed in string to Base64
    *
-   * @param functionName
+   * @param functionName the name of the function
    * @param parameters a list, with the message as the first element
    * @return Base64 encoded string
    */
@@ -77,9 +87,54 @@ public class Base64Functions extends AbstractFunction {
   }
 
   /**
+   * Encodes the passed in asset (via the asset reference) to Base64, with the option to include the
+   * data URI prefix (data scheme name, MIME type, and base64 encoding for http usage, default =
+   * {@code false}.
+   *
+   * @param functionName the name of the function
+   * @param parameters a list, with the asset ref as the first element and (optional) data URI
+   *     prefix as the second element
+   * @return Base64 encoded string with or without the data URI prefix
+   * @throws ParserException the parser exception
+   */
+  private Object base64EncodeAsset(String functionName, List<Object> parameters)
+      throws ParserException {
+    MD5Key key = getMD5Key(parameters.getFirst().toString(), functionName);
+    boolean includeDataURIPrefix =
+        parameters.size() > 1 ? FunctionUtil.getBooleanValue(parameters.get(1)) : false;
+
+    Asset asset = AssetManager.getAsset(key);
+    if (asset == null) {
+      // asset not available
+      return "";
+    }
+
+    Asset.Type assetType = asset.getType();
+    String assetSubType = asset.getExtension();
+    if (assetType == Asset.Type.IMAGE) {
+      byte[] rawByteData;
+      rawByteData = asset.getData();
+      String base64Data = Base64.getEncoder().encodeToString(rawByteData);
+      if (includeDataURIPrefix && !assetSubType.isBlank()) {
+        MediaType mediaType = MediaType.image(assetSubType);
+        return "data:" + mediaType.toString() + ";base64," + base64Data;
+      }
+      return base64Data;
+    } else {
+      // asset type not currently handled
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.base64.encodeAssetTypeUnhandled",
+              functionName,
+              key.toString(),
+              assetType.toString()));
+    }
+  }
+
+  /**
    * Decodes a passed in string from Base64
    *
-   * @param functionName
+   * @param functionName the name of the function
    * @param parameters a list of parameters with string to decode as first element.
    * @return String decoded from a Base64 encoded string
    */
@@ -94,7 +149,7 @@ public class Base64Functions extends AbstractFunction {
    * @param parameters passed into the function call
    * @param min number of parameters required
    * @param max number of parameters required
-   * @throws ParserException
+   * @throws ParserException the parser exception
    */
   private void checkParameters(String functionName, List<Object> parameters, int min, int max)
       throws ParserException {

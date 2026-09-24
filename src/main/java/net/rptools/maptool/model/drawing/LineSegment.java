@@ -41,7 +41,6 @@ public class LineSegment extends AbstractDrawing {
   private final List<Point> points = new ArrayList<Point>();
   private @Nonnull Float width;
   private boolean squareCap;
-  private transient int lastPointCount = -1;
   private transient Rectangle cachedBounds;
   private transient Area area;
 
@@ -109,8 +108,8 @@ public class LineSegment extends AbstractDrawing {
    * @param y
    */
   public void addPoint(int x, int y) {
-    area = null;
     points.add(new Point(x, y));
+    invalidateGeometryCache();
   }
 
   /**
@@ -137,10 +136,10 @@ public class LineSegment extends AbstractDrawing {
    * @param deltaY offset in the Y axis
    */
   public void translate(int deltaX, int deltaY) {
-    points.replaceAll(point1 -> new Point(point1.x + deltaX, point1.y + deltaY));
-    if (cachedBounds != null) {
-      cachedBounds.translate(deltaX, deltaY);
+    for (Point p : points) {
+      p.translate(deltaX, deltaY);
     }
+    invalidateGeometryCache();
   }
 
   @Override
@@ -179,7 +178,7 @@ public class LineSegment extends AbstractDrawing {
   }
 
   private Area createLineArea() {
-    if (points.size() < 1) {
+    if (points.isEmpty()) {
       return null;
     }
     GeneralPath gp = null;
@@ -210,11 +209,13 @@ public class LineSegment extends AbstractDrawing {
 
   @Override
   public Rectangle getBounds(Zone zone) {
-    if (lastPointCount == points.size()) {
+    if (cachedBounds != null) {
       return cachedBounds;
     }
-    if (points.size() < 1) return null;
-    Rectangle bounds = new Rectangle(points.get(0));
+    if (points.isEmpty()) {
+      return null;
+    }
+    Rectangle bounds = new Rectangle(points.getFirst());
     for (Point point : points) {
       bounds.add(point);
     }
@@ -227,7 +228,6 @@ public class LineSegment extends AbstractDrawing {
       bounds.height = 1;
     }
     cachedBounds = bounds;
-    lastPointCount = points.size();
     return bounds;
   }
 
@@ -247,5 +247,14 @@ public class LineSegment extends AbstractDrawing {
   public int getStrokeJoin() {
     if (squareCap) return BasicStroke.JOIN_MITER;
     else return BasicStroke.JOIN_ROUND;
+  }
+
+  /**
+   * Line segment geometry can mutate with either the number of points or point co-ordinate change.
+   * Whenever one of these change the bounds and area caches should be invalidated.
+   */
+  private void invalidateGeometryCache() {
+    cachedBounds = null;
+    area = null;
   }
 }

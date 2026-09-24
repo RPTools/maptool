@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-15-intel]
+        os: [windows-latest, ubuntu-latest, macos-15-intel, macos-15]
         java: [ '21' ]
         distribution: ['temurin']
       fail-fast: false
@@ -186,13 +186,22 @@ jobs:
       #    / / / / / // /_/ // /__ / /_/ /___/ /
       #   /_/ /_/ /_/ \__,_/ \___/ \____//____/
       #
+    - name: Set Mac Architecture Variable
+      if: startsWith(matrix.os, 'macos')
+      run: |
+        ARCH=$(uname -m)
+        if [ "$ARCH" = "arm64" ]; then
+          echo "MAC_ARCH=apple-silicon" >> $GITHUB_ENV
+        else
+          echo "MAC_ARCH=intel" >> $GITHUB_ENV
+        fi
     - name: Rename Mac OS Release Files
       if: startsWith(matrix.os, 'macos')
       run: |
-        mkdir releases/renamed/
-        cp releases/MapTool*.dmg releases/renamed/MapTool-${{ github.event.release.tag_name }}.dmg
-        cp releases/MapTool*.pkg releases/renamed/MapTool-${{ github.event.release.tag_name }}.pkg
-        cp releases/MapTool*-mac.app.zip releases/renamed/MapTool-${{ github.event.release.tag_name }}-mac.app.zip
+        mkdir -p releases/renamed/
+        cp releases/MapTool*.dmg releases/renamed/MapTool-${{ github.event.release.tag_name }}-${{ env.MAC_ARCH }}.dmg
+        cp releases/MapTool*.pkg releases/renamed/MapTool-${{ github.event.release.tag_name }}-${{ env.MAC_ARCH }}.pkg
+        cp releases/MapTool*-mac*.zip releases/renamed/MapTool-${{ github.event.release.tag_name }}-mac-${{ env.MAC_ARCH }}.app.zip
       continue-on-error: true
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
@@ -202,8 +211,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.dmg
-        asset_name: MapTool-${{ github.event.release.tag_name }}.dmg
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}-${{ env.MAC_ARCH }}.dmg
+        asset_name: MapTool-${{ github.event.release.tag_name }}-${{ env.MAC_ARCH }}.dmg
         asset_content_type: application/octet-stream
     - name: Upload Mac PKG Release Asset
       id: upload-release-asset-pkg
@@ -213,8 +222,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.pkg
-        asset_name: MapTool-${{ github.event.release.tag_name }}.pkg
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}-${{ env.MAC_ARCH }}.pkg
+        asset_name: MapTool-${{ github.event.release.tag_name }}-${{ env.MAC_ARCH }}.pkg
         asset_content_type: application/octet-stream
     - name: Upload Mac Image Release Asset
       id: upload-release-asset-mac-image
@@ -224,6 +233,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}-mac.app.zip
-        asset_name: MapTool-${{ github.event.release.tag_name }}-mac.app.zip
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}-mac-${{ env.MAC_ARCH }}.app.zip
+        asset_name: MapTool-${{ github.event.release.tag_name }}-mac-${{ env.MAC_ARCH }}.app.zip
         asset_content_type: application/octet-stream
