@@ -21,9 +21,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.RectangularShape;
+import java.awt.geom.*;
 import java.io.Serial;
 import java.util.*;
 import java.util.List;
@@ -43,6 +41,7 @@ import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.*;
 import org.apache.logging.log4j.LogManager;
@@ -240,7 +239,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   /**
-   * Set <kbd>DELETE</kbd> to delete selected drawn elements. Set <kbd>CTRL</kbd>+<kbd>V</kbd> to
+   * Set <kbd>DELETE</kbd> to delete selected drawn elements. Set <kbd>CTRL</kbd>+<kbd>D</kbd> to
    * duplicate selected drawn elements.
    *
    * @param actionMap What keys do what action.
@@ -250,7 +249,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
     super.installKeystrokes(actionMap);
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), deleteAction);
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK), duplicateAction);
+        KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), duplicateAction);
   }
 
   /**
@@ -436,7 +435,7 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       }
     }
 
-    if (SwingUtilities.isRightMouseButton(e)) {
+    if (SwingUtilities.isRightMouseButton(e) && isDraggingMap()) {
       cancelMapDrag(); // We no longer drag the map. Fixes bug #616
       return;
     }
@@ -1085,9 +1084,9 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   /**
-   * Paint the dragged movement distance in feet according to the Movement Metric setting.
+   * Paint the dragged movement distance according to the Movement Metric setting.
    *
-   * <p>Label is displayed below the template (i.e. similar to dragging a token)
+   * <p>Label is displayed near the dragged terminus
    *
    * @param g where to draw.
    * @param startVertex the starting point.
@@ -1112,10 +1111,9 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
 
     if (moveDistance != 0) {
       Rectangle bounds = at.getBounds(zone);
-      int x = (int) (bounds.getMinX() + bounds.getMaxX()) / 2;
-      int y = (int) (bounds.getMaxY());
-      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(x, y);
-
+      ScreenPoint centerText =
+          renderer.getViewModel().getZoneScale().toScreenSpace(endVertex.x, endVertex.y);
+      centerText.translate(CURSOR_WIDTH, CURSOR_WIDTH);
       ToolHelper.drawMeasurement(g, moveDistance, (int) centerText.x, (int) centerText.y);
     }
   }
@@ -1176,19 +1174,23 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
   }
 
   /**
-   * Paint the radius value in feet. To be displayed above the template vertex (i.e. same as when
-   * drawing a template)
+   * Paint the template radius value label.
+   *
+   * <p>Label is displayed to the right of the template.
    *
    * @param g where to paint.
    * @param zp where on the map to paint the radius label.
    */
   private void paintTemplateRadiusLabel(Graphics2D g, ZonePoint zp, AbstractTemplate at) {
     if (at.getRadius() > 0) {
-      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(zp.x, zp.y);
-      centerText.translate(CURSOR_WIDTH, -CURSOR_WIDTH);
+      Zone zone = getZone();
+      Rectangle bounds = at.getBounds(zone);
+      int x = (int) bounds.getMaxX();
+      int y = (int) (bounds.getMinY() + bounds.getMaxY()) / 2;
+      ScreenPoint centerText = renderer.getViewModel().getZoneScale().toScreenSpace(x, y);
       ToolHelper.drawMeasurement(
           g, at.getRadius() * getZone().getUnitsPerCell(), (int) centerText.x, (int) centerText.y);
-    } // endif
+    }
   }
 
   /**
@@ -1359,14 +1361,55 @@ public class DrawingPointerTool extends DefaultTool implements ZoneOverlay, Mous
       dragPointOffset.y = dragWorkingZonePoint.y - dragPointOffset.y;
     }
 
-    if (sd.getShape() instanceof RectangularShape rs) {
+    Shape s = sd.getShape();
+    if (s instanceof RectangularShape rs) {
       rs.setFrame(
-          rs.getBounds().x - dragPointOffset.x,
-          rs.getBounds().y - dragPointOffset.y,
+          rs.getX() - dragPointOffset.x,
+          rs.getY() - dragPointOffset.y,
           rs.getWidth(),
           rs.getHeight());
-    } else if (sd.getShape() instanceof Polygon p) {
+    } else if (s instanceof Polygon p) {
       p.translate(-dragPointOffset.x, -dragPointOffset.y);
+    } else if (s instanceof Area a) {
+      AffineTransform tx =
+          AffineTransform.getTranslateInstance(-dragPointOffset.x, -dragPointOffset.y);
+      a.transform(tx);
+    } else if (s instanceof Path2D p2d) {
+      AffineTransform tx =
+          AffineTransform.getTranslateInstance(-dragPointOffset.x, -dragPointOffset.y);
+      p2d.transform(tx);
+    } else if (s instanceof Line2D line) {
+      line.setLine(
+          line.getX1() - dragPointOffset.x,
+          line.getY1() - dragPointOffset.y,
+          line.getX2() - dragPointOffset.x,
+          line.getY2() - dragPointOffset.y);
+    } else if (s instanceof QuadCurve2D quad) {
+      quad.setCurve(
+          quad.getX1() - dragPointOffset.x,
+          quad.getY1() - dragPointOffset.y,
+          quad.getCtrlX() - dragPointOffset.x,
+          quad.getCtrlY() - dragPointOffset.y,
+          quad.getX2() - dragPointOffset.x,
+          quad.getY2() - dragPointOffset.y);
+    } else if (s instanceof CubicCurve2D cubic) {
+      cubic.setCurve(
+          cubic.getX1() - dragPointOffset.x,
+          cubic.getY1() - dragPointOffset.y,
+          cubic.getCtrlX1() - dragPointOffset.x,
+          cubic.getCtrlY1() - dragPointOffset.y,
+          cubic.getCtrlX2() - dragPointOffset.x,
+          cubic.getCtrlY2() - dragPointOffset.y,
+          cubic.getX2() - dragPointOffset.x,
+          cubic.getY2() - dragPointOffset.y);
+    } else {
+      // log that we cannot drag certain types of shape that are being dragged
+      log.warn(
+          I18N.getText(
+              "tool.drawingpointer.draggingUnsupportedShapeType",
+              s.getClass().getSimpleName(),
+              sd.getId(),
+              sd.getName()));
     }
   }
 

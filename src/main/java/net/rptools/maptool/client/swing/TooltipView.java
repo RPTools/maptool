@@ -23,13 +23,13 @@ import net.rptools.maptool.language.I18N;
 
 public class TooltipView extends InlineView {
 
-  private boolean mlToolTips;
+  private final boolean mlToolTips;
 
   /**
    * Constructs a new view wrapped on an element.
    *
    * @param elem the element
-   * @param macroLinkToolTips if to show macrolinks as tooltips
+   * @param macroLinkToolTips if to show macroLinks as tooltips
    */
   public TooltipView(Element elem, boolean macroLinkToolTips) {
     super(elem);
@@ -38,35 +38,56 @@ public class TooltipView extends InlineView {
 
   @Override
   public String getToolTipText(float x, float y, Shape allocation) {
-    AttributeSet attSet;
+    boolean isInsideChat = mlToolTips;
+    boolean showTitleAsTooltip = AppPreferences.suppressToolTipsForMacroLinks.get();
+    boolean isMacroLink = false;
+    AttributeSet attSet = (AttributeSet) getElement().getAttributes().getAttribute(HTML.Tag.A);
+    String href;
+    String title = null;
 
-    attSet = (AttributeSet) getElement().getAttributes().getAttribute(HTML.Tag.A);
     if (attSet != null) {
       Object attribute = attSet.getAttribute(HTML.Attribute.HREF);
-      String href;
 
       if (attribute != null) {
         href = attribute.toString();
+        isMacroLink =
+            href.toLowerCase().startsWith("macro:")
+                || (href.toLowerCase().startsWith("lib:")
+                    && href.toLowerCase().contains("/macro/"));
       } else {
         href = I18N.getString("macroLink.error.tooltip.bad.href");
       }
 
-      if (href.startsWith("macro:")) {
-        boolean isInsideChat = mlToolTips;
-        boolean allowToolTipToShow = !AppPreferences.suppressToolTipsForMacroLinks.get();
-        if (isInsideChat && allowToolTipToShow) {
+      attribute = attSet.getAttribute(HTML.Attribute.TITLE);
+      if (attribute != null) {
+        title = attribute.toString();
+      }
+
+      if (isInsideChat) {
+        if (!isMacroLink || showTitleAsTooltip) {
+          // not using anti-cheat tooltip, or not a macroLink, i.e. not suppress tooltip
+          if (title != null) {
+            return title;
+          }
+        } else if (href.toLowerCase().startsWith("macro:")) {
+          // use anti-cheat tooltip, i.e. suppress normal tooltip
           return MacroLinkFunction.getInstance().macroLinkToolTip(href);
+        } else if (href.toLowerCase().startsWith("lib:")) {
+          // no tooltip creation function available yet, just show the URL
+          return href;
         }
-        // if we are not displaying macro link tooltips let if fall through so that any span
-        // tooltips will be displayed
-      } else {
-        return href;
       }
     }
-
+    // first fallback - use title
+    if (title != null) {
+      return title;
+    }
+    // second fallback - span tag
     attSet = (AttributeSet) getElement().getAttributes().getAttribute(HTML.Tag.SPAN);
-    if (attSet != null) return (String) attSet.getAttribute(HTML.Attribute.TITLE);
-
+    if (attSet != null) {
+      return (String) attSet.getAttribute(HTML.Attribute.TITLE);
+    }
+    // nothing to show
     return null;
   }
 }
