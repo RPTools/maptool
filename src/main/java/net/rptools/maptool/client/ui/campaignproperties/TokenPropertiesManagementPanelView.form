@@ -23,7 +23,7 @@
         </properties>
         <border type="none"/>
         <children>
-          <grid id="15866" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="15866" layout-manager="GridLayoutManager" row-count="6" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
@@ -92,12 +92,12 @@
               </component>
               <component id="86fa8" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.defaultValue"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.playerEditable"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
@@ -116,6 +116,30 @@
               </component>
               <component id="d59a2" class="javax.swing.JTextArea" default-binding="true">
                 <constraints>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                  <focusable value="false"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.playerEditable.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="7698b" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <horizontalAlignment value="4"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.defaultValue"/>
+                  <verticalAlignment value="1"/>
+                </properties>
+              </component>
+              <component id="d0b73" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
                   <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
@@ -127,65 +151,78 @@
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
-            </children>
-          </grid>
-          <grid id="5ecae" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties/>
-            <border type="etched" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="campaignPropertiesTable.column.onStatSheet"/>
-            <children>
-              <component id="de662" class="javax.swing.JLabel">
+              <component id="1b557" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.onStatSheet"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.playerViewable"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
-              <component id="3813a" class="javax.swing.JLabel">
+              <component id="1ff40" class="javax.swing.JTextArea" default-binding="true">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font style="1"/>
-                  <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.gmStatSheet"/>
-                  <verticalAlignment value="1"/>
-                </properties>
-              </component>
-              <component id="14a87" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font style="1"/>
-                  <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="CampaignPropertiesDialog.label.owner"/>
-                  <verticalAlignment value="1"/>
-                </properties>
-              </component>
-              <component id="df35b" class="javax.swing.JTextArea" default-binding="true">
-                <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <editable value="false"/>
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.gm.description"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.playerViewable.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="5ecae" layout-manager="GridLayoutManager" row-count="10" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="etched" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="campaignPropertiesTable.column.statSheetVisibility"/>
+            <children>
+              <component id="3813a" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <horizontalAlignment value="4"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.gm"/>
+                  <verticalAlignment value="1"/>
+                </properties>
+              </component>
+              <component id="14a87" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <horizontalAlignment value="4"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.owner"/>
+                  <verticalAlignment value="1"/>
+                </properties>
+              </component>
+              <component id="df35b" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                  <focusable value="false"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.gm"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
               <component id="cc2fc" class="javax.swing.JTextArea" default-binding="true">
                 <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <editable value="false"/>
@@ -198,16 +235,148 @@
               </component>
               <component id="ae211" class="javax.swing.JTextArea" default-binding="true">
                 <constraints>
-                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <editable value="false"/>
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.owner.description"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.owner"/>
                   <wrapStyleWord value="true"/>
                 </properties>
+              </component>
+              <component id="f72c2" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <horizontalAlignment value="4"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.allies"/>
+                  <verticalAlignment value="1"/>
+                </properties>
+              </component>
+              <component id="d8993" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                  <focusable value="false"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.allies"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="48419" class="javax.swing.JSeparator">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="2a4a8" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <horizontalAlignment value="4"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.opponent"/>
+                  <verticalAlignment value="1"/>
+                </properties>
+              </component>
+              <component id="f1ede" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                  <focusable value="false"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.opponent"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="a9c45" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <horizontalAlignment value="4"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.allies.discrete"/>
+                  <verticalAlignment value="1"/>
+                </properties>
+              </component>
+              <component id="6b2e0" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                  <focusable value="false"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.allies.discrete"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="902d5" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <horizontalAlignment value="4"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.all"/>
+                  <verticalAlignment value="1"/>
+                </properties>
+              </component>
+              <component id="3d95c" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                  <focusable value="false"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.all"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="8aa0b" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <horizontalAlignment value="4"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.owner.discrete"/>
+                  <verticalAlignment value="1"/>
+                </properties>
+              </component>
+              <component id="411a2" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                  <focusable value="false"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.owner.discrete"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="9a17b" class="javax.swing.JSeparator">
+                <constraints>
+                  <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
               </component>
             </children>
           </grid>
@@ -350,7 +519,7 @@
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="dialog.NewToken.statSheetLocation"/>
                     </properties>
                   </component>
-                  <component id="e685d" class="javax.swing.JComboBox" default-binding="true">
+                  <component id="e685d" class="javax.swing.JComboBox">
                     <constraints>
                       <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
