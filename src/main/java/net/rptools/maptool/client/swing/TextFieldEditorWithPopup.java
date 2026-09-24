@@ -118,6 +118,7 @@ public class TextFieldEditorWithPopup extends Box implements Accessible {
                     if (c != null) {
                       setValue(c);
                     }
+                    textField.requestFocusInWindow();
                   })
               .show(getExternalEditorTitle(), getValue());
 
@@ -155,9 +156,8 @@ public class TextFieldEditorWithPopup extends Box implements Accessible {
   /** set up the collapse button */
   private void initCollapseButton() {
     collapseButton.setFocusable(true);
-    collapseButton.setFocusTraversalKeysEnabled(true);
     collapseButton.setRequestFocusEnabled(true);
-    collapseButton.addPropertyChangeListener(evt -> System.out.println(evt.getPropertyName()));
+
     // appearance - no background or border unless focussed
     collapseButton.addFocusListener(
         new FocusListener() {
@@ -217,7 +217,6 @@ public class TextFieldEditorWithPopup extends Box implements Accessible {
   /** adds openEditor button and listeners to keep enabled state aligned */
   private void initTextField() {
     textField.setFocusable(true);
-    textField.setFocusTraversalKeysEnabled(true);
     textField.setRequestFocusEnabled(true);
     // Put the external editor button inside the text field
     textField.setTrailingComponent(openEditorButton);
@@ -233,20 +232,7 @@ public class TextFieldEditorWithPopup extends Box implements Accessible {
    * differentiating the trailing button or making its focus obvious.
    */
   private void initOpenEditorButton() {
-    openEditorButton.addFocusListener(
-        new FocusListener() {
-          @Override
-          public void focusGained(FocusEvent e) {
-            openEditorButton.setBackground(BUTTON_HIGHLIGHT);
-          }
-
-          @Override
-          public void focusLost(FocusEvent e) {
-            openEditorButton.setBackground(OPEN_EDITOR_BUTTON_BG);
-          }
-        });
     openEditorButton.setFocusable(true);
-    openEditorButton.setFocusTraversalKeysEnabled(true);
     openEditorButton.setRequestFocusEnabled(true);
     openEditorButton.setOpaque(true);
     openEditorButton.setBorder(new PartialLineBorder(BUTTON_BORDER_COLOUR, 1, PartialSide.WEST));
@@ -500,7 +486,9 @@ public class TextFieldEditorWithPopup extends Box implements Accessible {
    * @return a new {@link DefaultCellEditor} with the text field as the editor component
    */
   public DefaultCellEditor getAsCellEditor() {
-    return new DefaultCellEditor(textField);
+    DefaultCellEditor dce = new DefaultCellEditor(textField);
+    dce.setClickCountToStart(1);
+    return dce;
   }
 
   /** sets various component visibilities before calling super method */
