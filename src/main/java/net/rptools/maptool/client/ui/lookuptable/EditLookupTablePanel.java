@@ -22,18 +22,20 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JTable;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -48,6 +50,10 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Theme;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
   private static final int PICKED_COLUMN_INDEX = 0;
@@ -99,6 +105,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
         .setIcon(RessourceManager.getSmallIcon(Icons.TABLEPANEL_TABLE_PLAYER_LOOKUP));
     view.getPickOnceIcon().setIcon(RessourceManager.getSmallIcon(Icons.TABLEPANEL_TABLE_PICK_ONCE));
 
+    loadTableGroups();
     bind(lookupTable);
 
     dialogFactory.display();
@@ -188,11 +195,88 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
     replaceComponent(view.getTableImagePlaceholder(), tableImageAssetPanel);
   }
 
+  public void initMetadataSyntaxArea() {
+
+    // configure the syntax text area
+    RSyntaxTextArea rsta = view.getTableMetadata();
+    rsta.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+    rsta.setCodeFoldingEnabled(true);
+    rsta.setEditable(true);
+    rsta.setInsertPairedCharacters(false);
+    rsta.setLineWrap(true);
+    rsta.setTabSize(4);
+    rsta.setWrapStyleWord(true);
+    rsta.setUseFocusableTips(false);
+
+    RTextScrollPane rtsp = view.getTableMetadataScrollPane();
+    rtsp.setLineNumbersEnabled(true);
+
+    // theme the syntax text area
+    Path themePath =
+        AppConstants.THEMES_DIR
+            .toPath()
+            .resolve(AppPreferences.defaultMacroEditorTheme.get() + ".xml");
+    try (InputStream in = Files.newInputStream(themePath)) {
+      Theme.load(in).apply(rsta);
+    } catch (IOException e) {
+      System.err.println("Unable to load theme: " + themePath + " " + e);
+    }
+
+    JComboBox<LookupTable.SupportedMetadataType> syntaxStyle = view.getTableMetadataType();
+    for (LookupTable.SupportedMetadataType type : LookupTable.SupportedMetadataType.values()) {
+      syntaxStyle.addItem(type);
+    }
+
+    /* Make the JComboBox display translated text */
+    syntaxStyle.setRenderer(
+        new DefaultListCellRenderer() {
+          @Override
+          public Component getListCellRendererComponent(
+              JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof LookupTable.SupportedMetadataType type) {
+              setText(type.getDisplayName());
+            }
+            return this;
+          }
+        });
+
+    syntaxStyle.addActionListener(
+        e -> {
+          LookupTable.SupportedMetadataType selectedMetadataType =
+              (LookupTable.SupportedMetadataType) syntaxStyle.getSelectedItem();
+          if (selectedMetadataType != null) {
+            rsta.setSyntaxEditingStyle(selectedMetadataType.getMimeType());
+          }
+        });
+  }
+
+  /**
+   * Populate the Table Groups ComboBox with groups already used. Should be outside an {@code init*}
+   * method as needs to respond to group changes.
+   */
+  public void loadTableGroups() {
+    view.getTableGroup().removeAllItems();
+
+    MapTool.getCampaign().getLookupTableMap().values().stream()
+        // Get the group name from the table
+        .map(LookupTable::getGroup)
+        // Remove any null groups
+        .filter(Objects::nonNull)
+        // Remove duplicate groups
+        .distinct()
+        // Sort groups
+        .sorted()
+        // Add to the ComboBox
+        .forEach(group -> view.getTableGroup().addItem(group));
+  }
+
   @Override
   public void bind(LookupTable lookupTable) {
     super.bind(lookupTable);
 
     view.getTableName().setText(lookupTable.getName());
+    view.getTableGroup().setSelectedItem(lookupTable.getGroup());
     view.getDefaultTableRoll()
         .setText(lookupTable.getPickOnce() ? "" : lookupTable.calculateRoll());
     tableImageAssetPanel.setImageId(lookupTable.getTableImage());
@@ -202,6 +286,14 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
     view.getPickOnce().setSelected(lookupTable.getPickOnce());
     view.getDefaultTableRoll().setEnabled(!lookupTable.getPickOnce());
     view.getResetPicks().setEnabled(lookupTable.getPickOnce());
+
+    view.getTableMetadata().setText(lookupTable.getMetadata());
+    LookupTable.SupportedMetadataType supportedMetadataType =
+        LookupTable.SupportedMetadataType.fromMimeType(lookupTable.getMetadataType());
+    view.getTableMetadataType().setSelectedItem(supportedMetadataType);
+    if (view.getTableMetadataType().getSelectedItem() == null) {
+      view.getTableMetadataType().setSelectedItem(LookupTable.SupportedMetadataType.NONE);
+    }
 
     view.getTableName().requestFocusInWindow();
 
@@ -240,6 +332,15 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
       return false;
     }
     var isPickOnce = view.getPickOnce().isSelected();
+
+    // Get the selected or entered table group from the combo box
+    Object selectedTableGroup = view.getTableGroup().getSelectedItem();
+    String group = selectedTableGroup == null ? "" : selectedTableGroup.toString();
+
+    String metadata = view.getTableMetadata().getText().trim();
+    LookupTable.SupportedMetadataType selectedMetadataType =
+        (LookupTable.SupportedMetadataType) view.getTableMetadataType().getSelectedItem();
+    String metadataType = Objects.requireNonNull(selectedMetadataType).getMimeType();
 
     // Before modifying the table, parse and validate all the entries to avoid partial modification
     // in case of error.
@@ -284,11 +385,14 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
     // save existing name for later removal from LookupTableMap
     String origname = lookupTable.getName();
     lookupTable.setName(name);
+    lookupTable.setGroup(group);
     lookupTable.setPickOnce(isPickOnce);
     lookupTable.setRoll(isPickOnce ? null : view.getDefaultTableRoll().getText());
     lookupTable.setTableImage(tableImageAssetPanel.getImageId());
     lookupTable.setVisible(view.getIsVisible().isSelected());
     lookupTable.setAllowLookup(view.getAllowLookup().isSelected());
+    lookupTable.setMetadata(metadata);
+    lookupTable.setMetadataType(metadataType);
 
     lookupTable.clearEntries();
     for (var entry : entries) {

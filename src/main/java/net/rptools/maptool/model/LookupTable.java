@@ -23,10 +23,12 @@ import javax.annotation.Nullable;
 import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.dicelib.expression.Result;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.LookupEntryDto;
 import net.rptools.maptool.server.proto.LookupTableDto;
 import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.parser.ParserException;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 public class LookupTable {
 
@@ -34,6 +36,7 @@ public class LookupTable {
 
   private @Nonnull List<LookupEntry> entryList = new ArrayList<>();
   private @Nullable String name;
+  private @Nullable String group;
   private @Nullable String defaultRoll;
   private @Nullable MD5Key tableImage;
   private @Nonnull Boolean visible = true;
@@ -41,6 +44,8 @@ public class LookupTable {
   // Flags a table as Pick Once, i.e. each entry can only be chosen once before the
   // table must be reset().
   private @Nonnull Boolean pickOnce = false;
+  private @Nullable String metadata;
+  private @Nullable String metadataType;
 
   public static final String NO_PICKS_LEFT = "NO_PICKS_LEFT";
 
@@ -48,12 +53,15 @@ public class LookupTable {
 
   public LookupTable(LookupTable table) {
     name = table.name;
+    group = table.group;
     defaultRoll = table.defaultRoll;
     tableImage = table.tableImage;
     pickOnce = table.pickOnce;
     visible = table.visible;
     allowLookup = table.allowLookup;
     entryList.addAll(table.entryList);
+    metadata = table.metadata;
+    metadataType = table.metadataType;
   }
 
   public String getRoll() {
@@ -92,6 +100,30 @@ public class LookupTable {
 
   public String getName() {
     return name;
+  }
+
+  public void setGroup(@Nullable String group) {
+    this.group = group;
+  }
+
+  public String getGroup() {
+    return group == null ? "" : group;
+  }
+
+  public void setMetadata(@Nullable String metadata) {
+    this.metadata = metadata;
+  }
+
+  public String getMetadata() {
+    return metadata == null ? "" : metadata;
+  }
+
+  public void setMetadataType(@Nullable String metadataType) {
+    this.metadataType = metadataType;
+  }
+
+  public @Nullable String getMetadataType() {
+    return metadataType == null ? SyntaxConstants.SYNTAX_STYLE_NONE : metadataType;
   }
 
   /**
@@ -532,9 +564,77 @@ public class LookupTable {
         .count();
   }
 
+  /**
+   * Returns if the table has any metadata or not.
+   *
+   * @return true/false
+   */
+  public boolean hasMetadata() {
+    return metadata != null && !metadata.isBlank();
+  }
+
+  /**
+   * Enum is a central list of supported table metadata types used for:
+   *
+   * <ul>
+   *   <li>populating {@code EditLookupTablePanel}'s metadata type JComboBox
+   *   <li>validating the metadata type in {@code LookupTableFunction setTableMetadataType()}
+   */
+  public enum SupportedMetadataType {
+    NONE(SyntaxConstants.SYNTAX_STYLE_NONE),
+    CSV(SyntaxConstants.SYNTAX_STYLE_CSV),
+    HTML(SyntaxConstants.SYNTAX_STYLE_HTML),
+    JSON(SyntaxConstants.SYNTAX_STYLE_JSON),
+    MARKDOWN(SyntaxConstants.SYNTAX_STYLE_MARKDOWN),
+    XML(SyntaxConstants.SYNTAX_STYLE_XML);
+
+    private final String mimeType;
+
+    SupportedMetadataType(String mimeType) {
+      this.mimeType = mimeType;
+    }
+
+    public String getMimeType() {
+      return mimeType;
+    }
+
+    public String getDisplayName() {
+      return I18N.getText(mimeType);
+    }
+
+    @Override
+    public String toString() {
+      return mimeType;
+    }
+
+    /** Finds a matching enum by its exact MIME type string. */
+    public static SupportedMetadataType fromMimeType(String mimeType) {
+      if (mimeType == null) {
+        return null;
+      }
+      String cleanedMimeType = mimeType.toLowerCase().trim();
+      for (SupportedMetadataType style : values()) {
+        if (style.getMimeType().equals(cleanedMimeType)) {
+          return style;
+        }
+      }
+      return null;
+    }
+
+    /** Generates a comma-separated list of supported enum MIME types, useful for error feedback. */
+    public static String getSupportedMimeTypeStringList() {
+      StringJoiner joiner = new StringJoiner(", ");
+      for (SupportedMetadataType type : values()) {
+        joiner.add(type.getMimeType());
+      }
+      return joiner.toString();
+    }
+  }
+
   public static LookupTable fromDto(LookupTableDto dto) {
     var table = new LookupTable();
     table.name = dto.hasName() ? dto.getName().getValue() : null;
+    table.group = dto.hasGroup() ? dto.getGroup().getValue() : null;
     table.entryList =
         dto.getEntriesList().stream().map(e -> LookupEntry.fromDto(e)).collect(Collectors.toList());
     table.defaultRoll = dto.hasDefaultRoll() ? dto.getDefaultRoll().getValue() : null;
@@ -542,6 +642,8 @@ public class LookupTable {
     table.setVisible(dto.getVisible());
     table.setAllowLookup(dto.getAllowLookup());
     table.setPickOnce(dto.getPickOnce());
+    table.metadata = dto.hasMetadata() ? dto.getMetadata().getValue() : null;
+    table.metadataType = dto.hasMetadataType() ? dto.getMetadataType().getValue() : null;
     return table;
   }
 
@@ -550,6 +652,9 @@ public class LookupTable {
     dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
     if (name != null) {
       dto.setName(StringValue.of(name));
+    }
+    if (group != null) {
+      dto.setGroup(StringValue.of(group));
     }
     if (defaultRoll != null) {
       dto.setDefaultRoll(StringValue.of(defaultRoll));
@@ -560,6 +665,12 @@ public class LookupTable {
     dto.setVisible(visible);
     dto.setAllowLookup(allowLookup);
     dto.setPickOnce(pickOnce);
+    if (metadata != null) {
+      dto.setName(StringValue.of(metadata));
+    }
+    if (metadataType != null) {
+      dto.setName(StringValue.of(metadataType));
+    }
     return dto.build();
   }
 }
