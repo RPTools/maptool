@@ -1142,11 +1142,13 @@ public class Zone {
           exposedAreaMeta.put(tea, meta);
         }
         meta.addToExposedAreaHistory(area);
-        ZoneRenderer zr = MapTool.getFrame().getZoneRenderer(this.getId());
-        if (zr != null) // Could be null if the AutoSaveManager is saving the campaign by copying
-        // Zones, but not
-        // ZoneRenderers
-        {
+        // The renderer is absent when this zone is not currently displayed -- for example while
+        // the AutoSaveManager copies Zones without their ZoneRenderers -- and the frame itself is
+        // absent when there is no UI. Exposing fog is model work either way, so neither is a
+        // reason to fail; there is simply no view to flush.
+        MapToolFrame frame = MapTool.getFrame();
+        ZoneRenderer zr = frame == null ? null : frame.getZoneRenderer(this.getId());
+        if (zr != null) {
           zr.getZoneView().flush();
         }
         putToken(tok);
