@@ -1988,7 +1988,6 @@ public class Zone {
 
   public void optimize() {
     log.debug("Optimizing Map " + getName());
-    MapTool.getFrame().setStatusMessage(I18N.getText("Zone.status.optimizing", getName()));
     collapseDrawables();
   }
 
