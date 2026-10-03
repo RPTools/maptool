@@ -35,17 +35,19 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
       List.of(
           DetailsTableColumn.IMAGE,
           DetailsTableColumn.NAME,
+          DetailsTableColumn.GROUP,
           DetailsTableColumn.PLAYER_VISIBLE,
           DetailsTableColumn.ALLOW_LOOKUP,
           DetailsTableColumn.PICK_ONCE,
           DetailsTableColumn.ROLL,
           DetailsTableColumn.COUNT_ENTRIES,
           DetailsTableColumn.COUNT_VALUES,
-          DetailsTableColumn.COUNT_IMAGES);
+          DetailsTableColumn.COUNT_IMAGES,
+          DetailsTableColumn.METADATA_TYPE);
 
   /** Defines the details view columns visible for non-GMs and their sequence */
   private static final List<DetailsTableColumn> PLAYER_COLUMNS =
-      List.of(DetailsTableColumn.IMAGE, DetailsTableColumn.NAME);
+      List.of(DetailsTableColumn.IMAGE, DetailsTableColumn.NAME, DetailsTableColumn.GROUP);
 
   /**
    * Retries the set list of details view columns based on GM role or not
@@ -66,6 +68,9 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
    *   <li>the column class
    *   <li>the column alignment
    *   <li>the preferred column width
+   *   <li>the column header icon
+   *   <li>the column row icon for true
+   *   <li>the column row icon for false
    */
   public enum DetailsTableColumn {
     IMAGE(
@@ -88,12 +93,26 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
         String.class,
         SwingConstants.LEFT,
         200,
-        Icons.WINDOW_TABLES,
+        null,
         null,
         null) {
       @Override
       Object getValue(LookupTable table) {
         return table.getName();
+      }
+    },
+    GROUP(
+        I18N.getText("Label.group"),
+        I18N.getText("LookupTablePanel.group.tooltip"),
+        String.class,
+        SwingConstants.LEFT,
+        100,
+        null,
+        null,
+        null) {
+      @Override
+      Object getValue(LookupTable table) {
+        return table.getGroup();
       }
     },
     PLAYER_VISIBLE(
@@ -192,6 +211,20 @@ public class LookupTableDetailsTablePanelModel extends AbstractTableModel {
       @Override
       Object getValue(LookupTable table) {
         return table.getEntryImageCount();
+      }
+    },
+    METADATA_TYPE(
+        I18N.getText("LookupTablePanel.metadataType"),
+        I18N.getText("LookupTablePanel.metadataType.tooltip"),
+        String.class,
+        SwingConstants.LEFT,
+        100,
+        null,
+        null,
+        null) {
+      @Override
+      Object getValue(LookupTable table) {
+        return table.hasMetadata() ? I18N.getText(table.getMetadataType()) : "";
       }
     };
 
