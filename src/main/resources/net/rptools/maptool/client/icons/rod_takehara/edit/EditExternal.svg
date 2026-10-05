@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" version="1.1" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(-19)">
+        <g id="Edit" transform="matrix(-1 0 0 1 116 1.21)">
+            <rect x="81.1" y="-1.21" width="16" height="16" fill="none"/>
+            
+                <path d="m84.7 14-0.017-2.77 2.79 2.79z" fill="#6e6e6e"/>
+            
+            
+                <path d="m86.3 9.6 2.79 2.79 5-5-2.79-2.79z" fill="#6e6e6e"/>
+            
+            
+                <path d="m93 3.18c-0.154 0.154-0.154 0.405 1e-4 0.56l2.23 2.23c0.154 0.154 0.405 0.155 0.56 1.6e-4l0.56-0.56c0.154-0.154 0.154-0.405-1e-4 -0.56l-2.23-2.23c-0.154-0.154-0.405-0.155-0.56-1.5e-4z" fill="#6e6e6e"/>
+            
+            
+                <rect transform="matrix(-.93 -.93 .0896 -.0896 96.9 16)" x="6" y="44.2" width="3" height="8" fill="#6e6e6e"/>
+            
+            
+                <rect transform="matrix(.93 .93 -.0756 .0756 83 1.68)" x="6" y="44.2" width="3" height="8" fill="#6e6e6e"/>
+            <path id="arrow" d="m87-0.292v0.988h-2.8l3.93 3.94-1.2 1.2-3.94-3.94v2.82h-0.99v-5h5z" fill="#6e6e6e" stroke-linecap="square" stroke-miterlimit="0"/>
+        </g>
+    </g>
+</svg>

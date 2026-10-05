@@ -64,6 +64,10 @@ public class RessourceManager {
           put(Icons.ADD_RESSOURCE_LOCAL, IMAGE_DIR + "folder.png");
           put(Icons.ADD_RESSOURCE_RPTOOLS, IMAGE_DIR + "rptools_icon.png");
           put(Icons.ADD_RESSOURCE_WEB, IMAGE_DIR + "download.png");
+          put(Icons.TRIANGLE_DOWN, IMAGE_DIR + "triangle_blue_down.svg");
+          put(Icons.TRIANGLE_LEFT, IMAGE_DIR + "triangle_blue_left.svg");
+          put(Icons.TRIANGLE_RIGHT, IMAGE_DIR + "triangle_blue_right.svg");
+          put(Icons.TRIANGLE_UP, IMAGE_DIR + "triangle_blue_up.svg");
           put(Icons.ASSETPANEL_HEROLABS, IMAGE_DIR + "hero-lab-icon.png");
           put(Icons.ASSETPANEL_HEROLABS_FOLDER, IMAGE_DIR + "hero_lab_folder.png");
           put(Icons.ASSETPANEL_PDF, IMAGE_DIR + "pdf_icon.png");
@@ -227,6 +231,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_VOLUME_ON, IMAGE_DIR + "audio/volume.png");
           put(Icons.TOOLBAR_ZONE, IMAGE_DIR + "tool/btn-world.png");
           put(Icons.TOOLBAR_ZONE_NOT_VISIBLE, IMAGE_DIR + "notvisible.png");
+          put(Icons.WARNING, IMAGE_DIR + "warning.svg");
           put(Icons.WINDOW_CAMPAIGN_MACROS, IMAGE_DIR + "campaign_panel.png");
           put(Icons.WINDOW_CHAT, IMAGE_DIR + "application.png");
           put(Icons.WINDOW_CONNECTIONS, IMAGE_DIR + "computer.png");
@@ -304,6 +309,7 @@ public class RessourceManager {
           put(Icons.ACTION_DELETE, ROD_ICONS + "edit/Delete.svg");
           put(Icons.ACTION_ACCEPT, ROD_ICONS + "edit/Accept.svg");
           put(Icons.ACTION_EDIT, ROD_ICONS + "edit/Edit.svg");
+          put(Icons.ACTION_EDIT_IN_EDITOR, ROD_ICONS + "edit/EditExternal.svg");
           put(Icons.ACTION_EXPORT, ROD_ICONS + "edit/Export.svg");
           put(Icons.ACTION_IMPORT, ROD_ICONS + "edit/Import.svg");
           put(Icons.ACTION_NEW, ROD_ICONS + "edit/New.svg");
