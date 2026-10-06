@@ -964,47 +964,52 @@ public class MapToolLineParser {
                 break;
             }
           }
-          var htmlContent = HTMLContent.htmlFromString(expressionBuilder.toString());
+
           switch (outputTo) {
-            case FRAME:
+            case FRAME -> {
               // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }
+              var htmlContent = HTMLContent.htmlFromString(expressionBuilder.toString());
               HTMLFrameFactory.show(frameName, FrameType.FRAME, false, frameOpts, htmlContent);
-              break;
-            case DIALOG:
+            }
+            case DIALOG -> {
               // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }
+              var htmlContent = HTMLContent.htmlFromString(expressionBuilder.toString());
               HTMLFrameFactory.show(frameName, FrameType.DIALOG, false, frameOpts, htmlContent);
-              break;
-            case OVERLAY:
+            }
+            case OVERLAY -> {
               // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }
+              var htmlContent = HTMLContent.htmlFromString(expressionBuilder.toString());
               HTMLFrameFactory.show(frameName, FrameType.OVERLAY, true, frameOpts, htmlContent);
-              break;
-            case CHAT:
+            }
+            case CHAT -> {
               builder.append(expressionBuilder);
-              break;
-            case FRAME5:
+            }
+            case FRAME5 -> {
               // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }
+              var htmlContent = HTMLContent.htmlFromString(expressionBuilder.toString());
               HTMLFrameFactory.show(frameName, FrameType.FRAME, true, frameOpts, htmlContent);
-              break;
-            case DIALOG5:
+            }
+            case DIALOG5 -> {
               // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }
+              var htmlContent = HTMLContent.htmlFromString(expressionBuilder.toString());
               HTMLFrameFactory.show(
                   frameName, HTMLFrameFactory.FrameType.DIALOG, true, frameOpts, htmlContent);
-              break;
+            }
           }
 
           // Revert to our previous token if [token(): ] was used
