@@ -131,8 +131,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   }
 
   public void startTokenDrag(Token keyToken, Set<GUID> tokens) {
-    startTokenDrag(
-        keyToken, tokens, new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer), false);
+    startTokenDrag(keyToken, tokens, keyToken.getDragAnchor(renderer.getZone()), false);
   }
 
   private void startTokenDrag(
