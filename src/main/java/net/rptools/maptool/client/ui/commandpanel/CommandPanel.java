@@ -30,7 +30,6 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.PreferencesChanged;
-import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
@@ -74,12 +73,6 @@ public class CommandPanel extends JPanel {
 
   private ChatProcessor chatProcessor;
 
-  /** The impersonated identity as displayed in the Impersonate panel. */
-  private TokenIdentity globalIdentity = new TokenIdentity();
-
-  /** The stack of impersonated identities. The most current is at the top of the stack. */
-  private final Stack<TokenIdentity> identityStack = new Stack<>();
-
   /** The identity representing no impersonation. */
   private static final TokenIdentity emptyIdentity = new TokenIdentity();
 
@@ -106,9 +99,21 @@ public class CommandPanel extends JPanel {
     chatProcessor.install(smileyRuleGroup);
   }
 
+  /**
+   * The identity state this panel displays and changes.
+   *
+   * <p>Looked up on every use rather than kept in a field: it belongs to the client, and a new
+   * client is created on every connection.
+   *
+   * @return the current client's impersonation state.
+   */
+  private static ImpersonationState impersonation() {
+    return MapTool.getClient().getImpersonation();
+  }
+
   /** Clears both the identity stack and the global identity. */
   public void clearAllIdentities() {
-    identityStack.clear();
+    impersonation().clearContextIdentities();
     setGlobalIdentity(emptyIdentity);
   }
 
@@ -118,7 +123,7 @@ public class CommandPanel extends JPanel {
    * @return {@code true} if there is a token being impersonated.
    */
   public boolean isImpersonating() {
-    return getCurrentIdentity().hasName();
+    return impersonation().isImpersonating();
   }
 
   /**
@@ -128,7 +133,7 @@ public class CommandPanel extends JPanel {
    * @return the identity to use.
    */
   public String getIdentity() {
-    return getCurrentIdentity().getIdentity();
+    return impersonation().getIdentity();
   }
 
   /**
@@ -139,7 +144,7 @@ public class CommandPanel extends JPanel {
    * @return ID of the token that is being impersonated if it was set via ID.
    */
   public GUID getIdentityGUID() {
-    return getCurrentIdentity().getIdentityGUID();
+    return impersonation().getIdentityGUID();
   }
 
   /**
@@ -162,11 +167,13 @@ public class CommandPanel extends JPanel {
    * @param globalIdentity the identity to impersonate
    */
   public void setGlobalIdentity(TokenIdentity globalIdentity) {
-    this.globalIdentity = globalIdentity;
+    // The state changes first, before anything is told about it. Everything below can read the
+    // identity back -- the HTML frame callbacks run macro code -- and must see the new one.
+    impersonation().setGlobalIdentity(globalIdentity);
     Token token = globalIdentity.getToken();
 
     // Change the impersonated panel
-    if (token == null || !globalIdentity.canImpersonate) {
+    if (token == null || !globalIdentity.canImpersonate()) {
       MapTool.getFrame().getImpersonatePanel().stopImpersonating();
     } else {
       MapTool.getFrame().getImpersonatePanel().startImpersonating(token);
@@ -180,6 +187,7 @@ public class CommandPanel extends JPanel {
 
   /** Refreshes the global identity so that it matches the impersonated token. */
   public void refreshGlobalIdentity() {
+    TokenIdentity globalIdentity = impersonation().getGlobalIdentity();
     if (globalIdentity.getIdentityGUID() != null) {
       TokenIdentity identity = globalIdentity;
       identity = new TokenIdentity(identity.getIdentityGUID(), identity.getIdentity());
@@ -188,17 +196,18 @@ public class CommandPanel extends JPanel {
   }
 
   /**
-   * Change the current impersonated identity. If the identityStack is empty, change the global
-   * identity; otherwise, change the current temporary one.
+   * Change the current impersonated identity. If no macro has entered a context identity, change
+   * the global identity; otherwise, replace the current context identity.
    *
    * @param macroIdentity the identity to change to
    */
   public void setIdentity(TokenIdentity macroIdentity) {
-    if (identityStack.isEmpty()) {
+    if (!impersonation().hasContextIdentity()) {
       setGlobalIdentity(macroIdentity);
     } else {
-      identityStack.pop();
-      enterContextIdentity(macroIdentity);
+      // Deliberately silent, like entering and leaving a context: only the global identity is
+      // ever announced.
+      impersonation().replaceContextIdentity(macroIdentity);
     }
   }
 
@@ -206,14 +215,14 @@ public class CommandPanel extends JPanel {
    * @return whether the current identity is a token.
    */
   public boolean isImpersonatingToken() {
-    return getCurrentIdentity().validToken();
+    return impersonation().isImpersonatingToken();
   }
 
   /**
    * @return whether the global identity is a token.
    */
   public boolean isGlobalImpersonatingToken() {
-    return globalIdentity.validToken();
+    return impersonation().isGlobalImpersonatingToken();
   }
 
   /**
@@ -222,7 +231,7 @@ public class CommandPanel extends JPanel {
    * @param macroIdentity the identity to temporarily adopt.
    */
   public void enterContextIdentity(TokenIdentity macroIdentity) {
-    identityStack.push(macroIdentity);
+    impersonation().enterContextIdentity(macroIdentity);
   }
 
   /**
@@ -230,17 +239,7 @@ public class CommandPanel extends JPanel {
    * global one if the stack is empty.
    */
   public void leaveContextIdentity() {
-    identityStack.pop();
-  }
-
-  /**
-   * Gets the current identity. The current identity is the one at the top of the stack, or the
-   * current one if it is empty.
-   *
-   * @return the current identity
-   */
-  private TokenIdentity getCurrentIdentity() {
-    return identityStack.isEmpty() ? globalIdentity : identityStack.peek();
+    impersonation().leaveContextIdentity();
   }
 
   /**
@@ -259,7 +258,8 @@ public class CommandPanel extends JPanel {
   }
 
   private boolean isTokenImpersonated(Token token) {
-    return token != null && token.getId().equals(globalIdentity.getIdentityGUID());
+    return token != null
+        && token.getId().equals(impersonation().getGlobalIdentity().getIdentityGUID());
   }
 
   private Token getImpersonatedAmongList(List<Token> list) {
@@ -282,7 +282,7 @@ public class CommandPanel extends JPanel {
   }
 
   private void updateIdentityIfImpersonatedChanged(List<Token> tokens) {
-    GUID tokenId = globalIdentity.getIdentityGUID();
+    GUID tokenId = impersonation().getGlobalIdentity().getIdentityGUID();
     if (tokenId != null) {
       // If the impersonated token has changed, update the identity
 
@@ -312,142 +312,6 @@ public class CommandPanel extends JPanel {
   void onChatMessageAdded(ChatMessageAdded event) {
     addMessage(event.message());
     System.out.printf("Added message %s%n", event.message());
-  }
-
-  /**
-   * Class describing an identity that can be impersonated. The identity can be a token, or any
-   * specified name.
-   */
-  public static class TokenIdentity {
-
-    /** The name of the identity. If null, nothing is impersonated. */
-    private final String identityName;
-
-    /** The GUID of the identity. */
-    private final GUID identityGUID;
-
-    /** Whether the player is allowed to set the token in the Impersonate panel. */
-    private final boolean canImpersonate;
-
-    /** Creates an empty identity (nothing impersonated). */
-    public TokenIdentity() {
-      identityName = null;
-      identityGUID = null;
-      canImpersonate = false;
-    }
-
-    /**
-     * Creates an identity from the token. If null, nothing is impersonated.
-     *
-     * @param token the token to impersonate
-     */
-    TokenIdentity(Token token) {
-      this(token, null);
-    }
-
-    /**
-     * Creates an identity from a name. If null, nothing is impersonated.
-     *
-     * @param name the name to impersonate
-     */
-    TokenIdentity(String name) {
-      this(null, name, false);
-    }
-
-    /**
-     * Creates an identity from a token. If the token is null, the identity uses the specified
-     * backup name.
-     *
-     * @param token the token to impersonate
-     * @param backupName the backup name to impersonate if the token is null
-     */
-    public TokenIdentity(Token token, String backupName) {
-      this(token, backupName, true);
-    }
-
-    /**
-     * Creates an identity from a GUID. If there is no associated token, the identity uses the
-     * specified backup name.
-     *
-     * @param tokenId the token GUID
-     * @param backupName the backup name to impersonate if the token is null
-     */
-    public TokenIdentity(GUID tokenId, String backupName) {
-      this(FindTokenFunctions.findToken(tokenId, null), backupName);
-    }
-
-    /**
-     * Creates an identity from a token. If the token is null, the identity uses the specified
-     * backup name. Impersonation through the Impersonate panel can be disabled.
-     *
-     * @param token the token to impersonate
-     * @param backupName the backup name to impersonate if the token is null
-     * @param canImpersonate whether the token can be impersonated in the Impersonate panel
-     */
-    public TokenIdentity(Token token, String backupName, boolean canImpersonate) {
-      if (token != null) {
-        this.identityGUID = token.getId();
-        this.identityName = token.getName();
-        this.canImpersonate = canImpersonate;
-      } else {
-        this.identityGUID = null;
-        this.identityName = backupName;
-        this.canImpersonate = false;
-      }
-    }
-
-    /**
-     * @return a string representing the identity.
-     */
-    public String getIdentity() {
-      if (identityName == null) {
-        if (identityGUID == null) {
-          return MapTool.getPlayer().getName();
-        } else {
-          return identityGUID.toString();
-        }
-      }
-      return identityName;
-    }
-
-    /**
-     * @return a string for the character label of the identity.
-     */
-    public String getCharacterLabel() {
-      return hasName() ? identityName : "";
-    }
-
-    /**
-     * @return the GUID of the identity.
-     */
-    public GUID getIdentityGUID() {
-      return identityGUID;
-    }
-
-    /**
-     * @return the token of the identity.
-     */
-    public Token getToken() {
-      return FindTokenFunctions.findToken(identityGUID, null);
-    }
-
-    /**
-     * @return whether the identity has a name.
-     */
-    public boolean hasName() {
-      return identityName != null;
-    }
-
-    /**
-     * @return whether the token can still be found on the current map.
-     */
-    public boolean validToken() {
-      if (identityGUID == null) {
-        return false;
-      } else {
-        return FindTokenFunctions.findToken(identityGUID, null) != null;
-      }
-    }
   }
 
   public JButton getEmotePopupButton() {

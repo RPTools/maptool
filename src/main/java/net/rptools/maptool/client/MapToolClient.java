@@ -81,6 +81,12 @@ public class MapToolClient {
 
   private @Nullable ScheduledFuture<?> heartBeatHandle;
 
+  /**
+   * Who this client is speaking and acting as. Held here rather than in the chat panel so that it
+   * exists without a UI; see {@link ImpersonationState}.
+   */
+  private final ImpersonationState impersonation = new ImpersonationState();
+
   private MapToolClient(
       @Nullable MapToolServer localServer,
       Campaign campaign,
@@ -232,6 +238,13 @@ public class MapToolClient {
 
   public ServerCommand getServerCommand() {
     return serverCommand;
+  }
+
+  /**
+   * @return who this client is currently speaking and acting as.
+   */
+  public ImpersonationState getImpersonation() {
+    return impersonation;
   }
 
   public LocalPlayer getPlayer() {
