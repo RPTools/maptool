@@ -24,7 +24,8 @@ import net.rptools.maptool.model.Token;
  * <p>Instances are immutable. Note however that {@link #getToken()} and {@link #validToken()} are
  * not plain getters: they look the token up by its GUID each time, on the current map, so an
  * identity that resolved to a token when it was created can stop resolving later, or resolve
- * differently depending on which map is being viewed.
+ * differently depending on which map is being viewed. With no map open, or no window at all (see
+ * {@link MapTool#getCurrentZone()}), they find no token.
  *
  * <p>This was previously nested inside {@code CommandPanel}. It moved out alongside {@link
  * ImpersonationState}, so that code needing to know who is speaking does not depend on a Swing
@@ -156,7 +157,8 @@ public class TokenIdentity {
   }
 
   /**
-   * @return the token of the identity, looked up on the current map.
+   * @return the token of the identity, looked up on the current map, or {@code null} if it is not
+   *     there or no map is open.
    */
   public Token getToken() {
     return FindTokenFunctions.findToken(identityGUID, null);
@@ -170,7 +172,8 @@ public class TokenIdentity {
   }
 
   /**
-   * @return whether the token can still be found on the current map.
+   * @return whether the token can still be found on the current map; {@code false} if no map is
+   *     open.
    */
   public boolean validToken() {
     if (identityGUID == null) {

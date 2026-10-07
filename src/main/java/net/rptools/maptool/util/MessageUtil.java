@@ -24,6 +24,7 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeColor;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 
 public class MessageUtil {
 
@@ -141,9 +142,11 @@ public class MessageUtil {
     if (AppPreferences.showAvatarInChat.get()) {
       if (token == null && MapTool.getClient().getImpersonation().isImpersonating()) {
         GUID guid = MapTool.getClient().getImpersonation().getIdentityGUID();
-        if (guid != null)
-          token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
-        else token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokenByName(identity);
+        // With no map open there is no token to take the avatar from.
+        Zone zone = MapTool.getCurrentZone();
+        if (zone == null) token = null;
+        else if (guid != null) token = zone.getToken(guid);
+        else token = zone.getTokenByName(identity);
       }
       sb.append("<td class='avatar'>");
       if (token != null) {
