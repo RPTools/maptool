@@ -102,6 +102,13 @@ public class CommandPanel extends JPanel {
   /**
    * The identity state this panel displays and changes.
    *
+   * <p>Who the player is speaking as used to be stored in this panel. It is now held by the client
+   * in an {@link ImpersonationState}, and the identity methods below ({@code getIdentity}, {@code
+   * setGlobalIdentity}, {@code enterContextIdentity} and so on) only forward to it. They are kept
+   * so that existing callers continue to work; new code should use {@code
+   * MapTool.getClient().getImpersonation()} directly, which does not need a UI. What remains here
+   * is the display: {@link #showGlobalIdentity(TokenIdentity)} and the avatar and label.
+   *
    * <p>Looked up on every use rather than kept in a field: it belongs to the client, and a new
    * client is created on every connection.
    *
@@ -164,12 +171,26 @@ public class CommandPanel extends JPanel {
   /**
    * Changes the globally impersonated identity.
    *
+   * <p>The panel itself is updated by {@link #showGlobalIdentity(TokenIdentity)}, which the
+   * client's {@link ImpersonationState} calls back once the identity has changed.
+   *
    * @param globalIdentity the identity to impersonate
    */
   public void setGlobalIdentity(TokenIdentity globalIdentity) {
-    // The state changes first, before anything is told about it. Everything below can read the
-    // identity back -- the HTML frame callbacks run macro code -- and must see the new one.
     impersonation().setGlobalIdentity(globalIdentity);
+  }
+
+  /**
+   * Shows a new global identity: the Impersonate panel, the avatar and name beside the chat box,
+   * and the HTML frames' {@code onChangeImpersonated} callbacks, in that order.
+   *
+   * <p>This is the {@link ImpersonationState.GlobalIdentityListener} for each client, attached in
+   * {@code MapTool} when the client is set up. It only displays; by the time it runs the identity
+   * has already changed, which is what lets the HTML frame callbacks read the new one back.
+   *
+   * @param globalIdentity the identity now in effect
+   */
+  public void showGlobalIdentity(TokenIdentity globalIdentity) {
     Token token = globalIdentity.getToken();
 
     // Change the impersonated panel

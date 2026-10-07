@@ -15,6 +15,7 @@
 package net.rptools.maptool.client;
 
 import java.util.Stack;
+import javax.annotation.Nullable;
 import net.rptools.maptool.model.GUID;
 
 /**
@@ -34,16 +35,17 @@ import net.rptools.maptool.model.GUID;
  * MapToolClient}. Each connection creates a new client, which is also when the panel used to clear
  * this state, so the lifetime is the same as before.
  *
- * <p><b>What this deliberately does not do.</b> It only holds state, and announces nothing.
- * Updating the Impersonate panel, the avatar beside the chat box, and the HTML frames' {@code
- * onChangeImpersonated} callbacks is still done by {@code CommandPanel}, in the same order as
- * before, and only when the <em>global</em> identity changes. Entering and leaving a context
- * identity has never notified anything, and must not start to: if it did, every {@code /im token:
- * macro} would fire {@code onChangeImpersonated} in every open HTML frame, which frameworks with
- * character sheets would notice immediately.
+ * <p><b>What is announced, and what is not.</b> A change to the <em>global</em> identity is passed
+ * to a {@link GlobalIdentityListener}, which in a client with a UI is {@code CommandPanel}: it
+ * updates the Impersonate panel, the avatar beside the chat box, and the HTML frames' {@code
+ * onChangeImpersonated} callbacks. Entering, leaving or replacing a <em>context</em> identity is
+ * never announced. That has always been so, and must stay so: if it were announced, every {@code
+ * /im token: macro} -- which includes every click of a token's macro button -- would fire {@code
+ * onChangeImpersonated} in every open HTML frame.
  *
- * <p><b>Threading.</b> Like the rest of the client's model state this is not thread safe, and is
- * expected to be used from the model thread only.
+ * <p><b>Threading.</b> This is not thread safe. Like the chat panel that used to hold it, it is
+ * meant to be used from the thread that runs macros and chat commands, which in a client is the
+ * Swing event dispatch thread.
  */
 public class ImpersonationState {
 
@@ -53,6 +55,40 @@ public class ImpersonationState {
   /** Temporary identities pushed by macros. The most recent is at the top of the stack. */
   private final Stack<TokenIdentity> identityStack = new Stack<>();
 
+  /** Told when the global identity changes. */
+  @FunctionalInterface
+  public interface GlobalIdentityListener {
+    /**
+     * Called after the global identity has been replaced.
+     *
+     * @param identity the new global identity, which is already in effect.
+     */
+    void globalIdentityChanged(TokenIdentity identity);
+  }
+
+  /** Whatever displays this client's identity, if anything does. */
+  private @Nullable GlobalIdentityListener globalIdentityListener;
+
+  /**
+   * Sets what is told when the global identity changes, replacing any previous listener.
+   *
+   * <p>This is a single direct call rather than an event on {@code MapToolEventBus}, and that is
+   * deliberate. The event bus delivers an event that is posted while another event is being
+   * dispatched only after that outer dispatch has finished, and the global identity does change
+   * from inside dispatches: {@code CommandPanel} re-sets it when the impersonated token is edited,
+   * and framework event macros such as {@code onChangeMap} and {@code onMouseOverEnter} run inside
+   * dispatches and may call {@code impersonate()}. Through the bus, the display would lag behind
+   * the state, and a macro that impersonated a token and then asked {@code getImpersonated(1)} --
+   * which reads the Impersonate panel -- would get the previous answer. Calling the listener
+   * directly keeps the display exactly in step with the state, as it was when this state lived in
+   * {@code CommandPanel}.
+   *
+   * @param listener the listener, or {@code null} for none, as on a server with no UI.
+   */
+  public void setGlobalIdentityListener(@Nullable GlobalIdentityListener listener) {
+    this.globalIdentityListener = listener;
+  }
+
   /**
    * @return the identity the player chose, ignoring any context identity a macro has pushed.
    */
@@ -61,15 +97,21 @@ public class ImpersonationState {
   }
 
   /**
-   * Replaces the global identity.
+   * Replaces the global identity, then tells the listener if there is one.
    *
-   * <p>Only the state changes here. Anything that displays the identity has to be updated by the
-   * caller, which today is {@code CommandPanel.setGlobalIdentity}.
+   * <p>The state changes <em>before</em> the listener is called, so the listener, and anything it
+   * runs -- including the HTML frames' {@code onChangeImpersonated} macros -- sees the new
+   * identity. The listener is told on every call, even if the identity is the same as before; the
+   * chat panel relies on that to refresh after the impersonated token is edited. If the listener
+   * throws, the identity has still changed.
    *
    * @param identity the identity the player is now using.
    */
   public void setGlobalIdentity(TokenIdentity identity) {
     this.globalIdentity = identity;
+    if (globalIdentityListener != null) {
+      globalIdentityListener.globalIdentityChanged(identity);
+    }
   }
 
   /**

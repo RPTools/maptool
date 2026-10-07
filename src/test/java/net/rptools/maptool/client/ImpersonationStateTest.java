@@ -21,7 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.EmptyStackException;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -161,5 +163,87 @@ public class ImpersonationStateTest {
     assertFalse(state.isImpersonatingToken());
     assertFalse(state.isGlobalImpersonatingToken());
     assertNull(state.getIdentityGUID());
+  }
+
+  // ---------------------------------------------------------------- the listener
+
+  /**
+   * Records every announcement, and what the state said the global identity was at the moment of
+   * each one, so that a test can check both that it was announced and that the state had already
+   * changed.
+   */
+  private static List<String> listen(ImpersonationState state) {
+    var heard = new ArrayList<String>();
+    state.setGlobalIdentityListener(
+        identity ->
+            heard.add(identity.getIdentity() + "/" + state.getGlobalIdentity().getIdentity()));
+    return heard;
+  }
+
+  @Test
+  void changingTheGlobalIdentityIsAnnouncedAfterTheStateChanges() {
+    var state = new ImpersonationState();
+    var heard = listen(state);
+
+    state.setGlobalIdentity(named("Alice"));
+
+    // "announced/in effect": the listener already sees Alice as the global identity
+    assertEquals(List.of("Alice/Alice"), heard);
+  }
+
+  @Test
+  void settingTheSameIdentityAgainIsStillAnnounced() {
+    var state = new ImpersonationState();
+    var alice = named("Alice");
+    var heard = listen(state);
+
+    state.setGlobalIdentity(alice);
+    state.setGlobalIdentity(alice);
+
+    assertEquals(2, heard.size());
+  }
+
+  /**
+   * The property that matters most. Every click of a token's macro button enters and leaves a
+   * context identity, so if any of these announced, HTML frames would fire onChangeImpersonated on
+   * every click.
+   */
+  @Test
+  void contextIdentitiesAreNeverAnnounced() {
+    var state = new ImpersonationState();
+    state.setGlobalIdentity(named("Alice"));
+    var heard = listen(state);
+
+    state.enterContextIdentity(named("Bob"));
+    state.replaceContextIdentity(named("Carol"));
+    state.enterContextIdentity(named("Dave"));
+    state.leaveContextIdentity();
+    state.clearContextIdentities();
+
+    assertTrue(heard.isEmpty(), "context changes announced: " + heard);
+  }
+
+  @Test
+  void theIdentityHasChangedEvenIfTheListenerThrows() {
+    var state = new ImpersonationState();
+    state.setGlobalIdentityListener(
+        identity -> {
+          throw new IllegalStateException("display failed");
+        });
+
+    assertThrows(IllegalStateException.class, () -> state.setGlobalIdentity(named("Alice")));
+    assertEquals("Alice", state.getIdentity());
+  }
+
+  @Test
+  void aNullListenerMeansNobodyIsTold() {
+    var state = new ImpersonationState();
+    var heard = listen(state);
+    state.setGlobalIdentityListener(null);
+
+    state.setGlobalIdentity(named("Alice"));
+
+    assertTrue(heard.isEmpty(), "removed listener was still told: " + heard);
+    assertEquals("Alice", state.getIdentity());
   }
 }
