@@ -205,4 +205,40 @@ public class ImpersonationState {
   public void clearContextIdentities() {
     identityStack.clear();
   }
+
+  /**
+   * Changes the identity in effect, the way {@code /im} does.
+   *
+   * <p>If no macro has pushed a context identity, this changes the global identity, which is
+   * announced. Inside a context -- for example a token macro button that itself runs {@code /im
+   * Other} -- it replaces the current context identity instead, deliberately without announcing it,
+   * just as entering and leaving a context are not announced. The player's own choice is left alone
+   * and comes back when the context ends.
+   *
+   * <p>This logic used to be {@code CommandPanel.setIdentity}, which now forwards here.
+   *
+   * @param identity the identity to change to.
+   */
+  public void setIdentity(TokenIdentity identity) {
+    if (!hasContextIdentity()) {
+      setGlobalIdentity(identity);
+    } else {
+      replaceContextIdentity(identity);
+    }
+  }
+
+  /**
+   * Discards every context identity, then clears the global identity, which is announced. Called
+   * when a client is set up and when a campaign is loaded.
+   *
+   * <p>This empties the context stack outright. If it runs while a macro is inside {@code /im
+   * token: macro}, that macro's later {@link #leaveContextIdentity()} finds the stack empty and
+   * throws. That has always been so; it is recorded here rather than changed.
+   *
+   * <p>This used to be {@code CommandPanel.clearAllIdentities}, which now forwards here.
+   */
+  public void clearAllIdentities() {
+    clearContextIdentities();
+    setGlobalIdentity(new TokenIdentity());
+  }
 }

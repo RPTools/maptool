@@ -1220,7 +1220,7 @@ public class MapTool {
   private static void setUpClient(@Nonnull MapToolClient client) {
     // Attach first: clearing the identities below relies on it to reset what the panel shows.
     showIdentityOf(client);
-    MapTool.getFrame().getCommandPanel().clearAllIdentities();
+    client.getImpersonation().clearAllIdentities();
 
     MapToolConnection clientConn = client.getConnection();
     clientConn.addActivityListener(clientFrame.getActivityMonitor());

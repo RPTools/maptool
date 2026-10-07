@@ -246,4 +246,65 @@ public class ImpersonationStateTest {
     assertTrue(heard.isEmpty(), "removed listener was still told: " + heard);
     assertEquals("Alice", state.getIdentity());
   }
+
+  @Test
+  void setIdentityChangesAndAnnouncesTheGlobalIdentityOutsideAContext() {
+    var state = new ImpersonationState();
+    var heard = listen(state);
+
+    state.setIdentity(named("Alice"));
+
+    assertEquals("Alice", state.getGlobalIdentity().getIdentity());
+    assertEquals(List.of("Alice/Alice"), heard);
+  }
+
+  /**
+   * {@code /im Other} run inside {@code /im Token: ...} changes only the context, silently, and the
+   * player's own choice comes back afterwards.
+   */
+  @Test
+  void setIdentityInsideAContextReplacesTheContextSilently() {
+    var state = new ImpersonationState();
+    state.setGlobalIdentity(named("Alice"));
+    state.enterContextIdentity(named("Bob"));
+    var heard = listen(state);
+
+    state.setIdentity(named("Carol"));
+
+    assertEquals("Carol", state.getIdentity());
+    assertEquals("Alice", state.getGlobalIdentity().getIdentity());
+    assertTrue(heard.isEmpty(), "context change announced: " + heard);
+
+    state.leaveContextIdentity();
+    assertEquals("Alice", state.getIdentity());
+    assertFalse(state.hasContextIdentity());
+  }
+
+  @Test
+  void clearAllIdentitiesEmptiesTheStackAndAnnouncesAnEmptyGlobalIdentity() {
+    var state = new ImpersonationState();
+    state.setGlobalIdentity(named("Alice"));
+    state.enterContextIdentity(named("Bob"));
+    var heard = new ArrayList<Boolean>();
+    // Record whether anything is impersonated rather than the name: an empty identity's name is
+    // the local player's, which needs a running client.
+    state.setGlobalIdentityListener(identity -> heard.add(state.isImpersonating()));
+
+    state.clearAllIdentities();
+
+    assertFalse(state.hasContextIdentity());
+    assertFalse(state.isImpersonating());
+    assertEquals(List.of(false), heard, "the listener sees the state already cleared");
+  }
+
+  /** Recorded rather than fixed: see {@link ImpersonationState#clearAllIdentities()}. */
+  @Test
+  void leavingAContextAfterClearAllIdentitiesThrows() {
+    var state = new ImpersonationState();
+    state.enterContextIdentity(named("Bob"));
+
+    state.clearAllIdentities();
+
+    assertThrows(EmptyStackException.class, state::leaveContextIdentity);
+  }
 }
