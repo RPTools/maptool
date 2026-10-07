@@ -74,7 +74,7 @@ public class LookupTableMacro extends AbstractMacro {
         return;
       }
       sb.append("Table ").append(tableName).append(" (");
-      sb.append(MapTool.getFrame().getCommandPanel().getIdentity());
+      sb.append(MapTool.getClient().getImpersonation().getIdentity());
       sb.append("): ");
 
       if (result.getImageId() != null) {
