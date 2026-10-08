@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.events;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.TextMessage;
 
-public record ChatMessageAdded(TextMessage message) {}
+public record ChatMessageAdded(TextMessage message) implements MTEvent {}

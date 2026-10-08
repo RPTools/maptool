@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.zones;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Label;
 
-public record LabelRemoved(Label label) {}
+public record LabelRemoved(Label label) implements MTEvent {}

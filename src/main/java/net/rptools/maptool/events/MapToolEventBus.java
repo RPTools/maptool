@@ -25,7 +25,16 @@ public class MapToolEventBus {
   /**
    * Returns the main MapTool {@link EventBus}.
    *
-   * @return the main Maptool {@link EventBus}.
+   * @return the main MapTool {@link EventBus}.
+   */
+  public static EventBus get() {
+    return mainEventBus;
+  }
+
+  /**
+   * Returns the main MapTool {@link EventBus}.
+   *
+   * @return the main MapTool {@link EventBus}.
    */
   public EventBus getMainEventBus() {
     return mainEventBus;

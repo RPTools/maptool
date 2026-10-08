@@ -14,7 +14,8 @@
  */
 package net.rptools.maptool.model.zones;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawnElement;
 
-public record DrawableAdded(Zone zone, DrawnElement drawnElement) {}
+public record DrawableAdded(Zone zone, DrawnElement drawnElement) implements MTEvent {}

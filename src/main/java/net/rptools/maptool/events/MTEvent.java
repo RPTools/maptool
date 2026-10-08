@@ -9,13 +9,17 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <https://www.gnu.org/licenses/> and specifically the Affero license
- * text at <https://www.gnu.org/licenses/agpl.html>.
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.zones;
+package net.rptools.maptool.events;
 
-import net.rptools.maptool.events.MTEvent;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.drawing.DrawnElement;
-
-public record DrawableRemoved(Zone zone, DrawnElement drawnElement) implements MTEvent {}
+/**
+ *
+ *
+ * <h3>Event for {@link MapToolEventBus}</h3>
+ *
+ * Implement this whenever creating a new Event type.<br>
+ * It makes it easier to find events no matter where they are hiding.
+ */
+public interface MTEvent {}
