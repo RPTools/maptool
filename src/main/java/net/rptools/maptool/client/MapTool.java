@@ -699,6 +699,8 @@ public class MapTool {
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
     setClientFrame(new MapToolFrame(menuBar));
+    // The pre-initialisation client was created before there was a frame to show its identity.
+    showIdentityOf(client);
     taskbarFlasher = new TaskBarFlasher(clientFrame);
 
     // Make sure the user sees something right away so that they aren't staring at a black screen.
@@ -1199,7 +1201,25 @@ public class MapTool {
         player);
   }
 
+  /**
+   * Makes the chat panel display the given client's identity.
+   *
+   * <p>Each client holds its own {@link ImpersonationState}, and a new client is created on every
+   * connection, so the panel has to be attached to each one. Every client the frame can see is
+   * attached: the pre-initialisation one when the frame is created, and every later one in {@link
+   * #setUpClient(MapToolClient)}.
+   *
+   * @param client the client whose identity the chat panel should show.
+   */
+  private static void showIdentityOf(@Nonnull MapToolClient client) {
+    client
+        .getImpersonation()
+        .setGlobalIdentityListener(clientFrame.getCommandPanel()::showGlobalIdentity);
+  }
+
   private static void setUpClient(@Nonnull MapToolClient client) {
+    // Attach first: clearing the identities below relies on it to reset what the panel shows.
+    showIdentityOf(client);
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
     MapToolConnection clientConn = client.getConnection();
