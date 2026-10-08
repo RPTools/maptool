@@ -390,7 +390,7 @@ public class AppMenuBar extends JMenuBar {
         new JMenuItem(
             new OpenUrlAction(
                 "action.helpurl.04",
-                "http://forums.rptools.net/viewtopic.php?f=22&t=3370",
+                "https://forums.rptools.net/viewtopic.php?f=22&t=3370",
                 Icons.MENU_NETWORK_SETUP)));
     menu.add(
         new JMenuItem(

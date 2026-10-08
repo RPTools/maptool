@@ -1757,16 +1757,15 @@ public class MapTool {
       log.error("msg.error.genesysFont", e);
     }
 
-    /**
+    /*
      * This is a tweak that makes the Chinese version work better.
      *
-     * <p>Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
-     * wikipedia.org/wiki/CJK_characters</a> before making changes. And
-     * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
+     * Consider reviewing https://en.wikipedia.org/wiki/CJK_characters before making changes. And
+     * https://unicode.scarfboy.com/ is also a really cool site.
      */
     if (Locale.CHINA.equals(Locale.getDefault())) {
       // The following font name appears to be "Sim Sun". It can be downloaded
-      // from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
+      // from here: https://fr.cooltext.com/Fonts-Unicode-Chinese
       Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
       FontUIResource fontRes = new FontUIResource(f);
       for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator();
