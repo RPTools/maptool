@@ -157,6 +157,7 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
     var dto = BarTokenOverlayDto.newBuilder().setCommon(getCommonDto());
     dto.addAssetIds(assetId.toString());
     setSideDto(dto);
+    dto.setIncrements(getIncrements());
     return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.SINGLE_IMAGE).build();
   }
 }

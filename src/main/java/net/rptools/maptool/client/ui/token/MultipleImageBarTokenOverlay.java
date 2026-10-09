@@ -135,6 +135,7 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     setSideDto(dto);
     dto.addAllAssetIds(
         Arrays.asList(assetIds).stream().map(a -> a.toString()).collect(Collectors.toList()));
+    dto.setIncrements(getIncrements());
     return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.MULTIPLE_IMAGE).build();
   }
 }
