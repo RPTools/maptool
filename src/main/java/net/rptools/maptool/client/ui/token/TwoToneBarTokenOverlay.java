@@ -23,7 +23,12 @@ import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 /**
  * @author Jay
  */
-public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
+public class TwoToneBarTokenOverlay extends BarTokenOverlay {
+  /** The color of the bar. */
+  private Color barColor;
+
+  /** The thickness of the bar in pixels */
+  private int thickness;
 
   /** Background color of the bar. */
   private Color bgColor;
@@ -34,16 +39,46 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
    * @param name Name of the bar
    * @param aBarColor The color of the bar.
    * @param aBgColor The background color.
-   * @param thickness The thickness of the bar and background.
+   * @param aThickness The thickness of the bar and background.
    */
-  public TwoToneBarTokenOverlay(String name, Color aBarColor, Color aBgColor, int thickness) {
-    super(name, aBarColor, thickness);
+  public TwoToneBarTokenOverlay(String name, Color aBarColor, Color aBgColor, int aThickness) {
+    super(name);
+    barColor = aBarColor;
+    thickness = aThickness;
     bgColor = aBgColor;
   }
 
   /** Default constructor for serialization */
   public TwoToneBarTokenOverlay() {
     this(DEFAULT_STATE_NAME, Color.RED, Color.BLACK, 5);
+  }
+
+  /**
+   * @return Getter for barColor
+   */
+  public Color getBarColor() {
+    return barColor;
+  }
+
+  /**
+   * @param barColor Setter for barColor
+   */
+  public void setBarColor(Color barColor) {
+    this.barColor = barColor;
+  }
+
+  /**
+   * @return Getter for thickness
+   */
+  public int getThickness() {
+    return thickness;
+  }
+
+  /**
+   * @param thickness Setter for thickness
+   */
+  public void setThickness(int thickness) {
+    this.thickness = thickness;
   }
 
   /**
@@ -62,9 +97,8 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
 
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
-    int width = (getSide() == Side.TOP || getSide() == Side.BOTTOM) ? bounds.width : getThickness();
-    int height =
-        (getSide() == Side.LEFT || getSide() == Side.RIGHT) ? bounds.height : getThickness();
+    int width = (getSide() == Side.TOP || getSide() == Side.BOTTOM) ? bounds.width : thickness;
+    int height = (getSide() == Side.LEFT || getSide() == Side.RIGHT) ? bounds.height : thickness;
     int x = 0;
     int y = 0;
     switch (getSide()) {
@@ -79,7 +113,7 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     g.fillRect(x, y, width, height);
 
     // Draw the bar
-    int borderSize = getThickness() > 5 ? 2 : 1;
+    int borderSize = thickness > 5 ? 2 : 1;
     x += borderSize;
     y += borderSize;
     width -= borderSize * 2;
@@ -90,15 +124,14 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
       height = calcBarSize(height, value);
       y += bounds.height - borderSize * 2 - height;
     }
-    g.setColor(getBarColor());
+    g.setColor(barColor);
     g.fillRect(x, y, width, height);
     g.setColor(tempColor);
   }
 
   @Override
   public Object clone() {
-    BarTokenOverlay overlay =
-        new TwoToneBarTokenOverlay(getName(), getBarColor(), bgColor, getThickness());
+    BarTokenOverlay overlay = new TwoToneBarTokenOverlay(getName(), barColor, bgColor, thickness);
     overlay.setOrder(getOrder());
     overlay.setGroup(getGroup());
     overlay.setMouseover(isMouseover());
@@ -113,7 +146,8 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
 
   protected static TwoToneBarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
     var bar = new TwoToneBarTokenOverlay();
-    bar.fillFrom(dto);
+    bar.barColor = new Color(dto.getColor(), true);
+    bar.thickness = dto.getThickness();
     bar.bgColor = new Color(dto.getBgColor(), true);
     return bar;
   }

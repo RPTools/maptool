@@ -591,15 +591,15 @@ public class TokenBarController
 
         // Handle the drawn overlays
         int type = -1;
-        if (bar instanceof DrawnBarTokenOverlay) {
-          formPanel.getSpinner(THICKNESS).setValue(((DrawnBarTokenOverlay) bar).getThickness());
-          ((ColorWell) formPanel.getComponent(COLOR))
-              .setColor(((DrawnBarTokenOverlay) bar).getBarColor());
+        if (bar instanceof DrawnBarTokenOverlay drawnBar) {
+          formPanel.getSpinner(THICKNESS).setValue(drawnBar.getThickness());
+          ((ColorWell) formPanel.getComponent(COLOR)).setColor(drawnBar.getBarColor());
           type = 3;
         } // endif
-        if (bar instanceof TwoToneBarTokenOverlay) {
-          ((ColorWell) formPanel.getComponent(BG_COLOR))
-              .setColor(((TwoToneBarTokenOverlay) bar).getBgColor());
+        else if (bar instanceof TwoToneBarTokenOverlay twoToneBar) {
+          formPanel.getSpinner(THICKNESS).setValue(twoToneBar.getThickness());
+          ((ColorWell) formPanel.getComponent(COLOR)).setColor(twoToneBar.getBarColor());
+          ((ColorWell) formPanel.getComponent(BG_COLOR)).setColor(twoToneBar.getBgColor());
           type = 4;
         } // endif
 
