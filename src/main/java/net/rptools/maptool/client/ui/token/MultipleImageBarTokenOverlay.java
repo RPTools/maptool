@@ -113,21 +113,17 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     this.assetIds = theAssetIds.toArray(MD5Key[]::new);
   }
 
-  public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+  protected static BarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
     var bar = new MultipleImageBarTokenOverlay();
-    bar.fillFrom(dto.getCommon());
-    bar.assetIds =
-        dto.getAssetIdsList().stream().map(a -> new MD5Key(a)).toArray(size -> new MD5Key[size]);
+    bar.assetIds = dto.getAssetIdsList().stream().map(MD5Key::new).toArray(MD5Key[]::new);
     bar.setIncrements(bar.assetIds.length);
     return bar;
   }
 
-  public BarTokenOverlayDto toDto() {
-    var dto = BarTokenOverlayDto.newBuilder().setCommon(getCommonDto());
-    setSideDto(dto);
-    dto.addAllAssetIds(
-        Arrays.asList(assetIds).stream().map(a -> a.toString()).collect(Collectors.toList()));
-    dto.setIncrements(getIncrements());
-    return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.MULTIPLE_IMAGE).build();
+  @Override
+  protected BarTokenOverlayDto.Builder toDtoImpl() {
+    return super.toDtoImpl()
+        .setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.MULTIPLE_IMAGE)
+        .addAllAssetIds(Arrays.stream(assetIds).map(MD5Key::toString).collect(Collectors.toList()));
   }
 }
