@@ -171,20 +171,18 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     return List.of(this.topAssetId, this.bottomAssetId);
   }
 
-  public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+  protected static BarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
     var bar = new TwoImageBarTokenOverlay();
-    bar.fillFrom(dto.getCommon());
     bar.bottomAssetId = new MD5Key(dto.getAssetIds(0));
     bar.topAssetId = new MD5Key(dto.getAssetIds(1));
     return bar;
   }
 
-  public BarTokenOverlayDto toDto() {
-    var dto = BarTokenOverlayDto.newBuilder().setCommon(getCommonDto());
-    dto.addAssetIds(bottomAssetId.toString());
-    dto.addAssetIds(topAssetId.toString());
-    setSideDto(dto);
-    dto.setIncrements(getIncrements());
-    return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.TWO_IMAGES).build();
+  @Override
+  protected BarTokenOverlayDto.Builder toDtoImpl() {
+    return super.toDtoImpl()
+        .setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.TWO_IMAGES)
+        .addAssetIds(bottomAssetId.toString())
+        .addAssetIds(topAssetId.toString());
   }
 }

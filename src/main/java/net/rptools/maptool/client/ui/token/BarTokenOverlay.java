@@ -184,33 +184,42 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
   public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
     var bar =
         switch (dto.getType()) {
-          case DRAWN -> DrawnBarTokenOverlay.fromDto(dto);
-          case MULTIPLE_IMAGE -> MultipleImageBarTokenOverlay.fromDto(dto);
-          case SINGLE_IMAGE -> SingleImageBarTokenOverlay.fromDto(dto);
-          case TWO_IMAGES -> TwoImageBarTokenOverlay.fromDto(dto);
-          case TWO_TONE -> TwoToneBarTokenOverlay.fromDto(dto);
+          case DRAWN -> DrawnBarTokenOverlay.fromDtoImpl(dto);
+          case MULTIPLE_IMAGE -> MultipleImageBarTokenOverlay.fromDtoImpl(dto);
+          case SINGLE_IMAGE -> SingleImageBarTokenOverlay.fromDtoImpl(dto);
+          case TWO_IMAGES -> TwoImageBarTokenOverlay.fromDtoImpl(dto);
+          case TWO_TONE -> TwoToneBarTokenOverlay.fromDtoImpl(dto);
           case UNRECOGNIZED -> null;
         };
     if (bar != null) {
+      bar.fillFrom(dto.getCommon());
       bar.setIncrements(dto.getIncrements());
-      switch (dto.getSide()) {
-        case TOP -> bar.setSide(Side.TOP);
-        case LEFT -> bar.setSide(Side.LEFT);
-        case RIGHT -> bar.setSide(Side.RIGHT);
-        case BOTTOM -> bar.setSide(Side.BOTTOM);
-      }
+      bar.setSide(
+          switch (dto.getSide()) {
+            case TOP, UNRECOGNIZED -> Side.TOP;
+            case LEFT -> Side.LEFT;
+            case RIGHT -> Side.RIGHT;
+            case BOTTOM -> Side.BOTTOM;
+          });
     }
     return bar;
   }
 
-  protected void setSideDto(BarTokenOverlayDto.Builder dto) {
-    switch (side) {
-      case TOP -> dto.setSide(SideDto.TOP);
-      case BOTTOM -> dto.setSide(SideDto.BOTTOM);
-      case LEFT -> dto.setSide(SideDto.LEFT);
-      case RIGHT -> dto.setSide(SideDto.RIGHT);
-    }
+  public BarTokenOverlayDto toDto() {
+    return toDtoImpl().build();
   }
 
-  public abstract BarTokenOverlayDto toDto();
+  protected BarTokenOverlayDto.Builder toDtoImpl() {
+    var dto = BarTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setIncrements(increments);
+    dto.setSide(
+        switch (side) {
+          case TOP -> SideDto.TOP;
+          case BOTTOM -> SideDto.BOTTOM;
+          case LEFT -> SideDto.LEFT;
+          case RIGHT -> SideDto.RIGHT;
+        });
+    return dto;
+  }
 }

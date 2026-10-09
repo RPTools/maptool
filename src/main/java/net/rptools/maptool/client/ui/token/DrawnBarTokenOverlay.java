@@ -121,30 +121,21 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
   }
 
   protected void fillFrom(BarTokenOverlayDto dto) {
-    fillFrom(dto.getCommon());
     barColor = new Color(dto.getColor(), true);
     thickness = dto.getThickness();
   }
 
-  public static DrawnBarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+  protected static DrawnBarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
     var bar = new DrawnBarTokenOverlay();
     bar.fillFrom(dto);
     return bar;
   }
 
-  protected BarTokenOverlayDto.Builder getDto() {
-    var dto = BarTokenOverlayDto.newBuilder();
-    dto.setCommon(getCommonDto());
-    dto.setThickness(thickness);
-    dto.setColor(barColor.getRGB());
-    setSideDto(dto);
-    return dto;
-  }
-
-  public BarTokenOverlayDto toDto() {
-    return getDto()
+  @Override
+  protected BarTokenOverlayDto.Builder toDtoImpl() {
+    return super.toDtoImpl()
         .setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.DRAWN)
-        .setIncrements(getIncrements())
-        .build();
+        .setThickness(thickness)
+        .setColor(barColor.getRGB());
   }
 }
