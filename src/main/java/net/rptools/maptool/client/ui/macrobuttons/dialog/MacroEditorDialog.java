@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.macrobuttons.dialog;
 
@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
+import javax.accessibility.AccessibleContext;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -962,4 +963,8 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
   }
 
   // End comparison customization
+
+  public AccessibleContext getAccessibleContext() {
+    return macroEditorRSyntaxTextArea.getAccessibleContext();
+  }
 }
