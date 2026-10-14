@@ -51,10 +51,6 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     this(AbstractTokenOverlay.DEFAULT_STATE_NAME, Color.RED, 5);
   }
 
-  /**
-   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle, double)
-   */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
     int width = (getSide() == Side.TOP || getSide() == Side.BOTTOM) ? bounds.width : thickness;
@@ -81,9 +77,6 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     g.setColor(tempColor);
   }
 
-  /**
-   * @see AbstractTokenOverlay#clone()
-   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new DrawnBarTokenOverlay(getName(), barColor, thickness);

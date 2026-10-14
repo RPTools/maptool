@@ -60,10 +60,6 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     this.bgColor = bgColor;
   }
 
-  /**
-   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle, double)
-   */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
     int width = (getSide() == Side.TOP || getSide() == Side.BOTTOM) ? bounds.width : getThickness();
@@ -99,9 +95,6 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     g.setColor(tempColor);
   }
 
-  /**
-   * @see AbstractTokenOverlay#clone()
-   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay =

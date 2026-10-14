@@ -46,16 +46,13 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
    * Create the complete image overlay.
    *
    * @param name Name of the new token overlay
-   * @param theAssetId Id of the bar image
+   * @param theAssetId ID of the bar image
    */
   public SingleImageBarTokenOverlay(String name, MD5Key theAssetId) {
     super(name);
     assetId = theAssetId;
   }
 
-  /**
-   * @see AbstractTokenOverlay#clone()
-   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new SingleImageBarTokenOverlay(getName(), assetId);
@@ -71,10 +68,6 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
     return overlay;
   }
 
-  /**
-   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle, double)
-   */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
 
