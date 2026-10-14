@@ -185,6 +185,7 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     dto.addAssetIds(bottomAssetId.toString());
     dto.addAssetIds(topAssetId.toString());
     setSideDto(dto);
+    dto.setIncrements(getIncrements());
     return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.TWO_IMAGES).build();
   }
 }
