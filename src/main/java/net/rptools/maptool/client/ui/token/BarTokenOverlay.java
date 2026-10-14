@@ -83,37 +83,36 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * @param value The percentage of the bar that is painted.
    * @return The size of the bar to be painted.
    */
-  public int calcBarSize(int size, double value) {
-    if (value == 0) {
+  protected int calcBarSize(int size, double value) {
+    if (value <= 0) {
       return 0;
     }
-    if (value == 1) {
+    if (value >= 1) {
       return size;
     }
 
     var increments = getIncrements();
-    if (increments == 0) {
+    if (increments <= 0) {
       return (int) Math.ceil(size * value);
     }
     double iSize = 1.0 / (increments - 1);
-    return (int) (size * findIncrement(value) * iSize);
+    return (int) (size * findIncrement(value, increments) * iSize);
   }
 
   /**
    * Find the increment for the passed value
    *
+   * <p>Requires {@code increments > 0}.
+   *
    * @param value Find the increment for this value.
-   * @return The increment for the value or -1 if no increments defined.
+   * @return The increment for the value, where the result satisfies {@code 0 <= result && result <
+   *     increments}.
    */
-  public int findIncrement(double value) {
-    var increments = getIncrements();
-    if (increments == 0) {
-      return -1;
-    }
-    if (value == 0) {
+  protected static int findIncrement(double value, int increments) {
+    if (value <= 0) {
       return 0;
     }
-    if (value == 1) {
+    if (value >= 1) {
       return increments - 1;
     }
     return (int) Math.ceil(value * (increments - 1));
