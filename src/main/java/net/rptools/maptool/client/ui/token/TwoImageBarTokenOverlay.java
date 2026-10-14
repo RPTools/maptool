@@ -40,11 +40,6 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
   /** ID of the top image displayed in the overlay. */
   private MD5Key topAssetId;
 
-  /** Needed for serialization */
-  public TwoImageBarTokenOverlay() {
-    this(DEFAULT_STATE_NAME, null, null);
-  }
-
   /**
    * Create the complete image overlay.
    *
@@ -172,10 +167,8 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
   }
 
   protected static BarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
-    var bar = new TwoImageBarTokenOverlay();
-    bar.bottomAssetId = new MD5Key(dto.getAssetIds(0));
-    bar.topAssetId = new MD5Key(dto.getAssetIds(1));
-    return bar;
+    return new TwoImageBarTokenOverlay(
+        DEFAULT_STATE_NAME, new MD5Key(dto.getAssetIds(0)), new MD5Key(dto.getAssetIds(1)));
   }
 
   @Override

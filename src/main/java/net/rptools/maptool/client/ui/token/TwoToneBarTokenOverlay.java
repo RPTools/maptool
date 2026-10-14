@@ -48,11 +48,6 @@ public class TwoToneBarTokenOverlay extends BarTokenOverlay {
     bgColor = aBgColor;
   }
 
-  /** Default constructor for serialization */
-  public TwoToneBarTokenOverlay() {
-    this(DEFAULT_STATE_NAME, Color.RED, Color.BLACK, 5);
-  }
-
   /**
    * @return Getter for barColor
    */
@@ -145,11 +140,11 @@ public class TwoToneBarTokenOverlay extends BarTokenOverlay {
   }
 
   protected static TwoToneBarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
-    var bar = new TwoToneBarTokenOverlay();
-    bar.barColor = new Color(dto.getColor(), true);
-    bar.thickness = dto.getThickness();
-    bar.bgColor = new Color(dto.getBgColor(), true);
-    return bar;
+    return new TwoToneBarTokenOverlay(
+        DEFAULT_STATE_NAME,
+        new Color(dto.getColor(), true),
+        new Color(dto.getBgColor(), true),
+        dto.getThickness());
   }
 
   @Override
