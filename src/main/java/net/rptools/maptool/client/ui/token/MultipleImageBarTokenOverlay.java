@@ -76,10 +76,9 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
 
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
-    int incr = findIncrement(value);
-
-    // Get the images
-    BufferedImage image = ImageManager.getImageAndWait(assetIds[incr]);
+    // Get the image
+    var assetId = getAssetForValue(value);
+    BufferedImage image = ImageManager.getImageAndWait(assetId);
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension(image.getWidth(), image.getHeight());
@@ -103,6 +102,10 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     }
     g.drawImage(image, x, y, size.width, size.height, null);
     g.setComposite(tempComposite);
+  }
+
+  public MD5Key getAssetForValue(double value) {
+    return assetIds[findIncrement(value, assetIds.length)];
   }
 
   @Override
