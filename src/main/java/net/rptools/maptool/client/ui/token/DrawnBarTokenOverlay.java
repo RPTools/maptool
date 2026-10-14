@@ -46,11 +46,6 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     thickness = aThickness;
   }
 
-  /** Default constructor for serialization. */
-  public DrawnBarTokenOverlay() {
-    this(AbstractTokenOverlay.DEFAULT_STATE_NAME, Color.RED, 5);
-  }
-
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
     int width = (getSide() == Side.TOP || getSide() == Side.BOTTOM) ? bounds.width : thickness;
@@ -121,10 +116,8 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
   }
 
   protected static DrawnBarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
-    var bar = new DrawnBarTokenOverlay();
-    bar.barColor = new Color(dto.getColor(), true);
-    bar.thickness = dto.getThickness();
-    return bar;
+    return new DrawnBarTokenOverlay(
+        DEFAULT_STATE_NAME, new Color(dto.getColor(), true), dto.getThickness());
   }
 
   @Override

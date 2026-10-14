@@ -37,11 +37,6 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
   /** ID of the bar image displayed in the overlay. */
   private MD5Key assetId;
 
-  /** Needed for serialization */
-  public SingleImageBarTokenOverlay() {
-    this(DEFAULT_STATE_NAME, null);
-  }
-
   /**
    * Create the complete image overlay.
    *
@@ -146,9 +141,7 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
   }
 
   protected static BarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
-    var bar = new SingleImageBarTokenOverlay();
-    bar.assetId = new MD5Key(dto.getAssetIds(0));
-    return bar;
+    return new SingleImageBarTokenOverlay(DEFAULT_STATE_NAME, new MD5Key(dto.getAssetIds(0)));
   }
 
   @Override
