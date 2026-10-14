@@ -39,11 +39,6 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
   /** ID of the base image displayed in the overlay. */
   private MD5Key[] assetIds;
 
-  /** Needed for serialization */
-  public MultipleImageBarTokenOverlay() {
-    this(DEFAULT_STATE_NAME, null);
-  }
-
   /**
    * Create the complete image overlay.
    *
@@ -56,13 +51,22 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
   }
 
   @Override
+  public int getIncrements() {
+    return assetIds.length;
+  }
+
+  @Override
+  public void setIncrements(int increments) {
+    // Forbid manually setting our increment count.
+  }
+
+  @Override
   public Object clone() {
     BarTokenOverlay overlay = new MultipleImageBarTokenOverlay(getName(), assetIds);
     overlay.setOrder(getOrder());
     overlay.setGroup(getGroup());
     overlay.setMouseover(isMouseover());
     overlay.setOpacity(getOpacity());
-    overlay.setIncrements(getIncrements());
     overlay.setSide(getSide());
     overlay.setShowGM(isShowGM());
     overlay.setShowOwner(isShowOwner());
@@ -114,10 +118,8 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
   }
 
   protected static BarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
-    var bar = new MultipleImageBarTokenOverlay();
-    bar.assetIds = dto.getAssetIdsList().stream().map(MD5Key::new).toArray(MD5Key[]::new);
-    bar.setIncrements(bar.assetIds.length);
-    return bar;
+    return new MultipleImageBarTokenOverlay(
+        DEFAULT_STATE_NAME, dto.getAssetIdsList().stream().map(MD5Key::new).toArray(MD5Key[]::new));
   }
 
   @Override

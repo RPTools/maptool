@@ -84,9 +84,17 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * @return The size of the bar to be painted.
    */
   public int calcBarSize(int size, double value) {
-    if (value == 0) return 0;
-    if (value == 1) return size;
-    if (increments == 0) return (int) Math.ceil(size * value);
+    if (value == 0) {
+      return 0;
+    }
+    if (value == 1) {
+      return size;
+    }
+
+    var increments = getIncrements();
+    if (increments == 0) {
+      return (int) Math.ceil(size * value);
+    }
     double iSize = 1.0 / (increments - 1);
     return (int) (size * findIncrement(value) * iSize);
   }
@@ -98,9 +106,16 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * @return The increment for the value or -1 if no increments defined.
    */
   public int findIncrement(double value) {
-    if (increments == 0) return -1;
-    if (value == 0) return 0;
-    if (value == 1) return increments - 1;
+    var increments = getIncrements();
+    if (increments == 0) {
+      return -1;
+    }
+    if (value == 0) {
+      return 0;
+    }
+    if (value == 1) {
+      return increments - 1;
+    }
     return (int) Math.ceil(value * (increments - 1));
   }
 
@@ -212,7 +227,7 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
   protected BarTokenOverlayDto.Builder toDtoImpl() {
     var dto = BarTokenOverlayDto.newBuilder();
     dto.setCommon(getCommonDto());
-    dto.setIncrements(increments);
+    dto.setIncrements(getIncrements());
     dto.setSide(
         switch (side) {
           case TOP -> SideDto.TOP;
