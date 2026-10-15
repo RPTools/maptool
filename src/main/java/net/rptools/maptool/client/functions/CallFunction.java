@@ -135,7 +135,8 @@ public class CallFunction extends AbstractFunction {
                       resolver,
                       tokenInContext,
                       macroName,
-                      MapToolLineParser.ARGS_PASSED_AS_VARIABLE_INDICATOR);
+                      MapToolLineParser.ARGS_PASSED_AS_VARIABLE_INDICATOR,
+                      true);
             } catch (ParserException e) {
               MapTool.addErrorMessage(e);
             }
@@ -147,7 +148,8 @@ public class CallFunction extends AbstractFunction {
               resolver,
               tokenInContext,
               macroName,
-              MapToolLineParser.ARGS_PASSED_AS_VARIABLE_INDICATOR);
+              MapToolLineParser.ARGS_PASSED_AS_VARIABLE_INDICATOR,
+              true);
     }
   }
 

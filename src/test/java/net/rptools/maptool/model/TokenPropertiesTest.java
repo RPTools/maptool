@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.model.permissions.Permissions;
@@ -80,7 +81,7 @@ public class TokenPropertiesTest {
         };
     factory = MacroLocationFactory.getInstance();
     var loc = factory.createTokenLocation("test", testToken);
-    MapTool.getParser().enterContext("test", loc, true);
+    MapTool.getParser().enterContext(new MapToolMacroContext("test", loc, true));
   }
 
   /**

@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.exceptions.*;
@@ -42,8 +43,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nullable;
-
 public class MapToolLineParser {
 
   // Logger for this class.
@@ -57,8 +56,8 @@ public class MapToolLineParser {
       MacroLocationFactory.getInstance();
 
   /**
-   * The args value to pass to the runMacro functions to indicate that the arrguments are stored in
-   * a variable
+   * The args value to pass to the runMacro functions to indicate that the arguments are stored in a
+   * variable
    */
   public static final String ARGS_PASSED_AS_VARIABLE_INDICATOR = "@args";
 
@@ -211,26 +210,11 @@ public class MapToolLineParser {
     }
   }
 
-  public String parseLine(String line) throws ParserException {
-    return parseLine(null, line);
-  }
-
-  public String parseLine(Token tokenInContext, String line) throws ParserException {
-    return parseLine(tokenInContext, line, null);
-  }
-
-  public String parseLine(Token tokenInContext, String line, MapToolMacroContext context)
-      throws ParserException {
-    return parseLine(null, tokenInContext, line, context);
-  }
-
-  public String parseLine(MapToolVariableResolver res, Token tokenInContext, String line)
-      throws ParserException {
-    return parseLine(res, tokenInContext, line, null);
-  }
-
   public String parseLine(
-      MapToolVariableResolver res, Token tokenInContext, String line, MapToolMacroContext context)
+      MapToolVariableResolver resolver,
+      Token tokenInContext,
+      String line,
+      @Nullable MapToolMacroContext context)
       throws ParserException {
     // copy previous rolls and clear out for new rolls.
     if (parserRecurseDepth == 0 && macroRecurseDepth == 0) {
@@ -249,13 +233,11 @@ public class MapToolLineParser {
     }
     Stack<Token> contextTokenStack = new Stack<>();
     context = enterContext(context);
-    MapToolVariableResolver resolver = null;
     boolean resolverInitialized = false;
     String opts = null;
     String roll = null;
     try {
       // Keep the same variable context for this line
-      resolver = (res == null) ? new MapToolVariableResolver(tokenInContext) : res;
       resolverInitialized = resolver.initialize();
       StringBuilder builder = new StringBuilder();
       int start = 0;
@@ -852,7 +834,7 @@ public class MapToolLineParser {
                       expressionBuilder.append(output_text);
                     } else {
                       outputOpts.add("r");
-                      expressionBuilder.append(rollString(outputOpts, output_text));
+                      expressionBuilder.append(rollString(outputOpts, null, output_text));
                     }
 
                     break;
@@ -881,6 +863,7 @@ public class MapToolLineParser {
                     expressionBuilder.append(
                         rollString(
                             outputOpts,
+                            null,
                             rollBranch + " = " + expandRoll(resolver, tokenInContext, rollBranch)));
                     break;
                   case UNFORMATTED:
@@ -891,7 +874,7 @@ public class MapToolLineParser {
                     output_text = output_text.replaceAll("'", "&#39;");
                     output_text = output_text.replaceAll("\"", "&#34;");
 
-                    expressionBuilder.append(rollString(outputOpts, output_text));
+                    expressionBuilder.append(rollString(outputOpts, null, output_text));
                 } // end of switch(output) statement
                 break; // end of case NO_CODE in switch(codeType) statement
               /*
@@ -905,7 +888,7 @@ public class MapToolLineParser {
                 String macroArgs = result.getValue().toString();
 
                 try {
-                  output_text = runMacro(resolver, tokenInContext, callName, macroArgs);
+                  output_text = runMacro(resolver, tokenInContext, callName, macroArgs, true);
                 } catch (AbortFunctionException e) {
                   // required to catch abort that are not
                   // in a (UDF)function call
@@ -1036,17 +1019,6 @@ public class MapToolLineParser {
     }
   }
 
-  public Result parseExpression(String expression, boolean makeDeterministic)
-      throws ParserException {
-    return parseExpression(null, expression, makeDeterministic);
-  }
-
-  public Result parseExpression(Token tokenInContext, String expression, boolean makeDeterministic)
-      throws ParserException {
-    return parseExpression(
-        new MapToolVariableResolver(tokenInContext), tokenInContext, expression, makeDeterministic);
-  }
-
   public Result parseExpression(
       MapToolVariableResolver resolver,
       Token tokenInContext,
@@ -1114,14 +1086,6 @@ public class MapToolLineParser {
     }
   }
 
-  public String expandRoll(String roll) throws ParserException {
-    return expandRoll(null, roll);
-  }
-
-  public String expandRoll(Token tokenInContext, String roll) throws ParserException {
-    return expandRoll(new MapToolVariableResolver(tokenInContext), tokenInContext, roll);
-  }
-
   public String expandRoll(MapToolVariableResolver resolver, Token tokenInContext, String roll)
       throws ParserException {
     try {
@@ -1139,29 +1103,6 @@ public class MapToolLineParser {
     } catch (Exception e) {
       return I18N.getText("lineParser.invalidExpr", roll);
     }
-  }
-
-  /**
-   * Runs a macro from a specified location.
-   *
-   * <p>If {@code args} is the value {@link #ARGS_PASSED_AS_VARIABLE_INDICATOR} then the arguments
-   * will be taken from the vairable {@link #ARGS_PASSED_AS_VARIABLE_NAME } set in the {@code
-   * resolver} to avoid conversion to/from a string. The variable {@link
-   * #ARGS_PASSED_AS_VARIABLE_NAME} is expected to be a JsonArray if you want to take full advantage
-   * of this feature.
-   *
-   * @param resolver the {@link MapToolVariableResolver} used for resolving variables in the macro
-   *     being run.
-   * @param tokenInContext the {@code Token} if any that is the "current" token for the macro.
-   * @param qMacroName the qualified macro name. (i.e. macro name and location of macro).
-   * @param args the arguments to pass to the macro when executing it.
-   * @return the result of the macro execution.
-   * @throws ParserException when an error occurs parsing or executing the macro.
-   */
-  public String runMacro(
-      MapToolVariableResolver resolver, Token tokenInContext, String qMacroName, String args)
-      throws ParserException {
-    return runMacro(resolver, tokenInContext, qMacroName, args, true);
   }
 
   /**
@@ -1449,10 +1390,6 @@ public class MapToolLineParser {
     return retval;
   }
 
-  private String rollString(Collection<String> options, String text) {
-    return rollString(options, null, text);
-  }
-
   private String rollString(Collection<String> options, String tooltip, String text) {
     StringBuilder s = new StringBuilder("\036");
     if (options != null) {
@@ -1534,17 +1471,6 @@ public class MapToolLineParser {
    */
   public void enterUntrustedContext(String name, MacroLocation source) {
     enterContext(new MapToolMacroContext(name, source, false));
-  }
-
-  /**
-   * Convenience method to enter a new context.
-   *
-   * @param name The name of the macro.
-   * @param source Where the macro comes from.
-   * @param secure Is the context secure or not.
-   */
-  public void enterContext(String name, MacroLocation source, boolean secure) {
-    enterContext(new MapToolMacroContext(name, source, secure));
   }
 
   /**
