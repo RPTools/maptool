@@ -151,6 +151,13 @@ public class MapToolLineParser {
     SKIP_NEXT_CHAR
   }
 
+  public final class ContextCloseable implements AutoCloseable {
+    @Override
+    public void close() {
+      contextStack.pop();
+    }
+  }
+
   public Map<String, String> listAllMacroFunctions() {
     Map<String, String> functionList = new HashMap<>();
 
@@ -240,11 +247,9 @@ public class MapToolLineParser {
         context = new MapToolMacroContext(loc.getName(), loc, MapTool.getPlayer().isGM(), -1);
       }
     }
-    enterContext(context);
-
     String opts = null;
     String roll = null;
-    try {
+    try (var ignored = enterContext(context)) {
       // Keep the same variable context for this line
       StringBuilder builder = new StringBuilder();
       int start = 0;
@@ -1004,7 +1009,6 @@ public class MapToolLineParser {
       throw doError(
           "lineParser.errorBodyRoll", opts == null ? "" : opts, roll == null ? line : roll);
     } finally {
-      exitContext();
       if (MapTool.getFrame() != null) {
         // Repaint in case macros changed anything.
         MapTool.getFrame().refresh();
@@ -1393,8 +1397,9 @@ public class MapToolLineParser {
    * Enters a new context for the macro.
    *
    * @param context The context for the macro.
+   * @return A resource that can be closed to exit the context.
    */
-  public void enterContext(@Nonnull MapToolMacroContext context) {
+  public ContextCloseable enterContext(@Nonnull MapToolMacroContext context) {
     // First time through set our trusted path to same as first context.
     // Any subsequent trips through we only change trusted path if context
     // is not trusted (if context == null on subsequent calls we don't change
@@ -1407,11 +1412,8 @@ public class MapToolLineParser {
       macroPathTrusted = false;
     }
     contextStack.push(context);
-  }
 
-  /** Leaves the current context reverting to the previous context. */
-  public void exitContext() {
-    contextStack.pop();
+    return new ContextCloseable();
   }
 
   /**
@@ -1419,9 +1421,21 @@ public class MapToolLineParser {
    *
    * @param name The name of the macro.
    * @param source Where the macro comes from.
+   * @return A resource that can be closed to exit the context.
    */
-  public void enterTrustedContext(String name, MacroLocation source) {
-    enterContext(new MapToolMacroContext(name, source, true));
+  public ContextCloseable enterTrustedContext(String name, MacroLocation source) {
+    return enterContext(new MapToolMacroContext(name, source, true));
+  }
+
+  /**
+   * Convenience method to enter a new insecure context.
+   *
+   * @param name The name of the macro.
+   * @param source Where the macro comes from.
+   * @return A resource that can be closed to exit the context.
+   */
+  public ContextCloseable enterUntrustedContext(String name, MacroLocation source) {
+    return enterContext(new MapToolMacroContext(name, source, false));
   }
 
   /**
@@ -1431,16 +1445,6 @@ public class MapToolLineParser {
    */
   public @Nullable MapToolMacroContext getContext() {
     return !contextStack.isEmpty() ? contextStack.peek() : null;
-  }
-
-  /**
-   * Convenience method to enter a new insecure context.
-   *
-   * @param name The name of the macro.
-   * @param source Where the macro comes from.
-   */
-  public void enterUntrustedContext(String name, MacroLocation source) {
-    enterContext(new MapToolMacroContext(name, source, false));
   }
 
   /**
