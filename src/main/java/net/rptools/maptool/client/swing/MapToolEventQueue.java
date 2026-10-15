@@ -174,12 +174,12 @@ public class MapToolEventQueue extends EventQueue {
     try {
       var loc = macroLocationFactory.createSentryIoLoggingLocation();
       MapToolMacroContext sentryContext = new MapToolMacroContext(command, loc, true);
-      MapTool.getParser().enterContext(sentryContext);
-      campaign =
-          getInfoFunction
-              .getInstance()
-              .childEvaluate(null, null, null, Collections.singletonList(command));
-      MapTool.getParser().exitContext();
+      try (var ignored = MapTool.getParser().enterContext(sentryContext)) {
+        campaign =
+            getInfoFunction
+                .getInstance()
+                .childEvaluate(null, null, null, Collections.singletonList(command));
+      }
     } catch (ParserException e) {
       campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();
     }
