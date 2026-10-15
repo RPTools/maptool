@@ -216,7 +216,7 @@ public class TokenPropertiesTest {
    */
   @Test
   public void testJSONObjectStrict() {
-    Object val = testToken.getEvaluatedProperty(variableResolver, "jsonObj1");
+    Object val = variableResolver.getEvaluatedTokenProperty("jsonObj1");
     JsonObject json = (JsonObject) val;
     assertAll(
         () -> assertTrue(json.isJsonObject()),
@@ -232,8 +232,8 @@ public class TokenPropertiesTest {
    */
   @Test
   public void testJSONObjectLenient() {
-    Object jsonObj2 = testToken.getEvaluatedProperty(variableResolver, "jsonObj2");
-    Object jsonObj3 = testToken.getEvaluatedProperty(variableResolver, "jsonObj3");
+    Object jsonObj2 = variableResolver.getEvaluatedTokenProperty("jsonObj2");
+    Object jsonObj3 = variableResolver.getEvaluatedTokenProperty("jsonObj3");
 
     JsonObject expected = new JsonObject();
     expected.addProperty("prop3", "other");
@@ -248,35 +248,34 @@ public class TokenPropertiesTest {
    */
   @Test
   public void testAssignmentInDefaultValue() {
-    assertEquals("10", testToken.getEvaluatedProperty(variableResolver, "prop2"));
+    assertEquals("10", variableResolver.getEvaluatedTokenProperty("prop2"));
 
     // the point of the assignment is that after the first access, prop2 should no longer be
     // dependent on prop1
     testToken.setProperty("prop1", "newValue");
-    assertEquals("10", testToken.getEvaluatedProperty(variableResolver, "prop2"));
+    assertEquals("10", variableResolver.getEvaluatedTokenProperty("prop2"));
   }
 
   @Test
   public void testJsonArray() {
-    JsonElement elem = (JsonElement) testToken.getEvaluatedProperty(variableResolver, "jsonArr1");
+    JsonElement elem = (JsonElement) variableResolver.getEvaluatedTokenProperty("jsonArr1");
     assertTrue(elem.isJsonArray());
   }
 
   @Test
   public void testPlainStr() {
-    Object val = testToken.getEvaluatedProperty(variableResolver, "plainStr1");
+    Object val = variableResolver.getEvaluatedTokenProperty("plainStr1");
     assertInstanceOf(String.class, val);
     assertEquals("justAString", val);
   }
 
   @Test
   public void testUnknownProperty() {
-    assertEquals("", testToken.getEvaluatedProperty(variableResolver, "unknownProp"));
+    assertEquals("", variableResolver.getEvaluatedTokenProperty("unknownProp"));
   }
 
   @Test
   public void testBadJsonReturnsAsString() {
-    assertEquals(
-        "{\"a\": 1}{\"b\": 2}", testToken.getEvaluatedProperty(variableResolver, "badJson"));
+    assertEquals("{\"a\": 1}{\"b\": 2}", variableResolver.getEvaluatedTokenProperty("badJson"));
   }
 }
