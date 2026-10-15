@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -174,7 +175,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
     boolean trusted = JSScriptEngine.inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
-      Object val = this.token.getEvaluatedProperty(name);
+      Object val = new MapToolVariableResolver(token).getEvaluatedTokenProperty(name);
       return "" + val;
     }
     return "";
@@ -188,12 +189,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
       return null;
     }
 
-    var res = this.token.getPropertyDefault(name);
-    if (res == null) {
-      return null;
-    }
-
-    return "" + this.token.evaluateProperty(null, name, res);
+    return "" + new MapToolVariableResolver(token).getEvaluatedTokenPropertyDefault(name);
   }
 
   @HostAccess.Export
