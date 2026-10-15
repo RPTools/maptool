@@ -24,7 +24,6 @@ import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.*;
 
@@ -90,9 +89,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public Object execMacro(String macro) throws ParserException {
-    Token tokenInContext =
-        MacroJavaScriptBridge.getInstance().getVariableResolver().getTokenInContext();
-    return _evalMacro(new MapToolVariableResolver(tokenInContext), macro);
+    return _evalMacro(MacroJavaScriptBridge.getInstance().getVariableResolver().spawn(), macro);
   }
 
   @HostAccess.Export

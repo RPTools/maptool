@@ -123,6 +123,13 @@ public class MapToolVariableResolver implements VariableResolver {
     }
   }
 
+  /**
+   * @return A new resolver with the same token in context.
+   */
+  public MapToolVariableResolver spawn() {
+    return new MapToolVariableResolver(tokenInContext);
+  }
+
   public void setAutoPrompt(boolean value) {
     autoPrompt = value;
   }
@@ -285,9 +292,7 @@ public class MapToolVariableResolver implements VariableResolver {
       if (evaluate) {
         // Try parse the value if we can not parse it then just return it as a string.
         try {
-          value =
-              MapTool.getParser()
-                  .parseLine(new MapToolVariableResolver(tokenInContext), result.toString(), null);
+          value = MapTool.getParser().parseLine(spawn(), result.toString(), null);
         } catch (Exception e) {
           value = result.toString();
         }
