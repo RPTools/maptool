@@ -21,7 +21,6 @@ import net.rptools.maptool.client.MapToolLineParser;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -54,12 +53,10 @@ public class EvalMacroFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
 
-    Token tokenInContext = mtResolver.getTokenInContext();
-
     // execMacro has new variable scope where as evalMacro does not.
     MapToolVariableResolver mtResolver = (MapToolVariableResolver) resolver;
     if (functionName.equalsIgnoreCase("execMacro")) {
-      return execMacro(tokenInContext, parameters.get(0).toString());
+      return evalMacro(mtResolver.spawn(), parameters.get(0).toString());
     } else if ("evalMacro".equalsIgnoreCase(functionName)) {
       return evalMacro(mtResolver, parameters.get(0).toString());
     }
