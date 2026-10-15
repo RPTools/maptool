@@ -48,13 +48,13 @@ public class EvalMacroFunctions extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     MapToolLineParser lineParser = MapTool.getParser();
-    MapToolVariableResolver mtResolver = (MapToolVariableResolver) resolver;
 
     if (!lineParser.isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
 
     // execMacro has new variable scope where as evalMacro does not.
+    MapToolVariableResolver mtResolver = (MapToolVariableResolver) resolver;
     if (functionName.equalsIgnoreCase("execMacro")) {
       return evalMacro(mtResolver.spawn(), parameters.get(0).toString());
     } else if ("evalMacro".equalsIgnoreCase(functionName)) {
