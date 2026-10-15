@@ -25,6 +25,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.macro.MacroLocation;
 import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
@@ -807,7 +808,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
             token.getName(),
             token.getId());
       }
-      return MapTool.getParser().parseLine(token, toolTip, context);
+      return MapTool.getParser()
+          .parseLine(new MapToolVariableResolver(token), token, toolTip, context);
     } catch (ParserException pe) {
       return toolTip;
     }

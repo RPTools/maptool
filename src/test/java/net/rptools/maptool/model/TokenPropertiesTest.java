@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.macro.MacroLocationFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +68,7 @@ public class TokenPropertiesTest {
         };
     factory = MacroLocationFactory.getInstance();
     var loc = factory.createTokenLocation("test", testToken);
-    MapTool.getParser().enterContext("test", loc, true);
+    MapTool.getParser().enterContext(new MapToolMacroContext("test", loc, true));
   }
 
   /**

@@ -144,7 +144,8 @@ public class RequestHandler {
 
                     resolver.setVariable("macro.requestHeaders", gson.toJsonTree(requestHeaders));
                     resolver.setVariable("macro.responseHeaders", gson.toJsonTree(responseHeaders));
-                    String line = MapTool.getParser().runMacro(resolver, null, macroName, body);
+                    String line =
+                        MapTool.getParser().runMacro(resolver, null, macroName, body, true);
                     return line;
                   })
               .thenApply(
