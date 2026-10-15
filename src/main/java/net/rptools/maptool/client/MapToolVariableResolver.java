@@ -94,8 +94,6 @@ public class MapToolVariableResolver implements VariableResolver {
           GM_PANEL);
   private final Map<String, Object> variables = new CaseInsensitiveHashMap<>();
 
-  private List<Runnable> delayedActionList;
-
   private Token tokenInContext;
 
   private boolean autoPrompt;
@@ -122,37 +120,6 @@ public class MapToolVariableResolver implements VariableResolver {
       } catch (ParserException e) {
         LOGGER.error("Error: Unable to set constant " + entry.getKey() + " to " + entry.getValue());
       }
-    }
-  }
-
-  /**
-   * Initialize this resolver
-   *
-   * @return true if initialization actually happened, false if it's already been initialized
-   */
-  public boolean initialize() {
-    if (delayedActionList == null) {
-      delayedActionList = new ArrayList<>();
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Add an action to be performed after the full expression has been evaluated.
-   *
-   * @param runnable the action to be performed.
-   */
-  public void addDelayedAction(Runnable runnable) {
-    if (!delayedActionList.contains(runnable)) {
-      delayedActionList.add(runnable);
-    }
-  }
-
-  /** Perform any delayed actions. This should called by the command framework only. */
-  public void flush() {
-    for (Runnable r : delayedActionList) {
-      r.run();
     }
   }
 
@@ -199,7 +166,7 @@ public class MapToolVariableResolver implements VariableResolver {
 
     boolean evaluate = false; // Should we try to evaluate the value.
 
-    // MT Script doesnt have much in the way of types.
+    // MT Script doesn't have much in the way of types.
     if (name.startsWith(MarkDownFunctions.MARKDOWN_PREFIX)) {
       return new MarkDownFunctions().getMTSTypeLabel(name);
     }
