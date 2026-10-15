@@ -497,19 +497,14 @@ public class MacroLinkFunction extends AbstractFunction {
       throws ParserException {
 
     var loc = macroLocationFactory.createMacroLinkLocation(macroName);
-    if (MapTool.getParser().isMacroTrusted()) {
-      MapTool.getParser().enterTrustedContext(macroName, loc);
-    } else {
-      MapTool.getParser().enterUntrustedContext(macroName, loc);
-    }
-
     String line = "";
     // Execute the macro
-    try {
+    try (var ignored =
+        MapTool.getParser().isMacroTrusted()
+            ? MapTool.getParser().enterTrustedContext(macroName, loc)
+            : MapTool.getParser().enterUntrustedContext(macroName, loc)) {
       MapToolVariableResolver resolver = new MapToolVariableResolver(token);
       line = MapTool.getParser().runMacro(resolver, macroName, args, true);
-    } finally {
-      MapTool.getParser().exitContext();
     }
 
     // Don't output blank messages. Fixes #1867.

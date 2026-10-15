@@ -224,12 +224,13 @@ public class EventMacroUtil {
       }
       var loc = macroLocationFactory.createEventLocation(macroTarget);
 
-      MapTool.getParser().enterTrustedContext(loc.getName(), loc);
-      String resultVal = MapTool.getParser().runMacro(newResolver, macroTarget, args, false);
-      if (!suppressChatOutput && resultVal != null && !resultVal.equals("")) {
-        MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.SAY, null, MapTool.getPlayer().getName(), resultVal, null));
+      try (var ignored = MapTool.getParser().enterTrustedContext(loc.getName(), loc)) {
+        String resultVal = MapTool.getParser().runMacro(newResolver, macroTarget, args, false);
+        if (!suppressChatOutput && resultVal != null && !resultVal.equals("")) {
+          MapTool.addMessage(
+              new TextMessage(
+                  TextMessage.Channel.SAY, null, MapTool.getPlayer().getName(), resultVal, null));
+        }
       }
     } catch (AbortFunctionException afe) {
       // Do nothing
@@ -239,8 +240,6 @@ public class EventMacroUtil {
       MapTool.addLocalMessage(
           "Event continuing after error running " + macroTarget + ": " + e.getMessage());
       LOGGER.debug("error running {}: {}", macroTarget, e.getMessage(), e);
-    } finally {
-      MapTool.getParser().exitContext();
     }
     return newResolver;
   }
