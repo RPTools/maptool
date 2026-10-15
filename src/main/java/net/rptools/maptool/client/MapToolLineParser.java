@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.client.functions.*;
@@ -228,8 +229,19 @@ public class MapToolLineParser {
     if (line.isEmpty()) {
       return "";
     }
+
     Stack<Token> contextTokenStack = new Stack<>();
-    context = enterContext(context);
+    if (context == null) {
+      if (!contextStack.isEmpty()) {
+        context = contextStack.peek();
+      } else {
+        // Create a new top-level context.
+        var loc = macroLocationFactory.createChatLocation();
+        context = new MapToolMacroContext(loc.getName(), loc, MapTool.getPlayer().isGM(), -1);
+      }
+    }
+    enterContext(context);
+
     String opts = null;
     String roll = null;
     try {
@@ -1380,41 +1392,26 @@ public class MapToolLineParser {
   /**
    * Enters a new context for the macro.
    *
-   * @param context The context for the macro. If context is null and there is a current context it
-   *     is reentered. If context is null and there is no current context then a new top level
-   *     context is created.
+   * @param context The context for the macro.
    */
-  public MapToolMacroContext enterContext(MapToolMacroContext context) {
+  public void enterContext(@Nonnull MapToolMacroContext context) {
     // First time through set our trusted path to same as first context.
     // Any subsequent trips through we only change trusted path if context
     // is not trusted (if context == null on subsequent calls we don't change
     // anything as trusted context will remain the same as it was before the call).
     if (contextStack.isEmpty()) {
       // The path is untrusted if any typing is involved, including GM's
-      macroPathTrusted = context != null && context.isTrusted();
-      macroButtonIndex = context == null ? -1 : context.getMacroButtonIndex();
-    } else if (context != null && !context.isTrusted()) {
+      macroPathTrusted = context.isTrusted();
+      macroButtonIndex = context.getMacroButtonIndex();
+    } else if (!context.isTrusted()) {
       macroPathTrusted = false;
     }
-    if (context == null) {
-      if (contextStack.isEmpty()) {
-        var loc = macroLocationFactory.createChatLocation();
-        context = new MapToolMacroContext(loc.getName(), loc, MapTool.getPlayer().isGM());
-      } else {
-        context = contextStack.peek();
-      }
-    }
     contextStack.push(context);
-    return context;
   }
 
-  /**
-   * Leaves the current context reverting to the previous context.
-   *
-   * @return The context that you leave.
-   */
-  public MapToolMacroContext exitContext() {
-    return contextStack.pop();
+  /** Leaves the current context reverting to the previous context. */
+  public void exitContext() {
+    contextStack.pop();
   }
 
   /**
