@@ -507,7 +507,7 @@ public class MacroLinkFunction extends AbstractFunction {
     // Execute the macro
     try {
       MapToolVariableResolver resolver = new MapToolVariableResolver(token);
-      line = MapTool.getParser().runMacro(resolver, token, macroName, args);
+      line = MapTool.getParser().runMacro(resolver, token, macroName, args, true);
     } finally {
       MapTool.getParser().exitContext();
     }
