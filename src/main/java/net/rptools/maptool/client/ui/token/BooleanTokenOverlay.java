@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.FunctionUtil;
@@ -53,7 +54,8 @@ public abstract sealed class BooleanTokenOverlay extends AbstractTokenOverlay
   public abstract BooleanTokenOverlay clone();
 
   @Override
-  public final void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
+  public final void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, Object value, ImageObserver observer) {
     if (!FunctionUtil.getBooleanValue(value)) {
       return;
     }
@@ -64,7 +66,7 @@ public abstract sealed class BooleanTokenOverlay extends AbstractTokenOverlay
       float opacity = token.getTokenOpacity() * getOpacity() / 100.f;
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
 
-      paintOverlay(g, token, bounds);
+      paintOverlay(g, token, bounds, observer);
     } finally {
       g.dispose();
     }
@@ -80,8 +82,11 @@ public abstract sealed class BooleanTokenOverlay extends AbstractTokenOverlay
    * @param bounds The bounds of the actual token. This will be different than the clip since the
    *     clip also has to take into account the edge of the window. If you draw based on the clip it
    *     will be off for partial token painting.
+   * @param observer An image observer to notify as images become available. Used to support
+   *     non-blocking rendering for image-based states.
    */
-  public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds);
+  protected abstract void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, ImageObserver observer);
 
   public static BooleanTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
     BooleanTokenOverlay overlay =

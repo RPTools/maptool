@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
@@ -50,8 +51,8 @@ public final class ImageTokenOverlay extends AbstractImageTokenOverlay {
   }
 
   @Override
-  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
-    BufferedImage image = ImageManager.getImageAndWait(getAssetId());
+  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, ImageObserver observer) {
+    BufferedImage image = ImageManager.getImage(getAssetId(), observer);
 
     var imageBounds = new Rectangle2D.Double(0, 0, image.getWidth(), image.getHeight());
     AwtUtil.fitInto(imageBounds, bounds);

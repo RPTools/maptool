@@ -21,6 +21,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.ImageObserver;
 import java.util.Objects;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
@@ -103,7 +104,7 @@ public final class ColorDotTokenOverlay extends BooleanTokenOverlay {
   }
 
   @Override
-  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
+  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds, ImageObserver observer) {
     g.setColor(getColor());
     var shape = getShape(bounds);
     g.fill(shape);

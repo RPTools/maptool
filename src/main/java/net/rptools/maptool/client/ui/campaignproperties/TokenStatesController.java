@@ -637,7 +637,7 @@ public class TokenStatesController
             g.translate(x + 1, y + 1);
             Shape old = g.getClip();
             g.setClip(bounds.intersection(old.getBounds()));
-            overlay.paintOverlay((Graphics2D) g, token, bounds, value);
+            overlay.paintOverlay((Graphics2D) g, token, bounds, value, StateListRenderer.this);
             g.setClip(old);
             g.translate(-(x + 1), -(y + 1));
           }
