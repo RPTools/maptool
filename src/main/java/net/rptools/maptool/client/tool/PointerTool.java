@@ -1437,13 +1437,10 @@ public class PointerTool extends DefaultTool {
                     }
                     timer.start(property.getName());
                     MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
-                    resolver.initialize();
                     resolver.setAutoPrompt(false);
                     Object propertyValue =
                         tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
-                    resolver.flush();
-                    //noinspection ConstantValue
-                    if (propertyValue != null && !propertyValue.toString().isEmpty()) {
+                    if (!propertyValue.toString().isEmpty()) {
                       String propName = property.getShortName();
                       if (StringUtils.isEmpty(propName)) {
                         propName = property.getName();
