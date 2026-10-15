@@ -66,18 +66,6 @@ public class EvalMacroFunctions extends AbstractFunction {
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
-  /**
-   * Executes the macro with a new variable scope.
-   *
-   * @param tokenInContext The token in context.
-   * @param line the macro to execute.
-   * @return the result of the execution.
-   * @throws ParserException if an error occurs.
-   */
-  public static Object execMacro(Token tokenInContext, String line) throws ParserException {
-    return evalMacro(new MapToolVariableResolver(tokenInContext), line);
-  }
-
   public static Object evalMacro(MapToolVariableResolver res, String line) throws ParserException {
     MapToolMacroContext context =
         new MapToolMacroContext("<dynamic>", MapTool.getParser().getContext().getSource(), true);
