@@ -49,7 +49,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
   }
 
   private void connect(Socket socket) {
-    assert this.socket != null : "Should only call #connect() not already open";
+    assert this.socket == null : "Should only call #connect() when not already open";
 
     this.socket = socket;
     this.send = new SendThread(socket);
