@@ -230,12 +230,10 @@ public class MapToolLineParser {
     }
     Stack<Token> contextTokenStack = new Stack<>();
     context = enterContext(context);
-    boolean resolverInitialized = false;
     String opts = null;
     String roll = null;
     try {
       // Keep the same variable context for this line
-      resolverInitialized = resolver.initialize();
       StringBuilder builder = new StringBuilder();
       int start = 0;
       List<InlineRollMatch> matches = this.locateInlineRolls(line);
@@ -995,10 +993,6 @@ public class MapToolLineParser {
           "lineParser.errorBodyRoll", opts == null ? "" : opts, roll == null ? line : roll);
     } finally {
       exitContext();
-      if (resolverInitialized) {
-        // This is the top level call, time to clean up
-        resolver.flush();
-      }
       if (MapTool.getFrame() != null) {
         // Repaint in case macros changed anything.
         MapTool.getFrame().refresh();
