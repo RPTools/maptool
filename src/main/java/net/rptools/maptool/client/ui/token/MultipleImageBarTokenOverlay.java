@@ -20,6 +20,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,10 +76,11 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
   }
 
   @Override
-  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
+  public void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, double value, ImageObserver observer) {
     // Get the image
     var assetId = getAssetForValue(value);
-    BufferedImage image = ImageManager.getImageAndWait(assetId);
+    BufferedImage image = ImageManager.getImage(assetId, observer);
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension(image.getWidth(), image.getHeight());
