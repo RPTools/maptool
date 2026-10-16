@@ -654,16 +654,27 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     MapTool.getFrame().getZoomStatusBar().update();
   }
 
-  public void enforceView(int x, int y, double scale, int gmWidth, int gmHeight) {
+  /**
+   * Forces the player view, fitting the new view to the GM viewport.
+   *
+   * @param x The center point of the new view
+   * @param y The center point of the new view
+   * @param scale The scale of the new view.
+   * @param gmViewSize The size of the GM viewport that needs to be fit into, or {@code null} if we
+   *     don't need to fit to the GM viewport.
+   */
+  public void enforceView(int x, int y, double scale, @Nullable Dimension gmViewSize) {
     int width = getWidth();
     int height = getHeight();
 
-    if ((width * gmHeight) < (height * gmWidth)) {
-      // Our aspect ratio is narrower than server's, so fit to width
-      scale = scale * width / gmWidth;
-    } else {
-      // Our aspect ratio is shorter than server's, so fit to height
-      scale = scale * height / gmHeight;
+    if (gmViewSize != null) {
+      if ((width * gmViewSize.height) < (height * gmViewSize.width)) {
+        // Our aspect ratio is narrower than server's, so fit to width
+        scale = scale * width / gmViewSize.width;
+      } else {
+        // Our aspect ratio is shorter than server's, so fit to height
+        scale = scale * height / gmViewSize.height;
+      }
     }
 
     previousScale = getScale();
