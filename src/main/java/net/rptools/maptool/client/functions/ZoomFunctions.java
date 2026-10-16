@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonObject;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.List;
 import net.rptools.maptool.client.AppState;
@@ -190,7 +191,7 @@ public class ZoomFunctions extends AbstractFunction {
     int height = y2 - y1;
     int centreX = x1 + (width / 2);
     int centreY = y1 + (height / 2);
-    zoneRenderer.enforceView(centreX, centreY, 1, width, height);
+    zoneRenderer.enforceView(centreX, centreY, 1, new Dimension(width, height));
     // if requested, set all players to map and match view
     if (allPlayers && MapTool.getParser().isMacroTrusted()) {
       MapTool.serverCommand().enforceZone(zoneRenderer.getZone().getId());
