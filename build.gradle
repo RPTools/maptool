@@ -447,6 +447,12 @@ dependencies {
     implementation(libs.rptools.maptool.addons)
     implementation(libs.rptools.dice.roller)
     implementation(libs.noiselib)
+
+    // libgdx
+    implementation(libs.bundles.gdx)
+    // TODO Make sure these variants are correct for apple silicon as well as intel.
+    implementation(variantOf(libs.gdx.platform) { classifier('natives-desktop')})
+    implementation(variantOf(libs.gdx.freetype.platform) { classifier('natives-desktop')})
 }
 
 processResources {
