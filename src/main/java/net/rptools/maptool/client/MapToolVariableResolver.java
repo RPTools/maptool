@@ -14,13 +14,19 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
+import javax.annotation.Nonnull;
 import javax.swing.JOptionPane;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.StringUtil;
@@ -39,6 +45,10 @@ public class MapToolVariableResolver implements VariableResolver {
 
   // Logger for this class.
   private static final Logger LOGGER = LogManager.getLogger(MapToolVariableResolver.class);
+
+  /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
+  private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
+      new Gson().getAdapter(JsonObject.class);
 
   /** The prefix for querying and setting state values . */
   public static final String BAR_PREFIX = "bar.";
@@ -94,8 +104,6 @@ public class MapToolVariableResolver implements VariableResolver {
           GM_PANEL);
   private final Map<String, Object> variables = new CaseInsensitiveHashMap<>();
 
-  private List<Runnable> delayedActionList;
-
   private Token tokenInContext;
 
   private boolean autoPrompt;
@@ -126,34 +134,111 @@ public class MapToolVariableResolver implements VariableResolver {
   }
 
   /**
-   * Initialize this resolver
-   *
-   * @return true if initialization actually happened, false if it's already been initialized
+   * @return A new resolver with the same token in context.
    */
-  public boolean initialize() {
-    if (delayedActionList == null) {
-      delayedActionList = new ArrayList<>();
-      return true;
-    }
-    return false;
+  public MapToolVariableResolver spawn() {
+    return new MapToolVariableResolver(tokenInContext);
   }
 
   /**
-   * Add an action to be performed after the full expression has been evaluated.
+   * Looks up a property on the token in context and evaluates it.
    *
-   * @param runnable the action to be performed.
+   * @param key The property name to look up.
+   * @return The evaluate result.
    */
-  public void addDelayedAction(Runnable runnable) {
-    if (!delayedActionList.contains(runnable)) {
-      delayedActionList.add(runnable);
+  public @Nonnull Object getEvaluatedTokenProperty(@Nonnull String key) {
+    if (tokenInContext == null) {
+      return "";
     }
+
+    Object val = tokenInContext.getProperty(key);
+    if (val == null) {
+      val = tokenInContext.getPropertyDefault(key);
+    }
+    if (val == null) {
+      return "";
+    }
+    return evaluateProperty(key, val);
   }
 
-  /** Perform any delayed actions. This should called by the command framework only. */
-  public void flush() {
-    for (Runnable r : delayedActionList) {
-      r.run();
+  /**
+   * Looks up a property default on the token in context and evaluates it.
+   *
+   * @param key The property name to look up.
+   * @return The evaluate result.
+   */
+  public @Nonnull Object getEvaluatedTokenPropertyDefault(@Nonnull String key) {
+    if (tokenInContext == null) {
+      return "";
     }
+
+    Object val = tokenInContext.getPropertyDefault(key);
+    if (val == null) {
+      return "";
+    }
+    return evaluateProperty(key, val);
+  }
+
+  /**
+   * Evaluate the provided expression with the resolver
+   *
+   * @param key the key of the value
+   * @param val An expression to evaluate
+   * @return The evaluated value
+   */
+  private @Nonnull Object evaluateProperty(@Nonnull String key, @Nonnull Object val) {
+    if (val.toString().trim().startsWith("{")) {
+      /*
+       * The normal Gson evaluator was too lenient in identifying JSON objects, so we had to move
+       * that lower (see #1560). But we would really like to avoid the performance cost of
+       * attempting to parse anything that actually is a proper JSON, so let's try a stricter
+       * evaluation process here first (see #2396).
+       */
+      try {
+        try (JsonReader reader = new JsonReader(new StringReader(val.toString()))) {
+          JsonObject result = strictGsonObjectAdapter.read(reader);
+          // in case of a situation like {"a": 1}{"b": 2}, the above would have stopped at the first
+          // complete object.  This next line will throw an exception on finding another top-level
+          // object, allowing us to move on with other evaluation.
+          reader.hasNext();
+          if (result.isJsonObject()) {
+            return result;
+          }
+        }
+      } catch (IOException e) {
+        // deliberately ignored - continue parsing
+      }
+    }
+    // try to convert it to a JSON array. Fixes #2057.
+    if (val.toString().trim().startsWith("[")) {
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+      if (json.isJsonArray()) {
+        return json;
+      }
+    }
+    try {
+      LOGGER.debug(
+          "Evaluating property: '{}' for token {} ({})----------------------------------------------------------------------------------",
+          key,
+          tokenInContext.getName(),
+          tokenInContext.getId());
+      val = MapTool.getParser().parseLine(this, val.toString(), null);
+    } catch (ParserException pe) {
+      LOGGER.debug("Ignoring Parse Exception, continuing to evaluate {}", key);
+      val = val.toString();
+    }
+    if (val == null) {
+      return "";
+    }
+    // Finally we try convert it to a JSON object. Fixes #1560.
+    if (val.toString().trim().startsWith("{")) {
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+      if (json.isJsonObject()) {
+        return json;
+      }
+    }
+
+    return val;
   }
 
   public void setAutoPrompt(boolean value) {
@@ -199,7 +284,7 @@ public class MapToolVariableResolver implements VariableResolver {
 
     boolean evaluate = false; // Should we try to evaluate the value.
 
-    // MT Script doesnt have much in the way of types.
+    // MT Script doesn't have much in the way of types.
     if (name.startsWith(MarkDownFunctions.MARKDOWN_PREFIX)) {
       return new MarkDownFunctions().getMTSTypeLabel(name);
     }
@@ -236,7 +321,7 @@ public class MapToolVariableResolver implements VariableResolver {
       } // endif
 
       if (this.validTokenProperty(name, tokenInContext)) {
-        result = tokenInContext.getEvaluatedProperty(name);
+        result = getEvaluatedTokenProperty(name);
       } else {
         // If the token has no property of that name check to see if there s a defaulted
         // value for the property for the token type.
@@ -318,7 +403,7 @@ public class MapToolVariableResolver implements VariableResolver {
       if (evaluate) {
         // Try parse the value if we can not parse it then just return it as a string.
         try {
-          value = MapTool.getParser().parseLine(tokenInContext, result.toString());
+          value = MapTool.getParser().parseLine(spawn(), result.toString(), null);
         } catch (Exception e) {
           value = result.toString();
         }
