@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
+import javax.accessibility.AccessibleContext;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -962,4 +963,8 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
   }
 
   // End comparison customization
+
+  public AccessibleContext getAccessibleContext() {
+    return macroEditorRSyntaxTextArea.getAccessibleContext();
+  }
 }
