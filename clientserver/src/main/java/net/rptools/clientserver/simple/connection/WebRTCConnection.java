@@ -387,9 +387,9 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
             var slice = buffer.slice(buffer.position(), amountToSend);
             part = ByteBuffer.allocate(amountToSend);
             part.put(slice);
+            part.limit(part.position()).position(0);
           }
 
-          buffer.position(buffer.position() + amountToSend);
           try {
             localDataChannel.send(new RTCDataChannelBuffer(part, true));
           } catch (Exception e) {
@@ -398,6 +398,8 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
             return;
           }
           log.debug(prefix() + " sent " + part.capacity() + " bytes");
+
+          buffer.position(buffer.position() + amountToSend);
         }
       }
 
