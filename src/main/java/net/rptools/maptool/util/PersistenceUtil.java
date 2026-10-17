@@ -336,6 +336,7 @@ public class PersistenceUtil {
         String n = fixupZoneName(z.getName());
         z.setName(n);
         z.imported(); // Resets creation timestamp and init panel, among other things
+        MapTool.getFrame().setStatusMessage(I18N.getText("Zone.status.optimizing", z.getName()));
         z.optimize(); // Collapses overlaid or redundant drawables
 
         // Make sure the imported zone is as fresh as possible (new IDs all the way down).
@@ -577,6 +578,8 @@ public class PersistenceUtil {
         Set<MD5Key> allAssetIds = persistedCampaign.assetMap.keySet();
         loadAssets(allAssetIds, pakFile);
         for (Zone zone : persistedCampaign.campaign.getZones()) {
+          MapTool.getFrame()
+              .setStatusMessage(I18N.getText("Zone.status.optimizing", zone.getName()));
           zone.optimize();
         }
 
