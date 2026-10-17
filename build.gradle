@@ -401,7 +401,6 @@ dependencies {
     implementation(libs.fifesoft.languagesupport)
     implementation(libs.bundles.flatlaf)
     implementation(libs.tinylaf.nocp)
-    implementation(libs.jsvg)
 
     implementation(libs.bundles.handlebars)
 
