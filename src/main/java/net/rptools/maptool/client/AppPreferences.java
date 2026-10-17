@@ -745,6 +745,9 @@ public class AppPreferences {
           "Preferences.label.loadMRU.tooltip",
           false);
 
+  public static final Preference<Boolean> initiativePanelShowsInfoInTitle =
+      store.defineBoolean("initShowTitleInfo", true);
+
   public static final Preference<Boolean> initiativePanelShowsTokenImage =
       store.defineBoolean("initShowTokens", true);
 
