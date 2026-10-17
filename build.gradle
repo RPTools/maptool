@@ -412,7 +412,6 @@ dependencies {
     implementation(libs.apache.commons.cli)
     implementation(libs.apache.commons.lang)
     implementation(libs.apache.commons.beanutils)
-    implementation(libs.apache.commons.jxpath)
     implementation(libs.apache.tika)
 
     implementation(libs.gson)
