@@ -15,7 +15,8 @@
 package net.rptools.maptool.model.zones;
 
 import java.util.List;
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
-public record TokensRemoved(Zone zone, List<Token> tokens) {}
+public record TokensRemoved(Zone zone, List<Token> tokens) implements MTEvent {}
