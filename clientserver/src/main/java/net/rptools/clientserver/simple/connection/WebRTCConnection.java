@@ -471,11 +471,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
     }
 
     @Override
-    public void onIceCandidatesRemoved(RTCIceCandidate[] candidates) {
-      log.info(prefix() + "PeerConnection.onIceCandidatesRemoved");
-    }
-
-    @Override
     public void onIceConnectionChange(RTCIceConnectionState state) {
       log.info(prefix() + "PeerConnection.onIceConnectionChange " + state);
     }
