@@ -32,7 +32,7 @@ icu4j = { group = "com.ibm.icu", name = "icu4j", version = "78.3" }
 websocket = { group = "org.java-websocket", name = "Java-WebSocket", version = "1.6.0" }
 webrtc = { group = "dev.onvoid.webrtc", name = "webrtc-java", version = "0.11.0" }
 # compression of messages between client and server
-apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.27.1" }
+apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.28.0" }
 zstd = { group = "com.github.luben", name = "zstd-jni", version = "1.5.7-4" }
 # Protobuf
 protobuf-java = { group = "com.google.protobuf", name = "protobuf-java-util", version.ref = "protoc" }
@@ -101,7 +101,7 @@ apache-commons-configuration = { group = "org.apache.commons", name = "commons-c
 # Specialized collections: ReferenceMap, LinkedMap.
 apache-commons-collections = { group = "org.apache.commons", name = "commons-collections4", version = "4.5.0" }
 # Various file utilities
-apache-commons-io = { group = "commons-io", name = "commons-io", version = "2.19.0" }
+apache-commons-io = { group = "commons-io", name = "commons-io", version = "2.22.0" }
 #  ftp client
 apache-commons-net = { group = "commons-net", name = "commons-net", version = "3.11.1" }
 # commandline parsing
@@ -121,7 +121,7 @@ gson = { group = "com.google.code.gson", name = "gson", version = "2.13.1" }
 # JsonPath for java
 jsonpath = { group = "com.jayway.jsonpath", name = "json-path", version = "2.9.0" }
 # HTML parsing
-jsoup = { group = "org.jsoup", name = "jsoup", version = "1.21.1" }
+jsoup = { group = "org.jsoup", name = "jsoup", version = "1.23.2" }
 # XML utilities, for Hero Lab integration
 jcabi-xml = { group = "com.jcabi", name = "jcabi-xml", version = "0.35.0" }
 # Serialization for saving campaigns, maps, tokens, etc.
