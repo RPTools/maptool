@@ -9,12 +9,11 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.tool;
 
-import com.github.weisj.jsvg.util.ColorUtil;
 import com.google.common.eventbus.Subscribe;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -43,6 +42,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.CollectionUtil;
+import net.rptools.lib.ColorUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -1308,7 +1308,7 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
     public void paint(Graphics2D g2) {
       super.paint(g2);
 
-      g2.setPaint(ColorUtil.withAlpha(AppStyle.selectionBoxFill, 0.25f));
+      g2.setPaint(ColorUtil.withAlpha(AppStyle.selectionBoxFill, 0x40));
       g2.fill(box);
 
       g2.setColor(AppStyle.selectionBoxOutline);

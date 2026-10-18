@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
@@ -30,8 +30,8 @@ import javax.swing.table.TableColumn;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
-import net.rptools.maptool.client.swing.table.MultiLineTableHeaderRenderer;
-import net.rptools.maptool.client.swing.table.TextFieldEditorButtonTableCellEditor;
+import net.rptools.maptool.client.swing.TableCellRendererDecorator;
+import net.rptools.maptool.client.swing.TextFieldEditorWithPopup;
 import net.rptools.maptool.client.ui.campaignproperties.TokenPropertiesTableModel.LargeEditableText;
 import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.client.ui.theme.Icons;
@@ -59,6 +59,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   public TokenPropertiesManagementPanel() {
     super(new TokenPropertiesManagementPanelView().getRootComponent());
+
     panelInit();
   }
 
@@ -72,6 +73,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         .forEach(
             (k, v) ->
                 tokenTypeMap.put(k, new ArrayList<>(v.stream().map(TokenProperty::new).toList())));
+    var ssManager = new StatSheetManager();
     tokenTypeMap
         .keySet()
         .forEach(
@@ -374,12 +376,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     propertyTable.setModel(new TokenPropertiesTableModel());
 
     propertyTable.setDefaultEditor(
-        LargeEditableText.class, new TextFieldEditorButtonTableCellEditor());
-
-    propertyTable.setDefaultEditor(
-        Permissions.class, new DefaultCellEditor(new JComboBox<>(Permissions.values())));
-
-    propertyTable.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+        LargeEditableText.class, new TextFieldEditorWithPopup().getAsCellEditor());
     propertyTable
         .getSelectionModel()
         .addListSelectionListener(

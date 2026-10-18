@@ -57,6 +57,9 @@ message LookupTableDto {
   bool visible = 5;
   bool allow_lookup = 6;
   bool pick_once = 7;
+  google.protobuf.StringValue group = 8;
+  google.protobuf.StringValue metadata = 9;
+  google.protobuf.StringValue metadata_type = 10;
 }
 
 message LookupEntryDto {
