@@ -32,7 +32,7 @@ icu4j = { group = "com.ibm.icu", name = "icu4j", version = "78.3" }
 websocket = { group = "org.java-websocket", name = "Java-WebSocket", version = "1.6.0" }
 webrtc = { group = "dev.onvoid.webrtc", name = "webrtc-java", version = "0.11.0" }
 # compression of messages between client and server
-apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.27.1" }
+apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.28.0" }
 zstd = { group = "com.github.luben", name = "zstd-jni", version = "1.5.7-4" }
 # Protobuf
 protobuf-java = { group = "com.google.protobuf", name = "protobuf-java-util", version.ref = "protoc" }
