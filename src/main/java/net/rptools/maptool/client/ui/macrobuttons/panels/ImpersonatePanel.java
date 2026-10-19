@@ -127,7 +127,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
 
   @Override
   public void clear() {
-    removeAll();
+    removeAllButtons();
     MapTool.getFrame()
         .getFrame(MTFrame.IMPERSONATED)
         .setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS));
