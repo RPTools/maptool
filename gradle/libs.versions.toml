@@ -10,7 +10,7 @@ handlebars-jackson = "4.3.1"
 jai-imageio = "1.4.0"
 graalvm-js = "21.2.0"
 pdfbox = "3.0.0"
-protoc = "4.31.1"
+protoc = "4.36.2"
 
 [libraries]
 findbugs-jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version = "3.0.2" }
