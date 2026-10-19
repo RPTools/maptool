@@ -15,5 +15,6 @@
 package net.rptools.maptool.model.library;
 
 import java.util.Set;
+import net.rptools.maptool.events.MTEvent;
 
-public record AddOnsAddedEvent(Set<LibraryInfo> addOns) {}
+public record AddOnsAddedEvent(Set<LibraryInfo> addOns) implements MTEvent {}
