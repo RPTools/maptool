@@ -99,7 +99,7 @@ handlebars-jackson-helper = { group = "com.github.jknack", name = "handlebars-ja
 # parsing of configuration data
 apache-commons-configuration = { group = "org.apache.commons", name = "commons-configuration2", version = "2.12.0" }
 # Specialized collections: ReferenceMap, LinkedMap.
-apache-commons-collections = { group = "org.apache.commons", name = "commons-collections4", version = "4.5.0" }
+apache-commons-collections = { group = "org.apache.commons", name = "commons-collections4", version = "4.6.0" }
 # Various file utilities
 apache-commons-io = { group = "commons-io", name = "commons-io", version = "2.22.0" }
 #  ftp client
