@@ -9,17 +9,17 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.zone.renderer;
 
-import com.github.weisj.jsvg.util.ColorUtil;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.ColorUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ScreenPoint;
@@ -46,9 +46,9 @@ public class GridRenderer {
     Color contrast = new Color(ImageUtil.negativeColourInt(gridColourInt));
     return new Color[] {
       gc,
-      ColorUtil.withAlpha(gc, 0.14f),
-      ColorUtil.withAlpha(contrast, 0.04f),
-      ColorUtil.withAlpha(contrast, 0.05f)
+      ColorUtil.withAlpha(gc, 0x24),
+      ColorUtil.withAlpha(contrast, 0x0A),
+      ColorUtil.withAlpha(contrast, 0x0D)
     };
   }
 

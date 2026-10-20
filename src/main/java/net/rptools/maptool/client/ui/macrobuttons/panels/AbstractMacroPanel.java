@@ -9,13 +9,14 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
 import com.google.common.eventbus.Subscribe;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
@@ -23,6 +24,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
+import javax.swing.AbstractButton;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
@@ -122,9 +124,36 @@ public abstract class AbstractMacroPanel extends JPanel implements Scrollable, M
   }
 
   protected void clear() {
-    removeAll();
+    removeAllButtons();
     revalidate();
     repaint();
+  }
+
+  /**
+   * Removes everything from this panel without drawing its buttons on the way out.
+   *
+   * <p>Removing a component makes Swing re-render an HTML button label, and an {@code <img>} in
+   * that label is loaded synchronously on the event dispatch thread. Panels are emptied while a
+   * campaign is being torn down -- on disconnect, or when another campaign is loaded -- after its
+   * add-on libraries have been unregistered. A {@code lib://} image of such a library then can no
+   * longer be found as an add-on, and looking it up as a library token needs the event dispatch
+   * thread, which is waiting for that very image: MapTool froze. A button that is about to be
+   * thrown away never needs drawing, so its label is blanked first.
+   */
+  protected void removeAllButtons() {
+    blankButtonLabels(this);
+    removeAll();
+  }
+
+  private static void blankButtonLabels(Container container) {
+    for (Component component : container.getComponents()) {
+      if (component instanceof AbstractButton button) {
+        button.setText("");
+      }
+      if (component instanceof Container child) {
+        blankButtonLabels(child);
+      }
+    }
   }
 
   public abstract void reset();

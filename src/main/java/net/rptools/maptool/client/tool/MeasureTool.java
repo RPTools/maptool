@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.tool;
 
@@ -117,9 +117,9 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
           path2D.moveTo(sp.x, sp.y);
         } else {
           path2D.lineTo(sp.x, sp.y);
-          int a = lastZP.x - zp.x;
-          int b = lastZP.y - zp.y;
-          c += Math.sqrt(a * a + b * b);
+          double a = (double) lastZP.x - zp.x;
+          double b = (double) lastZP.y - zp.y;
+          c += Math.hypot(a, b);
         }
         lastZP = zp;
       }

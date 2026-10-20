@@ -9,11 +9,12 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.events;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
@@ -27,4 +28,5 @@ import net.rptools.maptool.model.Zone;
  * @param altDown is the alt-key down.
  */
 public record TokenHoverExit(
-    Token token, Zone zone, boolean shiftDown, boolean controlDown, boolean altDown) {}
+    Token token, Zone zone, boolean shiftDown, boolean controlDown, boolean altDown)
+    implements MTEvent {}

@@ -9,13 +9,15 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.zones;
 
 import java.awt.*;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Zone;
 
-public record BoardChanged(Zone zone, MD5Key asset, Point position, double scaleX, double scaleY) {}
+public record BoardChanged(Zone zone, MD5Key asset, Point position, double scaleX, double scaleY)
+    implements MTEvent {}

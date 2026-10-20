@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -161,17 +161,38 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       return JavaScriptToMTScriptType(
           JSScriptEngine.getJSScriptEngine().evalScript(contextName, script));
     } catch (PolyglotException e) {
-      Throwable je = e.asHostException();
-      ParserException pe = (ParserException) je;
-      if (pe != null) {
-        throw pe;
-      }
-      throw new ParserException(je);
+      throw toParserException(e);
     } catch (ScriptException e) {
       throw new ParserException(e);
     } finally {
       callingArgsStack.pop();
     }
+  }
+
+  /**
+   * Converts an error raised while running a script into the exception reported to the macro.
+   *
+   * <p>An error thrown by Java code the script called -- an MTScript function failing, say -- is
+   * reported as that exception. An error in the script itself, such as a {@code ReferenceError}, a
+   * {@code TypeError} or a {@code throw}, has no Java exception behind it, and is reported with the
+   * script's own message and the line it happened on. {@link PolyglotException#asHostException()}
+   * throws for those, which used to replace the script's message with a bare {@code
+   * PolyglotEngineException} and left nothing to go on.
+   *
+   * @param e the error from the script engine
+   * @return the exception to throw
+   */
+  static ParserException toParserException(PolyglotException e) {
+    if (e.isHostException()) {
+      Throwable host = e.asHostException();
+      return host instanceof ParserException pe ? pe : new ParserException(host);
+    }
+    StringBuilder message = new StringBuilder(String.valueOf(e.getMessage()));
+    SourceSection location = e.getSourceLocation();
+    if (location != null && location.isAvailable()) {
+      message.append(" (line ").append(location.getStartLine()).append(')');
+    }
+    return new ParserException(message.toString());
   }
 
   public Object HostObjectToJavaScriptType(Object obj) {
