@@ -14,7 +14,8 @@
  */
 package net.rptools.maptool.model.zones;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
-public record TokenEdited(Zone zone, Token token) {}
+public record TokenEdited(Zone zone, Token token) implements MTEvent {}
