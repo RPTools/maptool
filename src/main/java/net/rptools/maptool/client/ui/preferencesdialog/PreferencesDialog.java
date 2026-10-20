@@ -1760,7 +1760,16 @@ public class PreferencesDialog extends AbeillePanel {
 
     // get JVM User Defaults/User override preferences
     if (!UserJvmOptions.loadAppCfg()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(I18N.getString("Label.startup")), false);
+      var startupTabTitle = I18N.getString("Label.startup");
+      var startupTabIndex = tabbedPane.indexOfTab(startupTabTitle);
+      if (startupTabIndex < 0) {
+        log.error(
+            "Unable to disable the startup tab: could not find a tab with the title {} (locale = {})",
+            startupTabTitle,
+            Locale.getDefault().getDisplayName());
+      } else {
+        tabbedPane.setEnabledAt(startupTabIndex, false);
+      }
     } else {
       try {
 
