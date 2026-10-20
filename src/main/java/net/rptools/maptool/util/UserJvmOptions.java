@@ -34,6 +34,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 
 /*
  * User Preferences are stored next to jar when installed.
@@ -45,9 +48,11 @@ public class UserJvmOptions {
 
   private static final String I18N_RESOURCE_PREFIX = "i18n_";
   private static final String I18N_RESOURCE_PATH = "net/rptools/maptool/language";
+
   private static final String CURRENT_DATA_DIR = AppUtil.getAppHome().getName();
   private static final Pattern UNIT_PATTERN = Pattern.compile("^([0-9]+)[g|G|m|M|k|K]$");
   private static final Map<String, String> LANGUAGE_MAP = getResourceBundles();
+  private static final List<Locale> KNOWN_LOCALES = getKnownLocales();
 
   private static FileBasedConfigurationBuilder<INIConfiguration> configurationBuilder;
   private static SubnodeConfiguration jvmNodeConfiguration;
@@ -247,6 +252,40 @@ public class UserJvmOptions {
     }
   }
 
+  private static List<Locale> getKnownLocales() {
+    var i18nResourcePattern = Pattern.compile("i18n(?:_([^/]*))?\\.properties$");
+    var i18nPackage = "net.rptools.maptool.language";
+
+    Reflections reflections =
+        new Reflections(
+            new ConfigurationBuilder()
+                .forPackage(i18nPackage)
+                .setInputsFilter(
+                    new FilterBuilder()
+                        .includePackage(i18nPackage)
+                        .excludePackage(i18nPackage + ".macro_descriptions"))
+                .setScanners(Scanners.Resources));
+    Set<String> resourcePathSet = reflections.getResources(i18nResourcePattern);
+    log.debug("getResourceBundles() resourcePathSet: {}", resourcePathSet);
+
+    List<Locale> locales = new ArrayList<>();
+    for (String resourcePath : resourcePathSet) {
+      var matcher = i18nResourcePattern.matcher(resourcePath);
+      if (matcher.find()) {
+        var languageTag = matcher.group(1);
+
+        // Special case: the root i18n.properties is en-US despite not being called that.
+        locales.add(
+            languageTag == null
+                ? Locale.of("en", "US")
+                : Locale.forLanguageTag(languageTag.replace("_", "-")));
+      }
+    }
+
+    log.debug("languages: {}", locales);
+    return locales;
+  }
+
   private static Map<String, String> getResourceBundles() {
     Map<String, String> languages = new TreeMap<>();
 
@@ -271,6 +310,10 @@ public class UserJvmOptions {
 
     log.debug("languages: " + languages.toString());
     return languages;
+  }
+
+  public static List<Locale> getLocales() {
+    return Collections.unmodifiableList(KNOWN_LOCALES);
   }
 
   public static Set<String> getLanguages() {
