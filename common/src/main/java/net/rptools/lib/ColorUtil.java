@@ -21,6 +21,6 @@ public final class ColorUtil {
 
   public static Color withAlpha(Color color, int alpha) {
     alpha = Math.clamp(alpha, 0, 255);
-    return new Color(color.getRGB(), color.getGreen(), color.getBlue(), alpha);
+    return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
   }
 }
