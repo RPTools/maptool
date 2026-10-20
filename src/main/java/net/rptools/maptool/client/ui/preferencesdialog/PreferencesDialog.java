@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.preferencesdialog;
 
-import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -422,10 +421,6 @@ public class PreferencesDialog extends AbeillePanel {
 
   /** Checkbox for if the JVM should initialize AWT. */
   private final JCheckBox jvmInitAwtCheckbox = getCheckBox("jvmInitAwt");
-
-  /** Combo box for selecting the language override for JAM messages. */
-  private final JComboBox<String> jamLanguageOverrideComboBox =
-      getComboBox("jamLanguageOverrideComboBox");
 
   /** Label for displaying startup information. */
   private final JTextField cfgFilePath = getTextField("cfgFilePath");
@@ -880,10 +875,6 @@ public class PreferencesDialog extends AbeillePanel {
     } else {
       configFileWarningPanel.setVisible(false);
     }
-
-    DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
-    languageModel.addAll(getLanguages());
-    jamLanguageOverrideComboBox.setModel(languageModel);
 
     {
       var locales = new ArrayList<>(UserJvmOptions.getLocales());
@@ -1549,14 +1540,6 @@ public class PreferencesDialog extends AbeillePanel {
           jvmValuesChanged = true;
         });
 
-    jamLanguageOverrideComboBox.addItemListener(
-        e -> {
-          setJvmOption(
-              JVM_OPTION.LOCALE_LANGUAGE,
-              Objects.requireNonNull(jamLanguageOverrideComboBox.getSelectedItem()).toString());
-          jvmValuesChanged = true;
-        });
-
     chatNotificationShowBackground.addActionListener(
         e ->
             AppPreferences.chatNotificationBackground.set(
@@ -1827,9 +1810,6 @@ public class PreferencesDialog extends AbeillePanel {
         jvmOpenGLCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
         jvmInitAwtCheckbox.setSelected(
             UserJvmOptions.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
-
-        jamLanguageOverrideComboBox.setSelectedItem(
-            UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
       } catch (Exception e) {
         log.error("Unable to retrieve JVM user options!", e);
       }
