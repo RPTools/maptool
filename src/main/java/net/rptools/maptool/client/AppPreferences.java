@@ -678,7 +678,7 @@ public class AppPreferences {
   public static final Preference<String> defaultUserName =
       store
           .defineString(
-              "defaultUsername", I18N.getString("Preferences.client.default.username.value"))
+              "defaultUsername", () -> I18N.getString("Preferences.client.default.username.value"))
           .setLabel("Preferences.label.client.default.username")
           .setTooltip("Preferences.label.client.default.username.tooltip");
 
@@ -856,18 +856,18 @@ public class AppPreferences {
   // Based off vision type enum in Zone.java, this could easily get tossed somewhere else if
   // preferred.
   public enum MapSortType {
-    DISPLAYNAME(),
-    GMNAME();
+    DISPLAYNAME("mapSortType.DISPLAYNAME"),
+    GMNAME("mapSortType.GMNAME");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    MapSortType() {
-      displayName = I18N.getString("mapSortType." + name());
+    MapSortType(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -876,15 +876,15 @@ public class AppPreferences {
     Masks("uvttLosImportType.masks"),
     Prompt("uvttLosImportType.prompt");
 
-    private final String displayName;
+    private final String displayNameKey;
 
     UvttLosImportType(String key) {
-      displayName = I18N.getString(key);
+      displayNameKey = key;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 

@@ -85,6 +85,10 @@ public class PreferenceStore {
   }
 
   public Preference<String> defineString(String key, String defaultValue) {
+    return defineString(key, () -> defaultValue);
+  }
+
+  public Preference<String> defineString(String key, Supplier<String> defaultValue) {
     return register(
         new BasicPreference<>(
             prefs, key, null, null, defaultValue, new PreferenceType.StringType()));
