@@ -128,37 +128,37 @@ public class Token implements Cloneable {
   }
 
   public enum TokenShape {
-    TOP_DOWN(),
-    CIRCLE(),
-    SQUARE(),
-    FIGURE();
+    TOP_DOWN("Token.TokenShape.TOP_DOWN"),
+    CIRCLE("Token.TokenShape.CIRCLE"),
+    SQUARE("Token.TokenShape.SQUARE"),
+    FIGURE("Token.TokenShape.FIGURE");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    TokenShape() {
-      displayName = I18N.getString("Token.TokenShape." + name());
+    TokenShape(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
   /** Type of character: PC or NPC. */
   public enum Type {
-    PC(),
-    NPC();
+    PC("Token.Type.PC"),
+    NPC("Token.Type.NPC");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    Type() {
-      displayName = I18N.getString("Token.Type." + name());
+    Type(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -296,21 +296,26 @@ public class Token implements Cloneable {
 
   /** Terrain Modifier Operations */
   public enum TerrainModifierOperation {
-    NONE(), // Default, no terrain modifications to pathfinding cost
-    MULTIPLY(), // All tokens with this type are added together and multiplied against the Cell cost
-    ADD(), // All tokens with this type are added together and added to the cell cost
-    BLOCK(), // Movement through tokens with this type are blocked just as if they had MBL
-    FREE(); // Any cell with a token of this type in it has ALL movement costs removed
+    /** Default, no terrain modifications to pathfinding cost */
+    NONE("Token.TerrainModifierOperation.NONE"),
+    /** All tokens with this type are added together and multiplied against the Cell cost */
+    MULTIPLY("Token.TerrainModifierOperation.MULTIPLY"),
+    /** All tokens with this type are added together and added to the cell cost */
+    ADD("Token.TerrainModifierOperation.ADD"),
+    /** Movement through tokens with this type are blocked just as if they had MBL */
+    BLOCK("Token.TerrainModifierOperation.BLOCK"),
+    /** Any cell with a token of this type in it has ALL movement costs removed */
+    FREE("Token.TerrainModifierOperation.FREE");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    TerrainModifierOperation() {
-      displayName = I18N.getString("Token.TerrainModifierOperation." + name());
+    TerrainModifierOperation(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
