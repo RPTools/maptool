@@ -38,7 +38,6 @@ import org.apache.logging.log4j.Logger;
  *
  * @author tcroft
  */
-@SuppressWarnings("unused")
 public class I18N {
   private static ResourceBundle BUNDLE;
   private static final Logger log = LogManager.getLogger(I18N.class);
@@ -46,7 +45,6 @@ public class I18N {
   private static final char MNEMONIC_MARKER = '&';
   private static final Pattern MNEMONIC_PREFIX_PATTERN =
       Pattern.compile(MNEMONIC_MARKER + "([a-z0-9])", Pattern.CASE_INSENSITIVE);
-  private static Enumeration<String> keys;
 
   static {
     // Put here to make break-pointing easier. :)
