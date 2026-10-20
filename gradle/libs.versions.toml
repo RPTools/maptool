@@ -128,7 +128,7 @@ xstream = { group = "com.thoughtworks.xstream", name = "xstream", version = "1.4
 # Java tuples
 javatuples = { group = "com.flipkart.utils", name = "javatuples", version = "3.0" }
 # Event bus, collections, and other utilities
-guava = { group = "com.google.guava", name = "guava", version = "33.4.8-jre" }
+guava = { group = "com.google.guava", name = "guava", version = "33.7.2-jre" }
 # Geometry library for pathfinding, vision, etc.
 jts-core = { group = "org.locationtech.jts", name = "jts-core", version = "1.20.0" }
 # Graph library used for walls
