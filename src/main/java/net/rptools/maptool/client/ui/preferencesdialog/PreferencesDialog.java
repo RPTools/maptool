@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -335,6 +336,10 @@ public class PreferencesDialog extends AbeillePanel {
 
   /** Text field for the default username when not logged into a server. */
   private final JTextField defaultUsername = getTextField("defaultUsername");
+
+  private final JComboBox<Locale> languageSelection = getComboBox("locale");
+
+  private @Nullable Locale originalLocale = null;
 
   /** Checkbox for if non-player characters should be hidden when creating a new map. */
   private final JCheckBox hideNPCs = getCheckBox("hideNPCs");
@@ -647,6 +652,11 @@ public class PreferencesDialog extends AbeillePanel {
                     "PreferencesDialog.themeChangeWarning",
                     "PreferencesDialog.themeChangeWarningTitle",
                     JOptionPane.WARNING_MESSAGE);
+              } else if (originalLocale != AppPreferences.locale.get()) {
+                MapTool.showMessage(
+                    "PreferencesDialog.language.changeWarning",
+                    "PreferencesDialog.language.changeWarningTitle",
+                    JOptionPane.WARNING_MESSAGE);
               }
             })
         .setContent(this);
@@ -874,6 +884,40 @@ public class PreferencesDialog extends AbeillePanel {
     DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
     languageModel.addAll(getLanguages());
     jamLanguageOverrideComboBox.setModel(languageModel);
+
+    {
+      var locales = new ArrayList<>(UserJvmOptions.getLocales());
+      locales.sort(Comparator.comparing(Locale::getDisplayName));
+      locales.addFirst(null);
+
+      DefaultComboBoxModel<Locale> localeModel = new DefaultComboBoxModel<>();
+      localeModel.addAll(locales);
+      languageSelection.setModel(localeModel);
+      languageSelection.setSelectedIndex(0);
+
+      languageSelection.setRenderer(
+          new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+              super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+              if (value == null) {
+                setText(I18N.getString("PreferencesDialog.language.systemDefault"));
+              }
+              if (value instanceof Locale locale) {
+                setText(locale.getDisplayName());
+              }
+              return this;
+            }
+          });
+
+      languageSelection.addItemListener(
+          e -> {
+            var index = languageSelection.getSelectedIndex();
+            var locale = index < 0 ? null : localeModel.getElementAt(index);
+            SwingUtilities.invokeLater(() -> AppPreferences.locale.set(locale));
+          });
+    }
 
     setInitialState();
 
@@ -1671,6 +1715,7 @@ public class PreferencesDialog extends AbeillePanel {
     fillSelectionCheckBox.setSelected(AppPreferences.fillSelectionBox.get());
     frameRateCapTextField.setText(Integer.toString(AppPreferences.frameRateCap.get()));
     defaultUsername.setText(AppPreferences.defaultUserName.get());
+    languageSelection.setSelectedItem(originalLocale = AppPreferences.locale.get());
     autoSaveSpinner.setValue(AppPreferences.autoSaveIncrement.get());
     loadMRUcheckbox.setSelected(AppPreferences.loadMruCampaignAtStart.get());
     checkUpdatesCheckbox.setSelected(!AppPreferences.skipAutoUpdate.get());
