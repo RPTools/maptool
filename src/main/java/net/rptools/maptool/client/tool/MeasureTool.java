@@ -117,9 +117,9 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
           path2D.moveTo(sp.x, sp.y);
         } else {
           path2D.lineTo(sp.x, sp.y);
-          int a = lastZP.x - zp.x;
-          int b = lastZP.y - zp.y;
-          c += Math.sqrt(a * a + b * b);
+          double a = (double) lastZP.x - zp.x;
+          double b = (double) lastZP.y - zp.y;
+          c += Math.hypot(a, b);
         }
         lastZP = zp;
       }
