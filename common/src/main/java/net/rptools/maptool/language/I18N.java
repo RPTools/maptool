@@ -40,7 +40,7 @@ import org.apache.logging.log4j.Logger;
  */
 @SuppressWarnings("unused")
 public class I18N {
-  private static final ResourceBundle BUNDLE;
+  private static ResourceBundle BUNDLE;
   private static final Logger log = LogManager.getLogger(I18N.class);
   private static final String DESCRIPTION_EXTENSION = ".description";
   private static final char MNEMONIC_MARKER = '&';
@@ -51,6 +51,23 @@ public class I18N {
   static {
     // Put here to make break-pointing easier. :)
     BUNDLE = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
+  }
+
+  /**
+   * Reinitializes the class with a different locale.
+   *
+   * <p>It's not a good idea to call this method except during application startup. UI elements
+   * typically won't updated themselves until they are rebuilt, so modifying the locale after the UI
+   * is shown can cause inconsistencies in the displayed language.
+   *
+   * @param locale The new locale to use for i18n requests. If the locale is the same as what is
+   *     already set, this is a no-op.
+   */
+  public static void setLocale(Locale locale) {
+    if (!BUNDLE.getLocale().equals(locale)) {
+      log.info("Setting the I18N locale to {}", locale.getDisplayName());
+      BUNDLE = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
+    }
   }
 
   /**
