@@ -45,7 +45,7 @@ public class UserJvmOptions {
   private static final Logger log = LogManager.getLogger(UserJvmOptions.class);
 
   private static final String CURRENT_DATA_DIR = AppUtil.getAppHome().getName();
-  private static final Pattern UNIT_PATTERN = Pattern.compile("^([0-9]+)[g|G|m|M|k|K]$");
+  private static final Pattern UNIT_PATTERN = Pattern.compile("^([0-9]+)[gGmMkK]$");
   private static final List<Locale> KNOWN_LOCALES = getKnownLocales();
 
   private static FileBasedConfigurationBuilder<INIConfiguration> configurationBuilder;
@@ -135,8 +135,7 @@ public class UserJvmOptions {
                     value);
               } else if (key.startsWith("-XX")) {
                 String value = "";
-                String newKey =
-                    key + ":" + jvmNodeConfiguration.getString(key).replaceAll("\\=", "");
+                String newKey = key + ":" + jvmNodeConfiguration.getString(key).replace("=", "");
                 jvmNodeConfiguration.setProperty(newKey, value);
                 jvmNodeConfiguration.clearProperty(key);
 
