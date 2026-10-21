@@ -41,6 +41,7 @@ import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -102,9 +103,28 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       renderer.renderPath(g, walker.getPath(), renderer.getZone().getGrid().getDefaultFootprint());
       ScreenPoint sp = walker.getLastPoint().convertToScreen(renderer);
 
-      int y = (int) sp.y - 10;
-      int x = (int) sp.x + (int) (renderer.getScaledGridSize() / 2);
-      GraphicsUtil.drawBoxedString(g, Double.toString(walker.getDistance()), x, y);
+      // distance label position to be below the last cell in the path and justified centrally
+      // so we must offset from each different grid types' representation of a cell point
+      Grid grid = renderer.getZone().getGrid();
+      double offsetX = 0;
+      double offsetY = 10;
+      if (grid.getType().equals(Grid.GridType.HexVertical)) {
+        // offset from middle center
+        offsetY += renderer.getScaledGridSize() / 2d;
+      } else if (grid.getType().equals(Grid.GridType.HexHorizontal)) {
+        // offset from middle center
+        offsetY += (renderer.getScaledGridSize() * grid.getSecondDimension() / grid.getSize()) / 2d;
+      } else if (grid.getType().isIsometric()) {
+        // offset from top center
+        offsetY += renderer.getScaledGridSize();
+      } else {
+        // offset from top left
+        offsetX += renderer.getScaledGridSize() / 2d;
+        offsetY += renderer.getScaledGridSize();
+      }
+
+      GraphicsUtil.drawBoxedString(
+          g, Double.toString(walker.getDistance()), (int) (sp.x + offsetX), (int) (sp.y + offsetY));
     } else if (gridlessPath != null) {
       // distance
       double c = 0;
