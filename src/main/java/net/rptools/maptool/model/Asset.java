@@ -46,11 +46,11 @@ import net.rptools.maptool.server.proto.AssetDto;
 import net.rptools.maptool.server.proto.AssetDtoType;
 import net.rptools.maptool.util.HandlebarsUtil;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.exception.TikaException;
+import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
+import org.apache.tika.parser.ParseContext;
 
 /** Asset used in the campaign. */
 public final class Asset {
@@ -783,21 +783,15 @@ public final class Asset {
   private static MediaType getMediaType(String filename, TikaInputStream tis) throws IOException {
     Metadata metadata = new Metadata();
     metadata.set(RESOURCE_NAME_KEY, filename);
-    try {
-      TikaConfig tika = new TikaConfig();
-      MediaType mediaType = tika.getDetector().detect(tis, metadata);
 
-      /* Workaround for Tika seeing Javascript files as Matlab scripts */
-      if ("text/x-matlab".equals(mediaType.toString())) {
-        String ext = FilenameUtils.getExtension(filename);
-        if ("js".equals(ext) || "javascript".equals(ext))
-          mediaType = new MediaType("text", "javascript");
-      }
-      return mediaType;
-
-    } catch (TikaException e) {
-      throw new IOException(e);
+    MediaType mediaType = new Tika().getDetector().detect(tis, metadata, new ParseContext());
+    /* Workaround for Tika seeing Javascript files as Matlab scripts */
+    if ("text/x-matlab".equals(mediaType.toString())) {
+      String ext = FilenameUtils.getExtension(filename);
+      if ("js".equals(ext) || "javascript".equals(ext))
+        mediaType = new MediaType("text", "javascript");
     }
+    return mediaType;
   }
 
   /**
