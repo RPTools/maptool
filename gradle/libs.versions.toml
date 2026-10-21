@@ -132,7 +132,7 @@ guava = { group = "com.google.guava", name = "guava", version = "33.4.8-jre" }
 # Geometry library for pathfinding, vision, etc.
 jts-core = { group = "org.locationtech.jts", name = "jts-core", version = "1.20.0" }
 # Graph library used for walls
-jgrapht-core = { group = "org.jgrapht", name = "jgrapht-core", version = "1.5.2" }
+jgrapht-core = { group = "org.jgrapht", name = "jgrapht-core", version = "1.5.3" }
 # Markdown parsing
 flexmark-all = { group = "com.vladsch.flexmark", name = "flexmark-all", version = "0.64.8" }
 # Utils for handling reflection
