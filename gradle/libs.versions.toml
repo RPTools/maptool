@@ -21,7 +21,7 @@ log4j-api = { group = "org.apache.logging.log4j", name = "log4j-api", version.re
 log4j-jul = { group = "org.apache.logging.log4j", name = "log4j-jul", version.ref = "log4j" }
 # Bridges v1 to v2 for other code in other libs
 log4j-1_2-api = { group = "org.apache.logging.log4j", name = "log4j-1.2-api", version.ref = "log4j" }
-slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version = "2.0.17" }
+slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version = "2.0.20" }
 apache-commons-logging = { group = "commons-logging", name = "commons-logging", version = "1.4.0" }
 # For Sentry bug reporting
 sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }
