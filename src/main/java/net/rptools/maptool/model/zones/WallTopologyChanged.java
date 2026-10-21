@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.zones;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Zone;
 
-public record WallTopologyChanged(Zone zone) {}
+public record WallTopologyChanged(Zone zone) implements MTEvent {}

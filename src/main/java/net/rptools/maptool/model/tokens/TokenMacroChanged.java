@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.tokens;
 
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.model.Token;
 
-public record TokenMacroChanged(Token token) {}
+public record TokenMacroChanged(Token token) implements MTEvent {}
