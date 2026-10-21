@@ -155,7 +155,10 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
 
         String distance = NumberFormat.getInstance().format(c);
         ScreenPoint sp = renderer.getViewModel().getZoneScale().toScreenSpace(lastZP.x, lastZP.y);
-        GraphicsUtil.drawBoxedString(g, distance, (int) sp.x, (int) sp.y - 20);
+
+        // distance label position to be below measure tool cursor and left justified
+        GraphicsUtil.drawBoxedString(g, distance, (int) sp.x, (int) sp.y + 20, SwingUtilities.LEFT);
+
       } finally {
         SwingUtil.restoreAntiAliasing(g, oldAA);
       }
