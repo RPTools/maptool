@@ -228,16 +228,18 @@ public class SocketConnection extends AbstractConnection implements Connection {
   }
 
   /**
-   * The largest message accepted from a peer, in bytes. A whole campaign travels as one message, so
-   * this has to be generous; it exists to reject lengths no real peer would send. Set with the
-   * {@code maptool.maxMessageBytes} system property.
+   * The largest message accepted from a peer, in bytes. A whole campaign travels as one message,
+   * and campaigns of well over a gigabyte exist, so by default any length an array can hold is
+   * accepted. Can be lowered with the {@code maptool.maxMessageBytes} system property.
    */
-  static final int MAX_MESSAGE_BYTES = Integer.getInteger("maptool.maxMessageBytes", 1 << 30);
+  static final int MAX_MESSAGE_BYTES =
+      Integer.getInteger("maptool.maxMessageBytes", Integer.MAX_VALUE);
 
   /**
-   * Messages up to this size get their whole buffer up front. Larger ones grow it as the bytes
-   * actually arrive, so a peer cannot make this process reserve memory just by sending a large
-   * length header.
+   * Messages up to this size get their whole buffer up front. A larger one gets the rest of its
+   * buffer only once this much of it has actually arrived, so a peer cannot make this process
+   * reserve memory just by sending a large length header, while a large campaign is still read into
+   * a single buffer of its own size, with at most this much copied along the way.
    */
   static final int EAGER_ALLOCATION_BYTES = 8 * 1024 * 1024;
 
@@ -289,7 +291,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
     int reported = 0;
     while (done < length) {
       if (done == buffer.length) {
-        buffer = Arrays.copyOf(buffer, (int) Math.min(length, 2L * buffer.length));
+        buffer = Arrays.copyOf(buffer, length);
       }
       int read = in.read(buffer, done, Math.min(buffer.length - done, ActivityListener.CHUNK_SIZE));
       if (read < 0) {
