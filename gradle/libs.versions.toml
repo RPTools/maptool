@@ -111,7 +111,7 @@ apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", ve
 # needed for preference dialog at runtime
 apache-commons-beanutils = { group = "commons-beanutils", name = "commons-beanutils", version = "1.11.0" }
 # For determining file type
-apache-tika = { group = "org.apache.tika", name = "tika-core", version = "3.2.1" }
+apache-tika = { group = "org.apache.tika", name = "tika-core", version = "4.1.0" }
 
 # Parsing and serialization
 # Better JSON functions
