@@ -1682,7 +1682,7 @@
                       </component>
                     </children>
                   </grid>
-                  <grid id="58760" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="58760" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
@@ -1731,6 +1731,27 @@
                           <actionCommand value="Fit GM view"/>
                           <name value="fitGMView"/>
                           <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="14123" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="checkForUpdates"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.language.label"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.language.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="bed55" class="javax.swing.JComboBox">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value=""/>
+                          <model/>
+                          <name value="locale"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.language.tooltip"/>
                         </properties>
                       </component>
                     </children>
@@ -2575,7 +2596,7 @@
                           <editable value="false"/>
                           <horizontalAlignment value="4"/>
                           <name value="jvmXmx"/>
-                          <scrollOffset value="32"/>
+                          <scrollOffset value="1"/>
                           <selectionEnd value="2"/>
                           <selectionStart value="2"/>
                           <text value="4G"/>
@@ -2590,7 +2611,7 @@
                           <editable value="false"/>
                           <horizontalAlignment value="4"/>
                           <name value="jvmXms"/>
-                          <scrollOffset value="32"/>
+                          <scrollOffset value="1"/>
                           <selectionEnd value="2"/>
                           <selectionStart value="2"/>
                           <text value="4G"/>
@@ -2614,7 +2635,7 @@
                           <editable value="false"/>
                           <horizontalAlignment value="4"/>
                           <name value="jvmXss"/>
-                          <scrollOffset value="35"/>
+                          <scrollOffset value="1"/>
                           <selectionEnd value="2"/>
                           <selectionStart value="2"/>
                           <text value="4M"/>
@@ -2647,7 +2668,7 @@
                       </component>
                     </children>
                   </grid>
-                  <grid id="91892" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="true" hgap="-1" vgap="-1">
+                  <grid id="91892" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="5" bottom="0" right="0"/>
                     <constraints>
                       <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
@@ -2661,7 +2682,7 @@
                     <children>
                       <component id="e2a2e" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.dataDirectory.label"/>
@@ -2670,7 +2691,7 @@
                       </component>
                       <component id="93ded" class="javax.swing.JTextField">
                         <constraints>
-                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <editable value="false"/>
@@ -2679,40 +2700,9 @@
                           <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.dataDirectory.tooltip"/>
                         </properties>
                       </component>
-                      <component id="43739" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.language.label"/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.language.tooltip"/>
-                        </properties>
-                      </component>
-                      <component id="a78f" class="javax.swing.JComboBox">
-                        <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <actionCommand value="comboBoxChanged"/>
-                          <enabled value="false"/>
-                          <model>
-                            <item value="English"/>
-                          </model>
-                          <name value="jamLanguageOverrideComboBox"/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.language.tooltip"/>
-                        </properties>
-                      </component>
-                      <component id="f1872" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.language.help"/>
-                        </properties>
-                      </component>
                       <component id="54d41" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.dataDirectory.help"/>

@@ -44,7 +44,6 @@ import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.PersistedPlayerDatabase;
-import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDBPropertyChange;
 import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
 import net.rptools.maptool.model.player.PlayerInfo;
@@ -118,9 +117,6 @@ public class PlayerDatabaseDialogController extends AbstractSwingJavaFXDialogCon
     playerDatabase.addPropertyChangeListener(changeListener);
     players = new Players(currentDb);
 
-    String gmI81n = I18N.getString("userTerm.GM");
-    String playerI81n = I18N.getString("userTerm.Player");
-
     String passI81n = I18N.getString("playerDB.dialog.password");
     String pubKeyI81n = I18N.getString("playerDB.dialog.publicKey");
 
@@ -129,8 +125,7 @@ public class PlayerDatabaseDialogController extends AbstractSwingJavaFXDialogCon
     playerCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().name()));
 
     var roleCol = new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.role"));
-    roleCol.setCellValueFactory(
-        p -> new ReadOnlyObjectWrapper<>(p.getValue().role() == Role.GM ? gmI81n : playerI81n));
+    roleCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().role().toString()));
     var authCol = new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.authType"));
     authCol.setCellValueFactory(
         p ->
