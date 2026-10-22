@@ -207,7 +207,7 @@ jai-imageio = ["jai-imageio-core", "jai-imageio-jpeg"]
 graalvm-js = ["graalvm-js", "graalvm-js-scriptengine"]
 
 [plugins]
-git-version = { id = "com.palantir.git-version", version = "4.0.0" }
+git-version = { id = "com.palantir.git-version", version = "5.1.0" }
 javafx = { id = "org.openjfx.javafxplugin", version = "0.0.14" }
 jpackage-runtime = { id = "org.beryx.runtime", version = "1.13.1" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
