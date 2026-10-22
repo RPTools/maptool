@@ -117,7 +117,7 @@ apache-tika = { group = "org.apache.tika", name = "tika-core", version = "3.2.1"
 # Better JSON functions
 gson = { group = "com.google.code.gson", name = "gson", version = "2.14.0" }
 # JsonPath for java
-jsonpath = { group = "com.jayway.jsonpath", name = "json-path", version = "2.9.0" }
+jsonpath = { group = "com.jayway.jsonpath", name = "json-path", version = "2.10.0" }
 # HTML parsing
 jsoup = { group = "org.jsoup", name = "jsoup", version = "1.23.2" }
 # XML utilities, for Hero Lab integration
