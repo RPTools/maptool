@@ -61,7 +61,7 @@ batik-transcoder = { group = "org.apache.xmlgraphics", name="batik-transcoder", 
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version.ref = "pdfbox" }
 pdfbox-tools = { group = "org.apache.pdfbox", name = "pdfbox-tools", version.ref = "pdfbox" }
 # To decrypt passworded/secured PDFs
-bcmail = { group = "org.bouncycastle", name = "bcmail-jdk18on", version = "1.81" }
+bcmail = { group = "org.bouncycastle", name = "bcmail-jdk18on", version = "1.86" }
 # For pdf image extraction, specifically for jpeg2000 (jpx) support.
 jai-imageio-core = { group = "com.github.jai-imageio", name = "jai-imageio-core", version.ref = "jai-imageio" }
 jai-imageio-jpeg = { group = "com.github.jai-imageio", name = "jai-imageio-jpeg2000", version.ref = "jai-imageio" }
