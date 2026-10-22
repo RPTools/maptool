@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
@@ -921,16 +922,11 @@ public class ClientMessageHandler implements MessageHandler {
           if (renderer == null) {
             return;
           }
-          if (AppPreferences.fitGmView.get()) {
-            renderer.enforceView(x, y, scale, gmWidth, gmHeight);
-          } else {
-            var viewModel = renderer.getViewModel();
-            viewModel.setZoneScale(
-                viewModel
-                    .getZoneScale()
-                    .withCenteredScale(scale, renderer.getSize())
-                    .centeredOn(x, y, renderer.getSize()));
-          }
+          renderer.enforceView(
+              x,
+              y,
+              scale,
+              AppPreferences.fitGmView.get() ? new Dimension(gmWidth, gmHeight) : null);
         });
   }
 
