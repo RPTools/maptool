@@ -483,6 +483,11 @@ public class TokenBarController
         formPanel.getComponent(DATA_ENTRY_COMPONENT_LABELS[i]).setEnabled(enabled);
       }
     } // endfor
+
+    int type = formPanel.getComboBox(TYPE).getSelectedIndex();
+    var allowsIncrements = NEEDED_IMAGES[type] != null;
+    formPanel.getSpinner(INCREMENTS).setEnabled(allowsIncrements);
+
     changedUpdate(null);
   }
 
@@ -521,7 +526,6 @@ public class TokenBarController
     int type = formPanel.getComboBox(TYPE).getSelectedIndex();
     int size = NEEDED_IMAGES[type] == null ? -1 : NEEDED_IMAGES[type].length;
     int imageCount = formPanel.getList(IMAGES).getModel().getSize();
-    int increments = TokenStatesController.getSpinner(INCREMENTS, "increments", formPanel);
     String text = formPanel.getTextComponent(NAME).getText();
     boolean hasName = text != null && (text = text.trim()).length() != 0;
     boolean hasShow =
@@ -531,15 +535,18 @@ public class TokenBarController
     boolean hasImages = false;
     BarTokenOverlay selectedBar = (BarTokenOverlay) formPanel.getList(BARS).getSelectedValue();
     boolean hasUniqueUpdateName = false;
-    if (selectedBar != null)
+    if (selectedBar != null) {
       hasUniqueUpdateName = selectedBar.getName().equals(text) || !getNames().contains(text);
+    }
     if (size > 0 && imageCount == size) {
       hasImages = true;
-    } else if (size < 0 && imageCount == increments && increments > 0) {
-      hasImages = true;
+    } else if (size < 0) {
+      // Multiple images.
+      hasImages = imageCount > 0;
     } else if (size == 0) {
       hasImages = true;
-    } // endif
+    }
+
     formPanel
         .getButton(ADD)
         .setEnabled(hasName && !getNames().contains(text) && hasImages && hasShow);
@@ -591,17 +598,16 @@ public class TokenBarController
 
         // Handle the drawn overlays
         int type = -1;
-        if (bar instanceof DrawnBarTokenOverlay) {
-          formPanel.getSpinner(THICKNESS).setValue(((DrawnBarTokenOverlay) bar).getThickness());
-          ((ColorWell) formPanel.getComponent(COLOR))
-              .setColor(((DrawnBarTokenOverlay) bar).getBarColor());
+        if (bar instanceof DrawnBarTokenOverlay drawnBar) {
+          formPanel.getSpinner(THICKNESS).setValue(drawnBar.getThickness());
+          ((ColorWell) formPanel.getComponent(COLOR)).setColor(drawnBar.getBarColor());
           type = 3;
-        } // endif
-        if (bar instanceof TwoToneBarTokenOverlay) {
-          ((ColorWell) formPanel.getComponent(BG_COLOR))
-              .setColor(((TwoToneBarTokenOverlay) bar).getBgColor());
+        } else if (bar instanceof TwoToneBarTokenOverlay twoToneBar) {
+          formPanel.getSpinner(THICKNESS).setValue(twoToneBar.getThickness());
+          ((ColorWell) formPanel.getComponent(COLOR)).setColor(twoToneBar.getBarColor());
+          ((ColorWell) formPanel.getComponent(BG_COLOR)).setColor(twoToneBar.getBgColor());
           type = 4;
-        } // endif
+        }
 
         // Handle images
         var assetIds = bar.getAssetIds();
@@ -680,25 +686,19 @@ public class TokenBarController
       key = (MD5Key) value;
       int type = formPanel.getComboBox(TYPE).getSelectedIndex();
       if (NEEDED_IMAGES[type] == null) {
-        int increments = TokenStatesController.getSpinner(INCREMENTS, "increments", formPanel);
-        if (increments >= index) {
-          if (index == 0) {
-            setText("Empty Bar");
-          } else if (index == increments - 1) {
-            setText("Full Bar");
-          } else if (index < increments) {
-            setText("Increment " + index);
-          } else {
-            setText("Unneeded");
-          } // endif
+        // Multiple images. Tell the user the purpose each image will serve.
+        if (index == 0) {
+          setText(I18N.getText("CampaignPropertiesDialog.bars.itemStatus.emptyBar"));
+        } else if (index == list.getModel().getSize() - 1) {
+          setText(I18N.getText("CampaignPropertiesDialog.bars.itemStatus.fullBar"));
         } else {
-          setText("Unneeded");
-        } // endif
+          setText(I18N.getText("CampaignPropertiesDialog.bars.itemStatus.partialBar", index));
+        }
       } else if (NEEDED_IMAGES[type].length > index) {
         setText(NEEDED_IMAGES[type][index]);
       } else {
         setText("Unneeded");
-      } // endif
+      }
       setIcon(icon);
       return this;
     }
