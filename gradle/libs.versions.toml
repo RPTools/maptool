@@ -150,7 +150,7 @@ graalvm-js-scriptengine = { group = "org.graalvm.js", name = "js-scriptengine", 
 intellij-forms-tasks = { group = "com.jetbrains.intellij.java", name = "java-compiler-ant-tasks", version = "233.14475.56" }
 intellij-forms-runtime = { group = "com.jetbrains.intellij.java", name = "java-gui-forms-rt", version = "241.12019" }
 # layout for forms created in code
-miglayout-swing = { group = "com.miglayout", name = "miglayout-swing", version = "11.4.2" }
+miglayout-swing = { group = "com.miglayout", name = "miglayout-swing", version = "11.5.1" }
 
 # RPTools libs
 # default resources (token, textures etc.)
