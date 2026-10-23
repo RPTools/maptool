@@ -185,8 +185,7 @@ public class StatSheetManager {
    * @return the id of the stat sheet.
    */
   public SortedSet<StatSheet> getOrderedStatSheets(String propertyType) {
-    TreeSet<StatSheet> sheets =
-        new TreeSet<StatSheet>((s1, s2) -> StatSheetManager.compareStatSheets(s1, s2));
+    TreeSet<StatSheet> sheets = new TreeSet<>(StatSheetManager::compareStatSheets);
     sheets.addAll(getStatSheets(propertyType));
     return sheets;
   }

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Permissions;
 import net.rptools.maptool.model.TokenProperty;
 
 /** Table model for the token properties type table. */
@@ -41,7 +42,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
    */
   private Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
 
-  /** The token type that is currently displayed in the table. */
+  /** The token property type on display in the table. */
   private String tokenType = "";
 
   /**
@@ -56,7 +57,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
 
   @Override
   public int getRowCount() {
-    var properties = tokenTypeMap.get(tokenType);
+    List<TokenProperty> properties = tokenTypeMap.get(tokenType);
     return properties == null ? 0 : properties.size();
   }
 
@@ -67,19 +68,16 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
 
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    var properties = tokenTypeMap.get(tokenType);
-    var property = properties.get(rowIndex);
+    List<TokenProperty> properties = tokenTypeMap.get(tokenType);
+    TokenProperty property = properties.get(rowIndex);
     return switch (columnIndex) {
       case 0 -> property.getName();
       case 1 -> property.getShortName();
-      case 2 -> {
-        var displayName = property.getDisplayName();
-        yield displayName == null || displayName.isBlank() ? null : displayName;
-      }
+      case 2 -> property.getDisplayName();
       case 3 -> property.getDefaultValue();
-      case 4 -> property.isShowOnStatSheet();
-      case 5 -> property.isGMOnly() & property.isShowOnStatSheet();
-      case 6 -> property.isOwnerOnly() & property.isShowOnStatSheet();
+      case 4 -> property.getEditorViewPermission().equals(Permissions.OWNER);
+      case 5 -> property.getEditorEditPermission().equals(Permissions.OWNER);
+      case 6 -> property.getStatSheetViewPermission();
       default -> null;
     };
   }
@@ -90,9 +88,9 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
       case 1 -> I18N.getText("campaignPropertiesTable.column.shortName.description");
       case 2 -> I18N.getText("campaignPropertiesTable.column.displayName.description");
       case 3 -> I18N.getText("campaignPropertiesTable.column.default.description");
-      case 4 -> I18N.getText("campaignPropertiesTable.column.statSheet.description");
-      case 5 -> I18N.getText("campaignPropertiesTable.column.gm.description");
-      case 6 -> I18N.getText("campaignPropertiesTable.column.owner.description");
+      case 4 -> I18N.getText("campaignPropertiesTable.column.playerViewable.description");
+      case 5 -> I18N.getText("campaignPropertiesTable.column.playerEditable.description");
+      case 6 -> I18N.getText("campaignPropertiesTable.column.statSheet.description");
       default -> "";
     };
   }
@@ -104,9 +102,9 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
       case 1 -> I18N.getText("campaignPropertiesTable.column.shortName");
       case 2 -> I18N.getText("campaignPropertiesTable.column.displayName");
       case 3 -> I18N.getText("campaignPropertiesTable.column.defaultValue");
-      case 4 -> I18N.getText("campaignPropertiesTable.column.onStatSheet");
-      case 5 -> I18N.getText("campaignPropertiesTable.column.gmStatSheet");
-      case 6 -> I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
+      case 4 -> I18N.getText("campaignPropertiesTable.column.playerViewable");
+      case 5 -> I18N.getText("campaignPropertiesTable.column.playerEditable");
+      case 6 -> I18N.getText("campaignPropertiesTable.column.statSheetVisibility");
       default -> "";
     };
   }
@@ -116,43 +114,39 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     return switch (columnIndex) {
       case 0, 1, 2 -> String.class;
       case 3 -> LargeEditableText.class;
-      case 4, 5, 6 -> Boolean.class;
+      case 4, 5 -> Boolean.class;
+      case 6 -> Permissions.class;
       default -> null;
     };
   }
 
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    var properties = tokenTypeMap.get(tokenType);
-    var tokenProperty = properties.get(rowIndex);
-    return switch (columnIndex) {
-      case 5, 6 ->
-          tokenProperty.isShowOnStatSheet(); // GM, Owner only editable if show on stat sheet is set
-      default -> true;
-    };
+    if (columnIndex == 5) {
+      return (boolean) getValueAt(rowIndex, 4);
+    }
+    return true;
   }
 
   @Override
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-    var properties = tokenTypeMap.get(tokenType);
-    var tokenProperty = properties.get(rowIndex);
+    List<TokenProperty> properties = tokenTypeMap.get(tokenType);
+    TokenProperty tokenProperty = properties.get(rowIndex);
+
     switch (columnIndex) {
       case 0 -> tokenProperty.setName((String) aValue);
       case 1 -> tokenProperty.setShortName((String) aValue);
       case 2 -> tokenProperty.setDisplayName((String) aValue);
       case 3 -> tokenProperty.setDefaultValue((String) aValue);
-      case 4 -> {
-        tokenProperty.setShowOnStatSheet((Boolean) aValue);
-        fireTableRowsUpdated(rowIndex, rowIndex);
-      }
-      case 5 -> tokenProperty.setGMOnly((Boolean) aValue);
-      case 6 -> tokenProperty.setOwnerOnly((Boolean) aValue);
+      case 4 -> tokenProperty.setEditorViewPermission((boolean) aValue);
+      case 5 -> tokenProperty.setEditorEditPermission((boolean) aValue);
+      case 6 -> tokenProperty.setStatSheetViewPermission((Permissions) aValue);
     }
   }
 
   /** Adds a new token property, with a generated name. */
   public void addProperty(int selectedRow) {
-    var properties = tokenTypeMap.get(tokenType);
+    List<TokenProperty> properties = tokenTypeMap.get(tokenType);
 
     // First find a unique name, there are so few entries we don't have to worry
     // about being fancy
@@ -189,13 +183,13 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
    * @param selectedRow the selected row to delete.
    */
   public void deleteProperty(int selectedRow) {
-    var properties = tokenTypeMap.get(tokenType);
+    List<TokenProperty> properties = tokenTypeMap.get(tokenType);
     properties.remove(selectedRow);
     fireTableRowsDeleted(selectedRow, selectedRow);
   }
 
   public void movePropertyUp(int selectedRow) {
-    var properties = tokenTypeMap.get(tokenType);
+    List<TokenProperty> properties = tokenTypeMap.get(tokenType);
     if (selectedRow <= 0 || selectedRow >= properties.size()) {
       // Either already at the top or a nonsense index.
       throw new ArrayIndexOutOfBoundsException(selectedRow);
@@ -206,7 +200,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
   }
 
   public void movePropertyDown(int selectedRow) {
-    var properties = tokenTypeMap.get(tokenType);
+    List<TokenProperty> properties = tokenTypeMap.get(tokenType);
     if (selectedRow < 0 || selectedRow >= properties.size() - 1) {
       // Either already at the bottom or a nonsense index.
       throw new ArrayIndexOutOfBoundsException(selectedRow);
