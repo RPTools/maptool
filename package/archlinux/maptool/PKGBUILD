@@ -1,5 +1,5 @@
 # Maintainer: Your Name <youremail@domain.com>
-pkgname=maptool
+pkgname=maptool-linux
 pkgver=${MAPTOOL_VERSION//-/_}
 pkgrel=1
 pkgdesc="Virtual Tabletop for playing roleplaying games."
