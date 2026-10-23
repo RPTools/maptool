@@ -89,7 +89,26 @@ ext {
     println "AppVersion: " + appSemVer
 
     // vendor, tagVersion, appSemVer, and DSNs defaults are set in gradle.properties
-    println "OS Detected: " + osdetector.os
+
+    def isArm = osdetector.arch.equals('aarch_64') || osdetector.arch.contains('arm') || osdetector.arch.contains('aarch')
+
+    // These are our own platform strings that we can tweak as we wish.
+    arch = isArm ? 'aarch64' : 'amd64'
+    brandedArch = arch
+    os = osdetector.os
+    // Tweak the OS name
+    if (osdetector.os == 'windows') {
+        os = 'win'
+    }
+    else if (osdetector.os == 'osx') {
+        os = 'mac'
+        brandedArch = isArm ? 'apple-silicon' : 'intel'
+    }
+    else if (osdetector.os == 'linux') {
+        os = 'linux'
+    }
+
+    println "OS Detected: '${os}' on '${arch}'"
 }
 
 def modulesToOpen = [
@@ -289,10 +308,11 @@ runtime {
                 '--file-associations', 'package/associations.properties'
         ]
 
-        if (osdetector.os.is('windows')) {
+        targetPlatformName = "${os}-${arch}"
+
+        if (os == 'win') {
             def winUpgradeUUID = "74d934b9-5fb5-433e-aca4-c6f14bd9aa6b"
             println "Setting Windows installer options with upgrade uuid = " + winUpgradeUUID
-            targetPlatformName = "win"
             resourceDir = file('package/windows')
             imageOptions += ['--icon', 'package/windows/' + project.name + developerRelease + '.ico']
             installerOptions += [
@@ -302,33 +322,37 @@ runtime {
                     '--win-menu-group', vendor,
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
-            targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.zip')
+
+            if (arch != 'aarch64') {
+                targetPlatform('win-amd64') {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.zip')
+                }
             }
         }
 
-        if (osdetector.os.is('osx')) {
+        if (os == 'mac') {
             println "Setting MacOS installer options"
-            def isArm = osdetector.arch.equals('aarch_64') || osdetector.arch.contains('arm') || osdetector.arch.contains('aarch')
-            def macArch = isArm ? 'apple-silicon' : 'intel'
-            def macJdkUrl = isArm ?
-                    'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.1_12.tar.gz' :
-                    'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz'
 
-            targetPlatformName = "mac-" + macArch
             imageOptions += ['--icon', 'package/macosx/' + project.name + developerRelease + '.icns']
             installerOptions += [
                     '--mac-package-name', project.name + developerRelease
             ]
-            targetPlatform("mac-${macArch}") {
-                jdkHome = jdkDownload(macJdkUrl)
-                jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
+            jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
+
+            if (arch == 'aarch64') {
+                targetPlatform("mac-aarch64") {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.1_12.tar.gz')
+                }
+            }
+            else {
+                targetPlatform("mac-amd64") {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz')
+                }
             }
         }
 
-        if (osdetector.os.is('linux')) {
+        if (os == 'linux') {
             println "Setting Linux installer options"
-            targetPlatformName = "linux"
             resourceDir = file('package/linux')
             imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
             installerOptions += [
@@ -347,8 +371,11 @@ runtime {
                         '--linux-rpm-license-type', 'AGPLv3'
                 ]
             }
-            targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_linux_hotspot_21.0.1_12.tar.gz')
+
+            if (arch != 'aarch64') {
+                targetPlatform('linux-amd64') {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_linux_hotspot_21.0.1_12.tar.gz')
+                }
             }
         }
     }
@@ -361,7 +388,7 @@ def zipJpackageImage = tasks.register('zipJpackageImage', Zip) {
     dependsOn tasks.jpackage
 
     def extension = ''
-    if (osdetector.os.is('osx')) {
+    if (os == 'mac') {
         extension = '.app'
     }
 
