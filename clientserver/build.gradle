@@ -20,15 +20,17 @@ dependencies {
     // webrtc
     implementation(libs.websocket)
     implementation(libs.webrtc)
-    if (osdetector.os.is('windows'))
+
+    if (osdetector.os == 'windows') {
         implementation(variantOf(libs.webrtc) { classifier('windows-x86_64')})
-    else if (osdetector.os.is('osx')) {
-        def isArm = osdetector.arch.equals('aarch_64') || osdetector.arch.contains('arm') || osdetector.arch.contains('aarch')
-        def webrtcClassifier = isArm ? 'macos-aarch64' : 'macos-x86_64'
-        implementation(variantOf(libs.webrtc) { classifier(webrtcClassifier) })
     }
-    else if (osdetector.os.is('linux'))
+    else if (osdetector.os == 'osx') {
+        def webrtcClassifier = (osdetector.arch == 'aarch_64') ? 'macos-aarch64' : 'macos-x86_64'
+        implementation(variantOf(libs.webrtc) { classifier(webrtcClassifier)})
+    }
+    else if (osdetector.os == 'linux') {
         implementation(variantOf(libs.webrtc) { classifier('linux-x86_64')})
+    }
 
     // compression of messages between client and server
     implementation(libs.apache.commons.compress)
