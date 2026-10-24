@@ -1,6 +1,8 @@
 plugins {
     id "base"
     id "java-library"
+
+    alias(libs.plugins.osdetector)
 }
 
 apply from: rootProject.file('buildSrc/shared.gradle')

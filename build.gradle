@@ -16,6 +16,7 @@ plugins {
     id "java"
 
     alias(libs.plugins.git.version)
+    alias(libs.plugins.osdetector)
     alias(libs.plugins.javafx)
     alias(libs.plugins.jpackage.runtime)
     alias(libs.plugins.shadow)
