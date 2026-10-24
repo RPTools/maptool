@@ -41,7 +41,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Build with Gradle
-      run: ./gradlew jpackage zipJpackageImage
+      run: ./gradlew --no-daemon jpackage zipJpackageImage
     - name: Copy the RPM to the location required to build the ArchLinux package
       if: startsWith(matrix.os, 'ubuntu')
       run: cp releases/maptool-*.rpm package/archlinux/maptool/maptool.rpm
