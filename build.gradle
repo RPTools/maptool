@@ -372,7 +372,12 @@ runtime {
                 ]
             }
 
-            if (arch != 'aarch64') {
+            if (arch == 'aarch64') {
+                targetPlatform('linux-aarch64') {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.1_12.tar.gz')
+                }
+            }
+            else {
                 targetPlatform('linux-amd64') {
                     jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_linux_hotspot_21.0.1_12.tar.gz')
                 }
