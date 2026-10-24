@@ -9,6 +9,7 @@ license=('AGPL3')
 source=("maptool.rpm")
 md5sums=(SKIP)
 install=maptool.install
+options=('!debug')
 
 package() {
     cp -r opt/ "$pkgdir/"
