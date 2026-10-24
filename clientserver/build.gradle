@@ -29,7 +29,8 @@ dependencies {
         implementation(variantOf(libs.webrtc) { classifier(webrtcClassifier)})
     }
     else if (osdetector.os == 'linux') {
-        implementation(variantOf(libs.webrtc) { classifier('linux-x86_64')})
+        def webrtcClassifier = (osdetector.arch == 'aarch_64') ? 'linux-aarch64' : 'linux-x86_64'
+        implementation(variantOf(libs.webrtc) { classifier(webrtcClassifier)})
     }
 
     // compression of messages between client and server

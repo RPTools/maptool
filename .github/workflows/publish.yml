@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-15-intel, macos-15]
+        os: [windows-latest, ubuntu-latest, ubuntu-26.04-arm, macos-15-intel, macos-15]
         java: [ '21' ]
       fail-fast: false
     steps:
@@ -49,14 +49,15 @@ jobs:
       # After Gradle completes, publishable artifacts will be placed under releases/renamed/
 
     # region Arch package build, by transforming the RPM.
+    # Arch is x86_64 only, so don't do it on arm.
     - name: Copy the RPM to the location required to build the ArchLinux package
-      if: runner.os == 'linux'
+      if: runner.os == 'linux' && runner.arch == 'x64'
       run: cp releases/renamed/maptool-*.rpm package/archlinux/maptool/maptool.rpm
       continue-on-error: true
     - name: Build ArchLinux package
       uses: 2m/arch-pkgbuild-builder@v1.16
-      # This only even makes sense on linux.
-      if: runner.os == 'linux'
+      # This only even makes sense on Ubuntu.
+      if: runner.os == 'linux' && runner.arch == 'x64'
       env:
         MAPTOOL_VERSION: ${{ github.event.release.tag_name }}
       with:
@@ -64,7 +65,7 @@ jobs:
         pkgname: 'package/archlinux/maptool'
       continue-on-error: true
     - name: Copy ArchLinux package back
-      if: runner.os == 'linux'
+      if: runner.os == 'linux' && runner.arch == 'x64'
       run: cp -t releases/renamed package/archlinux/maptool/maptool*.pkg.tar.zst
       continue-on-error: true
     # endregion
