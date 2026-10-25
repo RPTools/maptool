@@ -106,6 +106,14 @@ ext {
             brandedArch = 'intel'
         }
     }
+    else {
+        if (osdetector.arch == 'aarch_64') {
+            brandedArch = 'aarch64'
+        }
+        else if (osdetector.arch == 'x86_64') {
+            brandedArch = 'x86_64'
+        }
+    }
     // endregion
 }
 
