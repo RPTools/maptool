@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svg268"
+   style="clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"
+   version="1.1"
+   viewBox="0 0 16 16"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs8" />
+  <rect
+     id="rect259"
+     x="0"
+     width="16"
+     height="16"
+     style="clip-rule:evenodd;fill:none;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"
+     y="0" />
+  <rect
+     style="clip-rule:evenodd;display:inline;fill:#59a869;fill-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.65;paint-order:markers fill stroke"
+     id="rect472"
+     width="12"
+     height="12"
+     x="2"
+     y="2"
+     rx="8.6927834e-08"
+     ry="8.6927834e-08" />
+  <path
+     style="clip-rule:evenodd;display:inline;fill:#ffffff;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"
+     d="m 8.9973,4 -4e-6,3.0002 L 12,7.0001964 v 1.9998 l -3.002704,-4.3e-6 4e-6,2.9999999 H 6.9975 l 4e-6,-2.9999999 -2.9975,3.6e-6 v -1.9998 L 6.997504,7.0002 6.9975,4 Z"
+     id="path418" />
+</svg>
