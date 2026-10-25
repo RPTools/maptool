@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.macro.impl.*;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -328,7 +329,10 @@ public class MacroManager {
               tokenInContext = zr.getZone().getToken(cpanel.getIdentityGUID());
             else tokenInContext = zr.getZone().resolveToken(cpanel.getIdentity());
           }
-          details = MapTool.getParser().parseLine(tokenInContext, details, macroExecutionContext);
+          details =
+              MapTool.getParser()
+                  .parseLine(
+                      new MapToolVariableResolver(tokenInContext), details, macroExecutionContext);
           trustedPath = MapTool.getParser().isMacroPathTrusted();
         }
         context.addTransform(key + " " + details);
