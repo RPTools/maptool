@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.client.ui.lookuptable;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
@@ -132,6 +130,14 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
         });
   }
 
+  /**
+   * This uses hit-testing to identify which add or cancel button in the image column the user
+   * clicked based on the buttons' actual bounds within the rendered table cell. This approach
+   * preserves direct button interaction without requiring cell-editing mode (i.e. multiple user
+   * clicks to obtain the same effect), reuses the existing `ImageAssetPanel` actions, and avoids
+   * the added complexity of a `TableCellEditor`. This approach is also responsive to changes in
+   * number of buttons, and handles different button sizes due to user preferences.
+   */
   public void initTableDefinitionTable() {
     JTable definitionTable = view.getDefinitionTable();
 
@@ -143,46 +149,73 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTable> {
         new MouseAdapter() {
           @Override
           public void mousePressed(MouseEvent e) {
+            if (!SwingUtilities.isLeftMouseButton(e)) {
+              return;
+            }
             var model = (LookupTableTableModel) definitionTable.getModel();
 
-            int column = model.getCanonicalColumn(definitionTable.columnAtPoint(e.getPoint()));
+            int viewRow = definitionTable.rowAtPoint(e.getPoint());
+            int viewColumn = definitionTable.columnAtPoint(e.getPoint());
+            if (viewRow < 0 || viewColumn < 0) {
+              return;
+            }
+
+            int column = model.getCanonicalColumn(viewColumn);
             if (column != IMAGE_COLUMN_INDEX) {
               return;
             }
-            var row = model.getRowAt(definitionTable.rowAtPoint(e.getPoint()));
-            String imageIdStr = row.getImageId();
 
-            // HACK: this is a hacky way to figure out if the button was pushed :P
-            if (e.getPoint().x > definitionTable.getSize().width - 15) {
-              if (imageIdStr == null || imageIdStr.isEmpty()) {
-                // Add
-                ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
-                chooserDialog.setVisible(true);
-
-                MD5Key imageId = chooserDialog.getImageId();
-                if (imageId == null) {
-                  return;
-                }
-                imageIdStr = imageId.toString();
-              } else {
-                // Cancel
-                imageIdStr = null;
-              }
-            } else if (e.getPoint().x > definitionTable.getSize().width - 30) {
-              // Add
-              ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
-
-              chooserDialog.setVisible(true);
-
-              MD5Key imageId = chooserDialog.getImageId();
-              if (imageId == null) {
-                return;
-              }
-              imageIdStr = imageId.toString();
+            // get the renderer for this cell and lay it out at the same size as the cell so we can
+            // find the add and cancel buttons.
+            Rectangle cellBounds = definitionTable.getCellRect(viewRow, viewColumn, true);
+            Component component =
+                definitionTable.prepareRenderer(
+                    definitionTable.getCellRenderer(viewRow, viewColumn), viewRow, viewColumn);
+            if (!(component instanceof ImageAssetPanel imagePanel)) {
+              return;
             }
 
-            // Commit our changes back.
-            row.setImageId(imageIdStr);
+            // force the layout synchronously using {@code doLayout()}
+            // assumes layout manager correctly positions its children when directly invoked
+            imagePanel.setSize(cellBounds.getSize());
+            imagePanel.doLayout();
+            Container buttonPanel = imagePanel.getAddButton().getParent();
+            buttonPanel.doLayout();
+
+            // convert each button's bounds into image-cell coordinates.
+            Rectangle addBounds =
+                SwingUtilities.convertRectangle(
+                    imagePanel.getAddButton().getParent(),
+                    imagePanel.getAddButton().getBounds(),
+                    imagePanel);
+            Rectangle cancelBounds =
+                SwingUtilities.convertRectangle(
+                    imagePanel.getCancelButton().getParent(),
+                    imagePanel.getCancelButton().getBounds(),
+                    imagePanel);
+
+            int cellX = e.getX() - cellBounds.x;
+            int cellY = e.getY() - cellBounds.y;
+            int modelRow = definitionTable.convertRowIndexToModel(viewRow);
+            var row = model.getRowAt(modelRow);
+
+            if (addBounds.contains(cellX, cellY)) {
+              // add or replace image
+              ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
+              chooserDialog.setVisible(true);
+              MD5Key selectedImageId = chooserDialog.getImageId();
+
+              // if the image chooser was cancelled or closed, keep the existing image.
+              if (selectedImageId == null) {
+                return;
+              }
+              row.setImageId(selectedImageId.toString());
+
+            } else if (imagePanel.getCancelButton().isVisible()
+                && cancelBounds.contains(cellX, cellY)) {
+              // explicitly remove image
+              row.setImageId(null);
+            }
           }
         });
   }
