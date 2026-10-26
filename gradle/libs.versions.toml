@@ -107,7 +107,7 @@ apache-commons-net = { group = "commons-net", name = "commons-net", version = "3
 # commandline parsing
 apache-commons-cli = { group = "commons-cli", name = "commons-cli", version = "1.11.0" }
 # String utilities
-apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", version = "3.18.0" }
+apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", version = "3.20.0" }
 # needed for preference dialog at runtime
 apache-commons-beanutils = { group = "commons-beanutils", name = "commons-beanutils", version = "1.11.0" }
 # For determining file type
