@@ -211,9 +211,9 @@ message TokenPropertyDto {
   optional bool high_priority = 3;
   optional bool owner_only = 4;
   optional bool gm_only = 5;
-  optional string stat_sheet_view_permission = 8;
-  optional string editor_view_permission = 9;
-  optional string editor_edit_permission = 10;
+  string stat_sheet_view_permission = 8;
+  string editor_view_permission = 9;
+  string editor_edit_permission = 10;
   google.protobuf.StringValue default_value = 6;
   google.protobuf.StringValue display_name = 7;
 }
