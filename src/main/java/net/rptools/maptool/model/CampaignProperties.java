@@ -45,6 +45,7 @@ import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.permissions.Permissions;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.proto.CampaignPropertiesDto;

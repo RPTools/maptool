@@ -23,6 +23,7 @@ import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.macro.MacroLocationFactory;
+import net.rptools.maptool.model.permissions.Permissions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,15 +39,29 @@ public class TokenPropertiesTest {
   public void setUp() {
     propsList = new ArrayList<>();
     propsList.add(new TokenProperty("prop1", null, null, true, false, Permissions.NONE, "10"));
-    propsList.add(new TokenProperty("prop2", null, null, false, Permissions.ALL, "{prop2=prop1}"));
+    propsList.add(
+        new TokenProperty("prop2", null, null, false, false, Permissions.ALL, "{prop2=prop1}"));
     propsList.add(
         new TokenProperty(
-            "jsonObj1", null, Permissions.ALL, "{\"sampleKey\": 5, \"otherKey\": \"theValue\"}"));
-    propsList.add(new TokenProperty("jsonObj2", null, Permissions.ALL, "{\"prop3\"=other}"));
-    propsList.add(new TokenProperty("jsonObj3", null, Permissions.ALL, "{prop3:other}"));
-    propsList.add(new TokenProperty("jsonArr1", null, Permissions.ALL, "[4, 3]"));
-    propsList.add(new TokenProperty("plainStr1", null, Permissions.ALL, "justAString"));
-    propsList.add(new TokenProperty("badJson", null, Permissions.ALL, "{\"a\": 1}{\"b\": 2}"));
+            "jsonObj1",
+            null,
+            null,
+            false,
+            false,
+            Permissions.ALL,
+            "{\"sampleKey\": 5, \"otherKey\": \"theValue\"}"));
+    propsList.add(
+        new TokenProperty(
+            "jsonObj2", null, null, false, false, Permissions.ALL, "{\"prop3\"=other}"));
+    propsList.add(
+        new TokenProperty("jsonObj3", null, null, false, false, Permissions.ALL, "{prop3:other}"));
+    propsList.add(
+        new TokenProperty("jsonArr1", null, null, false, false, Permissions.ALL, "[4, 3]"));
+    propsList.add(
+        new TokenProperty("plainStr1", null, null, false, false, Permissions.ALL, "justAString"));
+    propsList.add(
+        new TokenProperty(
+            "badJson", null, null, false, false, Permissions.ALL, "{\"a\": 1}{\"b\": 2}"));
     MapTool.getCampaign().putTokenType("testType", propsList);
 
     testToken = new Token();

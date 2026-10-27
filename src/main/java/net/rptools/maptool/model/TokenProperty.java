@@ -15,146 +15,71 @@
 package net.rptools.maptool.model;
 
 import com.google.protobuf.StringValue;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
+import javax.annotation.Nonnull;
+import net.rptools.maptool.model.permissions.Permissions;
 import net.rptools.maptool.server.proto.TokenPropertyDto;
 
 public class TokenProperty implements DisplayNames, Serializable {
+  // new permissions
+  private static final Permissions EDITOR_VIEW_DEFAULT = Permissions.OWNER;
+  private static final Permissions EDITOR_EDIT_DEFAULT = Permissions.OWNER;
+  private static final Permissions VIEW_STATSHEET_DEFAULT = Permissions.NONE;
   private String name;
   private String shortName;
   private String displayName;
   private String defaultValue = "";
+  private Permissions editorViewPermission = EDITOR_VIEW_DEFAULT;
+  private Permissions editorEditPermission = EDITOR_EDIT_DEFAULT;
+  private Permissions statSheetViewPermission = VIEW_STATSHEET_DEFAULT;
 
   // old stat-sheet permissions
+  @SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
   @Deprecated private boolean highPriority; // showOnStatSheet; so that 1.3b28 files load in 1.3b29
+  @SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
   @Deprecated private boolean ownerOnly;
+  @SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
   @Deprecated private boolean gmOnly;
-
-  // new permissions
-  private Permissions editorViewPermission = Permissions.OWNER;
-  private Permissions editorEditPermission = Permissions.OWNER;
-  private Permissions statSheetViewPermission = Permissions.NONE;
 
   public TokenProperty() {
     // For serialization
   }
 
   public TokenProperty(String name) {
-    this(name, null, (String) null);
+    this(name, null, null, null, null, null, null);
   }
 
-  public TokenProperty(String name, String shortName) {
-    this(name, shortName, (String) null);
-  }
-
-  public TokenProperty(String name, String shortName, String displayName) {
-    this.name = name;
-    this.shortName = shortName;
-    this.displayName = displayName;
-  }
-
-  public TokenProperty(String name, boolean playerEditable) {
-    this(name, null, null, playerEditable, Permissions.NONE, null);
-  }
-
-  public TokenProperty(String name, Permissions statSheetViewPermission) {
-    this(name, null, null, true, statSheetViewPermission, null);
-  }
-
-  public TokenProperty(String name, String shortName, boolean playerEditable) {
-    this(name, shortName, null, playerEditable, Permissions.NONE, null);
-  }
-
-  public TokenProperty(String name, String shortName, String displayName, boolean playerEditable) {
-    this(name, shortName, displayName, playerEditable, Permissions.NONE, null);
-  }
-
-  public TokenProperty(String name, boolean playerEditable, Permissions statSheetViewPermission) {
-    this(name, null, null, playerEditable, statSheetViewPermission, null);
-  }
-
-  public TokenProperty(String name, String shortName, Permissions statSheetViewPermission) {
-    this(name, shortName, null, true, statSheetViewPermission, null);
-  }
-
-  public TokenProperty(
-      String name, String shortName, boolean playerEditable, Permissions statSheetViewPermission) {
-    this(name, shortName, null, playerEditable, statSheetViewPermission, null);
-  }
-
-  public TokenProperty(
-      String name, String shortName, Permissions statSheetViewPermission, String defaultValue) {
-    this(name, shortName, null, true, statSheetViewPermission, defaultValue);
-  }
-
-  public TokenProperty(
-      String name,
-      String shortName,
-      boolean playerEditable,
-      Permissions statSheetViewPermission,
-      String defaultValue) {
-    this(name, shortName, null, playerEditable, statSheetViewPermission, defaultValue);
-  }
-
-  public TokenProperty(
-      String name, String shortName, String displayName, Permissions statSheetViewPermission) {
-    this(name, shortName, displayName, true, statSheetViewPermission, null);
+  public TokenProperty(String name, String shortName, String displayName, Permissions permission) {
+    this(name, shortName, displayName, true, true, permission, "");
   }
 
   public TokenProperty(
       String name,
       String shortName,
       String displayName,
-      boolean playerEditable,
-      Permissions statSheetViewPermission) {
-    this(name, shortName, displayName, playerEditable, statSheetViewPermission, null);
-  }
-
-  public TokenProperty(
-      String name,
-      String shortName,
-      String displayName,
-      boolean playerEditable,
-      Permissions statSheetViewPermission,
-      String defaultValue) {
-    this(
-        name,
-        shortName,
-        displayName,
-        playerEditable,
-        playerEditable,
-        statSheetViewPermission,
-        defaultValue);
-  }
-
-  public TokenProperty(
-      String name,
-      String shortName,
-      boolean highPriority,
-      boolean isOwnerOnly,
-      boolean isGMOnly,
-      String defaultValue) {
-    this.name = name;
-    this.shortName = shortName;
-    this.highPriority = highPriority;
-    this.ownerOnly = isOwnerOnly;
-    this.gmOnly = isGMOnly;
-    this.defaultValue = defaultValue;
-  }
-
-  public TokenProperty(
-      String name,
-      String shortName,
-      String displayName,
-      boolean playerViewable,
-      boolean playerEditable,
+      Boolean playerViewable,
+      Boolean playerEditable,
       Permissions statSheetViewPermission,
       String defaultValue) {
     this.name = name;
-    this.shortName = shortName;
-    this.displayName = displayName;
-    this.editorEditPermission = playerEditable ? Permissions.OWNER : Permissions.GM;
-    this.editorViewPermission = playerViewable ? Permissions.OWNER : Permissions.GM;
+    if (shortName != null) {
+      this.shortName = shortName;
+    }
+    if (displayName != null) {
+      this.displayName = displayName;
+    }
+    this.setEditorEditPermission(
+        playerEditable == null
+            ? EDITOR_EDIT_DEFAULT
+            : playerEditable ? Permissions.OWNER : Permissions.GM);
+    this.setEditorViewPermission(
+        playerViewable == null
+            ? EDITOR_VIEW_DEFAULT
+            : playerViewable ? Permissions.OWNER : Permissions.GM);
+    this.setStatSheetViewPermission(
+        Objects.requireNonNullElse(statSheetViewPermission, VIEW_STATSHEET_DEFAULT));
     if (statSheetViewPermission != null) {
       this.statSheetViewPermission = statSheetViewPermission;
     }
@@ -168,10 +93,10 @@ public class TokenProperty implements DisplayNames, Serializable {
    */
   @SuppressWarnings("CopyConstructorMissesField")
   public TokenProperty(TokenProperty prop) {
-    this.name = prop.getName();
-    this.shortName = prop.getShortName();
-    this.displayName = prop.getDisplayName();
-    this.defaultValue = prop.getDefaultValue();
+    setName(prop.getName());
+    setShortName(prop.getShortName());
+    setDisplayName(prop.getDisplayName());
+    setDefaultValue(prop.getDefaultValue());
 
     if (prop.highPriority) {
       if (prop.ownerOnly) {
@@ -181,16 +106,27 @@ public class TokenProperty implements DisplayNames, Serializable {
       } else {
         setStatSheetViewPermission(Permissions.ALL);
       }
-    } else if (prop.hasStatSheetViewPermission()) {
+    } else {
       setStatSheetViewPermission(prop.getStatSheetViewPermission());
     }
-    // because these getters substitute nulls for defaults
     setEditorEditPermission(prop.getEditorEditPermission());
     setEditorViewPermission(prop.getEditorViewPermission());
   }
 
+  public static TokenProperty fromDto(TokenPropertyDto dto) {
+    var prop = new TokenProperty();
+    prop.setName(dto.getName());
+    prop.setDisplayName(dto.hasDisplayName() ? dto.getDisplayName().getValue() : null);
+    prop.setShortName(dto.hasShortName() ? dto.getShortName().getValue() : null);
+    prop.setEditorEditPermission(Permissions.fromString(dto.getEditorEditPermission()));
+    prop.setEditorViewPermission(Permissions.fromString(dto.getEditorViewPermission()));
+    prop.setStatSheetViewPermission(Permissions.fromString(dto.getStatSheetViewPermission()));
+    prop.setDefaultValue(dto.hasDefaultValue() ? dto.getDefaultValue().getValue() : null);
+    return prop;
+  }
+
   public boolean isShowOnStatSheet() {
-    return statSheetViewPermission != null && !statSheetViewPermission.equals(Permissions.NONE);
+    return !statSheetViewPermission.equals(Permissions.NONE);
   }
 
   public String getName() {
@@ -213,18 +149,6 @@ public class TokenProperty implements DisplayNames, Serializable {
     return defaultValue != null && !defaultValue.isBlank();
   }
 
-  public boolean hasEditorViewPermission() {
-    return editorViewPermission != null;
-  }
-
-  public boolean hasEditorEditPermission() {
-    return editorEditPermission != null;
-  }
-
-  public boolean hasStatSheetViewPermission() {
-    return statSheetViewPermission != null;
-  }
-
   public String getDisplayName() {
     return displayName;
   }
@@ -242,22 +166,20 @@ public class TokenProperty implements DisplayNames, Serializable {
   }
 
   public Permissions getStatSheetViewPermission() {
-    if (!hasStatSheetViewPermission()) {
-      statSheetViewPermission = Permissions.NONE;
-    }
-    return statSheetViewPermission;
+    return this.statSheetViewPermission;
   }
 
   public void setStatSheetViewPermission(Permissions statSheetViewPermission) {
-    this.statSheetViewPermission = statSheetViewPermission;
+    this.statSheetViewPermission =
+        Objects.requireNonNullElse(statSheetViewPermission, Permissions.NONE);
   }
 
   public boolean isGMOnly() {
-    return statSheetViewPermission.equals(Permissions.GM);
+    return this.statSheetViewPermission.equals(Permissions.GM);
   }
 
   public boolean isOwnerOnly() {
-    return statSheetViewPermission.equals(Permissions.OWNER);
+    return this.statSheetViewPermission.equals(Permissions.OWNER);
   }
 
   public String getDefaultValue() {
@@ -269,18 +191,18 @@ public class TokenProperty implements DisplayNames, Serializable {
   }
 
   public Permissions getEditorViewPermission() {
-    if (!hasEditorViewPermission()) {
-      this.editorViewPermission = Permissions.OWNER;
-    }
-    return editorViewPermission;
+    return this.editorViewPermission;
   }
 
   public void setEditorViewPermission(Permissions editorViewPermission) {
-    this.editorViewPermission = editorViewPermission;
+    this.editorViewPermission =
+        Objects.requireNonNullElse(editorViewPermission, EDITOR_VIEW_DEFAULT);
   }
 
-  public void setEditorViewPermission(boolean value) {
-    if (value) {
+  public void setEditorViewPermission(Boolean value) {
+    if (value == null) {
+      setEditorViewPermission(EDITOR_VIEW_DEFAULT);
+    } else if (value) {
       setEditorViewPermission(Permissions.OWNER);
     } else {
       setEditorViewPermission(Permissions.GM);
@@ -289,47 +211,38 @@ public class TokenProperty implements DisplayNames, Serializable {
   }
 
   public Permissions getEditorEditPermission() {
-    if (!hasEditorEditPermission()) {
-      this.editorEditPermission = Permissions.OWNER;
-    }
-    return editorEditPermission;
+    return this.editorEditPermission;
   }
 
-  public void setEditorEditPermission(boolean value) {
-    setEditorEditPermission(value ? Permissions.OWNER : Permissions.GM);
+  public void setEditorEditPermission(Boolean value) {
+    if (value == null) {
+      setEditorEditPermission(EDITOR_EDIT_DEFAULT);
+    } else if (value) {
+      setEditorEditPermission(Permissions.OWNER);
+    } else {
+      setEditorEditPermission(Permissions.GM);
+    }
   }
 
   public void setEditorEditPermission(Permissions editorEditPermission) {
-    this.editorEditPermission = editorEditPermission;
-  }
-
-  public static TokenProperty fromDto(TokenPropertyDto dto) {
-    var prop = new TokenProperty();
-    prop.name = dto.getName();
-    prop.shortName = dto.hasShortName() ? dto.getShortName().getValue() : null;
-
-    prop.editorEditPermission =
-        dto.hasEditorEditPermission()
-            ? Permissions.valueOf(dto.getEditorEditPermission())
-            : Permissions.OWNER;
-    prop.editorViewPermission =
-        dto.hasEditorViewPermission()
-            ? Permissions.valueOf(dto.getEditorViewPermission())
-            : Permissions.OWNER;
-    prop.statSheetViewPermission = Permissions.valueOf(dto.getStatSheetViewPermission());
-
-    prop.defaultValue = dto.hasDefaultValue() ? dto.getDefaultValue().getValue() : null;
-    prop.displayName = dto.hasDisplayName() ? dto.getDisplayName().getValue() : null;
-    return prop;
+    this.editorEditPermission =
+        Objects.requireNonNullElse(editorEditPermission, EDITOR_EDIT_DEFAULT);
   }
 
   public TokenPropertyDto toDto() {
     var dto = TokenPropertyDto.newBuilder();
-    dto.setName(name);
-    dto.setEditorEditPermission(
-        Objects.requireNonNullElse(editorEditPermission, Permissions.OWNER).name());
-    dto.setEditorViewPermission(
-        Objects.requireNonNullElse(editorViewPermission, Permissions.OWNER).name());
+    dto.setName(getName());
+    if (displayName != null) {
+      dto.setDisplayName(StringValue.of(getDisplayName()));
+    }
+    if (shortName != null) {
+      dto.setShortName(StringValue.of(shortName));
+    }
+    if (defaultValue != null) {
+      dto.setDefaultValue(StringValue.of(getDefaultValue()));
+    }
+    dto.setEditorEditPermission(getEditorEditPermission().name());
+    dto.setEditorViewPermission(getEditorViewPermission().name());
     // for campaigns pre 1.19
     if (highPriority || ownerOnly || gmOnly) {
       if (ownerOnly) {
@@ -340,18 +253,13 @@ public class TokenProperty implements DisplayNames, Serializable {
         dto.setStatSheetViewPermission(Permissions.ALL.name());
       }
     } else {
-      dto.setStatSheetViewPermission(
-          Objects.requireNonNullElse(statSheetViewPermission, Permissions.NONE).name());
-    }
-    if (hasShortName()) {
-      dto.setShortName(StringValue.of(shortName));
-    }
-    if (hasDisplayName()) {
-      dto.setDisplayName(StringValue.of(displayName));
-    }
-    if (hasDefaultValue()) {
-      dto.setDefaultValue(StringValue.of(defaultValue));
+      dto.setStatSheetViewPermission(dto.getStatSheetViewPermission());
     }
     return dto.build();
+  }
+
+  @Serial
+  private @Nonnull Object readResolve() {
+    return new TokenProperty(this);
   }
 }
