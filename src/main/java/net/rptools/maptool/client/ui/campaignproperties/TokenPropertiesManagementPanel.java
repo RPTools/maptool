@@ -39,6 +39,7 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.permissions.Permissions;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;

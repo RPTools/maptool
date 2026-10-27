@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Permissions;
 import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool.model.permissions.Permissions;
 
 /** Table model for the token properties type table. */
 public class TokenPropertiesTableModel extends AbstractTableModel {

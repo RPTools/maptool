@@ -12,14 +12,11 @@
  * <https://www.gnu.org/licenses/> and specifically the Affero license
  * text at <https://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package net.rptools.maptool.model.permissions;
 
-import java.util.List;
-import java.util.Set;
 import javax.annotation.Nullable;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.TokenProperty;
 
 /**
  *
@@ -54,7 +51,7 @@ public enum Permissions {
   /** Only the Owners' Allies have permission */
   ALLIED_ONLY("permission.displayName.allies.discrete"),
   /** Only the Owners and the Owners' Allies have permission */
-  OWNER_ALLIED_ONLY("permission.displayName.allies.discrete"),
+  OWNER_ALLIED_ONLY("permission.displayName.owner.allies.discrete"),
   /** Only the Owners' Opponents have permission */
   OPPONENT_ONLY("permission.displayName.opponent");
 
@@ -64,40 +61,21 @@ public enum Permissions {
     this.displayName = I18N.getText(i18nKey);
   }
 
-  public boolean hasPermission(@Nullable Player player, @Nullable Token token) {
-    if (player == null || token == null) {
-      return this.equals(ALL);
-    }
-    return switch (this) {
-      case ALL -> true;
-      case NONE -> false;
-      case GM -> player.isGM();
-      case OWNER -> player.isGM() || token.isOwner(player.getName());
-      case ALLIED -> player.isGM() || token.isOwner(player.getName()) || isAllied(token, player);
-      case OWNER_ONLY -> token.isOwner(player.getName());
-      case ALLIED_ONLY -> isAllied(token, player);
-      case OWNER_ALLIED_ONLY -> token.isOwner(player.getName()) || isAllied(token, player);
-      case OPPONENT_ONLY -> !token.isOwner(player.getName()) && !isAllied(token, player);
-    };
+  public boolean hasPermission(@Nullable Object accessor, @Nullable Object target) {
+    return PermissionTest.hasPermission(this, accessor, target);
   }
 
-  /**
-   * Simplistic check for alliance based on GM vs. players where all players on the same side. All
-   * PCs and player-owned NPCs are on the same side.
-   *
-   * @param token to check is ally
-   * @param player whose side we are checking for
-   * @return if token belongs to the same side
-   */
-  private boolean isAllied(Token token, Player player) {
-    if (!player.isGM() && token.getType().equals(Token.Type.PC)) {
-      return true;
-    } else {
-      List<Player> teamMates =
-          MapTool.getPlayerList().stream().dropWhile(p -> p.isGM() != player.isGM()).toList();
-      final Set<String> owners = token.getOwners();
-      return !teamMates.stream().filter(p -> owners.contains(p.getName())).toList().isEmpty();
+  public static Permissions fromString(String lookup) {
+    try {
+      return valueOf(lookup);
+    } catch (IllegalArgumentException e) {
+      for (Permissions p : values()) {
+        if (p.name().equalsIgnoreCase(lookup) || p.displayName.equalsIgnoreCase(lookup)) {
+          return p;
+        }
+      }
     }
+    return null;
   }
 
   @Override

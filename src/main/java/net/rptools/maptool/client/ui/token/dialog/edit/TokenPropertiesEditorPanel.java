@@ -31,7 +31,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.table.MTMultilineStringCellEditor;
 import net.rptools.maptool.client.swing.table.WordWrapCellRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Permissions;
+import net.rptools.maptool.model.permissions.Permissions;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.player.Player;
