@@ -24,9 +24,9 @@ import net.rptools.maptool.server.proto.TokenPropertyDto;
 
 public class TokenProperty implements DisplayNames, Serializable {
   // new permissions
-  private static final Permissions EDITOR_VIEW_DEFAULT = Permissions.OWNER;
-  private static final Permissions EDITOR_EDIT_DEFAULT = Permissions.OWNER;
-  private static final Permissions VIEW_STATSHEET_DEFAULT = Permissions.NONE;
+  public static final Permissions EDITOR_VIEW_DEFAULT = Permissions.OWNER;
+  public static final Permissions EDITOR_EDIT_DEFAULT = Permissions.OWNER;
+  public static final Permissions VIEW_STATSHEET_DEFAULT = Permissions.NONE;
   private String name;
   private String shortName;
   private String displayName;
@@ -37,11 +37,16 @@ public class TokenProperty implements DisplayNames, Serializable {
 
   // old stat-sheet permissions
   @SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
-  @Deprecated private boolean highPriority; // showOnStatSheet; so that 1.3b28 files load in 1.3b29
+  @Deprecated
+  private boolean highPriority; // showOnStatSheet; so that 1.3b28 files load in 1.3b29
+
   @SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
-  @Deprecated private boolean ownerOnly;
+  @Deprecated
+  private boolean ownerOnly;
+
   @SuppressWarnings({"unused", "DeprecatedIsStillUsed"})
-  @Deprecated private boolean gmOnly;
+  @Deprecated
+  private boolean gmOnly;
 
   public TokenProperty() {
     // For serialization
@@ -52,7 +57,7 @@ public class TokenProperty implements DisplayNames, Serializable {
   }
 
   public TokenProperty(String name, String shortName, String displayName, Permissions permission) {
-    this(name, shortName, displayName, true, true, permission, "");
+    this(name, shortName, displayName, true, true, permission, null);
   }
 
   public TokenProperty(
@@ -78,11 +83,7 @@ public class TokenProperty implements DisplayNames, Serializable {
         playerViewable == null
             ? EDITOR_VIEW_DEFAULT
             : playerViewable ? Permissions.OWNER : Permissions.GM);
-    this.setStatSheetViewPermission(
-        Objects.requireNonNullElse(statSheetViewPermission, VIEW_STATSHEET_DEFAULT));
-    if (statSheetViewPermission != null) {
-      this.statSheetViewPermission = statSheetViewPermission;
-    }
+    this.setStatSheetViewPermission(statSheetViewPermission);
     this.defaultValue = defaultValue;
   }
 
@@ -99,13 +100,15 @@ public class TokenProperty implements DisplayNames, Serializable {
     setDefaultValue(prop.getDefaultValue());
 
     if (prop.highPriority) {
-      if (prop.ownerOnly) {
-        setStatSheetViewPermission(Permissions.OWNER);
-      } else if (prop.gmOnly) {
+      if (prop.gmOnly && !prop.ownerOnly) {
         setStatSheetViewPermission(Permissions.GM);
+      } else if (prop.ownerOnly) {
+        setStatSheetViewPermission(Permissions.OWNER);
       } else {
         setStatSheetViewPermission(Permissions.ALL);
       }
+    } else if (prop.statSheetViewPermission == null) {
+      setStatSheetViewPermission(Permissions.NONE);
     } else {
       setStatSheetViewPermission(prop.getStatSheetViewPermission());
     }
