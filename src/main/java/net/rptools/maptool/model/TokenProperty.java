@@ -233,8 +233,12 @@ public class TokenProperty implements DisplayNames, Serializable {
   }
 
   public TokenPropertyDto toDto() {
-    var dto = TokenPropertyDto.newBuilder();
-    dto.setName(getName());
+    var dto =
+        TokenPropertyDto.newBuilder()
+            .setName(getName())
+            .setEditorEditPermission(getEditorEditPermission().name())
+            .setEditorViewPermission(getEditorViewPermission().name())
+            .setStatSheetViewPermission(getStatSheetViewPermission().name());
     if (displayName != null) {
       dto.setDisplayName(StringValue.of(getDisplayName()));
     }
@@ -244,20 +248,7 @@ public class TokenProperty implements DisplayNames, Serializable {
     if (defaultValue != null) {
       dto.setDefaultValue(StringValue.of(getDefaultValue()));
     }
-    dto.setEditorEditPermission(getEditorEditPermission().name());
-    dto.setEditorViewPermission(getEditorViewPermission().name());
-    // for campaigns pre 1.19
-    if (highPriority || ownerOnly || gmOnly) {
-      if (ownerOnly) {
-        dto.setStatSheetViewPermission(Permissions.OWNER.name());
-      } else if (gmOnly) {
-        dto.setStatSheetViewPermission(Permissions.GM.name());
-      } else {
-        dto.setStatSheetViewPermission(Permissions.ALL.name());
-      }
-    } else {
-      dto.setStatSheetViewPermission(dto.getStatSheetViewPermission());
-    }
+
     return dto.build();
   }
 
