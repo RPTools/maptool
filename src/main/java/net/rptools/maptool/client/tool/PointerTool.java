@@ -1430,6 +1430,11 @@ public class PointerTool extends DefaultTool {
                     if (property.isOwnerOnly() && !AppUtil.playerOwns(tokenUnderMouse)) {
                       continue;
                     }
+                    if (!property
+                        .getStatSheetViewPermission()
+                        .hasPermission(MapTool.getPlayer(), tokenUnderMouse)) {
+                      continue;
+                    }
                     timer.start(property.getName());
                     MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
                     resolver.initialize();
@@ -1437,7 +1442,8 @@ public class PointerTool extends DefaultTool {
                     Object propertyValue =
                         tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
                     resolver.flush();
-                    if (propertyValue != null && propertyValue.toString().length() > 0) {
+                    //noinspection ConstantValue
+                    if (propertyValue != null && !propertyValue.toString().isEmpty()) {
                       String propName = property.getShortName();
                       if (StringUtils.isEmpty(propName)) {
                         propName = property.getName();
