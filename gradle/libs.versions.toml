@@ -26,7 +26,7 @@ apache-commons-logging = { group = "commons-logging", name = "commons-logging", 
 # For Sentry bug reporting
 sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }
 sentry-log4j = { group = "io.sentry", name = "sentry-log4j2", version.ref = "sentry" }
-icu4j = { group = "com.ibm.icu", name = "icu4j", version = "78.3" }
+icu4j = { group = "com.ibm.icu", name = "icu4j", version = "79.1" }
 # Networking
 # Web RTC
 websocket = { group = "org.java-websocket", name = "Java-WebSocket", version = "1.6.0" }
