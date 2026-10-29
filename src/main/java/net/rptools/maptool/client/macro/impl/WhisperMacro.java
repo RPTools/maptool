@@ -73,7 +73,7 @@ public class WhisperMacro extends AbstractMacro {
             context.getTransformationHistory(),
             playerName,
             MessageUtil.getFormattedWhisperRecipient(
-                message, MapTool.getFrame().getCommandPanel().getIdentity())));
+                message, MapTool.getClient().getImpersonation().getIdentity())));
     MapTool.addMessage(
         TextMessage.me(
             context.getTransformationHistory(),
