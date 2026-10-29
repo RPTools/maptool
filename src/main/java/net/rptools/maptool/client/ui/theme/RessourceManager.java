@@ -305,6 +305,7 @@ public class RessourceManager {
   private static final HashMap<Icons, String> rodIcons =
       new HashMap<>() {
         {
+          put(Icons.ACTION_CANCEL, ROD_ICONS + "edit/Delete Square Knockout.svg");
           put(Icons.ACTION_COPY, ROD_ICONS + "edit/Duplicate.svg");
           put(Icons.ACTION_DELETE, ROD_ICONS + "edit/Delete.svg");
           put(Icons.ACTION_ACCEPT, ROD_ICONS + "edit/Accept.svg");
@@ -313,6 +314,7 @@ public class RessourceManager {
           put(Icons.ACTION_EXPORT, ROD_ICONS + "edit/Export.svg");
           put(Icons.ACTION_IMPORT, ROD_ICONS + "edit/Import.svg");
           put(Icons.ACTION_NEW, ROD_ICONS + "edit/New.svg");
+          put(Icons.ACTION_NEW_SMALL, ROD_ICONS + "edit/New Square Knockout.svg");
           put(Icons.ACTION_NEXT, ROD_ICONS + "initiative/Next Initiative.svg");
           put(Icons.ACTION_NEXT_TOKEN, ROD_ICONS + "misc/Select Previous Token.svg");
           put(Icons.ACTION_PAUSE, ROD_ICONS + "initiative/Toggle Hold Initiative.svg");

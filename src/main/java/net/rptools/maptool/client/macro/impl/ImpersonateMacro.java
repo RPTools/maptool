@@ -16,6 +16,7 @@ package net.rptools.maptool.client.macro.impl;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.TokenIdentity;
 import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
@@ -38,7 +39,7 @@ public class ImpersonateMacro implements Macro {
 
     // Clear current identity
     if (macro == null || macro.length() == 0) {
-      cpanel.setIdentity(new CommandPanel.TokenIdentity());
+      cpanel.setIdentity(new TokenIdentity());
       return;
     }
     // Figure out what we want to impersonate
@@ -67,12 +68,12 @@ public class ImpersonateMacro implements Macro {
     // Impersonate
     if (index > 0) {
       // Enter impersonation context for the duration of the macro
-      cpanel.enterContextIdentity(new CommandPanel.TokenIdentity(token, name));
+      cpanel.enterContextIdentity(new TokenIdentity(token, name));
       MacroManager.executeMacro(macro, executionContext);
       cpanel.leaveContextIdentity();
     } else {
       // Set current identity
-      cpanel.setIdentity(new CommandPanel.TokenIdentity(token, name, canLoadTokenMacros(token)));
+      cpanel.setIdentity(new TokenIdentity(token, name, canLoadTokenMacros(token)));
     }
   }
 

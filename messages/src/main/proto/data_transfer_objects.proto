@@ -208,11 +208,11 @@ message SightTypeDto {
 message TokenPropertyDto {
   string name = 1;
   google.protobuf.StringValue short_name = 2;
-  bool high_priority = 3;
-  bool owner_only = 4;
-  bool gm_only = 5;
-  google.protobuf.StringValue default_value = 6;
-  google.protobuf.StringValue display_name = 7;
+  google.protobuf.StringValue default_value = 3;
+  google.protobuf.StringValue display_name = 4;
+  string stat_sheet_view_permission = 5;
+  string editor_view_permission = 6;
+  string editor_edit_permission = 7;
 }
 
 message TokenOverlayDto {
