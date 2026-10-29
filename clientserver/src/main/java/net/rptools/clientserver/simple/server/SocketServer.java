@@ -124,7 +124,10 @@ public final class SocketServer extends AbstractServer implements Server {
 
           String id = nextClientId(s);
           SocketConnection conn = new SocketConnection(id, s);
+          // Only start reading once the observers have added their message handlers. A client
+          // sends its first message as soon as it connects, and one read before then is lost.
           server.fireClientConnect(conn);
+          conn.open();
         } catch (IOException e) {
           if (!suppressErrors) {
             log.error(e.getMessage(), e);
