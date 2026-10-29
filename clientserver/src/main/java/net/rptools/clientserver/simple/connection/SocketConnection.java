@@ -34,7 +34,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
   private ReceiveThread receive;
   private Socket socket;
 
-  // Only valid for pending connections before #open() is called.
+  // Only valid for outgoing connections before #open() is called.
   private String hostName;
   private int port;
 
@@ -44,15 +44,21 @@ public class SocketConnection extends AbstractConnection implements Connection {
     this.port = port;
   }
 
+  /**
+   * A connection for a socket that has already been accepted. Nothing is read from it until {@link
+   * #open()} is called, so whoever accepted it can first add the handlers for its messages: a
+   * message the peer sends straight away would otherwise be read and dispatched to nobody, and
+   * lost.
+   *
+   * @param id the connection's ID
+   * @param socket the accepted socket
+   */
   public SocketConnection(String id, Socket socket) {
     super(id);
-    connect(socket);
+    this.socket = socket;
   }
 
-  private void connect(Socket socket) {
-    assert this.socket == null : "Should only call #connect() when not already open";
-
-    this.socket = socket;
+  private void startThreads() {
     this.send = new SendThread(socket);
     this.receive = new ReceiveThread(socket);
 
@@ -62,11 +68,18 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
   @Override
   public void open() throws IOException {
-    if (this.socket != null) {
+    if (this.send != null) {
       throw new IOException("The connection has already been opened.");
     }
+    if (isClosed()) {
+      // Closed before it was opened, e.g. refused while its handlers were being added.
+      return;
+    }
 
-    connect(new Socket(hostName, port));
+    if (this.socket == null) {
+      this.socket = new Socket(hostName, port);
+    }
+    startThreads();
   }
 
   @Override
@@ -81,8 +94,10 @@ public class SocketConnection extends AbstractConnection implements Connection {
       return;
     }
 
-    receive.interrupt();
-    send.interrupt();
+    if (receive != null) {
+      receive.interrupt();
+      send.interrupt();
+    }
 
     try {
       socket.close();
