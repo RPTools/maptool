@@ -385,7 +385,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       } else {
         for (TokenFootprint footprint : grid.getFootprints()) {
           if (footprint.getName().equalsIgnoreCase(size)) {
-            token.setFootprint(grid, footprint);
+            token.setFootprintId(grid.getType(), footprint.getId());
             token.setSnapToScale(true);
             break;
           }

@@ -2304,7 +2304,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
         token.setWidth(image.getWidth(null));
         token.setHeight(image.getHeight(null));
-        token.setFootprint(zone.getGrid(), zone.getGrid().getDefaultFootprint());
+        token.setFootprintId(
+            zone.getGrid().getType(), zone.getGrid().getDefaultFootprint().getId());
         token.guessAndSetShape();
       }
 

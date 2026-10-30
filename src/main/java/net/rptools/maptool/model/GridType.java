@@ -18,6 +18,9 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
+import net.rptools.maptool.server.proto.GridTypeDto;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public enum GridType {
   Square(OffsetTranslator.IDENTITY),
@@ -35,6 +38,8 @@ public enum GridType {
   public OffsetTranslator getOffsetTranslator() {
     return offsetTranslator;
   }
+
+  private static final Logger log = LogManager.getLogger(GridType.class);
 
   public boolean isHex() {
     return this == HexVertical || this == HexHorizontal;
@@ -116,6 +121,30 @@ public enum GridType {
       default ->
           throw new IllegalArgumentException(
               String.format("\"%s\" is not a valid grid type", string));
+    };
+  }
+
+  public GridTypeDto toDto() {
+    return switch (this) {
+      case Square -> GridTypeDto.Square;
+      case Isometric -> GridTypeDto.Isometric;
+      case HexVertical -> GridTypeDto.HexVertical;
+      case HexHorizontal -> GridTypeDto.HexHorizontal;
+      case None -> GridTypeDto.Gridless;
+    };
+  }
+
+  public static GridType fromDto(GridTypeDto dto) {
+    return switch (dto) {
+      case Square -> Square;
+      case Gridless -> None;
+      case HexVertical -> HexVertical;
+      case HexHorizontal -> HexHorizontal;
+      case Isometric -> Isometric;
+      case UNRECOGNIZED -> {
+        log.error("Unrecognized grid. Defaulting to {}", Square);
+        yield Square;
+      }
     };
   }
 }

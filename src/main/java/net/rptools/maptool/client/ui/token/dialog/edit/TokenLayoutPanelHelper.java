@@ -123,7 +123,7 @@ class TokenLayoutPanelHelper {
   AbeillePanel<?> parent;
   private JRootPane parentRoot;
   private final TokenLayoutRenderPanel renderPanel;
-  private JComboBox<?> sizeCombo;
+  private JComboBox<EditTokenDialog.FootprintRecord> sizeCombo;
   private JSpinner anchorXSpinner, anchorYSpinner, scaleSpinner, zoomSpinner;
   private JSlider anchorXSlider, anchorYSlider, scaleSlider, zoomSlider;
   private AbstractButton okButton;
@@ -163,8 +163,10 @@ class TokenLayoutPanelHelper {
     return flippedYCB;
   }
 
-  private JComboBox<?> getSizeCombo() {
-    if (sizeCombo == null) sizeCombo = (JComboBox<?>) parent.getComponent("size");
+  private JComboBox<EditTokenDialog.FootprintRecord> getSizeCombo() {
+    if (sizeCombo == null) {
+      sizeCombo = (JComboBox<EditTokenDialog.FootprintRecord>) parent.getComponent("size");
+    }
     return sizeCombo;
   }
 
@@ -349,12 +351,8 @@ class TokenLayoutPanelHelper {
         @Override
         public void itemStateChanged(ItemEvent e) {
           if (mirrorToken != null) {
-            final var selected = getSizeCombo().getSelectedItem();
-            if (selected instanceof TokenFootprint tmpFP) {
-              setFootprint(tmpFP);
-            } else {
-              setFootprint(null);
-            }
+            var selected = getSizeCombo().getItemAt(getSizeCombo().getSelectedIndex());
+            setFootprint(selected.footprint());
           }
         }
       };
@@ -403,13 +401,12 @@ class TokenLayoutPanelHelper {
       mirrorToken.setAnchor(0, 0);
     }
 
-    if (mirrorToken.getFootprint(grid) != getSizeCombo().getSelectedItem()) {
-      var selected = getSizeCombo().getSelectedItem();
-      switch (selected) {
-        case TokenFootprint tmpFP ->
-            mirrorToken.setFootprint(grid, grid.getFootprint(tmpFP.getId()));
-        case null, default -> mirrorToken.setSnapToScale(false);
-      }
+    var sizeCombo = getSizeCombo();
+    var selected = sizeCombo.getItemAt(sizeCombo.getSelectedIndex());
+    if (selected.footprint() == null) {
+      mirrorToken.setSnapToScale(false);
+    } else {
+      mirrorToken.setFootprintId(grid.getType(), selected.footprint().getId());
     }
 
     isIsoFigure =

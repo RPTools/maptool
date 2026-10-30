@@ -22,9 +22,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import net.rptools.maptool.server.Mapper;
-import net.rptools.maptool.server.proto.TokenFootPrintDto;
 
 /**
  * This class represents the set of cells a token occupies based on its size. Each token is assumed
@@ -69,26 +66,6 @@ public class TokenFootprint {
     this.scale = scale;
     this.isDefault = isDefault;
     this.cellSet.addAll(Arrays.asList(points));
-  }
-
-  public static TokenFootprint fromDto(TokenFootPrintDto dto) {
-    return new TokenFootprint(
-        GUID.fromDto(dto.getId()),
-        dto.getName(),
-        dto.getLocalizedName(),
-        dto.getIsDefault(),
-        dto.getScale(),
-        dto.getCellSetList().stream().map(Mapper::map).toArray(Point[]::new));
-  }
-
-  public TokenFootPrintDto toDto() {
-    var dto = TokenFootPrintDto.newBuilder();
-    dto.addAllCellSet(cellSet.stream().map(Mapper::map).collect(Collectors.toList()));
-    dto.setName(name);
-    dto.setId(id.toDto());
-    dto.setIsDefault(isDefault);
-    dto.setScale(scale);
-    return dto.build();
   }
 
   @Override

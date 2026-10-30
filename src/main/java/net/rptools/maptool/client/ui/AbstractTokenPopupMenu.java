@@ -565,8 +565,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token == null) {
           continue;
         }
-        token.setFootprint(
-            renderer.getZone().getGrid(), renderer.getZone().getGrid().getDefaultFootprint());
+        token.setFootprintId(
+            renderer.getZone().getGrid().getType(),
+            renderer.getZone().getGrid().getDefaultFootprint().getId());
         token.setSnapToScale(true);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
@@ -1133,7 +1134,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
       for (GUID tokenGUID : selectedTokenSet) {
         Token token = renderer.getZone().getToken(tokenGUID);
-        token.setFootprint(renderer.getZone().getGrid(), footprint);
+        token.setFootprintId(renderer.getZone().getGrid().getType(), footprint.getId());
         token.setSnapToScale(true);
         renderer.flush(token);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);

@@ -1768,6 +1768,16 @@ public class Token implements Cloneable {
     this.sightType = sightType;
   }
 
+  private String getSizeMapKey(GridType type) {
+    return switch (type) {
+      case Square -> SquareGrid.class.getName();
+      case Isometric -> IsometricGrid.class.getName();
+      case HexVertical -> HexGridVertical.class.getName();
+      case HexHorizontal -> HexGridHorizontal.class.getName();
+      case None -> GridlessGrid.class.getName();
+    };
+  }
+
   /**
    * Calculate the foot print of a grid
    *
@@ -1775,11 +1785,21 @@ public class Token implements Cloneable {
    * @return Returns the size.
    */
   public TokenFootprint getFootprint(Grid grid) {
-    return grid.getFootprint(getSizeMap().get(grid.getClass().getName()));
+    return grid.getFootprint(getFootprintId(grid.getType()));
   }
 
-  public TokenFootprint setFootprint(Grid grid, TokenFootprint footprint) {
-    return grid.getFootprint(getSizeMap().put(grid.getClass().getName(), footprint.getId()));
+  /**
+   * Finds the ID of the footprint of the token on the given grid type.
+   *
+   * @param gridType the type of grid to get footprint of
+   * @return Returns the size.
+   */
+  public GUID getFootprintId(GridType gridType) {
+    return sizeMap.getOrDefault(getSizeMapKey(gridType), gridType.getDefaultFootprint().getId());
+  }
+
+  public void setFootprintId(GridType gridType, GUID footprintId) {
+    sizeMap.put(getSizeMapKey(gridType), footprintId);
   }
 
   public Set<CellPoint> getOccupiedCells(Grid grid) {
@@ -1788,10 +1808,6 @@ public class Token implements Cloneable {
         .getFootprint(getFootprintId(gridType))
         .getOccupiedCells(
             grid.convert(new ZonePoint(getX(), getY())), gridType.getOffsetTranslator());
-  }
-
-  private Map<String, GUID> getSizeMap() {
-    return sizeMap;
   }
 
   public boolean isSnapToGrid() {
@@ -2756,9 +2772,9 @@ public class Token implements Cloneable {
         break;
       case setFootprint:
         setSnapToScale(true);
-        setFootprint(
-            Grid.fromDto(parameters.get(0).getGrid()),
-            TokenFootprint.fromDto(parameters.get(1).getTokenFootPrint()));
+        setFootprintId(
+            GridType.fromDto(parameters.get(0).getGridType()),
+            GUID.fromDto(parameters.get(1).getFootprintId()));
         break;
       case setProperty:
         setProperty(parameters.get(0).getStringValue(), parameters.get(1).getStringValue());

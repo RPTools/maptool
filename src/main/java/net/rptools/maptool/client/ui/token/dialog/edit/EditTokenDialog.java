@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -88,10 +89,6 @@ import org.fife.ui.rtextarea.SearchEngine;
 
 /** This dialog is used to display all the token states and notes to the user. */
 public class EditTokenDialog extends AbeillePanel<Token> {
-
-  /** The size used to constrain the icon. */
-  public static final int SIZE = 64;
-
   private static final Logger log = LogManager.getLogger();
   private static final long serialVersionUID = 1295729281890170792L;
   private static final ImageIcon REFRESH_ICON_ON =
@@ -209,7 +206,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
               }
               unbind();
             });
-    getTokenLayoutPanel().reset(token);
     getFlippedX()
         .addChangeListener(
             e ->
@@ -231,6 +227,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     getTokenTopologyPanel().reset(token);
     bind(token);
+    getTokenLayoutPanel().reset(token);
 
     getRootPane().setDefaultButton((JButton) dialogFactory.getDialog().getOKButton());
     setGmNotesEnabled(MapTool.getPlayer().isGM());
@@ -347,7 +344,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     /* OTHER */
     getShapeCombo().setSelectedItem(token.getShape());
-    setSizeCombo(token);
+    fillSizeCombo(token);
     getSnapToGrid().setSelected(token.isSnapToGrid());
     getFlippedIso().setSelected(token.getIsFlippedIso());
     getFlippedX().setSelected(token.isFlippedX());
@@ -666,25 +663,33 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     getImageTableCombo().setModel(model);
   }
 
-  public JComboBox getSizeCombo() {
-    return (JComboBox) getComponent("size");
+  private JComboBox<FootprintRecord> getSizeCombo() {
+    return (JComboBox<FootprintRecord>) getComponent("size");
   }
 
-  public void setSizeCombo(Token token) {
-    JComboBox size = getSizeCombo();
+  private void fillSizeCombo(Token token) {
     Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-    DefaultComboBoxModel model = new DefaultComboBoxModel(grid.getFootprints().toArray());
-    model.insertElementAt(
-        !token.getLayer().isStampLayer()
-            ? I18N.getString("token.popup.menu.size.native")
-            : I18N.getString("token.popup.menu.size.free"),
-        0);
-    size.setModel(model);
-    if (token.isSnapToScale()) {
-      size.setSelectedItem(token.getFootprint(grid));
-    } else {
-      size.setSelectedIndex(0);
+    GUID footprintId = token.getFootprintId(grid.getType());
+
+    int selectedIndex = 0;
+    var model = new DefaultComboBoxModel<FootprintRecord>();
+    model.addElement(
+        new FootprintRecord(
+            token.getLayer().isStampLayer()
+                ? I18N.getString("token.popup.menu.size.free")
+                : I18N.getString("token.popup.menu.size.native"),
+            null));
+    for (var footprint : grid.getFootprints()) {
+      model.addElement(new FootprintRecord(footprint.getLocalizedName(), footprint));
+
+      if (token.isSnapToScale() && footprint.getId().equals(footprintId)) {
+        selectedIndex = model.getSize() - 1;
+      }
     }
+
+    JComboBox<FootprintRecord> sizeCombo = getSizeCombo();
+    sizeCombo.setModel(model);
+    sizeCombo.setSelectedIndex(selectedIndex);
   }
 
   public JComboBox getPropertyTypeCombo() {
@@ -785,11 +790,17 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     token.setNotesType(getPlayerNotesEditor().getTextType());
 
     /* SIZE */
-    token.setSnapToScale(getSizeCombo().getSelectedIndex() != 0);
-    if (getSizeCombo().getSelectedIndex() > 0) {
-      Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-      token.setFootprint(grid, (TokenFootprint) getSizeCombo().getSelectedItem());
+    TokenFootprint footprint =
+        getSizeCombo().getItemAt(getSizeCombo().getSelectedIndex()).footprint();
+    if (footprint == null) {
+      token.setSnapToScale(false);
+    } else {
+      token.setSnapToScale(true);
+      token.setFootprintId(
+          MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid().getType(),
+          footprint.getId());
     }
+
     /* Other */
     token.setPropertyType((String) getPropertyTypeCombo().getSelectedItem());
     token.setSightType((String) getSightTypeCombo().getSelectedItem());
@@ -1743,6 +1754,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
           SearchEngine.find(textStatblockRSyntaxTextArea, context).wasFound();
         });
+  }
+
+  public record FootprintRecord(String displayName, @Nullable TokenFootprint footprint) {
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   private static class SpeechTableModel extends KeyValueTableModel {
