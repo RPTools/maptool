@@ -22,6 +22,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.ColorUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Scale;
@@ -111,7 +112,8 @@ public class GridRenderer {
   }
 
   public void renderCoordinates(Graphics2D g, PlayerView view) {
-    if (AppState.isShowCoordinates()) {
+    if (AppState.isShowCoordinates()
+        && renderer.getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().isGM())) {
       var grid = zone.getGrid();
       var bounds = new Rectangle(0, 0, renderer.getWidth(), renderer.getHeight());
       switch (grid) {

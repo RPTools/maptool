@@ -38,6 +38,9 @@ public class ZoneLoadedListener {
   @Subscribe
   public void OnChangedMap(ZoneLoaded event) {
     ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+    if (!currentZR.getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().isGM())) {
+      MapTool.getFrame().getCoordinateStatusBar().clear();
+    }
     try {
       var libs = new LibraryManager().getLegacyEventTargets(ON_CHANGE_MAP_CALLBACK).get();
       if (libs.isEmpty()) {

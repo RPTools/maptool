@@ -402,3 +402,8 @@ message PutLookupTableMsg {
 message DeleteLookupTableMsg {
   string tableName = 1;
 }
+
+message SetShowCoordinatesMsg {
+  string zone_guid = 1;
+  ZoneDto.ShowCoordinatesDto show_coordinates = 2;
+}

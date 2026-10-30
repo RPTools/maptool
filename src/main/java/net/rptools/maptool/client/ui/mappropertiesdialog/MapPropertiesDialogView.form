@@ -3,14 +3,14 @@
   <grid id="775b6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="813" height="422"/>
+      <xy x="10" y="10" width="1080" height="775"/>
     </constraints>
     <properties>
       <name value="root"/>
     </properties>
     <border type="none"/>
     <children>
-      <grid id="aa2a3" layout-manager="GridLayoutManager" row-count="10" column-count="6" same-size-horizontally="false" same-size-vertically="true" hgap="-1" vgap="-1">
+      <grid id="aa2a3" layout-manager="GridLayoutManager" row-count="11" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -343,7 +343,7 @@
           </component>
           <component id="52be" class="javax.swing.JLabel">
             <constraints>
-              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.label.landingMap"/>
@@ -352,11 +352,30 @@
           </component>
           <component id="f6573" class="javax.swing.JCheckBox" default-binding="true">
             <constraints>
-              <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <name value="isLandingMap"/>
               <text value=""/>
+            </properties>
+          </component>
+          <component id="f1620" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.label.showCoordinates"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.label.showCoordinates.tooltip"/>
+            </properties>
+          </component>
+          <component id="4dba4" class="javax.swing.JComboBox">
+            <constraints>
+              <grid row="9" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="comboBoxChanged"/>
+              <model/>
+              <name value="showCoordinatesComboBox"/>
             </properties>
           </component>
         </children>
