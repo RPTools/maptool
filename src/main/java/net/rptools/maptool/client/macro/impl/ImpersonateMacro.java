@@ -69,9 +69,6 @@ public class ImpersonateMacro implements Macro {
     // Impersonate
     if (index > 0) {
       // Enter impersonation context for the duration of the macro
-      // Not wrapped in try/finally, as before: MacroManager.executeMacro catches the exceptions a
-      // macro normally throws, so the leave is reached. Making it a finally block would be a
-      // separate behaviour change.
       identities.enterContextIdentity(new TokenIdentity(token, name));
       MacroManager.executeMacro(macro, executionContext);
       identities.leaveContextIdentity();

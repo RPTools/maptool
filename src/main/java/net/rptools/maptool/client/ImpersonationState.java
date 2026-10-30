@@ -215,8 +215,6 @@ public class ImpersonationState {
    * just as entering and leaving a context are not announced. The player's own choice is left alone
    * and comes back when the context ends.
    *
-   * <p>This logic used to be {@code CommandPanel.setIdentity}, which now forwards here.
-   *
    * @param identity the identity to change to.
    */
   public void setIdentity(TokenIdentity identity) {
@@ -233,9 +231,7 @@ public class ImpersonationState {
    *
    * <p>This empties the context stack outright. If it runs while a macro is inside {@code /im
    * token: macro}, that macro's later {@link #leaveContextIdentity()} finds the stack empty and
-   * throws. That has always been so; it is recorded here rather than changed.
-   *
-   * <p>This used to be {@code CommandPanel.clearAllIdentities}, which now forwards here.
+   * throws.
    */
   public void clearAllIdentities() {
     clearContextIdentities();
