@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.macro.impl;
 
+import net.rptools.maptool.client.ImpersonationState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.TokenIdentity;
@@ -22,7 +23,6 @@ import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.MapToolFrame;
-import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 
@@ -34,12 +34,13 @@ import net.rptools.maptool.model.Token;
 public class ImpersonateMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     final MapToolFrame frame = MapTool.getFrame(); // cached for quicker access
-    final CommandPanel cpanel = frame.getCommandPanel();
+    // Who the player is speaking as belongs to the client, not to the chat panel.
+    final ImpersonationState identities = MapTool.getClient().getImpersonation();
     if (macro != null) macro = macro.trim();
 
     // Clear current identity
     if (macro == null || macro.length() == 0) {
-      cpanel.setIdentity(new TokenIdentity());
+      identities.setIdentity(new TokenIdentity());
       return;
     }
     // Figure out what we want to impersonate
@@ -68,12 +69,12 @@ public class ImpersonateMacro implements Macro {
     // Impersonate
     if (index > 0) {
       // Enter impersonation context for the duration of the macro
-      cpanel.enterContextIdentity(new TokenIdentity(token, name));
+      identities.enterContextIdentity(new TokenIdentity(token, name));
       MacroManager.executeMacro(macro, executionContext);
-      cpanel.leaveContextIdentity();
+      identities.leaveContextIdentity();
     } else {
       // Set current identity
-      cpanel.setIdentity(new TokenIdentity(token, name, canLoadTokenMacros(token)));
+      identities.setIdentity(new TokenIdentity(token, name, canLoadTokenMacros(token)));
     }
   }
 
