@@ -357,6 +357,15 @@ public class AppPreferences {
           .setLabel("Preferences.label.maps.light")
           .setTooltip("Preferences.label.maps.light.tooltip");
 
+  public static final Preference<Zone.ShowCoordinates> defaultShowCoordinates =
+      store
+          .defineEnum(
+              Zone.ShowCoordinates.class,
+              "defaultShowCoordinates",
+              Zone.ShowCoordinates.SHOW_COORDS_TO_ALL)
+          .setLabel("Preferences.label.maps.showCoordinates")
+          .setTooltip("Preferences.label.maps.showCoordinates.tooltip");
+
   public static final Preference<MapSortType> mapSortType =
       store
           .defineEnum(MapSortType.class, "sortByGMName", MapSortType.GMNAME)

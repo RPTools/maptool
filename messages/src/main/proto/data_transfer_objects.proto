@@ -628,6 +628,11 @@ message ZoneDto {
     CELL_UNIT = 1;
     INTEGER = 2;
   }
+  enum ShowCoordinatesDto {
+    SHOW_COORDS_TO_ALL = 0;
+    SHOW_COORDS_TO_GM_ONLY = 1;
+    SHOW_COORDS_TO_NONE = 2;
+  }
   int64 creation_time = 1;
   string id = 2;
   GridDto grid = 3;
@@ -662,6 +667,7 @@ message ZoneDto {
   TokenSelectionDto token_selection = 36;
   int32 height = 37;
   int32 width = 38;
+  ShowCoordinatesDto show_coordinates = 40;
 }
 
 message InitiativeListDto {
