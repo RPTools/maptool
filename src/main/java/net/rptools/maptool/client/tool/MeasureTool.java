@@ -15,11 +15,7 @@
 package net.rptools.maptool.client.tool;
 
 import com.google.common.collect.Iterables;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -41,7 +37,6 @@ import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -101,30 +96,17 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     if (walker != null) {
       renderer.renderPath(g, walker.getPath(), renderer.getZone().getGrid().getDefaultFootprint());
-      ScreenPoint sp = walker.getLastPoint().convertToScreen(renderer);
 
       // distance label position to be below the last cell in the path and justified centrally
-      // so we must offset from each different grid types' representation of a cell point
-      Grid grid = renderer.getZone().getGrid();
-      double offsetX = 0;
-      double offsetY = 10;
-      if (grid.getType().equals(Grid.GridType.HexVertical)) {
-        // offset from middle center
-        offsetY += renderer.getScaledGridSize() / 2d;
-      } else if (grid.getType().equals(Grid.GridType.HexHorizontal)) {
-        // offset from middle center
-        offsetY += (renderer.getScaledGridSize() * grid.getSecondDimension() / grid.getSize()) / 2d;
-      } else if (grid.getType().isIsometric()) {
-        // offset from top center
-        offsetY += renderer.getScaledGridSize();
-      } else {
-        // offset from top left
-        offsetX += renderer.getScaledGridSize() / 2d;
-        offsetY += renderer.getScaledGridSize();
-      }
+      Rectangle lastCellPointBounds = renderer.getZone().getGrid().getBounds(walker.getLastPoint());
+      ZonePoint zp =
+          new ZonePoint(
+              (int) lastCellPointBounds.getCenterX(), (int) lastCellPointBounds.getMaxY());
+      ScreenPoint sp =
+          ScreenPoint.fromZonePointRnd(renderer.getViewModel().getZoneScale(), zp.x, zp.y);
 
       GraphicsUtil.drawBoxedString(
-          g, Double.toString(walker.getDistance()), (int) (sp.x + offsetX), (int) (sp.y + offsetY));
+          g, Double.toString(walker.getDistance()), (int) sp.x, (int) sp.y + 10);
     } else if (gridlessPath != null) {
       // distance
       double c = 0;
