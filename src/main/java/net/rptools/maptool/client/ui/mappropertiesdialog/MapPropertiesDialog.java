@@ -158,6 +158,7 @@ public class MapPropertiesDialog extends JDialog {
     initVisionTypeCombo();
     initLightingStyleCombo();
     initAStarRoundingOptionsComboBox();
+    initShowCoordinatesComboBox();
 
     initIsometricRadio();
     initHexHoriRadio();
@@ -279,6 +280,10 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getComboBox("aStarRoundingOptionsComboBox");
   }
 
+  public JComboBox getShowCoordinatesComboBox() {
+    return formPanel.getComboBox("showCoordinatesComboBox");
+  }
+
   public void setZone(Zone zone) {
     this.zone = zone;
     copyZoneToUI();
@@ -301,6 +306,7 @@ public class MapPropertiesDialog extends JDialog {
     getVisionTypeCombo().setSelectedItem(zone.getVisionType());
     getLightingStyleCombo().setSelectedItem(zone.getLightingStyle());
     getAStarRoundingOptionsComboBox().setSelectedItem(zone.getAStarRounding());
+    getShowCoordinatesComboBox().setSelectedItem(zone.getShowCoordinates());
     getIsLandingMapCheckBox().setSelected(zone.getId().equals(campaign.getLandingMapId()));
 
     gridOffsetX = zone.getGrid().getOffsetX();
@@ -325,6 +331,7 @@ public class MapPropertiesDialog extends JDialog {
     zone.setLightingStyle((Zone.LightingStyle) getLightingStyleCombo().getSelectedItem());
     zone.setAStarRounding(
         (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
+    zone.setShowCoordinates((Zone.ShowCoordinates) getShowCoordinatesComboBox().getSelectedItem());
 
     zone.setFogPaint(fogPaint);
     zone.setBackgroundPaint(backgroundPaint);
@@ -550,6 +557,15 @@ public class MapPropertiesDialog extends JDialog {
   private void initAStarRoundingOptionsComboBox() {
     getAStarRoundingOptionsComboBox()
         .setModel(new DefaultComboBoxModel<>(Zone.AStarRoundingOptions.values()));
+  }
+
+  private void initShowCoordinatesComboBox() {
+    DefaultComboBoxModel<Zone.ShowCoordinates> model = new DefaultComboBoxModel<>();
+    for (Zone.ShowCoordinates sc : Zone.ShowCoordinates.values()) {
+      model.addElement(sc);
+    }
+    model.setSelectedItem(AppPreferences.defaultShowCoordinates.get());
+    getShowCoordinatesComboBox().setModel(model);
   }
 
   private void initLightingStyleCombo() {

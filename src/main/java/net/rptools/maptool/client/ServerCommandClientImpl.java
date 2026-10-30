@@ -28,6 +28,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Zone.ShowCoordinates;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
@@ -123,6 +124,14 @@ public class ServerCommandClientImpl implements ServerCommand {
             .setZoneGuid(zoneGUID.toString())
             .setVision(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
     makeServerCall(Message.newBuilder().setSetVisionTypeMsg(msg).build());
+  }
+
+  public void setShowCoordinates(GUID zoneGUID, ShowCoordinates showCoordinates) {
+    var msg =
+        SetShowCoordinatesMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setShowCoordinates(ZoneDto.ShowCoordinatesDto.valueOf(showCoordinates.name()));
+    makeServerCall(Message.newBuilder().setSetShowCoordinatesMsg(msg).build());
   }
 
   public void updateCampaign(CampaignProperties properties) {

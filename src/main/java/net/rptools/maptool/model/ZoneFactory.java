@@ -83,6 +83,7 @@ public class ZoneFactory {
     zone.setUnitsPerCell(AppPreferences.defaultUnitsPerCell.get());
     zone.setTokenVisionDistance(AppPreferences.defaultVisionDistance.get());
     zone.setVisionType(AppPreferences.defaultVisionType.get());
+    zone.setShowCoordinates(AppPreferences.defaultShowCoordinates.get());
 
     zone.setGrid(
         GridFactory.createGrid(Grid.GridType.fromString(AppPreferences.defaultGridType.get())));

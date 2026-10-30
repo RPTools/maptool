@@ -275,6 +275,10 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getDeleteLookupTableMsg());
           sendToClients(id, msg);
         }
+        case SET_SHOW_COORDINATES_MSG -> {
+          handle(msg.getSetShowCoordinatesMsg());
+          sendToAllClients(msg);
+        }
         default -> log.warn(msgType + " not handled.");
       }
       log.debug("from " + id + " handled: " + msgType);
@@ -764,6 +768,19 @@ public class ServerMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           server.getCampaign().getLookupTableMap().remove(msg.getTableName());
+        });
+  }
+
+  private void handle(SetShowCoordinatesMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          Zone.ShowCoordinates showCoordinates =
+              Zone.ShowCoordinates.valueOf(msg.getShowCoordinates().name());
+          var zone = server.getCampaign().getZone(zoneGUID);
+          if (zone != null) {
+            zone.setShowCoordinates(showCoordinates);
+          }
         });
   }
 
