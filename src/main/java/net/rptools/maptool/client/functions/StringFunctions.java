@@ -30,7 +30,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
 public class StringFunctions extends AbstractFunction {
@@ -283,10 +282,7 @@ public class StringFunctions extends AbstractFunction {
       String str = parameters.get(0).toString().trim();
       // isParsable() returns false for leading + so stripping
       // off the first one. Any extras will return false.
-      if (str.length() > 1 && str.charAt(0) == '+') {
-        str = str.substring(1);
-      }
-      if (NumberUtils.isParsable(str)) {
+      if (isNumber(str)) {
         return BigDecimal.ONE;
       } else {
         return BigDecimal.ZERO;
@@ -404,6 +400,45 @@ public class StringFunctions extends AbstractFunction {
     }
     // should never happen
     throw new ParserException(functionName + "(): Unknown function.");
+  }
+
+  private boolean isNumber(@Nonnull String str) {
+    if (str.isEmpty()) {
+      return false;
+    }
+
+    if (str.charAt(str.length() - 1) == '.') {
+      // Number can't end with '.'
+      return false;
+    }
+
+    // Skip any leading sign.
+    var startIndex =
+        switch (str.charAt(0)) {
+          case '+', '-' -> 1;
+          default -> 0;
+        };
+
+    if (str.length() <= startIndex) {
+      // Empty after the sign. Not a number.
+      return false;
+    }
+
+    boolean decimalPointAlreadyFound = false;
+    for (var i = startIndex; i < str.length(); ++i) {
+      var charAt = str.charAt(i);
+
+      if (charAt == '.') {
+        if (decimalPointAlreadyFound) {
+          return false;
+        }
+        decimalPointAlreadyFound = true;
+      } else if (!Character.isDigit(charAt)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
