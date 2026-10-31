@@ -415,12 +415,7 @@ dependencies {
 
     implementation(libs.gson)
 
-    // region json-smart <2.5.2 is subject to DoS, but json-path has not updated yet. Force it to.
-    implementation(libs.jsonpath) {
-        exclude group: 'net.minidev', module: 'json-smart'
-    }
-    implementation("net.minidev:json-smart:2.5.2")
-    // endregion
+    implementation(libs.jsonpath)
 
     implementation(libs.jsoup)
     implementation(libs.jcabi.xml)
