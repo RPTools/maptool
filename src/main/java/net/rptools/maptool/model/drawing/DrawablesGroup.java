@@ -101,7 +101,7 @@ public class DrawablesGroup extends AbstractDrawing {
   @Override
   public DrawableDto toDto() {
     var dto = DrawablesGroupDto.newBuilder();
-    dto.setId(getId().toString()).setLayer(getLayer().name());
+    dto.setId(getId().toDto()).setLayer(getLayer().name());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
@@ -110,7 +110,7 @@ public class DrawablesGroup extends AbstractDrawing {
   }
 
   public static DrawablesGroup fromDto(DrawablesGroupDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var elements = new ArrayList<DrawnElement>();
     var elementDtos = dto.getDrawnElementsList();
     elementDtos.forEach(e -> elements.add(DrawnElement.fromDto(e)));

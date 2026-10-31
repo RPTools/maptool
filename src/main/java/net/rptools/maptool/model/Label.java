@@ -419,7 +419,7 @@ public class Label {
    */
   public static Label fromDto(LabelDto dto) {
     return new Label(
-        GUID.valueOf(dto.getId()),
+        GUID.fromDto(dto.getId()),
         dto.getLabel(),
         dto.getX(),
         dto.getY(),
@@ -441,7 +441,7 @@ public class Label {
    */
   public LabelDto toDto() {
     return LabelDto.newBuilder()
-        .setId(id.toString())
+        .setId(id.toDto())
         .setLabel(label)
         .setX(x)
         .setY(y)
