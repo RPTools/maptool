@@ -15,9 +15,11 @@
 package net.rptools.maptool.model;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.HexFormat;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import net.rptools.maptool.server.proto.GuidDto;
 import org.apache.commons.lang3.StringUtils;
 
 /** Global unique identificator object. */
@@ -36,6 +38,12 @@ public class GUID implements Serializable, Comparable<GUID> {
 
   // Cache of the hashCode for a GUID
   private transient int hash;
+
+  private GUID(long high, long low) {
+    baGUID = new byte[GUID_LENGTH];
+    var buffer = ByteBuffer.wrap(baGUID);
+    buffer.putLong(high).putLong(low);
+  }
 
   public GUID() {
     this.baGUID = generateGUID();
@@ -173,5 +181,16 @@ public class GUID implements Serializable, Comparable<GUID> {
       }
     }
     return 0;
+  }
+
+  public GuidDto toDto() {
+    var buffer = ByteBuffer.wrap(baGUID);
+    long high = buffer.getLong();
+    long low = buffer.getLong();
+    return GuidDto.newBuilder().setHigh(high).setLow(low).build();
+  }
+
+  public static GUID fromDto(GuidDto dto) {
+    return new GUID(dto.getHigh(), dto.getLow());
   }
 }
