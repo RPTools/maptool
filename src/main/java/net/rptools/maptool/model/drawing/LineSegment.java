@@ -153,7 +153,7 @@ public class LineSegment extends AbstractDrawing {
   @Override
   public DrawableDto toDto() {
     var dto = LineSegmentDrawableDto.newBuilder();
-    dto.setId(getId().toString())
+    dto.setId(getId().toDto())
         .setLayer(getLayer().name())
         .setWidth(getWidth())
         .setSquareCap(isSquareCap());
@@ -165,7 +165,7 @@ public class LineSegment extends AbstractDrawing {
   }
 
   public static LineSegment fromDto(LineSegmentDrawableDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new LineSegment(id, dto.getWidth(), dto.getSquareCap());
     var points = drawable.points;
     var pointDtos = dto.getPointsList();

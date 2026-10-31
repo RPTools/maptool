@@ -513,7 +513,7 @@ public final class WallTopology implements Topology {
     for (var vertex : this.verticesById.values()) {
       builder.addVertices(
           VertexDto.newBuilder()
-              .setId(vertex.id().toString())
+              .setId(vertex.id().toDto())
               .setPosition(
                   DoublePointDto.newBuilder()
                       .setX(vertex.position().getX())
@@ -528,7 +528,7 @@ public final class WallTopology implements Topology {
   public static WallTopology fromDto(WallTopologyDto dto) {
     var topology = new WallTopology();
     for (var vertexDto : dto.getVerticesList()) {
-      Vertex vertex = new Vertex(new GUID(vertexDto.getId()));
+      Vertex vertex = new Vertex(GUID.fromDto(vertexDto.getId()));
       try {
         topology.addVertexImpl(vertex);
       } catch (GraphException e) {
