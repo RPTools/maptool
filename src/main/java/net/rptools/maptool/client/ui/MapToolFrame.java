@@ -125,6 +125,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private static final int WINDOW_WIDTH = 800;
   private static final int WINDOW_HEIGHT = 600;
 
+  private static String getLocalizedAppName() {
+    return I18N.getString("ApplicationName");
+  }
+
   private final Map<MTFrame, DockableFrame> frameMap = new HashMap<MTFrame, DockableFrame>();
 
   /** Are the drawing measurements being painted? */
@@ -346,7 +350,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   public MapToolFrame(JMenuBar menuBar) {
     // Set up the frame
-    super(AppConstants.APP_LOCAL_NAME);
+    super(getLocalizedAppName());
 
     this.menuBar = menuBar;
 
@@ -1741,12 +1745,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     String versionString =
         MapTool.getVersion().equals("unspecified") ? "Development" : "v" + MapTool.getVersion();
     var title =
-        AppConstants.APP_LOCAL_NAME
-            + " "
-            + versionString
-            + " - "
-            + MapTool.getPlayer()
-            + campaignName;
+        getLocalizedAppName() + " " + versionString + " - " + MapTool.getPlayer() + campaignName;
 
     if (renderer != null) {
       title += "-" + renderer.getZone().toString();

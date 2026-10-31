@@ -58,10 +58,10 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
   private final Set<SwingJavaFXDialogEventHandler> eventHandlers = ConcurrentHashMap.newKeySet();
 
   /** The localised name for GMs. */
-  private final String GM_ROLE_NAME = I18N.getText("userTerm.GM");
+  private final String GM_ROLE_NAME = Role.GM.toString();
 
   /** The localised name for Players. */
-  private final String PLAYER_ROLE_NAME = I18N.getText("userTerm.Player");
+  private final String PLAYER_ROLE_NAME = Role.PLAYER.toString();
 
   /** The localised name for public key. */
   private final String AUTH_PUB_KEY_NAME = I18N.getText("playerDB.dialog.publicKey");

@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.preferencesdialog;
 
-import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -31,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -336,6 +336,10 @@ public class PreferencesDialog extends AbeillePanel {
   /** Text field for the default username when not logged into a server. */
   private final JTextField defaultUsername = getTextField("defaultUsername");
 
+  private final JComboBox<Locale> languageSelection = getComboBox("locale");
+
+  private @Nullable Locale originalLocale = null;
+
   /** Checkbox for if non-player characters should be hidden when creating a new map. */
   private final JCheckBox hideNPCs = getCheckBox("hideNPCs");
 
@@ -417,10 +421,6 @@ public class PreferencesDialog extends AbeillePanel {
 
   /** Checkbox for if the JVM should initialize AWT. */
   private final JCheckBox jvmInitAwtCheckbox = getCheckBox("jvmInitAwt");
-
-  /** Combo box for selecting the language override for JAM messages. */
-  private final JComboBox<String> jamLanguageOverrideComboBox =
-      getComboBox("jamLanguageOverrideComboBox");
 
   /** Label for displaying startup information. */
   private final JTextField cfgFilePath = getTextField("cfgFilePath");
@@ -647,6 +647,11 @@ public class PreferencesDialog extends AbeillePanel {
                     "PreferencesDialog.themeChangeWarning",
                     "PreferencesDialog.themeChangeWarningTitle",
                     JOptionPane.WARNING_MESSAGE);
+              } else if (originalLocale != AppPreferences.locale.get()) {
+                MapTool.showMessage(
+                    "PreferencesDialog.language.changeWarning",
+                    "PreferencesDialog.language.changeWarningTitle",
+                    JOptionPane.WARNING_MESSAGE);
               }
             })
         .setContent(this);
@@ -871,9 +876,39 @@ public class PreferencesDialog extends AbeillePanel {
       configFileWarningPanel.setVisible(false);
     }
 
-    DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
-    languageModel.addAll(getLanguages());
-    jamLanguageOverrideComboBox.setModel(languageModel);
+    {
+      var locales = new ArrayList<>(UserJvmOptions.getLocales());
+      locales.sort(Comparator.comparing(Locale::getDisplayName));
+      locales.addFirst(null);
+
+      DefaultComboBoxModel<Locale> localeModel = new DefaultComboBoxModel<>();
+      localeModel.addAll(locales);
+      languageSelection.setModel(localeModel);
+      languageSelection.setSelectedIndex(0);
+
+      languageSelection.setRenderer(
+          new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+              super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+              if (value == null) {
+                setText(I18N.getString("PreferencesDialog.language.systemDefault"));
+              }
+              if (value instanceof Locale locale) {
+                setText(locale.getDisplayName());
+              }
+              return this;
+            }
+          });
+
+      languageSelection.addItemListener(
+          e -> {
+            var index = languageSelection.getSelectedIndex();
+            var locale = index < 0 ? null : localeModel.getElementAt(index);
+            SwingUtilities.invokeLater(() -> AppPreferences.locale.set(locale));
+          });
+    }
 
     setInitialState();
 
@@ -1505,14 +1540,6 @@ public class PreferencesDialog extends AbeillePanel {
           jvmValuesChanged = true;
         });
 
-    jamLanguageOverrideComboBox.addItemListener(
-        e -> {
-          setJvmOption(
-              JVM_OPTION.LOCALE_LANGUAGE,
-              Objects.requireNonNull(jamLanguageOverrideComboBox.getSelectedItem()).toString());
-          jvmValuesChanged = true;
-        });
-
     chatNotificationShowBackground.addActionListener(
         e ->
             AppPreferences.chatNotificationBackground.set(
@@ -1671,6 +1698,7 @@ public class PreferencesDialog extends AbeillePanel {
     fillSelectionCheckBox.setSelected(AppPreferences.fillSelectionBox.get());
     frameRateCapTextField.setText(Integer.toString(AppPreferences.frameRateCap.get()));
     defaultUsername.setText(AppPreferences.defaultUserName.get());
+    languageSelection.setSelectedItem(originalLocale = AppPreferences.locale.get());
     autoSaveSpinner.setValue(AppPreferences.autoSaveIncrement.get());
     loadMRUcheckbox.setSelected(AppPreferences.loadMruCampaignAtStart.get());
     checkUpdatesCheckbox.setSelected(!AppPreferences.skipAutoUpdate.get());
@@ -1760,7 +1788,16 @@ public class PreferencesDialog extends AbeillePanel {
 
     // get JVM User Defaults/User override preferences
     if (!UserJvmOptions.loadAppCfg()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(I18N.getString("Label.startup")), false);
+      var startupTabTitle = I18N.getString("Label.startup");
+      var startupTabIndex = tabbedPane.indexOfTab(startupTabTitle);
+      if (startupTabIndex < 0) {
+        log.error(
+            "Unable to disable the startup tab: could not find a tab with the title {} (locale = {})",
+            startupTabTitle,
+            Locale.getDefault().getDisplayName());
+      } else {
+        tabbedPane.setEnabledAt(startupTabIndex, false);
+      }
     } else {
       try {
 
@@ -1773,9 +1810,6 @@ public class PreferencesDialog extends AbeillePanel {
         jvmOpenGLCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
         jvmInitAwtCheckbox.setSelected(
             UserJvmOptions.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
-
-        jamLanguageOverrideComboBox.setSelectedItem(
-            UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
       } catch (Exception e) {
         log.error("Unable to retrieve JVM user options!", e);
       }
