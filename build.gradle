@@ -390,7 +390,6 @@ dependencies {
     implementation(libs.bundles.imageio)
     implementation(libs.bundles.batik)
     implementation(libs.bundles.pdfbox)
-    implementation(libs.bcmail)
     implementation(libs.bundles.jai.imageio)
     implementation(libs.webp.imageio)
 
