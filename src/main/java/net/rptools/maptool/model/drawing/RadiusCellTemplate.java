@@ -278,7 +278,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
   @Override
   public DrawableDto toDto() {
     var dto = RadiusCellTemplateDto.newBuilder();
-    dto.setId(getId().toString())
+    dto.setId(getId().toDto())
         .setLayer(getLayer().name())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
@@ -289,7 +289,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
   }
 
   public static RadiusCellTemplate fromDto(RadiusCellTemplateDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new RadiusCellTemplate(id);
     drawable.setRadius(dto.getRadius());
     var vertex = dto.getVertex();

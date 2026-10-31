@@ -455,7 +455,7 @@ public class LineCellTemplate extends AbstractTemplate {
   @Override
   public DrawableDto toDto() {
     var dto = LineCellTemplateDto.newBuilder();
-    dto.setId(getId().toString())
+    dto.setId(getId().toDto())
         .setLayer(getLayer().name())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
@@ -472,7 +472,7 @@ public class LineCellTemplate extends AbstractTemplate {
   }
 
   public static LineCellTemplate fromDto(LineCellTemplateDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new LineCellTemplate(id);
     drawable.setRadius(dto.getRadius());
     var vertex = dto.getVertex();

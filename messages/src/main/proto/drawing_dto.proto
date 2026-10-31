@@ -6,6 +6,7 @@ option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto.drawing";
 option java_outer_classname = "DrawingDtoProtos";
 
+import "common.proto";
 import "google/protobuf/wrappers.proto";
 
 /*
@@ -45,7 +46,7 @@ message DrawableDto {
 }
 
 message WallTemplateDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   IntPointDto vertex = 4;
@@ -57,7 +58,7 @@ message WallTemplateDto {
 }
 
 message LineTemplateDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   IntPointDto vertex = 4;
@@ -69,7 +70,7 @@ message LineTemplateDto {
 }
 
 message BlastTemplateDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   IntPointDto vertex = 4;
@@ -80,7 +81,7 @@ message BlastTemplateDto {
 }
 
 message ConeTemplateDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   IntPointDto vertex = 4;
@@ -89,7 +90,7 @@ message ConeTemplateDto {
 }
 
 message BurstTemplateDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   IntPointDto vertex = 4;
@@ -97,7 +98,7 @@ message BurstTemplateDto {
 }
 
 message RadiusTemplateDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   IntPointDto vertex = 4;
@@ -105,7 +106,7 @@ message RadiusTemplateDto {
 }
 
 message LineCellTemplateDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   string zoneId = 4;
@@ -115,7 +116,7 @@ message LineCellTemplateDto {
 }
 
 message RadiusCellTemplateDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   IntPointDto vertex = 4;
@@ -123,14 +124,14 @@ message RadiusCellTemplateDto {
 }
 
 message DrawablesGroupDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   repeated DrawnElementDto drawn_elements = 4;
 }
 
 message LineSegmentDrawableDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   repeated IntPointDto points = 4;
@@ -139,7 +140,7 @@ message LineSegmentDrawableDto {
 }
 
 message DrawnLabelDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   RectangleDto bounds = 4;
@@ -148,7 +149,7 @@ message DrawnLabelDto {
 }
 
 message ShapeDrawableDto {
-  string id = 1;
+  GuidDto id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
   ShapeDto shape = 4;
