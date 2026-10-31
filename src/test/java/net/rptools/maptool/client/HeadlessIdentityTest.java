@@ -52,7 +52,7 @@ public class HeadlessIdentityTest {
 
   @Test
   void thereIsNoCurrentMapWithoutAWindow() {
-    assertNull(MapTool.getCurrentZone());
+    assertNull(MapTool.getClient().getCurrentZone());
   }
 
   @Test

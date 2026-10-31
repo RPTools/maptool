@@ -322,7 +322,7 @@ public class MacroManager {
           // getCurrentZone() rather than the frame, so that with no window at all (a server run
           // without a UI) this behaves as it does with no map open: the command has no token in
           // context.
-          Zone zone = MapTool.getCurrentZone();
+          Zone zone = MapTool.getClient().getCurrentZone();
           if (zone != null) {
             // The token a chat command runs against is whoever the player is speaking as, which
             // the client keeps. Property references, currentToken() and the like in the command

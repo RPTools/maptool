@@ -25,7 +25,7 @@ import net.rptools.maptool.model.Token;
  * not plain getters: they look the token up by its GUID each time, on the current map, so an
  * identity that resolved to a token when it was created can stop resolving later, or resolve
  * differently depending on which map is being viewed. With no map open, or no window at all (see
- * {@link MapTool#getCurrentZone()}), they find no token.
+ * {@link MapToolClient#getCurrentZone()}), they find no token.
  *
  * <p>This was previously nested inside {@code CommandPanel}. It moved out alongside {@link
  * ImpersonationState}, so that code needing to know who is speaking does not depend on a Swing

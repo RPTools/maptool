@@ -55,7 +55,7 @@ public class ImpersonateMacro implements Macro {
     // With no map to look on -- no map open, or no window at all, as on a server run without a
     // UI -- there is no token, and the name is impersonated on its own, as it is for a name that
     // no token has.
-    Zone zone = MapTool.getCurrentZone();
+    Zone zone = MapTool.getClient().getCurrentZone();
     Token token = zone == null ? null : zone.resolveToken(name);
     if (token != null) {
       name = token.getName();

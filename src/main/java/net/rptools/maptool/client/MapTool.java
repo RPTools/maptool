@@ -1287,34 +1287,6 @@ public class MapTool {
     return clientFrame;
   }
 
-  /**
-   * The map this client is currently showing, for code that needs the map but not the window.
-   *
-   * <p>Most code reaches the current map as {@code
-   * MapTool.getFrame().getCurrentZoneRenderer().getZone()}. That fails with a {@code
-   * NullPointerException} wherever there is no window -- on a server run without a UI, or in unit
-   * tests -- and also in a normal client when no map is open. This returns {@code null} in all of
-   * those cases instead, so a caller can treat them all as "no map is open", which most callers
-   * already handle.
-   *
-   * <p>A process with no window has no notion of a current map at all, so this is always {@code
-   * null} there. If one is added later -- for example, a map chosen for macros run on a server --
-   * this is the place it would be returned from.
-   *
-   * <p>Like the frame itself, this is meant to be called from the thread that runs macros and
-   * updates the UI.
-   *
-   * @return the zone of the map this client is showing, or {@code null} if there is no window or no
-   *     map is open.
-   */
-  public static @Nullable Zone getCurrentZone() {
-    if (clientFrame == null) {
-      return null;
-    }
-    ZoneRenderer renderer = clientFrame.getCurrentZoneRenderer();
-    return renderer == null ? null : renderer.getZone();
-  }
-
   private static void configureLaf() {
     final var defaults = UIManager.getDefaults();
 

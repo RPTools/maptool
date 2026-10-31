@@ -143,7 +143,7 @@ public class MessageUtil {
       if (token == null && MapTool.getClient().getImpersonation().isImpersonating()) {
         GUID guid = MapTool.getClient().getImpersonation().getIdentityGUID();
         // With no map open there is no token to take the avatar from.
-        Zone zone = MapTool.getCurrentZone();
+        Zone zone = MapTool.getClient().getCurrentZone();
         if (zone == null) token = null;
         else if (guid != null) token = zone.getToken(guid);
         else token = zone.getTokenByName(identity);
