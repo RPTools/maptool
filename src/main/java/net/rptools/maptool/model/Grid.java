@@ -46,48 +46,6 @@ import org.apache.logging.log4j.Logger;
  * @author trevor
  */
 public abstract class Grid implements Cloneable {
-  public enum GridType {
-    Square,
-    Isometric,
-    HexVertical,
-    HexHorizontal,
-    None;
-
-    public boolean isHex() {
-      return this == HexVertical || this == HexHorizontal;
-    }
-
-    public boolean isIsometric() {
-      return this == Isometric;
-    }
-
-    public boolean isNone() {
-      return this == None;
-    }
-
-    public String toString() {
-      return switch (this) {
-        case Square -> "Square";
-        case Isometric -> "Isometric";
-        case HexVertical -> "Vertical Hex";
-        case HexHorizontal -> "Horizontal Hex";
-        case None -> "None";
-      };
-    }
-
-    public static GridType fromString(String string) {
-      return switch (string) {
-        case "Square" -> Square;
-        case "Isometric" -> Isometric;
-        case "Vertical Hex" -> HexVertical;
-        case "Horizontal Hex" -> HexHorizontal;
-        case "None" -> None;
-        default ->
-            throw new IllegalArgumentException(
-                String.format("\"%s\" is not a valid grid type", string));
-      };
-    }
-  }
 
   /**
    * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm

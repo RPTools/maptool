@@ -55,7 +55,7 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Grid.GridType;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.UserJvmOptions;

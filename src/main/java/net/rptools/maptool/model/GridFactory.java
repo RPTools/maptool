@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import net.rptools.maptool.model.Grid.GridType;
-
 /** Creates {@link Grid} instances from a given {@link GridType}. */
 public class GridFactory {
   public static Grid createGrid(GridType type) {

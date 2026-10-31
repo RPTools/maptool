@@ -163,7 +163,7 @@ public class GridRenderer {
   }
 
   private void draw(Graphics2D g, HexGrid grid, Color[] gridColours, Rectangle bounds) {
-    var isHorizontal = grid.getType() == Grid.GridType.HexHorizontal;
+    var isHorizontal = grid.getType() == GridType.HexHorizontal;
     var zoneScale = renderer.getViewModel().getZoneScale();
     var scale = zoneScale.getScale();
     var scaledMinorRadius = grid.getMinorRadius() * scale;

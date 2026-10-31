@@ -44,7 +44,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.ShapeType;
@@ -183,7 +183,7 @@ public class DungeonDraftImporter {
         MapPropertiesDialog.createMapPropertiesImportDialog(MapTool.getFrame());
     dialog.setZone(zone);
     dialog.forcePixelsPerCell(pixelsPerCell);
-    dialog.forceGridType(Grid.GridType.Square);
+    dialog.forceGridType(GridType.Square);
     dialog.forceMap(asset);
     dialog.setVisible(true);
     if (dialog.getStatus() != MapPropertiesDialog.Status.OK) {
