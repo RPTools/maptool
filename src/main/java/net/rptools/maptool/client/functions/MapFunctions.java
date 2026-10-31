@@ -47,7 +47,7 @@ public class MapFunctions extends AbstractFunction {
         0,
         2,
         "getCurrentMapID",
-        "getCursorMapPosition",
+        "getStatusBarMapCoordinates",
         "getAllMapIDs",
         "getMapIDs",
         "getAllMapNames",
@@ -85,13 +85,13 @@ public class MapFunctions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.map.none", functionName));
       }
       return currentZR.getZone().getId().toString();
-    } else if (functionName.equalsIgnoreCase("getCursorMapPosition")) {
+    } else if (functionName.equalsIgnoreCase("getStatusBarMapCoordinates")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       var statusBar = MapTool.getFrame().getCoordinateStatusBar();
       if (!statusBar.hasCoordinates()) {
         throw new ParserException(
                 //I18N.getText("macro.function.general.argumentTypeInvalid", functionName));
-                "getCursorMapPosition(): No cursor coordinates are available. "
+                "getStatusBarMapCoordinates(): No cursor coordinates are available. "
               + "Move the mouse over the map and try again.");
       }
       return "{\"x\":" + statusBar.getMapX()
