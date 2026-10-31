@@ -183,7 +183,7 @@ public interface Library {
   /**
    * Returns a list of the "files" within the library.
    *
-   * @return a list of the "files" within the library.
+   * @return a list of the "files" within the library, in the same order every time.
    */
   CompletableFuture<List<String>> getAllFiles();
 
