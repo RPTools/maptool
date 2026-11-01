@@ -332,9 +332,11 @@ public class MacroManager {
             // exactly like the player becomes the token in context. Frameworks may rely on this,
             // so it is deliberate.
             final ImpersonationState identity = MapTool.getClient().getImpersonation();
-            if (identity.getIdentityGUID() != null)
+            if (identity.getIdentityGUID() != null) {
               tokenInContext = zone.getToken(identity.getIdentityGUID());
-            else tokenInContext = zone.resolveToken(identity.getIdentity());
+            } else {
+              tokenInContext = zone.resolveToken(identity.getIdentity());
+            }
           }
           details = MapTool.getParser().parseLine(tokenInContext, details, macroExecutionContext);
           trustedPath = MapTool.getParser().isMacroPathTrusted();
