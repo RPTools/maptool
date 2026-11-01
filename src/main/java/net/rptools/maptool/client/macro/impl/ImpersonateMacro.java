@@ -22,9 +22,9 @@ import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.client.macro.MacroManager;
-import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 
 @MacroDefinition(
     name = "impersonate",
@@ -33,7 +33,6 @@ import net.rptools.maptool.model.Token;
     expandRolls = false)
 public class ImpersonateMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-    final MapToolFrame frame = MapTool.getFrame(); // cached for quicker access
     // Who the player is speaking as belongs to the client, not to the chat panel.
     final ImpersonationState identities = MapTool.getClient().getImpersonation();
     if (macro != null) macro = macro.trim();
@@ -53,7 +52,11 @@ public class ImpersonateMacro implements Macro {
       name = macro.substring(0, index).trim();
       macro = macro.substring(index + 1);
     }
-    Token token = frame.getCurrentZoneRenderer().getZone().resolveToken(name);
+    // With no map to look on -- no map open, or no window at all, as on a server run without a
+    // UI -- there is no token, and the name is impersonated on its own, as it is for a name that
+    // no token has.
+    Zone zone = MapTool.getClient().getCurrentZone();
+    Token token = zone == null ? null : zone.resolveToken(name);
     if (token != null) {
       name = token.getName();
     }
