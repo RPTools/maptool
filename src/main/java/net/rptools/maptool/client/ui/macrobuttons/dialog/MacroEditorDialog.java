@@ -59,6 +59,7 @@ import org.fife.rsta.ui.search.SearchEvent;
 import org.fife.rsta.ui.search.SearchListener;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DescWindowVisibility;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -491,7 +492,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
     ac.setAutoCompleteEnabled(true);
     ac.setAutoActivationEnabled(true);
     ac.setAutoActivationDelay(500);
-    ac.setShowDescWindow(true);
+    ac.setDescWindowVisibility(DescWindowVisibility.ALWAYS);
     ac.setAutoCompleteSingleChoices(false);
     ac.install(macroEditorRSyntaxTextArea);
 
