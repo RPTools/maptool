@@ -149,6 +149,9 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
   }
 
   public BarTokenOverlayDto toDto() {
-    return getDto().setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.DRAWN).build();
+    return getDto()
+        .setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.DRAWN)
+        .setIncrements(getIncrements())
+        .build();
   }
 }
