@@ -39,6 +39,20 @@ import org.apache.logging.log4j.Logger;
  */
 public class UPnPUtil {
   private static final Logger log = LogManager.getLogger(UPnPUtil.class);
+
+  /**
+   * How long to wait after searching one interface before searching the next.
+   *
+   * <p>upnplib's DiscoveryListener runs one listening thread at a time, signalled to stop by a
+   * shared flag and holding its socket in a shared field. Its socket times out every 250 ms, and
+   * only then does the thread notice it should stop. A search started before that replaces the
+   * shared socket and sets the flag again, so the old thread carries on, and when one of the
+   * threads finally exits it closes the socket the other is still reading. That thread then fails
+   * on every read with no pause and logs each failure, hundreds of thousands of times in a few
+   * seconds. Waiting longer than one timeout between searches lets each thread exit cleanly first.
+   */
+  private static final long LISTENER_STOP_WAIT_MS = 500;
+
   private static Map<InternetGatewayDevice, NetworkInterface> igds;
   private static List<InternetGatewayDevice> mappings;
 
@@ -65,6 +79,13 @@ public class UPnPUtil {
           } else if (!ni.isUp()) {
             log.info(
                 "UPnP:  Rejecting interface '{}' [{}] as it is not up",
+                ni.getDisplayName(),
+                addresses);
+          } else if (addresses.stream().noneMatch(a -> a instanceof Inet4Address)) {
+            // upnplib only sends its search from IPv4 addresses, so it would send nothing here and
+            // still wait out the whole discovery timeout.
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it has no IPv4 address",
                 ni.getDisplayName(),
                 addresses);
           } else {
@@ -100,6 +121,8 @@ public class UPnPUtil {
             } catch (IOException ex) {
               // some IO Exception occurred during communication with device
               log.warn("While searching for internet gateway devices", ex);
+            } finally {
+              waitForListenerToStop();
             }
             log.info("Found {} IGDs on interface {}", found, ni.getDisplayName());
           }
@@ -112,6 +135,14 @@ public class UPnPUtil {
     }
     mappings = new ArrayList<InternetGatewayDevice>(igds.size());
     return !igds.isEmpty();
+  }
+
+  private static void waitForListenerToStop() {
+    try {
+      Thread.sleep(LISTENER_STOP_WAIT_MS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   public static boolean openPort(int port) {
