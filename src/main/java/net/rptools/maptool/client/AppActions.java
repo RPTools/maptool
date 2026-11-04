@@ -2427,7 +2427,7 @@ public class AppActions {
         MapTool.getAutoSaveManager().tidy();
 
         // UI related stuff
-        MapTool.getFrame().getCommandPanel().clearAllIdentities();
+        MapTool.getClient().getImpersonation().clearAllIdentities();
         MapTool.getFrame().resetPanels();
         MapTool.getFrame().getLookupTablePanel().updateView();
 

@@ -18,15 +18,14 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.lib.StringUtil;
+import net.rptools.maptool.client.ImpersonationState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.macro.impl.*;
-import net.rptools.maptool.client.ui.MapToolFrame;
-import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -320,13 +319,24 @@ public class MacroManager {
         // Preprocess line if required.
         if (def == null || def.expandRolls()) {
           Token tokenInContext = null;
-          ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-          if (zr != null) {
-            final MapToolFrame frame = MapTool.getFrame();
-            final CommandPanel cpanel = frame.getCommandPanel();
-            if (cpanel.getIdentityGUID() != null)
-              tokenInContext = zr.getZone().getToken(cpanel.getIdentityGUID());
-            else tokenInContext = zr.getZone().resolveToken(cpanel.getIdentity());
+          // getCurrentZone() rather than the frame, so that with no window at all (a server run
+          // without a UI) this behaves as it does with no map open: the command has no token in
+          // context.
+          Zone zone = MapTool.getClient().getCurrentZone();
+          if (zone != null) {
+            // The token a chat command runs against is whoever the player is speaking as, which
+            // the client keeps. Property references, currentToken() and the like in the command
+            // all resolve against this token.
+            //
+            // When nothing is impersonated, getIdentity() is the player's name, so a token named
+            // exactly like the player becomes the token in context. Frameworks may rely on this,
+            // so it is deliberate.
+            final ImpersonationState identity = MapTool.getClient().getImpersonation();
+            if (identity.getIdentityGUID() != null) {
+              tokenInContext = zone.getToken(identity.getIdentityGUID());
+            } else {
+              tokenInContext = zone.resolveToken(identity.getIdentity());
+            }
           }
           details = MapTool.getParser().parseLine(tokenInContext, details, macroExecutionContext);
           trustedPath = MapTool.getParser().isMacroPathTrusted();
