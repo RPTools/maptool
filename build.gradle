@@ -392,7 +392,6 @@ dependencies {
     implementation(libs.bundles.pdfbox)
     implementation(libs.bcmail)
     implementation(libs.bundles.jai.imageio)
-    implementation(libs.webp.imageio)
 
     implementation(libs.bundles.jide) // Currently hosted on nerps.net/repo
     implementation(libs.fifesoft.rsyntaxtexxtarea)
