@@ -113,7 +113,7 @@ public class GridRenderer {
 
   public void renderCoordinates(Graphics2D g, PlayerView view) {
     if (AppState.isShowCoordinates()
-        && renderer.getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().isGM())) {
+        && renderer.getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().getRole())) {
       var grid = zone.getGrid();
       var bounds = new Rectangle(0, 0, renderer.getWidth(), renderer.getHeight());
       switch (grid) {

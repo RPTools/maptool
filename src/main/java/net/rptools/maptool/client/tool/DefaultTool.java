@@ -230,7 +230,7 @@ public abstract class DefaultTool extends Tool
             .convert(
                 new ScreenPoint(mouseX, mouseY)
                     .convertToZone(renderer.getViewModel().getZoneScale()));
-    if (cp != null && getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().isGM())) {
+    if (cp != null && getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().getRole())) {
       MapTool.getFrame().getCoordinateStatusBar().update(cp.x, cp.y);
     } else {
       MapTool.getFrame().getCoordinateStatusBar().clear();
@@ -243,7 +243,7 @@ public abstract class DefaultTool extends Tool
     int mY = e.getY();
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mX, mY));
     if (cellUnderMouse != null
-        && getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().isGM())) {
+        && getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().getRole())) {
       MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
     } else {
       MapTool.getFrame().getCoordinateStatusBar().clear();

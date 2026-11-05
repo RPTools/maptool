@@ -1132,7 +1132,7 @@ public class ClientMessageHandler implements MessageHandler {
             zone.setShowCoordinates(showCoordinates);
             // clear the coordinates from the status bar if need be
             if (MapTool.getFrame().getCurrentZoneRenderer().getZone().equals(zone)
-                && !showCoordinates.shouldShow(MapTool.getPlayer().isGM())) {
+                && !showCoordinates.shouldShow(MapTool.getPlayer().getRole())) {
               MapTool.getFrame().getCoordinateStatusBar().clear();
             }
             MapTool.getFrame().refresh();

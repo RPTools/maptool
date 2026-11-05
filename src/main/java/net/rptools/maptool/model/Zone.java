@@ -345,30 +345,25 @@ public class Zone {
      * Get the enum value from the option.
      *
      * @param option the option
-     * @return the enum value
+     * @return an Optional containing the enum value if found, or empty
      */
-    public static ShowCoordinates fromOption(String option) {
-      for (ShowCoordinates value : values()) {
-        if (value.option.equalsIgnoreCase(option)) {
-          return value;
-        }
-      }
-      throw new IllegalArgumentException(
-          I18N.getText(
-              "Zone.ShowCoordinates.invalidOption", option, String.join(", ", validOptions())));
+    public static Optional<ShowCoordinates> fromOption(String option) {
+      return Arrays.stream(values())
+          .filter(value -> value.option.equalsIgnoreCase(option))
+          .findFirst();
     }
 
     /**
      * Evaluation of whether map coordinates should be shown or not based on the enum and {@link
-     * Player#isGM}.
+     * Player.Role}.
      *
-     * @param isGM player is a GM boolean
+     * @param role the player role
      * @return true (i.e. show) / false (i.e. do not show)
      */
-    public boolean shouldShow(boolean isGM) {
+    public boolean shouldShow(Player.Role role) {
       return switch (this) {
         case SHOW_COORDS_TO_ALL -> true;
-        case SHOW_COORDS_TO_GM_ONLY -> isGM;
+        case SHOW_COORDS_TO_GM_ONLY -> Player.Role.GM == role;
         case SHOW_COORDS_TO_NONE -> false;
       };
     }

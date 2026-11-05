@@ -225,9 +225,16 @@ public class MapFunctions extends AbstractFunction {
         newMap.setAStarRounding(aiRounding);
       }
       if (config.has("show coordinates")) {
+        String optionText = config.getAsJsonPrimitive("show coordinates").getAsString();
         newMap.setShowCoordinates(
-            Zone.ShowCoordinates.fromOption(
-                config.getAsJsonPrimitive("show coordinates").getAsString()));
+            Zone.ShowCoordinates.fromOption(optionText)
+                .orElseThrow(
+                    () ->
+                        new ParserException(
+                            I18N.getText(
+                                "Zone.ShowCoordinates.invalidOption",
+                                optionText,
+                                String.join(", ", Zone.ShowCoordinates.validOptions())))));
       }
       {
         final var gridConfig =
@@ -427,8 +434,16 @@ public class MapFunctions extends AbstractFunction {
     } else if ("setMapShowCoordinates".equalsIgnoreCase(functionName)) {
       FunctionUtil.blockUntrustedMacro(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      String optionText = parameters.getFirst().toString();
       Zone.ShowCoordinates showCoordinates =
-          Zone.ShowCoordinates.fromOption(parameters.getFirst().toString());
+          Zone.ShowCoordinates.fromOption(optionText)
+              .orElseThrow(
+                  () ->
+                      new ParserException(
+                          I18N.getText(
+                              "Zone.ShowCoordinates.invalidOption",
+                              optionText,
+                              String.join(", ", Zone.ShowCoordinates.validOptions()))));
       ZoneRenderer zr = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 1);
       Zone zone = zr.getZone();
       if (zone == null) {

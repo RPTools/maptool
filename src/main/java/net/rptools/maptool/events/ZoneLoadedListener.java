@@ -38,7 +38,7 @@ public class ZoneLoadedListener {
   @Subscribe
   public void OnChangedMap(ZoneLoaded event) {
     ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
-    if (!currentZR.getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().isGM())) {
+    if (!currentZR.getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().getRole())) {
       MapTool.getFrame().getCoordinateStatusBar().clear();
     }
     try {
