@@ -109,21 +109,29 @@ public final class SquareGrid extends Grid {
             new GUID("7F000101D065152A060000002A000100"),
             "Large",
             I18N.getString("TokenFootprint.name.large"),
+            false,
+            1.0,
             squareFootprintPoints(2)),
         new TokenFootprint(
             new GUID("7F000101D065152A070000002A000100"),
             "Huge",
             I18N.getString("TokenFootprint.name.huge"),
+            false,
+            1.0,
             squareFootprintPoints(3)),
         new TokenFootprint(
             new GUID("7F000101D165152A080000002A000101"),
             "Gargantuan",
             I18N.getString("TokenFootprint.name.gargantuan"),
+            false,
+            1.0,
             squareFootprintPoints(4)),
         new TokenFootprint(
             new GUID("7F000101E165152A090000002A000101"),
             "Colossal",
             I18N.getString("TokenFootprint.name.colossal"),
+            false,
+            1.0,
             squareFootprintPoints(6)));
   }
 

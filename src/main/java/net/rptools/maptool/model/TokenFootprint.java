@@ -18,7 +18,10 @@ import static net.rptools.lib.MathUtil.isEven;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TokenFootPrintDto;
@@ -29,25 +32,30 @@ import net.rptools.maptool.server.proto.TokenFootPrintDto;
  * occupied cell is at 0, 0
  */
 public class TokenFootprint {
-  private final Set<Point> cellSet = new HashSet<Point>();
-
-  private String name;
-  private GUID id;
-  private boolean isDefault;
-  private double scale;
-
-  /**
-   * @deprecated That was used when footprints were defined by XML. Now the constructor should be
-   *     provided translated names when needed.
-   */
-  @Deprecated private boolean localizeName = false;
-
-  private transient String localizedName;
+  private final GUID id;
+  private final String name;
+  private final double scale;
+  private final String localizedName;
+  private final boolean isDefault;
+  private final Set<Point> cellSet = new HashSet<>();
 
   public TokenFootprint() {
     this(new GUID(), "", "", false, 1.0);
   }
 
+  /**
+   * Create a footprint with a list of constituent points, relative to {@code (0, 0)}.
+   *
+   * <p>The point {@code (0, 0)} is implicitly included.
+   *
+   * @param id The unique ID of the footprint.
+   * @param name The unique name of the footprint.
+   * @param localizedName A human-readable, translated name for displaying the footprint.
+   * @param isDefault Whether this footprint is the default one to use for the grid type.
+   * @param scale For footprints less than one grid cell, how much to scale the footprint relative
+   *     to the cell size.
+   * @param points The non-zero points making up the footprint.
+   */
   public TokenFootprint(
       GUID id,
       String name,
@@ -57,18 +65,10 @@ public class TokenFootprint {
       Point... points) {
     this.id = id;
     this.name = name;
-    this.localizedName = localizedName;
-    this.isDefault = isDefault;
+    this.localizedName = Objects.requireNonNullElse(localizedName, name);
     this.scale = scale;
+    this.isDefault = isDefault;
     this.cellSet.addAll(Arrays.asList(points));
-  }
-
-  public TokenFootprint(GUID id, String name, boolean isDefault, double scale, Point... points) {
-    this(id, name, name, isDefault, scale, points);
-  }
-
-  public TokenFootprint(GUID id, String name, String localizedName, Point... points) {
-    this(id, name, localizedName, false, 1, points);
   }
 
   public static TokenFootprint fromDto(TokenFootPrintDto dto) {
@@ -97,7 +97,7 @@ public class TokenFootprint {
   }
 
   public Set<CellPoint> getOccupiedCells(CellPoint centerPoint, OffsetTranslator offsetTranslator) {
-    Set<CellPoint> occupiedSet = new HashSet<>();
+    var occupiedSet = new HashSet<CellPoint>();
 
     // Implied
     occupiedSet.add(centerPoint);
@@ -109,10 +109,6 @@ public class TokenFootprint {
       occupiedSet.add(cp);
     }
     return occupiedSet;
-  }
-
-  public void setDefault(boolean isDefault) {
-    this.isDefault = isDefault;
   }
 
   public boolean isDefault() {
@@ -137,6 +133,11 @@ public class TokenFootprint {
     return getBounds(grid, null);
   }
 
+  /**
+   * A scale factor to convert {@link #getBounds(Grid, CellPoint)} to actual footprint bounds.
+   *
+   * @return The footprint's scale factor.
+   */
   public double getScale() {
     return scale;
   }
@@ -162,15 +163,16 @@ public class TokenFootprint {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof TokenFootprint)) {
+    if (!(obj instanceof TokenFootprint other)) {
       return false;
     }
-    return ((TokenFootprint) obj).id.equals(id);
+
+    return name.equals(other.name) && scale == other.scale && cellSet.equals(other.cellSet);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name);
+    return Objects.hash(name, scale, cellSet);
   }
 
   public interface OffsetTranslator {
