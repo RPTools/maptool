@@ -668,8 +668,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   private void fillSizeCombo(Token token) {
-    Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-    GUID footprintId = token.getFootprintId(grid.getType());
+    GridType gridType = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid().getType();
+    GUID footprintId = token.getFootprintId(gridType);
 
     int selectedIndex = 0;
     var model = new DefaultComboBoxModel<FootprintRecord>();
@@ -679,9 +679,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 ? I18N.getString("token.popup.menu.size.free")
                 : I18N.getString("token.popup.menu.size.native"),
             null));
-    for (var footprint : grid.getFootprints()) {
-      model.addElement(new FootprintRecord(footprint.getLocalizedName(), footprint));
 
+    for (var footprint : gridType.getFootprints()) {
+      model.addElement(new FootprintRecord(footprint.getLocalizedName(), footprint));
       if (token.isSnapToScale() && footprint.getId().equals(footprintId)) {
         selectedIndex = model.getSize() - 1;
       }

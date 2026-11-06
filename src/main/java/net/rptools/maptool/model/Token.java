@@ -1785,7 +1785,7 @@ public class Token implements Cloneable {
    * @return Returns the size.
    */
   public TokenFootprint getFootprint(Grid grid) {
-    return grid.getFootprint(getFootprintId(grid.getType()));
+    return grid.getType().getFootprint(getFootprintId(grid.getType()));
   }
 
   /**

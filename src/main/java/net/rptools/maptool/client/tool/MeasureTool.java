@@ -95,7 +95,8 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     if (walker != null) {
-      renderer.renderPath(g, walker.getPath(), renderer.getZone().getGrid().getDefaultFootprint());
+      renderer.renderPath(
+          g, walker.getPath(), renderer.getZone().getGrid().getType().getDefaultFootprint());
 
       // distance label position to be below the last cell in the path and justified centrally
       Rectangle lastCellPointBounds = renderer.getZone().getGrid().getBounds(walker.getLastPoint());

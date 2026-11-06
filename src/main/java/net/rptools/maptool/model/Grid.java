@@ -20,7 +20,6 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -65,7 +64,6 @@ public abstract class Grid implements Cloneable {
   protected transient Map<KeyStroke, Action> movementKeys = null;
   private transient Zone zone;
   private transient Area cellShape;
-  private transient List<TokenFootprint> footprintList;
   private int offsetX = 0;
   private int offsetY = 0;
   private int size;
@@ -169,37 +167,6 @@ public abstract class Grid implements Cloneable {
    * @return Point of the coordinates.
    */
   public abstract Point2D.Double getCellCenter(CellPoint cell);
-
-  protected abstract List<TokenFootprint> createFootprints();
-
-  public TokenFootprint getDefaultFootprint() {
-    for (TokenFootprint footprint : getFootprints()) {
-      if (footprint.isDefault()) {
-        return footprint;
-      }
-    }
-    // None specified, use the first
-    return getFootprints().get(0);
-  }
-
-  public TokenFootprint getFootprint(GUID guid) {
-    if (guid == null) {
-      return getDefaultFootprint();
-    }
-    for (TokenFootprint footprint : getFootprints()) {
-      if (footprint.getId().equals(guid)) {
-        return footprint;
-      }
-    }
-    return getDefaultFootprint();
-  }
-
-  public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      footprintList = createFootprints();
-    }
-    return footprintList;
-  }
 
   public boolean useMetric() {
     return false; // only square & iso use metrics
@@ -450,7 +417,7 @@ public abstract class Grid implements Cloneable {
       }
       case BEAM -> {
         // Make at least 1 pixel on each side, so it's at least visible at 100% zoom.
-        var pixelWidth = Math.max(2, width * getSize() / zone.getUnitsPerCell());
+        var pixelWidth = Math.max(2, width * getSize() / getZone().getUnitsPerCell());
         Shape lineShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
 
         visibleArea =
@@ -520,7 +487,9 @@ public abstract class Grid implements Cloneable {
       int offsetAngle,
       boolean scaleWithToken) {
     double visionRange =
-        ((range == 0) ? zone.getTokenVisionDistance() : range) * getSize() / zone.getUnitsPerCell();
+        ((range == 0) ? getZone().getTokenVisionDistance() : range)
+            * getSize()
+            / getZone().getUnitsPerCell();
 
     Rectangle footprint = token.getFootprint(this).getBounds(this);
 
@@ -597,7 +566,7 @@ public abstract class Grid implements Cloneable {
 
   private void fireGridChanged() {
     getGridShapeCache().clear();
-    new MapToolEventBus().getMainEventBus().post(new GridChanged(this.zone));
+    new MapToolEventBus().getMainEventBus().post(new GridChanged(getZone()));
   }
 
   /**
@@ -829,7 +798,7 @@ public abstract class Grid implements Cloneable {
 
     if (range > 0) {
       final Stopwatch stopwatch = Stopwatch.createStarted();
-      final int gridRadius = (int) (range / zone.getUnitsPerCell());
+      final int gridRadius = (int) (range / getZone().getUnitsPerCell());
 
       if (scaleWithToken) {
         visibleArea = getScaledGridArea(token, gridRadius);

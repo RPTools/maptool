@@ -15,7 +15,6 @@
 package net.rptools.maptool.model;
 
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
@@ -23,7 +22,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
@@ -33,7 +31,6 @@ import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarVertHexEuclideanWalker;
-import net.rptools.maptool.language.I18N;
 
 /*
  * @formatter:off
@@ -53,66 +50,6 @@ public final class HexGridVertical extends HexGrid {
   @Override
   public GridType getType() {
     return GridType.HexVertical;
-  }
-
-  @Override
-  protected List<TokenFootprint> createFootprints() {
-    return List.of(
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560100000040A8090C"), "1/6", "1/6", false, .408),
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560200000040A8090C"), "1/4", "1/4", false, .500),
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560300000040A8090C"), "1/3", "1/3", false, .577),
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560400000040A8090C"), "1/2", "1/2", false, .707),
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560500000040A8090C"), "2/3", "2/3", false, .816),
-        new TokenFootprint(
-            new GUID("7F00010109655C380100000038000101"),
-            "Medium",
-            I18N.getString("TokenFootprint.name.medium"),
-            true,
-            1.0),
-        new TokenFootprint(
-            new GUID("7F00010109655C380200000038000101"),
-            "Large",
-            I18N.getString("TokenFootprint.name.large"),
-            false,
-            1.0,
-            new Point(0, 1),
-            new Point(1, 0)),
-        new TokenFootprint(
-            new GUID("7F00010109655C380300000038000101"),
-            "Huge",
-            I18N.getString("TokenFootprint.name.huge"),
-            false,
-            1.0,
-            new Point(-1, -1),
-            new Point(-1, 0),
-            new Point(0, -1),
-            new Point(0, 1),
-            new Point(1, -1),
-            new Point(1, 0)),
-        new TokenFootprint(
-            new GUID("C0A80F464BAAC1B10900000080800A42"),
-            "Humongous",
-            I18N.getString("TokenFootprint.name.humongous"),
-            false,
-            1.0,
-            new Point(-2, -1),
-            new Point(-2, 0),
-            new Point(-2, 1),
-            new Point(-1, -2),
-            new Point(-1, -1),
-            new Point(-1, 0),
-            new Point(-1, 1),
-            new Point(0, -2),
-            new Point(0, -1),
-            new Point(0, 1),
-            new Point(0, 2),
-            new Point(1, -2),
-            new Point(1, -1),
-            new Point(1, 0),
-            new Point(1, 1),
-            new Point(2, -1),
-            new Point(2, 0),
-            new Point(2, 1)));
   }
 
   @Override

@@ -423,10 +423,12 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
     sizeMenu.addSeparator();
 
-    Grid grid = renderer.getZone().getGrid();
-    for (TokenFootprint footprint : grid.getFootprints()) {
+    GridType gridType = renderer.getZone().getGrid().getType();
+    GUID selectedFootprintId =
+        tokenUnderMouse.isSnapToScale() ? tokenUnderMouse.getFootprintId(gridType) : null;
+    for (TokenFootprint footprint : gridType.getFootprints()) {
       JMenuItem menuItem = new JCheckBoxMenuItem(new ChangeSizeAction(footprint));
-      if (tokenUnderMouse.isSnapToScale() && tokenUnderMouse.getFootprint(grid) == footprint) {
+      if (footprint.getId().equals(selectedFootprintId)) {
         menuItem.setSelected(true);
       }
       sizeMenu.add(menuItem);
@@ -565,9 +567,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token == null) {
           continue;
         }
-        token.setFootprintId(
-            renderer.getZone().getGrid().getType(),
-            renderer.getZone().getGrid().getDefaultFootprint().getId());
+        GridType gridType = renderer.getZone().getGrid().getType();
+        token.setFootprintId(gridType, gridType.getDefaultFootprint().getId());
         token.setSnapToScale(true);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }

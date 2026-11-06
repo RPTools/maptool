@@ -37,7 +37,6 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
@@ -1017,15 +1016,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @return the size of the token.
    */
   private String getSize(Zone zone, Token token) {
-    Grid grid = zone.getGrid();
-    if (token.isSnapToScale()) {
-      for (TokenFootprint footprint : grid.getFootprints()) {
-        if (token.getFootprint(grid) == footprint) {
-          return footprint.getName();
-        }
-      }
-    }
-    return "";
+    GridType gridType = zone.getGrid().getType();
+    return token.isSnapToScale()
+        ? ""
+        : gridType.getFootprint(token.getFootprintId(gridType)).getName();
   }
 
   /**
@@ -1043,10 +1037,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
       return "";
     }
 
-    Grid grid = zone.getGrid();
-    for (TokenFootprint footprint : grid.getFootprints()) {
+    GridType gridType = zone.getGrid().getType();
+    for (TokenFootprint footprint : gridType.getFootprints()) {
       if (footprint.getName().equalsIgnoreCase(size)) {
-        MapTool.serverCommand().setTokenFootprint(zone, token, grid.getType(), footprint.getId());
+        MapTool.serverCommand().setTokenFootprint(zone, token, gridType, footprint.getId());
         return footprint.getName();
       }
     }
@@ -1061,9 +1055,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @param token The token to reset the size of.
    */
   private void resetSize(Zone zone, Token token) {
-    Grid grid = zone.getGrid();
-    GUID footprintId = grid.getDefaultFootprint().getId();
-    MapTool.serverCommand().setTokenFootprint(zone, token, grid.getType(), footprintId);
+    GridType gridType = zone.getGrid().getType();
+    GUID footprintId = gridType.getDefaultFootprint().getId();
+    MapTool.serverCommand().setTokenFootprint(zone, token, gridType, footprintId);
   }
 
   /**

@@ -19,7 +19,6 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.swing.Action;
@@ -32,7 +31,6 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.IsometricGridDto;
 
@@ -43,85 +41,6 @@ public final class IsometricGrid extends Grid {
   @Override
   public GridType getType() {
     return GridType.Isometric;
-  }
-
-  @Override
-  protected List<TokenFootprint> createFootprints() {
-    return List.of(
-        new TokenFootprint(
-            new GUID("7F000101CD65152A010000002A000101"),
-            "Fine",
-            I18N.getString("TokenFootprint.name.fine"),
-            false,
-            0.5),
-        new TokenFootprint(
-            new GUID("7F000101CD65152A020000002A000101"),
-            "Diminutive",
-            I18N.getString("TokenFootprint.name.diminutive"),
-            false,
-            0.5),
-        new TokenFootprint(
-            new GUID("7F000101CE65152A030000002A000100"),
-            "Tiny",
-            I18N.getString("TokenFootprint.name.tiny"),
-            false,
-            0.5),
-        new TokenFootprint(
-            new GUID("7F000101CE65152A040000002A000100"),
-            "Small",
-            I18N.getString("TokenFootprint.name.small"),
-            false,
-            0.75),
-        new TokenFootprint(
-            new GUID("7F000101CF65152A050000002A000101"),
-            "Medium",
-            I18N.getString("TokenFootprint.name.medium"),
-            true,
-            1.0),
-        new TokenFootprint(
-            new GUID("7F000101D065152A060000002A000100"),
-            "Large",
-            I18N.getString("TokenFootprint.name.large"),
-            true,
-            1.0,
-            squareFootprintPoints(2)),
-        new TokenFootprint(
-            new GUID("7F000101D065152A070000002A000100"),
-            "Huge",
-            I18N.getString("TokenFootprint.name.huge"),
-            true,
-            1.0,
-            squareFootprintPoints(3)),
-        new TokenFootprint(
-            new GUID("7F000101D165152A080000002A000101"),
-            "Gargantuan",
-            I18N.getString("TokenFootprint.name.gargantuan"),
-            true,
-            1.0,
-            squareFootprintPoints(4)),
-        new TokenFootprint(
-            new GUID("7F000101E165152A090000002A000101"),
-            "Colossal",
-            I18N.getString("TokenFootprint.name.colossal"),
-            true,
-            1.0,
-            squareFootprintPoints(6)));
-  }
-
-  private static Point[] squareFootprintPoints(int size) {
-    Point[] pa = new Point[size * size - 1];
-
-    int indx = 0;
-    for (int y = 0; y < size; y++) {
-      for (int x = 0; x < size; x++) {
-        if (y == 0 && x == 0) {
-          continue;
-        }
-        pa[indx] = new Point(x, y);
-        indx++;
-      }
-    }
-    return pa;
   }
 
   /**

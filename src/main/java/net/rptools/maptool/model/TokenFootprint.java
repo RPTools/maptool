@@ -33,11 +33,10 @@ public class TokenFootprint {
   private final String name;
   private final double scale;
   private final String localizedName;
-  private final boolean isDefault;
   private final Set<Point> cellSet = new HashSet<>();
 
   public TokenFootprint() {
-    this(new GUID(), "", "", false, 1.0);
+    this(new GUID(), "", "", 1.0);
   }
 
   /**
@@ -48,23 +47,15 @@ public class TokenFootprint {
    * @param id The unique ID of the footprint.
    * @param name The unique name of the footprint.
    * @param localizedName A human-readable, translated name for displaying the footprint.
-   * @param isDefault Whether this footprint is the default one to use for the grid type.
    * @param scale For footprints less than one grid cell, how much to scale the footprint relative
    *     to the cell size.
    * @param points The non-zero points making up the footprint.
    */
-  public TokenFootprint(
-      GUID id,
-      String name,
-      String localizedName,
-      boolean isDefault,
-      double scale,
-      Point... points) {
+  public TokenFootprint(GUID id, String name, String localizedName, double scale, Point... points) {
     this.id = id;
     this.name = name;
     this.localizedName = Objects.requireNonNullElse(localizedName, name);
     this.scale = scale;
-    this.isDefault = isDefault;
     this.cellSet.addAll(Arrays.asList(points));
   }
 
@@ -86,10 +77,6 @@ public class TokenFootprint {
       occupiedSet.add(cp);
     }
     return occupiedSet;
-  }
-
-  public boolean isDefault() {
-    return isDefault;
   }
 
   public GUID getId() {
