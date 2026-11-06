@@ -47,7 +47,6 @@ public class MapFunctions extends AbstractFunction {
         0,
         2,
         "getCurrentMapID",
-        "getStatusBarMapCoordinates",
         "getAllMapIDs",
         "getMapIDs",
         "getAllMapNames",
@@ -67,7 +66,8 @@ public class MapFunctions extends AbstractFunction {
         "getMapName",
         "setMapSelectButton",
         "getMapVision",
-        "setMapVision");
+        "setMapVision",
+        "getStatusBarMapCoordinates");
   }
 
   public static MapFunctions getInstance() {

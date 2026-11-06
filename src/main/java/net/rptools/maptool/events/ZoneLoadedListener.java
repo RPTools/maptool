@@ -38,6 +38,8 @@ public class ZoneLoadedListener {
   @Subscribe
   public void OnChangedMap(ZoneLoaded event) {
     ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+    // Clears the CoordinateStatusBar coordinates when changing maps.
+    MapTool.getFrame().getCoordinateStatusBar().clear();
     try {
       var libs = new LibraryManager().getLegacyEventTargets(ON_CHANGE_MAP_CALLBACK).get();
       if (libs.isEmpty()) {
