@@ -855,7 +855,7 @@ class TokenLayoutPanelHelper {
     }
 
     private Shape createGridShape(boolean trueSize) {
-      return Grid.createGridShape(grid.getType(), (trueSize ? grid.getSize() : grid.getSize() - 8));
+      return grid.getType().createGridShape(trueSize ? grid.getSize() : grid.getSize() - 8);
     }
 
     /** Itty bitty cross to show the dead-centre of the footprint */

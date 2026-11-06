@@ -80,56 +80,6 @@ public abstract class Grid implements Cloneable {
     setOffset(grid.offsetX, grid.offsetY);
   }
 
-  public static Shape createGridShape(GridType gridType, double size) {
-    final Shape gridShape;
-    int sides = 0;
-    double startAngle = 0;
-    double increment;
-    double skew = 0;
-    double hScale = 1;
-    double vScale = 1;
-    final double root2 = Math.sqrt(2d);
-    final double root3 = Math.sqrt(3d);
-    switch (gridType) {
-      case HexHorizontal -> {
-        sides = 6;
-        startAngle = Math.TAU / 12;
-        hScale = vScale = root3 / 3d;
-      }
-      case HexVertical -> {
-        sides = 6;
-        hScale = vScale = root3 / 3d;
-      }
-      case Isometric -> {
-        sides = 4;
-        vScale = 0.5;
-      }
-      case None -> {
-        return new Ellipse2D.Double(-size / 2d, -size / 2d, size, size);
-      }
-      case Square -> {
-        sides = 4;
-        hScale = vScale = root2 / 2d;
-        startAngle = Math.TAU / 8d;
-      }
-    }
-    increment = Math.TAU / sides;
-    Path2D path = new Path2D.Double();
-    path.moveTo(Math.cos(startAngle) * size * hScale, Math.sin(startAngle) * size * vScale);
-    for (int i = 1; i < sides; i++) {
-      path.lineTo(
-          Math.cos(startAngle + i * increment) * size * hScale,
-          Math.sin(startAngle + i * increment) * size * vScale);
-    }
-    path.closePath();
-    if (skew != 0) {
-      gridShape = AffineTransform.getShearInstance(skew, 0).createTransformedShape(path);
-    } else {
-      gridShape = path;
-    }
-    return gridShape;
-  }
-
   protected Object readResolve() {
     cellShape = createCellShape();
     return this;
