@@ -2218,7 +2218,7 @@ public class Zone {
   public static Zone fromDto(ZoneDto dto) {
     var zone = new Zone();
     zone.creationTime = dto.getCreationTime();
-    zone.id = GUID.valueOf(dto.getId());
+    zone.id = GUID.fromDto(dto.getId());
     zone.grid = Grid.fromDto(dto.getGrid());
     zone.grid.setZone(zone);
     zone.gridColor = dto.getGridColor();
@@ -2284,7 +2284,7 @@ public class Zone {
       dto.setPlayerAlias(StringValue.of(playerAlias));
     }
     dto.setCreationTime(creationTime);
-    dto.setId(id.toString());
+    dto.setId(id.toDto());
     dto.setGrid(grid.toDto());
     dto.setGridColor(gridColor);
     dto.setImageScaleX(imageScaleX);
