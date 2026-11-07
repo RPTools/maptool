@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import javax.annotation.Nullable;
+import net.rptools.maptool.language.I18N;
 
 /**
  * This class represents the set of cells a token occupies based on its size. Each token is assumed
@@ -32,11 +34,11 @@ public class TokenFootprint {
   private final GUID id;
   private final String name;
   private final double scale;
-  private final String localizedName;
+  private final @Nullable String localizedNameKey;
   private final Set<Point> cellSet = new HashSet<>();
 
   public TokenFootprint() {
-    this(new GUID(), "", "", 1.0);
+    this(new GUID(), "", null, 1.0);
   }
 
   /**
@@ -46,15 +48,16 @@ public class TokenFootprint {
    *
    * @param id The unique ID of the footprint.
    * @param name The unique name of the footprint.
-   * @param localizedName A human-readable, translated name for displaying the footprint.
+   * @param localizedNameKey An i18n key pointing to a human-readable name for the footprint.
    * @param scale For footprints less than one grid cell, how much to scale the footprint relative
    *     to the cell size.
    * @param points The non-zero points making up the footprint.
    */
-  public TokenFootprint(GUID id, String name, String localizedName, double scale, Point... points) {
+  public TokenFootprint(
+      GUID id, String name, @Nullable String localizedNameKey, double scale, Point... points) {
     this.id = id;
     this.name = name;
-    this.localizedName = Objects.requireNonNullElse(localizedName, name);
+    this.localizedNameKey = localizedNameKey;
     this.scale = scale;
     this.cellSet.addAll(Arrays.asList(points));
   }
@@ -90,7 +93,7 @@ public class TokenFootprint {
 
   /** Returns the localized name of the footprint */
   public String getLocalizedName() {
-    return localizedName;
+    return localizedNameKey == null ? name : I18N.getString(localizedNameKey);
   }
 
   public Rectangle getBounds(Grid grid) {
@@ -131,12 +134,15 @@ public class TokenFootprint {
       return false;
     }
 
-    return name.equals(other.name) && scale == other.scale && cellSet.equals(other.cellSet);
+    return name.equals(other.name)
+        && Objects.equals(localizedNameKey, other.localizedNameKey)
+        && scale == other.scale
+        && cellSet.equals(other.cellSet);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, scale, cellSet);
+    return Objects.hash(name, localizedNameKey, scale, cellSet);
   }
 
   public interface OffsetTranslator {
