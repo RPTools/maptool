@@ -52,6 +52,7 @@ imageio-tiff = { group = "com.twelvemonkeys.imageio", name = "imageio-tiff", ver
 imageio-batik = { group = "com.twelvemonkeys.imageio", name = "imageio-batik", version.ref = "imageio" }
 imageio-tga = { group = "com.twelvemonkeys.imageio", name = "imageio-tga", version.ref = "imageio" }
 imageio-bmp = { group = "com.twelvemonkeys.imageio", name = "imageio-bmp", version.ref = "imageio" }
+imageio-webp = { group = "com.twelvemonkeys.imageio", name = "imageio-webp", version.ref = "imageio" }
 
 batik-all = { group = "org.apache.xmlgraphics", name = "batik-all", version = "1.19" }
 batik-awt = { group = "org.apache.xmlgraphics", name="batik-awt-util", version = "1.19" }
@@ -65,8 +66,6 @@ bcmail = { group = "org.bouncycastle", name = "bcmail-jdk18on", version = "1.81"
 # For pdf image extraction, specifically for jpeg2000 (jpx) support.
 jai-imageio-core = { group = "com.github.jai-imageio", name = "jai-imageio-core", version.ref = "jai-imageio" }
 jai-imageio-jpeg = { group = "com.github.jai-imageio", name = "jai-imageio-jpeg2000", version.ref = "jai-imageio" }
-# WebP support
-webp-imageio = { group = "com.github.gotson", name = "webp-imageio", version = "0.2.2" }
 
 # JIDE UI libraries. Currently hosted on nerps.net/repo
 jide-common = { group = "com.jidesoft", name = "jide-common", version.ref = "jide" }
@@ -185,6 +184,7 @@ imageio = [
   "imageio-batik",
   "imageio-tga",
   "imageio-bmp",
+  "imageio-webp",
 ]
 batik = ["batik-all", "batik-awt", "batik-transcoder"]
 pdfbox = ["pdfbox", "pdfbox-tools"]
