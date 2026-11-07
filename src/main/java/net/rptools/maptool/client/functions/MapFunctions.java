@@ -232,7 +232,9 @@ public class MapFunctions extends AbstractFunction {
                     () ->
                         new ParserException(
                             I18N.getText(
-                                "Zone.ShowCoordinates.invalidOption",
+                                "macro.function.general.argumentTypeInvalidOption",
+                                functionName,
+                                "2 (\"show coordinates\")",
                                 optionText,
                                 String.join(", ", Zone.ShowCoordinates.validOptions())))));
       }
@@ -441,7 +443,9 @@ public class MapFunctions extends AbstractFunction {
                   () ->
                       new ParserException(
                           I18N.getText(
-                              "Zone.ShowCoordinates.invalidOption",
+                              "macro.function.general.argumentTypeInvalidOption",
+                              functionName,
+                              "1",
                               optionText,
                               String.join(", ", Zone.ShowCoordinates.validOptions()))));
       ZoneRenderer zr = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 1);
@@ -449,6 +453,11 @@ public class MapFunctions extends AbstractFunction {
       if (zone == null) {
         throw new ParserException(I18N.getText("macro.function.map.none", functionName));
       }
+      // update this client immediately
+      zone.setShowCoordinates(showCoordinates);
+      MapTool.getFrame().getCoordinateStatusBar().reset();
+      MapTool.getFrame().refresh();
+      // send up to other clients
       MapTool.serverCommand().setShowCoordinates(zone.getId(), showCoordinates);
       return "";
     } else if ("getMapShowCoordinates".equalsIgnoreCase(functionName)) {

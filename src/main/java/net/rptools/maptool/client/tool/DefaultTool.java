@@ -230,11 +230,7 @@ public abstract class DefaultTool extends Tool
             .convert(
                 new ScreenPoint(mouseX, mouseY)
                     .convertToZone(renderer.getViewModel().getZoneScale()));
-    if (cp != null && getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().getRole())) {
-      MapTool.getFrame().getCoordinateStatusBar().update(cp.x, cp.y);
-    } else {
-      MapTool.getFrame().getCoordinateStatusBar().clear();
-    }
+    MapTool.getFrame().getCoordinateStatusBar().update(cp);
   }
 
   @Override
@@ -242,12 +238,8 @@ public abstract class DefaultTool extends Tool
     int mX = e.getX();
     int mY = e.getY();
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mX, mY));
-    if (cellUnderMouse != null
-        && getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().getRole())) {
-      MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
-    } else {
-      MapTool.getFrame().getCoordinateStatusBar().clear();
-    }
+    MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse);
+
     // MAP MOVEMENT
     // Sometimes the mousePressed() event can come after the first mouseDragged() event when the
     // right button is pressed. So check that we are actually intending to drag the map.

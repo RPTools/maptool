@@ -277,7 +277,7 @@ public class ServerMessageHandler implements MessageHandler {
         }
         case SET_SHOW_COORDINATES_MSG -> {
           handle(msg.getSetShowCoordinatesMsg());
-          sendToAllClients(msg);
+          sendToClients(id, msg);
         }
         default -> log.warn(msgType + " not handled.");
       }

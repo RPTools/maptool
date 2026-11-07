@@ -1130,11 +1130,7 @@ public class ClientMessageHandler implements MessageHandler {
           var zone = client.getCampaign().getZone(zoneGUID);
           if (zone != null) {
             zone.setShowCoordinates(showCoordinates);
-            // clear the coordinates from the status bar if need be
-            if (MapTool.getFrame().getCurrentZoneRenderer().getZone().equals(zone)
-                && !showCoordinates.shouldShow(MapTool.getPlayer().getRole())) {
-              MapTool.getFrame().getCoordinateStatusBar().clear();
-            }
+            MapTool.getFrame().getCoordinateStatusBar().reset();
             MapTool.getFrame().refresh();
           }
         });

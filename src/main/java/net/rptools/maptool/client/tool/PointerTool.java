@@ -704,12 +704,7 @@ public class PointerTool extends DefaultTool {
     }
 
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mouseX, mouseY));
-    if (cellUnderMouse != null
-        && getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().getRole())) {
-      MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
-    } else {
-      MapTool.getFrame().getCoordinateStatusBar().clear();
-    }
+    MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse);
 
     if (SwingUtilities.isLeftMouseButton(e) && !SwingUtilities.isRightMouseButton(e)) {
       if (isDrawingSelectionBox) {
