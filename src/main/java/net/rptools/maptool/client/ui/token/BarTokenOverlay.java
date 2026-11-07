@@ -196,6 +196,7 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
           case UNRECOGNIZED -> null;
         };
     if (bar != null) {
+      bar.setIncrements(dto.getIncrements());
       switch (dto.getSide()) {
         case TOP -> bar.setSide(Side.TOP);
         case LEFT -> bar.setSide(Side.LEFT);
