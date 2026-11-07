@@ -359,6 +359,7 @@ public class ServerHandshake implements Handshake<Player>, MessageHandler {
 
     if (!MapTool.isDevelopment() && !MapTool.getVersion().equals(clientInitMsg.getVersion())) {
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.WRONG_VERSION);
+      return;
     }
 
     playerPublicKeyMD5 = new MD5Key(clientInitMsg.getPublicKeyMd5());
