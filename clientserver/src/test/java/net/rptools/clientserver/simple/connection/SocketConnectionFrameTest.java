@@ -16,6 +16,7 @@ package net.rptools.clientserver.simple.connection;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -105,6 +106,19 @@ class SocketConnectionFrameTest {
     assertEquals(ActivityListener.State.Start, states.get(0));
     assertTrue(states.contains(ActivityListener.State.Progress));
     assertEquals(ActivityListener.State.Complete, states.get(states.size() - 1));
+  }
+
+  @Test
+  void anOrdinaryDisconnectIsNotTreatedAsAnError() {
+    assertTrue(SocketConnection.isRoutineDisconnect(new IOException("Stream closed")));
+    assertTrue(
+        SocketConnection.isRoutineDisconnect(new java.net.SocketException("Connection reset")));
+    assertFalse(
+        SocketConnection.isRoutineDisconnect(
+            new EOFException("Stream closed after 4 of 100 bytes")));
+    assertFalse(
+        SocketConnection.isRoutineDisconnect(
+            new IOException("Message length -1 is outside 0..2147483647")));
   }
 
   @Test
