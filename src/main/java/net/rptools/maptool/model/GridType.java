@@ -17,13 +17,24 @@ package net.rptools.maptool.model;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
+import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
 public enum GridType {
-  Square,
-  Isometric,
-  HexVertical,
-  HexHorizontal,
-  None;
+  Square(OffsetTranslator.IDENTITY),
+  Isometric(OffsetTranslator.IDENTITY),
+  HexVertical(OffsetTranslator.HEX_VERTICAL),
+  HexHorizontal(OffsetTranslator.HEX_HORIZONTAL),
+  None(OffsetTranslator.IDENTITY);
+
+  private final OffsetTranslator offsetTranslator;
+
+  GridType(OffsetTranslator offsetTranslator) {
+    this.offsetTranslator = offsetTranslator;
+  }
+
+  public OffsetTranslator getOffsetTranslator() {
+    return offsetTranslator;
+  }
 
   public boolean isHex() {
     return this == HexVertical || this == HexHorizontal;

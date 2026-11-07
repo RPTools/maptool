@@ -486,7 +486,9 @@ class TokenLayoutPanelHelper {
     setCentredFootprintBounds();
 
     Set<CellPoint> occupiedCells =
-        footprint == null ? Collections.emptySet() : footprint.getOccupiedCells(ORIGIN);
+        footprint == null
+            ? Collections.emptySet()
+            : footprint.getOccupiedCells(ORIGIN, grid.getType().getOffsetTranslator());
     Rectangle2D aggregateBounds = new Rectangle2D.Double();
     cellCentres = new ArrayList<>(occupiedCells.size());
     for (CellPoint cp : occupiedCells) {

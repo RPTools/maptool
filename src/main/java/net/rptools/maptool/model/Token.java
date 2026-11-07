@@ -1783,7 +1783,11 @@ public class Token implements Cloneable {
   }
 
   public Set<CellPoint> getOccupiedCells(Grid grid) {
-    return getFootprint(grid).getOccupiedCells(grid.convert(new ZonePoint(getX(), getY())));
+    var gridType = grid.getType();
+    return gridType
+        .getFootprint(getFootprintId(gridType))
+        .getOccupiedCells(
+            grid.convert(new ZonePoint(getX(), getY())), gridType.getOffsetTranslator());
   }
 
   private Map<String, GUID> getSizeMap() {

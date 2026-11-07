@@ -33,7 +33,6 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
-import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.zones.GridChanged;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -171,10 +170,6 @@ public abstract class Grid implements Cloneable {
    */
   public abstract Point2D.Double getCellCenter(CellPoint cell);
 
-  protected OffsetTranslator getOffsetTranslator() {
-    return null;
-  }
-
   protected abstract List<TokenFootprint> createFootprints();
 
   public TokenFootprint getDefaultFootprint() {
@@ -202,13 +197,6 @@ public abstract class Grid implements Cloneable {
   public List<TokenFootprint> getFootprints() {
     if (footprintList == null) {
       footprintList = createFootprints();
-
-      OffsetTranslator offsetTranslator = getOffsetTranslator();
-      if (offsetTranslator != null) {
-        for (var footprint : footprintList) {
-          footprint.addOffsetTranslator(offsetTranslator);
-        }
-      }
     }
     return footprintList;
   }

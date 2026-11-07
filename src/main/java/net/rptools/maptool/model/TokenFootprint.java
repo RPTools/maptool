@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model;
 
+import static net.rptools.lib.MathUtil.isEven;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
@@ -41,8 +43,6 @@ public class TokenFootprint {
   @Deprecated private boolean localizeName = false;
 
   private transient String localizedName;
-
-  private transient List<OffsetTranslator> translatorList = new LinkedList<OffsetTranslator>();
 
   public TokenFootprint() {
     this(new GUID(), "", "", false, 1.0);
@@ -96,12 +96,8 @@ public class TokenFootprint {
     return getLocalizedName();
   }
 
-  public void addOffsetTranslator(OffsetTranslator translator) {
-    translatorList.add(translator);
-  }
-
-  public Set<CellPoint> getOccupiedCells(CellPoint centerPoint) {
-    Set<CellPoint> occupiedSet = new HashSet<CellPoint>();
+  public Set<CellPoint> getOccupiedCells(CellPoint centerPoint, OffsetTranslator offsetTranslator) {
+    Set<CellPoint> occupiedSet = new HashSet<>();
 
     // Implied
     occupiedSet.add(centerPoint);
@@ -109,9 +105,7 @@ public class TokenFootprint {
     // Relative
     for (Point offset : cellSet) {
       CellPoint cp = new CellPoint(centerPoint.x + offset.x, centerPoint.y + offset.y);
-      for (OffsetTranslator translator : translatorList) {
-        translator.translate(centerPoint, cp);
-      }
+      cp = offsetTranslator.translate(centerPoint, cp);
       occupiedSet.add(cp);
     }
     return occupiedSet;
@@ -159,7 +153,7 @@ public class TokenFootprint {
     cell = cell != null ? cell : new CellPoint(0, 0);
     Rectangle bounds = new Rectangle(grid.getBounds(cell));
 
-    for (CellPoint cp : getOccupiedCells(cell)) {
+    for (CellPoint cp : getOccupiedCells(cell, grid.getType().getOffsetTranslator())) {
       bounds.add(grid.getBounds(cp));
     }
 
@@ -179,12 +173,21 @@ public class TokenFootprint {
     return Objects.hash(name);
   }
 
-  private Object readResolve() {
-    translatorList = new LinkedList<OffsetTranslator>();
-    return this;
-  }
-
   public interface OffsetTranslator {
-    void translate(CellPoint originPoint, CellPoint offsetPoint);
+    CellPoint translate(CellPoint originPoint, CellPoint offsetPoint);
+
+    OffsetTranslator IDENTITY = (originPoint, offsetPoint) -> offsetPoint;
+
+    OffsetTranslator HEX_VERTICAL =
+        (originPoint, offsetPoint) ->
+            (isEven(originPoint.x) || !isEven(offsetPoint.x))
+                ? offsetPoint
+                : new CellPoint(offsetPoint.x, offsetPoint.y + 1);
+
+    OffsetTranslator HEX_HORIZONTAL =
+        (originPoint, offsetPoint) ->
+            (isEven(originPoint.y) || !isEven(offsetPoint.y))
+                ? offsetPoint
+                : new CellPoint(offsetPoint.x + 1, offsetPoint.y);
   }
 }

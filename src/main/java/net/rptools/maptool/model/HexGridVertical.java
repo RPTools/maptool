@@ -34,7 +34,6 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarVertHexEuclideanWalker;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
 /*
  * @formatter:off
@@ -49,12 +48,6 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  * @formatter:on
  */
 public final class HexGridVertical extends HexGrid {
-  private static final OffsetTranslator OFFSET_TRANSLATOR =
-      (originPoint, offsetPoint) -> {
-        if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
-          offsetPoint.y++;
-        }
-      };
   private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   @Override
@@ -270,11 +263,6 @@ public final class HexGridVertical extends HexGrid {
   @Override
   public ZonePoint convert(CellPoint cp) {
     return convertCP(cp.x, cp.y);
-  }
-
-  @Override
-  protected OffsetTranslator getOffsetTranslator() {
-    return OFFSET_TRANSLATOR;
   }
 
   /** Returns the cell centre as well as nearest vertex */

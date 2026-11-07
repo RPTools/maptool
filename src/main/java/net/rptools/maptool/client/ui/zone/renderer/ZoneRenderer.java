@@ -1344,7 +1344,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       Set<CellPoint> pathSet = new HashSet<>();
       List<ZonePoint> waypointList = new LinkedList<>();
       for (CellPoint p : cellPath) {
-        pathSet.addAll(footprint.getOccupiedCells(p));
+        pathSet.addAll(footprint.getOccupiedCells(p, grid.getType().getOffsetTranslator()));
 
         if (pathCP.isWaypoint(p) && previousPoint != null) {
           ZonePoint zp = grid.convert(p);
