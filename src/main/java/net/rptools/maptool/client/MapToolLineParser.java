@@ -21,6 +21,8 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.exceptions.*;
@@ -31,11 +33,9 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLContent;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory.FrameType;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.parser.ParserException;
@@ -49,8 +49,12 @@ public class MapToolLineParser {
   // Logger for this class.
   private static final Logger log = LogManager.getLogger(MapToolLineParser.class);
 
-  /** Name of macro to divert calls to unknown macros on a lib macro to. */
-  public static final String UNKNOWN_LIB_MACRO = "!!unknown-macro!!";
+  private static final MapToolExpressionParser expressionParser =
+      new ExpressionParserFactory().createMT();
+
+  /** Factory class for createing macro locations. */
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   /**
    * The args value to pass to the runMacro functions to indicate that the arrguments are stored in
@@ -64,17 +68,20 @@ public class MapToolLineParser {
    */
   public static final String ARGS_PASSED_AS_VARIABLE_NAME = "@args";
 
+  /** The default value for maximum macro recursion. */
+  private static final int DEFAULT_MAX_RECURSIVE_DEPTH = 150;
+
+  /** The default maximum loop iterations. */
+  private static final int DEFAULT_MAX_LOOP_ITERATIONS = 10000;
+
   /** Stack that holds our contexts. */
-  private final Stack<MapToolMacroContext> contextStack = new Stack<MapToolMacroContext>();
+  private final Stack<MapToolMacroContext> contextStack = new Stack<>();
 
   /** Was every context we entered during the macro trusted. */
   private volatile boolean macroPathTrusted = false;
 
   /** The macro button index of the button on the impersonated token that called us. */
   private volatile int macroButtonIndex = -1;
-
-  /** The default value for maximum macro recursion. */
-  private static final int DEFAULT_MAX_RECURSIVE_DEPTH = 150;
 
   /** The current parser recursion depth. */
   private int parserRecurseDepth = 0;
@@ -84,9 +91,6 @@ public class MapToolLineParser {
 
   /** The maximum parser and macro recursive depth. */
   private int maxRecursionDepth = DEFAULT_MAX_RECURSIVE_DEPTH;
-
-  /** The default maximum loop iterations. */
-  private static final int DEFAULT_MAX_LOOP_ITERATIONS = 10000;
 
   /** The maximum amount of loop iterations. */
   private int maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS;
@@ -102,10 +106,6 @@ public class MapToolLineParser {
    * #getNewRolls()} was called.
    */
   private List<Integer> newRolls = new LinkedList<>();
-
-  /** Factory class for createing macro locations. */
-  private static final MacroLocationFactory macroLocationFactory =
-      MacroLocationFactory.getInstance();
 
   private enum Output { // Mutually exclusive output formats
     NONE,
@@ -151,8 +151,15 @@ public class MapToolLineParser {
     SKIP_NEXT_CHAR
   }
 
+  public final class ContextCloseable implements AutoCloseable {
+    @Override
+    public void close() {
+      contextStack.pop();
+    }
+  }
+
   public Map<String, String> listAllMacroFunctions() {
-    Map<String, String> functionList = new HashMap<String, String>();
+    Map<String, String> functionList = new HashMap<>();
 
     for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof AdditionalFunctionDescription) {
@@ -175,14 +182,6 @@ public class MapToolLineParser {
     final String match;
     final int optEnd;
 
-    @SuppressWarnings("unused")
-    InlineRollMatch(int start, int end, String match) {
-      this.start = start;
-      this.end = end;
-      this.match = match;
-      this.optEnd = -1;
-    }
-
     InlineRollMatch(int start, int end, String match, int optEnd) {
       this.start = start;
       this.end = end;
@@ -202,11 +201,6 @@ public class MapToolLineParser {
       return match;
     }
 
-    @SuppressWarnings("unused")
-    public int getOptEnd() {
-      return optEnd;
-    }
-
     public String getOpt() {
       if (optEnd > 0) {
         return match.substring(1, optEnd - start);
@@ -224,26 +218,8 @@ public class MapToolLineParser {
     }
   }
 
-  public String parseLine(String line) throws ParserException {
-    return parseLine(null, line);
-  }
-
-  public String parseLine(Token tokenInContext, String line) throws ParserException {
-    return parseLine(tokenInContext, line, null);
-  }
-
-  public String parseLine(Token tokenInContext, String line, MapToolMacroContext context)
-      throws ParserException {
-    return parseLine(null, tokenInContext, line, context);
-  }
-
-  public String parseLine(MapToolVariableResolver res, Token tokenInContext, String line)
-      throws ParserException {
-    return parseLine(res, tokenInContext, line, null);
-  }
-
   public String parseLine(
-      MapToolVariableResolver res, Token tokenInContext, String line, MapToolMacroContext context)
+      MapToolVariableResolver resolver, String line, @Nullable MapToolMacroContext context)
       throws ParserException {
     // copy previous rolls and clear out for new rolls.
     if (parserRecurseDepth == 0 && macroRecurseDepth == 0) {
@@ -257,19 +233,24 @@ public class MapToolLineParser {
       return "";
     }
     line = line.trim();
-    if (line.length() == 0) {
+    if (line.isEmpty()) {
       return "";
     }
-    Stack<Token> contextTokenStack = new Stack<Token>();
-    context = enterContext(context);
-    MapToolVariableResolver resolver = null;
-    boolean resolverInitialized = false;
+
+    Stack<Token> contextTokenStack = new Stack<>();
+    if (context == null) {
+      if (!contextStack.isEmpty()) {
+        context = contextStack.peek();
+      } else {
+        // Create a new top-level context.
+        var loc = macroLocationFactory.createChatLocation();
+        context = new MapToolMacroContext(loc.getName(), loc, MapTool.getPlayer().isGM(), -1);
+      }
+    }
     String opts = null;
     String roll = null;
-    try {
+    try (var ignored = enterContext(context)) {
       // Keep the same variable context for this line
-      resolver = (res == null) ? new MapToolVariableResolver(tokenInContext) : res;
-      resolverInitialized = resolver.initialize();
       StringBuilder builder = new StringBuilder();
       int start = 0;
       List<InlineRollMatch> matches = this.locateInlineRolls(line);
@@ -285,7 +266,7 @@ public class MapToolLineParser {
                 : MapToolLineParser.Output.EXPANDED;
 
         String text = null; // used by the T option
-        HashSet<String> outputOpts = new HashSet<String>();
+        HashSet<String> outputOpts = new HashSet<>();
         OutputLoc outputTo = OutputLoc.CHAT;
 
         LoopType loopType = LoopType.NO_LOOP;
@@ -293,7 +274,7 @@ public class MapToolLineParser {
         int loopCount = 0;
         String loopSep = null;
         String loopVar = null, loopCondition = null;
-        List<String> foreachList = new ArrayList<String>();
+        List<String> foreachList = new ArrayList<>();
 
         BranchType branchType = BranchType.NO_BRANCH;
         Object branchCondition = null;
@@ -309,7 +290,7 @@ public class MapToolLineParser {
           roll = match.getRoll();
           if (opts != null) {
             // Turn the opts string into a list of OptionInfo objects.
-            List<OptionInfo> optionList = null;
+            List<OptionInfo> optionList;
             try {
               optionList = OptionInfo.getRollOptionList(opts);
             } catch (OptionInfo.RollOptionException roe) {
@@ -362,7 +343,7 @@ public class MapToolLineParser {
                   outputOpts.add("w");
                   for (int i = 0; i < option.getParamCount(); i++) {
                     String arg =
-                        parseExpression(resolver, tokenInContext, option.getStringParam(i), false)
+                        parseExpression(resolver, option.getStringParam(i), false)
                             .getValue()
                             .toString();
                     if (arg.trim().startsWith("[")) {
@@ -396,7 +377,7 @@ public class MapToolLineParser {
                   loopType = LoopType.COUNT;
                   error = null;
                   try {
-                    loopCount = option.getParsedIntParam(0, resolver, tokenInContext, this);
+                    loopCount = option.getParsedIntParam(0, resolver, this);
                     if (loopCount < 0) {
                       error = I18N.getText("lineParser.countNonNeg", loopCount);
                     }
@@ -418,10 +399,10 @@ public class MapToolLineParser {
                   error = null;
                   try {
                     loopVar = option.getIdentifierParam(0);
-                    loopStart = option.getParsedIntParam(1, resolver, tokenInContext, this);
-                    loopEnd = option.getParsedIntParam(2, resolver, tokenInContext, this);
+                    loopStart = option.getParsedIntParam(1, resolver, this);
+                    loopEnd = option.getParsedIntParam(2, resolver, this);
                     try {
-                      loopStep = option.getParsedIntParam(3, resolver, tokenInContext, this);
+                      loopStep = option.getParsedIntParam(3, resolver, this);
                     } catch (ParserException pe) {
                       // Build a more informative error message for this common mistake
                       String msg = pe.getMessage();
@@ -462,15 +443,11 @@ public class MapToolLineParser {
                   error = null;
                   try {
                     loopVar = option.getIdentifierParam(0);
-                    String listString =
-                        option.getParsedParam(1, resolver, tokenInContext, this).toString();
+                    String listString = option.getParsedParam(1, resolver, this).toString();
                     loopSep = option.getStringParam(2);
                     String listDelim = option.getStringParam(3);
                     if (listDelim.trim().startsWith("\"")) {
-                      listDelim =
-                          parseExpression(resolver, tokenInContext, listDelim, false)
-                              .getValue()
-                              .toString();
+                      listDelim = parseExpression(resolver, listDelim, false).getValue().toString();
                     }
 
                     foreachList = null;
@@ -532,32 +509,32 @@ public class MapToolLineParser {
                 ///////////////////////////////////////////////////
                 case FRAME:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
+                  frameName = option.getParsedParam(0, resolver, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, this).toString();
                   outputTo = OutputLoc.FRAME;
                   break;
                 case DIALOG:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
+                  frameName = option.getParsedParam(0, resolver, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, this).toString();
                   outputTo = OutputLoc.DIALOG;
                   break;
                 case DIALOG5:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
+                  frameName = option.getParsedParam(0, resolver, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, this).toString();
                   outputTo = OutputLoc.DIALOG5;
                   break;
                 case FRAME5:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
+                  frameName = option.getParsedParam(0, resolver, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, this).toString();
                   outputTo = OutputLoc.FRAME5;
                   break;
                 case OVERLAY:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
+                  frameName = option.getParsedParam(0, resolver, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, this).toString();
                   outputTo = OutputLoc.OVERLAY;
                   break;
                 ///////////////////////////////////////////////////
@@ -582,8 +559,7 @@ public class MapToolLineParser {
                       MapTool.getFrame()
                           .getCurrentZoneRenderer()
                           .getZone()
-                          .resolveToken(
-                              option.getParsedParam(0, resolver, tokenInContext, this).toString());
+                          .resolveToken(option.getParsedParam(0, resolver, this).toString());
                   if (newToken != null) {
                     contextTokenStack.push(resolver.getTokenInContext());
                     resolver.setTokenIncontext(newToken);
@@ -667,7 +643,7 @@ public class MapToolLineParser {
                     (loopCondition == null) ? null : String.format("if(%s, 1, 0)", loopCondition);
                 // Stop loop if the while condition is false
                 try {
-                  Result result = parseExpression(resolver, tokenInContext, hackCondition, false);
+                  Result result = parseExpression(resolver, hackCondition, false);
                   loopConditionValue = ((Number) result.getValue()).intValue();
                   if (loopConditionValue == 0) {
                     doLoop = false;
@@ -680,8 +656,7 @@ public class MapToolLineParser {
 
             // Output the loop separator
             if (doLoop && iteration != 0 && output != Output.NONE) {
-              expressionBuilder.append(
-                  parseExpression(resolver, tokenInContext, loopSep, false).getValue());
+              expressionBuilder.append(parseExpression(resolver, loopSep, false).getValue());
             }
 
             if (!doLoop) {
@@ -702,7 +677,7 @@ public class MapToolLineParser {
               }
               Result result;
               try {
-                result = parseExpression(resolver, tokenInContext, hackCondition, false);
+                result = parseExpression(resolver, hackCondition, false);
               } catch (Exception e) {
                 throw doError(
                     I18N.getText(
@@ -817,7 +792,6 @@ public class MapToolLineParser {
                       if (def != null) {
                         rollBranch = branch.trim();
                         foundMatch = true;
-                        ;
                       }
                       if (caseLabel != null && caseLabel.matches(caseTarget)) {
                         rollBranch = branch.trim();
@@ -852,10 +826,10 @@ public class MapToolLineParser {
                    * If you're adding a new formatting option, add a new case to build the output
                    */
                   case NONE:
-                    parseExpression(resolver, tokenInContext, rollBranch, false);
+                    parseExpression(resolver, rollBranch, false);
                     break;
                   case RESULT:
-                    result = parseExpression(resolver, tokenInContext, rollBranch, false);
+                    result = parseExpression(resolver, rollBranch, false);
                     output_text = result != null ? result.getValue().toString() : "";
                     if (!this.isMacroTrusted()) {
                       output_text =
@@ -866,14 +840,14 @@ public class MapToolLineParser {
                       expressionBuilder.append(output_text);
                     } else {
                       outputOpts.add("r");
-                      expressionBuilder.append(rollString(outputOpts, output_text));
+                      expressionBuilder.append(rollString(outputOpts, null, output_text));
                     }
 
                     break;
                   case TOOLTIP:
                     String tooltip = rollBranch + " = ";
                     output_text = null;
-                    result = parseExpression(resolver, tokenInContext, rollBranch, true);
+                    result = parseExpression(resolver, rollBranch, true);
                     tooltip += result.getDetailExpression();
                     if (text == null) {
                       output_text = result.getValue().toString();
@@ -882,10 +856,7 @@ public class MapToolLineParser {
                         tooltip += " = " + result.getValue();
                       }
                       resolver.setVariable("roll.result", result.getValue());
-                      output_text =
-                          parseExpression(resolver, tokenInContext, text, false)
-                              .getValue()
-                              .toString();
+                      output_text = parseExpression(resolver, text, false).getValue().toString();
                     }
                     tooltip = tooltip.replaceAll("'", "&#39;");
                     expressionBuilder.append(
@@ -895,17 +866,17 @@ public class MapToolLineParser {
                     expressionBuilder.append(
                         rollString(
                             outputOpts,
-                            rollBranch + " = " + expandRoll(resolver, tokenInContext, rollBranch)));
+                            null,
+                            rollBranch + " = " + expandRoll(resolver, rollBranch)));
                     break;
                   case UNFORMATTED:
-                    output_text =
-                        rollBranch + " = " + expandRoll(resolver, tokenInContext, rollBranch);
+                    output_text = rollBranch + " = " + expandRoll(resolver, rollBranch);
 
                     // Escape quotes so that the result can be used in a title attribute
                     output_text = output_text.replaceAll("'", "&#39;");
                     output_text = output_text.replaceAll("\"", "&#34;");
 
-                    expressionBuilder.append(rollString(outputOpts, output_text));
+                    expressionBuilder.append(rollString(outputOpts, null, output_text));
                 } // end of switch(output) statement
                 break; // end of case NO_CODE in switch(codeType) statement
               /*
@@ -913,13 +884,13 @@ public class MapToolLineParser {
                */
               case MACRO:
                 // [MACRO("macroName@location"): args]
-                result = parseExpression(resolver, tokenInContext, macroName, false);
+                result = parseExpression(resolver, macroName, false);
                 String callName = result.getValue().toString();
-                result = parseExpression(resolver, tokenInContext, rollBranch, false);
+                result = parseExpression(resolver, rollBranch, false);
                 String macroArgs = result.getValue().toString();
 
                 try {
-                  output_text = runMacro(resolver, tokenInContext, callName, macroArgs);
+                  output_text = runMacro(resolver, callName, macroArgs, true);
                 } catch (AbortFunctionException e) {
                   // required to catch abort that are not
                   // in a (UDF)function call
@@ -956,7 +927,7 @@ public class MapToolLineParser {
                 break;
 
               case CODEBLOCK:
-                output_text = runMacroBlock(resolver, tokenInContext, rollBranch);
+                output_text = runMacroBlock(resolver, rollBranch, null);
                 resolver.setVariable(
                     "roll.count", iteration); // reset this because called code might change it
                 if (output != Output.NONE) {
@@ -1009,12 +980,12 @@ public class MapToolLineParser {
           }
 
           // Revert to our previous token if [token(): ] was used
-          if (contextTokenStack.size() > 0) {
+          if (!contextTokenStack.isEmpty()) {
             resolver.setTokenIncontext(contextTokenStack.pop());
           }
         } else if (match.getMatch().startsWith("{")) {
           roll = match.getRoll();
-          Result result = parseExpression(resolver, tokenInContext, roll, false);
+          Result result = parseExpression(resolver, roll, false);
           if (isMacroTrusted()) {
             builder.append(result != null ? result.getValue().toString() : "");
           } else {
@@ -1038,11 +1009,6 @@ public class MapToolLineParser {
       throw doError(
           "lineParser.errorBodyRoll", opts == null ? "" : opts, roll == null ? line : roll);
     } finally {
-      exitContext();
-      if (resolverInitialized) {
-        // This is the top level call, time to clean up
-        resolver.flush();
-      }
       if (MapTool.getFrame() != null) {
         // Repaint in case macros changed anything.
         MapTool.getFrame().refresh();
@@ -1050,22 +1016,8 @@ public class MapToolLineParser {
     }
   }
 
-  public Result parseExpression(String expression, boolean makeDeterministic)
-      throws ParserException {
-    return parseExpression(null, expression, makeDeterministic);
-  }
-
-  public Result parseExpression(Token tokenInContext, String expression, boolean makeDeterministic)
-      throws ParserException {
-    return parseExpression(
-        new MapToolVariableResolver(tokenInContext), tokenInContext, expression, makeDeterministic);
-  }
-
   public Result parseExpression(
-      MapToolVariableResolver resolver,
-      Token tokenInContext,
-      String expression,
-      boolean makeDeterministic)
+      MapToolVariableResolver resolver, String expression, boolean makeDeterministic)
       throws ParserException {
     if (parserRecurseDepth > maxRecursionDepth) {
       parserRecurseDepth = 0;
@@ -1128,18 +1080,9 @@ public class MapToolLineParser {
     }
   }
 
-  public String expandRoll(String roll) throws ParserException {
-    return expandRoll(null, roll);
-  }
-
-  public String expandRoll(Token tokenInContext, String roll) throws ParserException {
-    return expandRoll(new MapToolVariableResolver(tokenInContext), tokenInContext, roll);
-  }
-
-  public String expandRoll(MapToolVariableResolver resolver, Token tokenInContext, String roll)
-      throws ParserException {
+  public String expandRoll(MapToolVariableResolver resolver, String roll) throws ParserException {
     try {
-      Result result = parseExpression(resolver, tokenInContext, roll, true);
+      Result result = parseExpression(resolver, roll, true);
       StringBuilder sb = new StringBuilder();
 
       if (result.getDetailExpression().equals(result.getValue().toString())) {
@@ -1166,30 +1109,6 @@ public class MapToolLineParser {
    *
    * @param resolver the {@link MapToolVariableResolver} used for resolving variables in the macro
    *     being run.
-   * @param tokenInContext the {@code Token} if any that is the "current" token for the macro.
-   * @param qMacroName the qualified macro name. (i.e. macro name and location of macro).
-   * @param args the arguments to pass to the macro when executing it.
-   * @return the result of the macro execution.
-   * @throws ParserException when an error occurs parsing or executing the macro.
-   */
-  public String runMacro(
-      MapToolVariableResolver resolver, Token tokenInContext, String qMacroName, String args)
-      throws ParserException {
-    return runMacro(resolver, tokenInContext, qMacroName, args, true);
-  }
-
-  /**
-   * Runs a macro from a specified location.
-   *
-   * <p>If {@code args} is the value {@link #ARGS_PASSED_AS_VARIABLE_INDICATOR} then the arguments
-   * will be taken from the vairable {@link #ARGS_PASSED_AS_VARIABLE_NAME } set in the {@code
-   * resolver} to avoid conversion to/from a string. The variable {@link
-   * #ARGS_PASSED_AS_VARIABLE_NAME} is expected to be a JsonArray if you want to take full advantage
-   * of this feature.
-   *
-   * @param resolver the {@link MapToolVariableResolver} used for resolving variables in the macro
-   *     being run.
-   * @param tokenInContext the {@code Token} if any that is the "current" token for the macro.
    * @param qMacroName the qualified macro name. (i.e. macro name and location of macro).
    * @param args the arguments to pass to the macro when executing it.
    * @param createNewVariableContext if {@code true} a new varaible scope is created for the macro,
@@ -1200,16 +1119,16 @@ public class MapToolLineParser {
    */
   public String runMacro(
       MapToolVariableResolver resolver,
-      Token tokenInContext,
       String qMacroName,
       String args,
       boolean createNewVariableContext)
       throws ParserException {
 
+    Token tokenInContext = resolver.getTokenInContext();
     MapToolMacroContext macroContext;
     MacroLocation currentContext = null;
 
-    if (!contextStackEmpty()) {
+    if (!contextStack.isEmpty()) {
       currentContext = getMacroSource();
     }
 
@@ -1253,7 +1172,7 @@ public class MapToolLineParser {
           var macroInfo = macroInfoFuture.get();
           if (macroInfo.isEmpty()) {
             // if the macro source is the same as the location then check private macros.
-            if (!contextStackEmpty()) {
+            if (!contextStack.isEmpty()) {
               if (getMacroSource().getSource() == MacroLocation.MacroSource.event
                   || mloc.getLocation().equalsIgnoreCase(getMacroSource().getLocation())) {
                 macroInfo = library.getPrivateMacroInfo(mloc.getName()).get();
@@ -1334,7 +1253,7 @@ public class MapToolLineParser {
     }
     MapToolVariableResolver macroResolver;
     if (createNewVariableContext) {
-      macroResolver = new MapToolVariableResolver(tokenInContext);
+      macroResolver = resolver.spawn();
     } else {
       macroResolver = resolver;
     }
@@ -1378,7 +1297,7 @@ public class MapToolLineParser {
       String macroOutput = null;
 
       try {
-        macroOutput = runMacroBlock(macroResolver, tokenInContext, macroBody, macroContext);
+        macroOutput = runMacroBlock(macroResolver, macroBody, macroContext);
         // Copy the return value of the macro into our current variable scope.
         resolver.setVariable("macro.return", macroResolver.getVariable("macro.return"));
       } catch (ReturnFunctionException returnEx) {
@@ -1417,128 +1336,12 @@ public class MapToolLineParser {
     }
   }
 
-  /**
-   * Run a block of text as a macro.
-   *
-   * @param tokenInContext the token in context.
-   * @param macroBody the macro text to run.
-   * @param contextName the name of the macro context to use.
-   * @param contextSource the source of the macro block.
-   * @param trusted is the context trusted or not.
-   * @return the macro output.
-   * @throws ParserException when an error occurs parsing or executing the macro.
-   */
-  public String runMacroBlock(
-      Token tokenInContext,
-      String macroBody,
-      String contextName,
-      String contextSource,
-      boolean trusted)
-      throws ParserException {
-    MapToolVariableResolver resolver = new MapToolVariableResolver(tokenInContext);
-    var loc = MacroLocation.parseMacroName(contextSource, getMacroSource(), tokenInContext);
-    MapToolMacroContext context = new MapToolMacroContext(contextName, loc, trusted);
-    return runMacroBlock(resolver, tokenInContext, macroBody, context);
-  }
-
   /** Executes a string as a block of macro code. */
-  String runMacroBlock(MapToolVariableResolver resolver, Token tokenInContext, String macroBody)
+  private String runMacroBlock(
+      MapToolVariableResolver resolver, String macroBody, MapToolMacroContext context)
       throws ParserException {
-    return runMacroBlock(resolver, tokenInContext, macroBody, null);
-  }
-
-  /** Executes a string as a block of macro code. */
-  String runMacroBlock(
-      MapToolVariableResolver resolver,
-      Token tokenInContext,
-      String macroBody,
-      MapToolMacroContext context)
-      throws ParserException {
-    String macroOutput = parseLine(resolver, tokenInContext, macroBody, context);
+    String macroOutput = parseLine(resolver, macroBody, context);
     return macroOutput;
-  }
-
-  /**
-   * Searches all maps for a token and returns the the requested lib: macro.
-   *
-   * @param location the location of the library macro.
-   * @return The token which holds the library.
-   * @throws ParserException if the token name is illegal, the token appears multiple times, or if
-   *     the caller doesn't have access to the token.
-   */
-  public Token getTokenMacroLib(String location) throws ParserException {
-    if (location == null) {
-      return null;
-    }
-    if (!location.matches("(?i)^lib:.*")) {
-      throw new ParserException(I18N.getText("lineParser.notALibToken"));
-    }
-    final String libTokenName = location;
-    Token libToken = null;
-    if (libTokenName.length() > 0) {
-      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-      for (ZoneRenderer zr : zrenderers) {
-        List<Token> tokenList =
-            zr.getZone().getTokensFiltered(t -> t.getName().equalsIgnoreCase(libTokenName));
-
-        for (Token token : tokenList) {
-          // If we are not the GM and the token is not visible to players then we don't
-          // let them get functions from it.
-          if (!MapTool.getPlayer().isGM() && !token.isVisible()) {
-            throw new ParserException(I18N.getText("lineParser.libUnableToExec", libTokenName));
-          }
-          if (libToken != null) {
-            throw new ParserException(I18N.getText("lineParser.duplicateLibTokens", libTokenName));
-          }
-
-          libToken = token;
-        }
-      }
-      return libToken;
-    }
-    return null;
-  }
-
-  /**
-   * Searches all maps for a token and returns the zone that the lib: macro is in.
-   *
-   * @param location the location of the library macro.
-   * @return The zone which holds the library.
-   * @throws ParserException if the token name is illegal, the token appears multiple times, or if
-   *     the caller doesn't have access to the token.
-   */
-  public Zone getTokenMacroLibZone(String location) throws ParserException {
-    if (location == null) {
-      return null;
-    }
-    if (!location.matches("(?i)^lib:.*")) {
-      throw new ParserException(I18N.getText("lineParser.notALibToken"));
-    }
-    final String libTokenName = location;
-    Zone libTokenZone = null;
-    if (libTokenName.length() > 0) {
-      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-      for (ZoneRenderer zr : zrenderers) {
-        List<Token> tokenList =
-            zr.getZone().getTokensFiltered(t -> t.getName().equalsIgnoreCase(libTokenName));
-
-        for (Token token : tokenList) {
-          // If we are not the GM and the token is not visible to players then we don't
-          // let them get functions from it.
-          if (!MapTool.getPlayer().isGM() && !token.isVisible()) {
-            throw new ParserException(I18N.getText("lineParser.libUnableToExec", libTokenName));
-          }
-
-          if (libTokenZone != null) {
-            throw new ParserException(I18N.getText("lineParser.duplicateLibTokens", libTokenName));
-          }
-
-          libTokenZone = zr.getZone();
-        }
-      }
-      return libTokenZone;
-    }
-    return null;
   }
 
   /**
@@ -1553,7 +1356,7 @@ public class MapToolLineParser {
   }
 
   /** Builds a formatted string showing the roll options and roll body. */
-  String errorString(String msg, String opts, String roll) {
+  private String errorString(String msg, String opts, String roll) {
     String retval = "<br>&nbsp;&nbsp;&nbsp;" + I18N.getText(msg);
     retval +=
         "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>"
@@ -1576,13 +1379,6 @@ public class MapToolLineParser {
     return retval;
   }
 
-  public static final MapToolExpressionParser expressionParser =
-      new ExpressionParserFactory().createMT();
-
-  private String rollString(Collection<String> options, String text) {
-    return rollString(options, null, text);
-  }
-
   private String rollString(Collection<String> options, String tooltip, String text) {
     StringBuilder s = new StringBuilder("\036");
     if (options != null) {
@@ -1600,41 +1396,24 @@ public class MapToolLineParser {
   /**
    * Enters a new context for the macro.
    *
-   * @param context The context for the macro. If context is null and there is a current context it
-   *     is reentered. If context is null and there is no current context then a new top level
-   *     context is created.
+   * @param context The context for the macro.
+   * @return A resource that can be closed to exit the context.
    */
-  public MapToolMacroContext enterContext(MapToolMacroContext context) {
+  public ContextCloseable enterContext(@Nonnull MapToolMacroContext context) {
     // First time through set our trusted path to same as first context.
     // Any subsequent trips through we only change trusted path if context
     // is not trusted (if context == null on subsequent calls we don't change
     // anything as trusted context will remain the same as it was before the call).
-    if (contextStack.size() == 0) {
+    if (contextStack.isEmpty()) {
       // The path is untrusted if any typing is involved, including GM's
-      macroPathTrusted = context != null && context.isTrusted();
-      macroButtonIndex = context == null ? -1 : context.getMacroButtonIndex();
-    } else if (context != null && !context.isTrusted()) {
+      macroPathTrusted = context.isTrusted();
+      macroButtonIndex = context.getMacroButtonIndex();
+    } else if (!context.isTrusted()) {
       macroPathTrusted = false;
     }
-    if (context == null) {
-      if (contextStack.size() == 0) {
-        var loc = macroLocationFactory.createChatLocation();
-        context = new MapToolMacroContext(loc.getName(), loc, MapTool.getPlayer().isGM());
-      } else {
-        context = contextStack.peek();
-      }
-    }
     contextStack.push(context);
-    return context;
-  }
 
-  /**
-   * Leaves the current context reverting to the previous context.
-   *
-   * @return The context that you leave.
-   */
-  public MapToolMacroContext exitContext() {
-    return contextStack.pop();
+    return new ContextCloseable();
   }
 
   /**
@@ -1642,18 +1421,10 @@ public class MapToolLineParser {
    *
    * @param name The name of the macro.
    * @param source Where the macro comes from.
+   * @return A resource that can be closed to exit the context.
    */
-  public void enterTrustedContext(String name, MacroLocation source) {
-    enterContext(new MapToolMacroContext(name, source, true));
-  }
-
-  /**
-   * Gets the current context for the execution. It is save to enter a context a second time.
-   *
-   * @return the current context.
-   */
-  public MapToolMacroContext getContext() {
-    return contextStack.size() > 0 ? contextStack.peek() : null;
+  public ContextCloseable enterTrustedContext(String name, MacroLocation source) {
+    return enterContext(new MapToolMacroContext(name, source, true));
   }
 
   /**
@@ -1661,29 +1432,19 @@ public class MapToolLineParser {
    *
    * @param name The name of the macro.
    * @param source Where the macro comes from.
+   * @return A resource that can be closed to exit the context.
    */
-  public void enterUntrustedContext(String name, MacroLocation source) {
-    enterContext(new MapToolMacroContext(name, source, false));
+  public ContextCloseable enterUntrustedContext(String name, MacroLocation source) {
+    return enterContext(new MapToolMacroContext(name, source, false));
   }
 
   /**
-   * Convenience method to enter a new context.
+   * Gets the current context for the execution. It is save to enter a context a second time.
    *
-   * @param name The name of the macro.
-   * @param source Where the macro comes from.
-   * @param secure Is the context secure or not.
+   * @return the current context.
    */
-  public void enterContext(String name, MacroLocation source, boolean secure) {
-    enterContext(new MapToolMacroContext(name, source, secure));
-  }
-
-  /**
-   * Returns if the context stack is empty.
-   *
-   * @return true if the context stack is empty.
-   */
-  private boolean contextStackEmpty() {
-    return contextStack.size() == 0;
+  public @Nullable MapToolMacroContext getContext() {
+    return !contextStack.isEmpty() ? contextStack.peek() : null;
   }
 
   /**
@@ -1720,7 +1481,7 @@ public class MapToolLineParser {
    * @return A list of the rolls.
    */
   private List<InlineRollMatch> locateInlineRolls(String line) {
-    List<InlineRollMatch> matches = new ArrayList<InlineRollMatch>();
+    List<InlineRollMatch> matches = new ArrayList<>();
     ScanState scanState = ScanState.SEARCHING_FOR_ROLL;
     int startMatch = 0;
     int bracketLevel = 0;

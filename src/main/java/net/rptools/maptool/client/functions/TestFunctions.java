@@ -141,9 +141,7 @@ public class TestFunctions extends AbstractFunction {
             new MapToolMacroContext(
                 TEST_CONTEXT_NAME, MapTool.getParser().getContext().getSource(), true);
         try {
-          String ret =
-              MapTool.getParser()
-                  .parseLine(resolver, resolver.getTokenInContext(), mbp.getCommand(), context);
+          String ret = MapTool.getParser().parseLine(resolver, mbp.getCommand(), context);
         } catch (Exception e) {
           failures++;
           messages.add(e.getMessage());
