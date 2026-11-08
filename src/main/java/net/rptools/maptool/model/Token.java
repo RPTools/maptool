@@ -3075,7 +3075,7 @@ public class Token implements Cloneable {
 
   public static Token fromDto(TokenDto dto) {
     var token = new Token();
-    token.id = GUID.valueOf(dto.getId());
+    token.id = GUID.fromDto(dto.getId());
     token.beingImpersonated = dto.getBeingImpersonated();
     token.exposedAreaGUID = GUID.valueOf(dto.getExposedAreaGuid());
     var assetMap = dto.getImageAssetMapMap();
@@ -3191,7 +3191,7 @@ public class Token implements Cloneable {
 
   public TokenDto toDto() {
     var dto = TokenDto.newBuilder();
-    dto.setId(id.toString());
+    dto.setId(id.toDto());
     dto.setBeingImpersonated(beingImpersonated);
     dto.setExposedAreaGuid(exposedAreaGUID.toString());
     for (var key : imageAssetMap.keySet()) {

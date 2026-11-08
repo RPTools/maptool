@@ -14,16 +14,17 @@
  */
 package net.rptools.maptool.client.macro.impl;
 
+import net.rptools.maptool.client.ImpersonationState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.TokenIdentity;
 import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.client.macro.MacroManager;
-import net.rptools.maptool.client.ui.MapToolFrame;
-import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 
 @MacroDefinition(
     name = "impersonate",
@@ -32,13 +33,13 @@ import net.rptools.maptool.model.Token;
     expandRolls = false)
 public class ImpersonateMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-    final MapToolFrame frame = MapTool.getFrame(); // cached for quicker access
-    final CommandPanel cpanel = frame.getCommandPanel();
+    // Who the player is speaking as belongs to the client, not to the chat panel.
+    final ImpersonationState identities = MapTool.getClient().getImpersonation();
     if (macro != null) macro = macro.trim();
 
     // Clear current identity
     if (macro == null || macro.length() == 0) {
-      cpanel.setIdentity(new CommandPanel.TokenIdentity());
+      identities.setIdentity(new TokenIdentity());
       return;
     }
     // Figure out what we want to impersonate
@@ -51,7 +52,11 @@ public class ImpersonateMacro implements Macro {
       name = macro.substring(0, index).trim();
       macro = macro.substring(index + 1);
     }
-    Token token = frame.getCurrentZoneRenderer().getZone().resolveToken(name);
+    // With no map to look on -- no map open, or no window at all, as on a server run without a
+    // UI -- there is no token, and the name is impersonated on its own, as it is for a name that
+    // no token has.
+    Zone zone = MapTool.getClient().getCurrentZone();
+    Token token = zone == null ? null : zone.resolveToken(name);
     if (token != null) {
       name = token.getName();
     }
@@ -67,12 +72,12 @@ public class ImpersonateMacro implements Macro {
     // Impersonate
     if (index > 0) {
       // Enter impersonation context for the duration of the macro
-      cpanel.enterContextIdentity(new CommandPanel.TokenIdentity(token, name));
+      identities.enterContextIdentity(new TokenIdentity(token, name));
       MacroManager.executeMacro(macro, executionContext);
-      cpanel.leaveContextIdentity();
+      identities.leaveContextIdentity();
     } else {
       // Set current identity
-      cpanel.setIdentity(new CommandPanel.TokenIdentity(token, name, canLoadTokenMacros(token)));
+      identities.setIdentity(new TokenIdentity(token, name, canLoadTokenMacros(token)));
     }
   }
 

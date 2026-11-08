@@ -17,6 +17,7 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.TokenIdentity;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -51,12 +52,13 @@ public class HasImpersonated extends AbstractFunction {
     if (functionName.equalsIgnoreCase("impersonate")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       if (psize > 0 && parameters.get(0).toString().equals("")) {
-        // Stop impersonating
-        MapTool.getFrame().getCommandPanel().clearGlobalIdentity();
+        // Stop impersonating. The client's identity state announces the change, which is what
+        // updates the Impersonate panel and the chat avatar when there is a UI.
+        MapTool.getClient().getImpersonation().setGlobalIdentity(new TokenIdentity());
         return "";
       } else {
         Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, -1);
-        MapTool.getFrame().getCommandPanel().setGlobalIdentity(token);
+        MapTool.getClient().getImpersonation().setGlobalIdentity(new TokenIdentity(token));
         return token.getName();
       }
     }
@@ -73,9 +75,9 @@ public class HasImpersonated extends AbstractFunction {
   private boolean hasImpersonated(boolean global) {
     if (global) {
       // Global impersonation, aka the one from the Impersonate Panel
-      return MapTool.getFrame().getCommandPanel().isGlobalImpersonatingToken();
+      return MapTool.getClient().getImpersonation().isGlobalImpersonatingToken();
     } else {
-      return MapTool.getFrame().getCommandPanel().isImpersonatingToken();
+      return MapTool.getClient().getImpersonation().isImpersonatingToken();
     }
   }
 }

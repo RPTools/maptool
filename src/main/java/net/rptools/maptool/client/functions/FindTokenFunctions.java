@@ -571,9 +571,9 @@ public class FindTokenFunctions extends AbstractFunction {
                   range.get("token").getAsString()));
         }
       } else {
-        GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
+        GUID guid = MapTool.getClient().getImpersonation().getIdentityGUID();
         if (guid != null) token = zone.getToken(guid);
-        else token = findToken(MapTool.getFrame().getCommandPanel().getIdentity(), mapName);
+        else token = findToken(MapTool.getClient().getImpersonation().getIdentity(), mapName);
         if (token == null) {
           throw new ParserException(
               I18N.getText("macro.function.general.noImpersonated", "getTokens"));
@@ -621,9 +621,9 @@ public class FindTokenFunctions extends AbstractFunction {
                   area.get("token").getAsString()));
         }
       } else {
-        GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
+        GUID guid = MapTool.getClient().getImpersonation().getIdentityGUID();
         if (guid != null) token = zone.getToken(guid);
-        else token = findToken(MapTool.getFrame().getCommandPanel().getIdentity(), mapName);
+        else token = findToken(MapTool.getClient().getImpersonation().getIdentity(), mapName);
         if (token == null) {
           throw new ParserException(
               I18N.getText("macro.function.general.noImpersonated", "getTokens"));
@@ -745,9 +745,9 @@ public class FindTokenFunctions extends AbstractFunction {
         break;
       case IMPERSONATED:
         Token t;
-        GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
+        GUID guid = MapTool.getClient().getImpersonation().getIdentityGUID();
         if (guid != null) t = zone.getToken(guid);
-        else t = zone.resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
+        else t = zone.resolveToken(MapTool.getClient().getImpersonation().getIdentity());
         if (t != null) {
           tokenList = getTokensFiltered(Collections.singletonList(t), originalList, match);
         } else if (!match) tokenList = originalList;
@@ -879,8 +879,9 @@ public class FindTokenFunctions extends AbstractFunction {
       return null;
     }
     if (zoneNameOrId == null || zoneNameOrId.length() == 0) {
-      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-      return zr == null ? null : zr.getZone().resolveToken(identifier);
+      // Null with no map open, and also with no window at all, as on a server run without a UI.
+      Zone zone = MapTool.getClient().getCurrentZone();
+      return zone == null ? null : zone.resolveToken(identifier);
     } else {
       if (!GUID.isNotGUID(zoneNameOrId)) {
         try {
@@ -922,8 +923,10 @@ public class FindTokenFunctions extends AbstractFunction {
       return null;
     }
     if (zoneName == null || zoneName.length() == 0) {
-      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-      return zr == null ? null : zr.getZone().getToken(guid);
+      // Null with no map open, and also with no window at all, as on a server run without a UI. The
+      // impersonation identity looks its token up through here.
+      Zone zone = MapTool.getClient().getCurrentZone();
+      return zone == null ? null : zone.getToken(guid);
     } else {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {

@@ -18,11 +18,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.macro.MacroLocationFactory;
+import net.rptools.maptool.model.permissions.Permissions;
+import net.rptools.maptool.server.proto.TokenPropertyDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,21 +41,30 @@ public class TokenPropertiesTest {
   @BeforeEach
   public void setUp() {
     propsList = new ArrayList<>();
-    propsList.add(new TokenProperty("prop1", null, true, false, false, "10"));
-    propsList.add(new TokenProperty("prop2", null, true, false, false, "{prop2=prop1}"));
+    propsList.add(new TokenProperty("prop1", null, null, true, false, Permissions.NONE, "10"));
+    propsList.add(
+        new TokenProperty("prop2", null, null, false, false, Permissions.ALL, "{prop2=prop1}"));
     propsList.add(
         new TokenProperty(
             "jsonObj1",
             null,
-            true,
+            null,
             false,
             false,
+            Permissions.ALL,
             "{\"sampleKey\": 5, \"otherKey\": \"theValue\"}"));
-    propsList.add(new TokenProperty("jsonObj2", null, true, false, false, "{\"prop3\"=other}"));
-    propsList.add(new TokenProperty("jsonObj3", null, true, false, false, "{prop3:other}"));
-    propsList.add(new TokenProperty("jsonArr1", null, true, false, false, "[4, 3]"));
-    propsList.add(new TokenProperty("plainStr1", null, true, false, false, "justAString"));
-    propsList.add(new TokenProperty("badJson", null, true, false, false, "{\"a\": 1}{\"b\": 2}"));
+    propsList.add(
+        new TokenProperty(
+            "jsonObj2", null, null, false, false, Permissions.ALL, "{\"prop3\"=other}"));
+    propsList.add(
+        new TokenProperty("jsonObj3", null, null, false, false, Permissions.ALL, "{prop3:other}"));
+    propsList.add(
+        new TokenProperty("jsonArr1", null, null, false, false, Permissions.ALL, "[4, 3]"));
+    propsList.add(
+        new TokenProperty("plainStr1", null, null, false, false, Permissions.ALL, "justAString"));
+    propsList.add(
+        new TokenProperty(
+            "badJson", null, null, false, false, Permissions.ALL, "{\"a\": 1}{\"b\": 2}"));
     MapTool.getCampaign().putTokenType("testType", propsList);
 
     testToken = new Token();
@@ -68,6 +81,131 @@ public class TokenPropertiesTest {
     factory = MacroLocationFactory.getInstance();
     var loc = factory.createTokenLocation("test", testToken);
     MapTool.getParser().enterContext("test", loc, true);
+  }
+
+  /**
+   * Simple test to make sure constructors don't throw exceptions, and the copy constructor fields
+   * are the same
+   */
+  @Test
+  public void testConstructors() {
+    assertDoesNotThrow(() -> new TokenProperty());
+    assertDoesNotThrow(() -> new TokenProperty("Attribute"));
+    assertDoesNotThrow(() -> new TokenProperty("attribute", "ATT", "Attribute", Permissions.ALL));
+    assertDoesNotThrow(
+        () ->
+            new TokenProperty(
+                "attribute", "ATT", "Attribute", null, true, Permissions.ALL, "value"));
+    assertDoesNotThrow(
+        () ->
+            new TokenProperty(
+                "attribute", "ATT", "Attribute", true, null, Permissions.ALL, "value"));
+    assertDoesNotThrow(
+        () ->
+            new TokenProperty(
+                "attribute", "ATT", "Attribute", true, false, Permissions.ALL, "value"));
+
+    TokenProperty prop =
+        new TokenProperty("attribute", "ATT", "Attribute", true, true, Permissions.ALL, "value");
+    TokenProperty property = new TokenProperty(prop);
+    assertTrue(
+        Objects.equals(prop.getName(), property.getName())
+            && Objects.equals(prop.getShortName(), property.getShortName())
+            && Objects.equals(prop.getDisplayName(), property.getDisplayName())
+            && Objects.equals(prop.getDefaultValue(), property.getDefaultValue())
+            && Objects.equals(prop.getEditorEditPermission(), property.getEditorEditPermission())
+            && Objects.equals(prop.getEditorViewPermission(), property.getEditorViewPermission())
+            && Objects.equals(
+                prop.getStatSheetViewPermission(), property.getStatSheetViewPermission()));
+  }
+
+  /** Test inferred Permissions are present and correct */
+  @Test
+  void testPermissions() {
+    // constructor providing null values for permissions
+    TokenProperty prop =
+        new TokenProperty("attribute", "ATT", "Attribute", null, null, null, "value");
+    assertEquals(TokenProperty.EDITOR_VIEW_DEFAULT, prop.getEditorViewPermission());
+    assertEquals(TokenProperty.EDITOR_EDIT_DEFAULT, prop.getEditorEditPermission());
+    assertEquals(TokenProperty.VIEW_STATSHEET_DEFAULT, prop.getStatSheetViewPermission());
+
+    // player view/edit allowed, sheet visibility non-null
+    prop =
+        new TokenProperty(
+            "attribute", "ATT", "Attribute", true, true, Permissions.OPPONENT_ONLY, "value");
+    assertEquals(Permissions.OWNER, prop.getEditorViewPermission());
+    assertEquals(Permissions.OWNER, prop.getEditorEditPermission());
+    assertEquals(Permissions.OPPONENT_ONLY, prop.getStatSheetViewPermission());
+
+    // player view/edit disallowed
+    prop =
+        new TokenProperty(
+            "attribute", "ATT", "Attribute", false, false, Permissions.OPPONENT_ONLY, "value");
+    assertEquals(Permissions.GM, prop.getEditorViewPermission());
+    assertEquals(Permissions.GM, prop.getEditorEditPermission());
+  }
+
+  /** Test DTO output matches input */
+  @Test
+  public void testDto() {
+    assertDoesNotThrow(
+        () -> {
+          TokenProperty prop =
+              new TokenProperty(
+                  "attribute", "ATT", "Attribute", true, true, Permissions.ALL, "value");
+          TokenPropertyDto dto = prop.toDto();
+          TokenProperty property = TokenProperty.fromDto(dto);
+          assertTrue(
+              Objects.equals(prop.getName(), property.getName())
+                  && Objects.equals(prop.getShortName(), property.getShortName())
+                  && Objects.equals(prop.getDisplayName(), property.getDisplayName())
+                  && Objects.equals(prop.getDefaultValue(), property.getDefaultValue())
+                  && Objects.equals(
+                      prop.getEditorEditPermission(), property.getEditorEditPermission())
+                  && Objects.equals(
+                      prop.getEditorViewPermission(), property.getEditorViewPermission())
+                  && Objects.equals(
+                      prop.getStatSheetViewPermission(), property.getStatSheetViewPermission()));
+        });
+  }
+
+  /** Tests the copy constructor used in readResolve() for legacy field conversion to Permissions */
+  @Test
+  public void testLegacyCompatible() {
+    TokenProperty prop = new TokenProperty("attribute", "ATT", "Attribute", Permissions.ALL);
+    TokenProperty property = new TokenProperty();
+    String[] oldFields = {"highPriority", "ownerOnly", "gmOnly"};
+    String[] newFields = {
+      "editorViewPermission", "editorEditPermission", "statSheetViewPermission"
+    };
+    try {
+      // nullify the new
+      for (String fieldName : newFields) {
+        Field field = prop.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(prop, null);
+      }
+      // set the old
+      for (String fieldName : oldFields) {
+        Field field = prop.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(prop, true);
+        property = new TokenProperty(prop);
+        switch (fieldName) {
+          case "highPriority" ->
+              assertEquals(Permissions.ALL, property.getStatSheetViewPermission());
+          case "ownerOnly" -> {
+            assertEquals(Permissions.OWNER, property.getStatSheetViewPermission());
+            field.set(prop, false);
+          }
+          case "gmOnly" -> assertEquals(Permissions.GM, property.getStatSheetViewPermission());
+        }
+      }
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+    assertEquals(TokenProperty.EDITOR_EDIT_DEFAULT, property.getEditorEditPermission());
+    assertEquals(TokenProperty.EDITOR_VIEW_DEFAULT, property.getEditorViewPermission());
   }
 
   /**
@@ -126,7 +264,7 @@ public class TokenPropertiesTest {
   @Test
   public void testPlainStr() {
     Object val = testToken.getEvaluatedProperty(variableResolver, "plainStr1");
-    assertTrue(val instanceof String);
+    assertInstanceOf(String.class, val);
     assertEquals("justAString", val);
   }
 

@@ -73,7 +73,7 @@ public class TokenFootprint {
 
   public static TokenFootprint fromDto(TokenFootPrintDto dto) {
     return new TokenFootprint(
-        GUID.valueOf(dto.getId()),
+        GUID.fromDto(dto.getId()),
         dto.getName(),
         dto.getLocalizedName(),
         dto.getIsDefault(),
@@ -85,7 +85,7 @@ public class TokenFootprint {
     var dto = TokenFootPrintDto.newBuilder();
     dto.addAllCellSet(cellSet.stream().map(Mapper::map).collect(Collectors.toList()));
     dto.setName(name);
-    dto.setId(id.toString());
+    dto.setId(id.toDto());
     dto.setIsDefault(isDefault);
     dto.setScale(scale);
     return dto.build();
