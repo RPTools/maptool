@@ -675,14 +675,18 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     var model = new DefaultComboBoxModel<FootprintRecord>();
     model.addElement(
         new FootprintRecord(
+            null,
             token.getLayer().isStampLayer()
                 ? I18N.getString("token.popup.menu.size.free")
                 : I18N.getString("token.popup.menu.size.native"),
             null));
 
-    for (var footprint : gridType.getFootprints()) {
-      model.addElement(new FootprintRecord(footprint.getLocalizedName(), footprint));
-      if (token.isSnapToScale() && footprint.getId().equals(footprintId)) {
+    for (var entry : gridType.getFootprintsMap().entrySet()) {
+      GUID id = entry.getKey();
+      TokenFootprint footprint = entry.getValue();
+
+      model.addElement(new FootprintRecord(id, footprint.getLocalizedName(), footprint));
+      if (token.isSnapToScale() && id.equals(footprintId)) {
         selectedIndex = model.getSize() - 1;
       }
     }
@@ -790,15 +794,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     token.setNotesType(getPlayerNotesEditor().getTextType());
 
     /* SIZE */
-    TokenFootprint footprint =
-        getSizeCombo().getItemAt(getSizeCombo().getSelectedIndex()).footprint();
-    if (footprint == null) {
+    var selected = getSizeCombo().getItemAt(getSizeCombo().getSelectedIndex());
+    if (selected.id() == null) {
       token.setSnapToScale(false);
     } else {
       token.setSnapToScale(true);
       token.setFootprintId(
-          MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid().getType(),
-          footprint.getId());
+          MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid().getType(), selected.id());
     }
 
     /* Other */
@@ -1756,7 +1758,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         });
   }
 
-  public record FootprintRecord(String displayName, @Nullable TokenFootprint footprint) {
+  public record FootprintRecord(
+      @Nullable GUID id, String displayName, @Nullable TokenFootprint footprint) {
     @Override
     public String toString() {
       return displayName;

@@ -383,9 +383,12 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
         token.setSnapToScale(false);
       } else {
-        for (TokenFootprint footprint : grid.getType().getFootprints()) {
+        for (var entry : grid.getType().getFootprintsMap().entrySet()) {
+          GUID id = entry.getKey();
+          TokenFootprint footprint = entry.getValue();
+
           if (footprint.getName().equalsIgnoreCase(size)) {
-            token.setFootprintId(grid.getType(), footprint.getId());
+            token.setFootprintId(grid.getType(), id);
             token.setSnapToScale(true);
             break;
           }

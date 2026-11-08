@@ -403,10 +403,10 @@ class TokenLayoutPanelHelper {
 
     var sizeCombo = getSizeCombo();
     var selected = sizeCombo.getItemAt(sizeCombo.getSelectedIndex());
-    if (selected.footprint() == null) {
+    if (selected.id() == null) {
       mirrorToken.setSnapToScale(false);
     } else {
-      mirrorToken.setFootprintId(grid.getType(), selected.footprint().getId());
+      mirrorToken.setFootprintId(grid.getType(), selected.id());
     }
 
     isIsoFigure =

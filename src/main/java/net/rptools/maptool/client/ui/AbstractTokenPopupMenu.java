@@ -426,9 +426,12 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     GridType gridType = renderer.getZone().getGrid().getType();
     GUID selectedFootprintId =
         tokenUnderMouse.isSnapToScale() ? tokenUnderMouse.getFootprintId(gridType) : null;
-    for (TokenFootprint footprint : gridType.getFootprints()) {
-      JMenuItem menuItem = new JCheckBoxMenuItem(new ChangeSizeAction(footprint));
-      if (footprint.getId().equals(selectedFootprintId)) {
+    for (var entry : gridType.getFootprintsMap().entrySet()) {
+      GUID id = entry.getKey();
+      TokenFootprint footprint = entry.getValue();
+      JMenuItem menuItem =
+          new JCheckBoxMenuItem(new ChangeSizeAction(id, footprint.getLocalizedName()));
+      if (id.equals(selectedFootprintId)) {
         menuItem.setSelected(true);
       }
       sizeMenu.add(menuItem);
@@ -568,7 +571,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           continue;
         }
         GridType gridType = renderer.getZone().getGrid().getType();
-        token.setFootprintId(gridType, gridType.getDefaultFootprint().getId());
+        token.setFootprintId(gridType, gridType.getDefaultFootprintId());
         token.setSnapToScale(true);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
@@ -1119,11 +1122,11 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   }
 
   public class ChangeSizeAction extends AbstractAction {
-    private final TokenFootprint footprint;
+    private final GUID id;
 
-    public ChangeSizeAction(TokenFootprint footprint) {
-      super(footprint.getLocalizedName());
-      this.footprint = footprint;
+    public ChangeSizeAction(GUID id, String text) {
+      super(text);
+      this.id = id;
     }
 
     /*
@@ -1135,7 +1138,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
       for (GUID tokenGUID : selectedTokenSet) {
         Token token = renderer.getZone().getToken(tokenGUID);
-        token.setFootprintId(renderer.getZone().getGrid().getType(), footprint.getId());
+        token.setFootprintId(renderer.getZone().getGrid().getType(), id);
         token.setSnapToScale(true);
         renderer.flush(token);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);

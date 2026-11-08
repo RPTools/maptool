@@ -31,14 +31,13 @@ import net.rptools.maptool.language.I18N;
  * occupied cell is at 0, 0
  */
 public class TokenFootprint {
-  private final GUID id;
   private final String name;
   private final double scale;
   private final @Nullable String localizedNameKey;
   private final Set<Point> cellSet = new HashSet<>();
 
   public TokenFootprint() {
-    this(new GUID(), "", null, 1.0);
+    this("", null, 1.0);
   }
 
   /**
@@ -46,7 +45,6 @@ public class TokenFootprint {
    *
    * <p>The point {@code (0, 0)} is implicitly included.
    *
-   * @param id The unique ID of the footprint.
    * @param name The unique name of the footprint.
    * @param localizedNameKey An i18n key pointing to a human-readable name for the footprint.
    * @param scale For footprints less than one grid cell, how much to scale the footprint relative
@@ -54,8 +52,7 @@ public class TokenFootprint {
    * @param points The non-zero points making up the footprint.
    */
   public TokenFootprint(
-      GUID id, String name, @Nullable String localizedNameKey, double scale, Point... points) {
-    this.id = id;
+      String name, @Nullable String localizedNameKey, double scale, Point... points) {
     this.name = name;
     this.localizedNameKey = localizedNameKey;
     this.scale = scale;
@@ -80,10 +77,6 @@ public class TokenFootprint {
       occupiedSet.add(cp);
     }
     return occupiedSet;
-  }
-
-  public GUID getId() {
-    return id;
   }
 
   /** Returns the English name of the footprint */
