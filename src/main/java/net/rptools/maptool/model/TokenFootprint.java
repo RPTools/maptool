@@ -18,8 +18,9 @@ import static net.rptools.lib.MathUtil.isEven;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -37,7 +38,7 @@ public class TokenFootprint {
   private final Set<Point> cellSet = new HashSet<>();
 
   public TokenFootprint() {
-    this("", null, 1.0);
+    this("", null, 1.0, List.of());
   }
 
   /**
@@ -52,11 +53,11 @@ public class TokenFootprint {
    * @param points The non-zero points making up the footprint.
    */
   public TokenFootprint(
-      String name, @Nullable String localizedNameKey, double scale, Point... points) {
+      String name, @Nullable String localizedNameKey, double scale, Collection<Point> points) {
     this.name = name;
     this.localizedNameKey = localizedNameKey;
     this.scale = scale;
-    this.cellSet.addAll(Arrays.asList(points));
+    this.cellSet.addAll(points);
   }
 
   @Override
