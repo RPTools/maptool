@@ -1,4 +1,10 @@
+![GitHub branch check runs](https://img.shields.io/github/check-runs/RPTools/MapTool/develop?label=Development%20Checks)
+[![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)
 ![GitHub License](https://img.shields.io/github/license/RPTools/maptool)
+![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/RPTools/maptool/latest/total)
+
+![GitHub Issues or Pull Requests by label](https://img.shields.io/github/issues/RPTools/maptool/feature?label=Features&link=!%5BGitHub%20Issues%20or%20Pull%20Requests%20by%20label%5D(https%3A%2F%2Fimg.shields.io%2Fgithub%2Fissues%2FRPTools%2Fmaptool%2Ffeature%3Flabel%3DFeature%2520Requests%26link%3Dhttps%253A%252F%252Fgithub.com%252FRPTools%252Fmaptool%252Fissues%253Fq%253Dsort%25253Aupdated-desc%252520is%25253Aissue%252520is%25253Aopen%252520label%25253Afeature))
+![GitHub Issues or Pull Requests by label](https://img.shields.io/github/issues/RPTools/maptool/bug?label=Bugs&link=!%5BGitHub%20Issues%20or%20Pull%20Requests%20by%20label%5D(https%3A%2F%2Fimg.shields.io%2Fgithub%2Fissues%2FRPTools%2Fmaptool%2Ffeature%3Flabel%3DFeature%2520Requests%26link%3Dhttps%253A%252F%252Fgithub.com%252FRPTools%252Fmaptool%252Fissues%253Fq%253Dsort%25253Aupdated-desc%252520is%25253Aissue%252520is%25253Aopen%252520label%25253Afeature))
 
 ![Latest Release](https://img.shields.io/github/v/release/RPTools/MapTool?label=Stable%20Release)
 ![Latest Release Candidate](https://img.shields.io/github/v/release/RPTools/maptool?include_prereleases&filter=*-rc.*&label=Release%20Candidate)
@@ -6,9 +12,9 @@
 [![Discord](./doc/discord_100.webp)](discord.gg/dZy7HeYYVY)
 ![Discord](https://img.shields.io/discord/296230822262865920?label=MapTool%20Discord)
 
-# MapTool
+# MapTool ![GitHub Repo stars](https://img.shields.io/github/stars/RPTools/MapTool)
 
-This is an unofficial custom development build of RPTools' Maptool Virtual Tabletop built from v1.18.7, that exposes the mouse cursor's map X and map Y position for use in macros. This build does not need to be installed, and is simply run from the archive's executable.
+Welcome to the MapTool repository! This is the official repository for the MapTool Virtual Tabletop
 
 ## So what is MapTool?
 
@@ -51,7 +57,7 @@ development branches.
 
 ## For Users
 
-MapTool's official build is available for Windows, Mac OS X, and Linux.
+MapTool is available for Windows, Mac OS X, and Linux.
 
 You can download the latest stable release
 from
@@ -68,6 +74,13 @@ getting started using MapTool.
 The MapTool installers for each platform are self contained and include everthing needed to run
 MapTool.
 
+## For Developers
+
+See the [CONTRIBUTING.md](CONTRIBUTING.md) file for information on setting up your development
+environment and contributing to MapTool.
+
+### Requirements
+
 ### Resources
 
 - **Website:** https://rptools.net/
@@ -77,3 +90,17 @@ MapTool.
 - **Reddit:**  https://www.reddit.com/r/MapTool/
 - **Crowdin:** https://crowdin.com/project/maptool
 
+## Contributing to MapTool
+
+MapTool wouldn't be where it is today without the contributions of many people. We welcome
+contributions from anyone who is interested in helping out, you don't need to be a developer to
+contribute. For detailed information
+about how
+you can contribute to MapTool, please see our [Contributing Guide](CONTRIBUTING.md).
+
+Recommended IDE
+----------------
+We currently recommend [IntelliJ IDEA](https://www.jetbrains.com/idea/) as our editor of choice
+although Eclipse and other IDE's should work just fine as well. For IntelliJ IDEA, simply open the
+project folder and it will detect it as a Gradle project and you should be ready to go with minimal
+effort.
