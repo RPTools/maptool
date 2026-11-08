@@ -19,6 +19,7 @@ import static net.rptools.lib.MathUtil.isEven;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -60,6 +61,37 @@ public class TokenFootprint {
     this.cellSet = new HashSet<>(points);
   }
 
+  /**
+   * @return the unique name of the footprint
+   */
+  public String getName() {
+    return name;
+  }
+
+  public @Nullable String getLocalizedNameKey() {
+    return localizedNameKey;
+  }
+
+  /**
+   * @return the localized name of the footprint
+   */
+  public String getLocalizedName() {
+    return localizedNameKey == null ? name : I18N.getString(localizedNameKey);
+  }
+
+  /**
+   * A scale factor to convert {@link #getBounds(Grid, CellPoint)} to actual footprint bounds.
+   *
+   * @return The footprint's scale factor.
+   */
+  public double getScale() {
+    return scale;
+  }
+
+  public Set<Point> getCellSet() {
+    return Collections.unmodifiableSet(cellSet);
+  }
+
   @Override
   public String toString() {
     return getLocalizedName();
@@ -80,27 +112,8 @@ public class TokenFootprint {
     return occupiedSet;
   }
 
-  /** Returns the English name of the footprint */
-  public String getName() {
-    return name;
-  }
-
-  /** Returns the localized name of the footprint */
-  public String getLocalizedName() {
-    return localizedNameKey == null ? name : I18N.getString(localizedNameKey);
-  }
-
   public Rectangle getBounds(Grid grid) {
     return getBounds(grid, null);
-  }
-
-  /**
-   * A scale factor to convert {@link #getBounds(Grid, CellPoint)} to actual footprint bounds.
-   *
-   * @return The footprint's scale factor.
-   */
-  public double getScale() {
-    return scale;
   }
 
   /**
