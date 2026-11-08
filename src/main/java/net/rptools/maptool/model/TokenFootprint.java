@@ -35,7 +35,7 @@ public class TokenFootprint {
   private final String name;
   private final double scale;
   private final @Nullable String localizedNameKey;
-  private final Set<Point> cellSet = new HashSet<>();
+  private final Set<Point> cellSet;
 
   public TokenFootprint() {
     this("", null, 1.0, List.of());
@@ -57,7 +57,7 @@ public class TokenFootprint {
     this.name = name;
     this.localizedNameKey = localizedNameKey;
     this.scale = scale;
-    this.cellSet.addAll(points);
+    this.cellSet = new HashSet<>(points);
   }
 
   @Override
