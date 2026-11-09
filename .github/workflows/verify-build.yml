@@ -23,7 +23,7 @@ jobs:
   formatting:
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-15-intel, macos-15]
+        os: [windows-latest, ubuntu-24.04, macos-15-intel, macos-15]
         java: ["21"]
         distribution: ["temurin"]
       fail-fast: false
