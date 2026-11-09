@@ -430,7 +430,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       GUID id = entry.getKey();
       TokenFootprint footprint = entry.getValue();
       JMenuItem menuItem =
-          new JCheckBoxMenuItem(new ChangeSizeAction(id, footprint.getLocalizedName()));
+          new JCheckBoxMenuItem(new ChangeSizeAction(id, footprint.getLocalizedName(), gridType));
       if (id.equals(selectedFootprintId)) {
         menuItem.setSelected(true);
       }
@@ -552,8 +552,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token == null) {
           continue;
         }
-        token.setSnapToScale(false);
-        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToScale, false);
+        renderer.flush(token);
       }
       renderer.repaint();
     }
@@ -565,15 +565,16 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     }
 
     public void actionPerformed(ActionEvent e) {
+      GridType gridType = renderer.getZone().getGrid().getType();
       for (GUID tokenGUID : selectedTokenSet) {
         Token token = renderer.getZone().getToken(tokenGUID);
         if (token == null) {
           continue;
         }
-        GridType gridType = renderer.getZone().getGrid().getType();
-        token.setFootprintId(gridType, gridType.getDefaultFootprintId());
-        token.setSnapToScale(true);
-        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+        MapTool.serverCommand()
+            .setTokenFootprint(
+                renderer.getZone(), token, gridType, gridType.getDefaultFootprintId());
+        renderer.flush(token);
       }
       renderer.repaint();
     }
@@ -1123,25 +1124,22 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ChangeSizeAction extends AbstractAction {
     private final GUID id;
+    private final GridType gridType;
 
-    public ChangeSizeAction(GUID id, String text) {
+    public ChangeSizeAction(GUID id, String text, GridType gridType) {
       super(text);
       this.id = id;
+      this.gridType = gridType;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event. ActionEvent)
-     */
     public void actionPerformed(ActionEvent e) {
-      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
       for (GUID tokenGUID : selectedTokenSet) {
         Token token = renderer.getZone().getToken(tokenGUID);
-        token.setFootprintId(renderer.getZone().getGrid().getType(), id);
-        token.setSnapToScale(true);
+        if (token == null) {
+          continue;
+        }
+        MapTool.serverCommand().setTokenFootprint(renderer.getZone(), token, gridType, id);
         renderer.flush(token);
-        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
       renderer.repaint();
     }
