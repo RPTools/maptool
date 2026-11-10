@@ -1785,7 +1785,7 @@ public class Token implements Cloneable {
    * @return Returns the size.
    */
   public TokenFootprint getFootprint(Grid grid) {
-    return grid.getType().getFootprint(getFootprintId(grid.getType()));
+    return grid.getType().getFootprints().get(getFootprintId(grid.getType()));
   }
 
   /**
@@ -1795,7 +1795,7 @@ public class Token implements Cloneable {
    * @return Returns the size.
    */
   public GUID getFootprintId(GridType gridType) {
-    return sizeMap.getOrDefault(getSizeMapKey(gridType), gridType.getDefaultFootprintId());
+    return sizeMap.getOrDefault(getSizeMapKey(gridType), gridType.getFootprints().getDefaultId());
   }
 
   public void setFootprintId(GridType gridType, GUID footprintId) {
@@ -1805,7 +1805,8 @@ public class Token implements Cloneable {
   public Set<CellPoint> getOccupiedCells(Grid grid) {
     var gridType = grid.getType();
     return gridType
-        .getFootprint(getFootprintId(gridType))
+        .getFootprints()
+        .get(getFootprintId(gridType))
         .getOccupiedCells(
             grid.convert(new ZonePoint(getX(), getY())), gridType.getOffsetTranslator());
   }

@@ -94,7 +94,7 @@ public class GridlessGrid extends Grid {
   public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
     if (movementKeys == null) {
       movementKeys = new HashMap<KeyStroke, Action>(18); // This is 13/0.75, rounded up
-      Rectangle r = getType().getDefaultFootprint().getBounds(this);
+      Rectangle r = getType().getFootprints().getDefault().getBounds(this);
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, 0),
           new MovementKey(callback, -r.width, -r.height));

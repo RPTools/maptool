@@ -681,7 +681,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 : I18N.getString("token.popup.menu.size.native"),
             null));
 
-    for (var entry : gridType.getFootprintsMap().entrySet()) {
+    for (var entry : gridType.getFootprints()) {
       GUID id = entry.getKey();
       TokenFootprint footprint = entry.getValue();
 

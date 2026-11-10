@@ -383,7 +383,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
         token.setSnapToScale(false);
       } else {
-        for (var entry : grid.getType().getFootprintsMap().entrySet()) {
+        for (var entry : grid.getType().getFootprints()) {
           GUID id = entry.getKey();
           TokenFootprint footprint = entry.getValue();
 

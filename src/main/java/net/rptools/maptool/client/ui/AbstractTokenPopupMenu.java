@@ -426,7 +426,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     GridType gridType = renderer.getZone().getGrid().getType();
     GUID selectedFootprintId =
         tokenUnderMouse.isSnapToScale() ? tokenUnderMouse.getFootprintId(gridType) : null;
-    for (var entry : gridType.getFootprintsMap().entrySet()) {
+    for (var entry : gridType.getFootprints()) {
       GUID id = entry.getKey();
       TokenFootprint footprint = entry.getValue();
       JMenuItem menuItem =
@@ -573,7 +573,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         }
         MapTool.serverCommand()
             .setTokenFootprint(
-                renderer.getZone(), token, gridType, gridType.getDefaultFootprintId());
+                renderer.getZone(), token, gridType, gridType.getFootprints().getDefaultId());
         renderer.flush(token);
       }
       renderer.repaint();

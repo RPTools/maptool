@@ -94,12 +94,14 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   }
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
+    var zone = renderer.getZone();
+
     if (walker != null) {
       renderer.renderPath(
-          g, walker.getPath(), renderer.getZone().getGrid().getType().getDefaultFootprint());
+          g, walker.getPath(), zone.getGrid().getType().getFootprints().getDefault());
 
       // distance label position to be below the last cell in the path and justified centrally
-      Rectangle lastCellPointBounds = renderer.getZone().getGrid().getBounds(walker.getLastPoint());
+      Rectangle lastCellPointBounds = zone.getGrid().getBounds(walker.getLastPoint());
       ZonePoint zp =
           new ZonePoint(
               (int) lastCellPointBounds.getCenterX(), (int) lastCellPointBounds.getMaxY());
@@ -128,8 +130,8 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       }
       assert lastZP != null : "Our non-empty iterable was empty!";
 
-      c /= renderer.getZone().getGrid().getSize();
-      c *= renderer.getZone().getUnitsPerCell();
+      c /= zone.getGrid().getSize();
+      c *= zone.getUnitsPerCell();
 
       Object oldAA = SwingUtil.useAntiAliasing(g);
       try {

@@ -1020,7 +1020,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     GridType gridType = zone.getGrid().getType();
     return token.isSnapToScale()
         ? ""
-        : gridType.getFootprint(token.getFootprintId(gridType)).getName();
+        : gridType.getFootprints().get(token.getFootprintId(gridType)).getName();
   }
 
   /**
@@ -1039,7 +1039,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     GridType gridType = zone.getGrid().getType();
-    for (var entry : gridType.getFootprintsMap().entrySet()) {
+    for (var entry : gridType.getFootprints()) {
       GUID id = entry.getKey();
       TokenFootprint footprint = entry.getValue();
 
@@ -1060,7 +1060,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
    */
   private void resetSize(Zone zone, Token token) {
     GridType gridType = zone.getGrid().getType();
-    GUID footprintId = gridType.getDefaultFootprintId();
+    GUID footprintId = gridType.getFootprints().getDefaultId();
     MapTool.serverCommand().setTokenFootprint(zone, token, gridType, footprintId);
   }
 
