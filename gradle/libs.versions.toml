@@ -209,6 +209,6 @@ git-version = { id = "com.palantir.git-version", version = "5.1.0" }
 osdetector = { id = "com.google.osdetector", version = "1.7.3" }
 javafx = { id = "org.openjfx.javafxplugin", version = "0.0.14" }
 jpackage-runtime = { id = "org.beryx.runtime", version = "2.0.1" }
-protobuf = { id = "com.google.protobuf", version = "0.10.0" }
+protobuf = { id = "com.google.protobuf", version = "0.10.1" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 spotless = { id = "com.diffplug.spotless", version = "8.11.0" }
