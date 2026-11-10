@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Dependencies
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions: # The Dependency Submission API requires write permission
       contents: write
     steps:
