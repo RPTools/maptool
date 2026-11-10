@@ -627,8 +627,6 @@ public class Zone {
         Token old = zone.tokenMap.get(oldGUID);
         Token token = new Token(old, keepIds); // keep old ids at server start
         if (old.getExposedAreaGUID() != null) {
-          GUID guid = keepIds ? old.getExposedAreaGUID() : new GUID();
-          token.setExposedAreaGUID(guid);
           // Update the TEA on the new map, since we have the Token object available...
           ExposedAreaMetaData eamd = zone.getExposedAreaMetaData(old.getExposedAreaGUID());
           if (eamd != null) {

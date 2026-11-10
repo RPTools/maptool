@@ -15,7 +15,6 @@
 package net.rptools.maptool.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,9 +39,9 @@ class ZoneCopyTest {
   }
 
   @Test
-  void copyWithNewIdsGetsANewExposedAreaKey() {
+  void copyWithNewIdsKeepsTheExposedAreaKey() {
     Zone copy = new Zone(zone, false);
 
-    assertNotEquals(token.getExposedAreaGUID(), copy.getAllTokens().get(0).getExposedAreaGUID());
+    assertEquals(token.getExposedAreaGUID(), copy.getAllTokens().get(0).getExposedAreaGUID());
   }
 }
