@@ -769,7 +769,7 @@
                       <name value="tokenStatesStates"/>
                       <selectionMode value="0"/>
                       <visible value="true"/>
-                      <visibleRowCount value="8"/>
+                      <visibleRowCount value="0"/>
                     </properties>
                   </component>
                 </children>
@@ -1077,7 +1077,7 @@
                       <layoutOrientation value="0"/>
                       <name value="tokenBarImages"/>
                       <selectionMode value="0"/>
-                      <visibleRowCount value="4"/>
+                      <visibleRowCount value="0"/>
                     </properties>
                   </component>
                 </children>
@@ -1096,7 +1096,7 @@
                       <layoutOrientation value="0"/>
                       <name value="tokenBarBars"/>
                       <selectionMode value="0"/>
-                      <visibleRowCount value="4"/>
+                      <visibleRowCount value="0"/>
                     </properties>
                   </component>
                 </children>
