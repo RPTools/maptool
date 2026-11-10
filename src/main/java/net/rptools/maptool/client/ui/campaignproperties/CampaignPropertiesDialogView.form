@@ -765,11 +765,11 @@
                   <component id="12ddb" class="javax.swing.JList">
                     <constraints/>
                     <properties>
-                      <layoutOrientation value="2"/>
+                      <layoutOrientation value="0"/>
                       <name value="tokenStatesStates"/>
                       <selectionMode value="0"/>
                       <visible value="true"/>
-                      <visibleRowCount value="0"/>
+                      <visibleRowCount value="8"/>
                     </properties>
                   </component>
                 </children>
@@ -1074,10 +1074,10 @@
                   <component id="82992" class="javax.swing.JList">
                     <constraints/>
                     <properties>
-                      <layoutOrientation value="2"/>
+                      <layoutOrientation value="0"/>
                       <name value="tokenBarImages"/>
                       <selectionMode value="0"/>
-                      <visibleRowCount value="0"/>
+                      <visibleRowCount value="4"/>
                     </properties>
                   </component>
                 </children>
@@ -1093,10 +1093,10 @@
                     <constraints/>
                     <properties>
                       <enabled value="true"/>
-                      <layoutOrientation value="2"/>
+                      <layoutOrientation value="0"/>
                       <name value="tokenBarBars"/>
                       <selectionMode value="0"/>
-                      <visibleRowCount value="0"/>
+                      <visibleRowCount value="4"/>
                     </properties>
                   </component>
                 </children>
