@@ -39,7 +39,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.gamedata.MTScriptDataConversion;
@@ -1039,14 +1038,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     GridType gridType = zone.getGrid().getType();
-    for (var entry : gridType.getFootprints()) {
-      GUID id = entry.getKey();
-      TokenFootprint footprint = entry.getValue();
-
-      if (footprint.getName().equalsIgnoreCase(size)) {
-        MapTool.serverCommand().setTokenFootprint(zone, token, gridType, id);
-        return footprint.getName();
-      }
+    var maybeId = gridType.getFootprints().getIdByName(size);
+    if (maybeId.isPresent()) {
+      MapTool.serverCommand().setTokenFootprint(zone, token, gridType, maybeId.get());
+      return size;
     }
     throw new ParserException(
         I18N.getText("macro.function.tokenProperty.invalidSize", "setSize", size));

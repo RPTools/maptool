@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +34,7 @@ public class TokenFootprints implements Iterable<Map.Entry<GUID, TokenFootprint>
   private static final Logger log = LogManager.getLogger(TokenFootprints.class);
 
   private final LinkedHashMap<GUID, TokenFootprint> footprints;
+  private final CaseInsensitiveMap<String, GUID> idsByName;
   private final GUID defaultFootprintId;
   private final TokenFootprint defaultFootprint;
 
@@ -44,6 +47,7 @@ public class TokenFootprints implements Iterable<Map.Entry<GUID, TokenFootprint>
   public TokenFootprints(
       GUID defaultFootprintId, List<Map.Entry<GUID, TokenFootprint>> footprints) {
     this.footprints = new LinkedHashMap<>();
+    this.idsByName = new CaseInsensitiveMap<>();
     for (var entry : footprints) {
       GUID id = entry.getKey();
       TokenFootprint footprint = entry.getValue();
@@ -51,6 +55,11 @@ public class TokenFootprints implements Iterable<Map.Entry<GUID, TokenFootprint>
       var existing = this.footprints.put(id, footprint);
       if (existing != null) {
         log.error("Found duplicate footprint ID: {}", id);
+      }
+
+      var existingId = this.idsByName.put(footprint.getName(), id);
+      if (existingId != null) {
+        log.error("Found duplicate footprint name: {}", footprint.getName());
       }
     }
 
@@ -92,6 +101,17 @@ public class TokenFootprints implements Iterable<Map.Entry<GUID, TokenFootprint>
    */
   public TokenFootprint get(GUID footprintId) {
     return footprints.getOrDefault(footprintId, defaultFootprint);
+  }
+
+  /**
+   * Case-insensitive name lookup.
+   *
+   * @param name The footprint name to look up.
+   * @return The ID for the footprint with name {@code name}, or {@link Optional#empty()} if there
+   *     is no match.
+   */
+  public Optional<GUID> getIdByName(String name) {
+    return Optional.ofNullable(idsByName.get(name));
   }
 
   /**

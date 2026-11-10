@@ -30,7 +30,6 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.AssetResolver;
@@ -383,16 +382,14 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
         token.setSnapToScale(false);
       } else {
-        for (var entry : grid.getType().getFootprints()) {
-          GUID id = entry.getKey();
-          TokenFootprint footprint = entry.getValue();
-
-          if (footprint.getName().equalsIgnoreCase(size)) {
-            token.setFootprintId(grid.getType(), id);
-            token.setSnapToScale(true);
-            break;
-          }
-        }
+        grid.getType()
+            .getFootprints()
+            .getIdByName(size)
+            .ifPresent(
+                footprintId -> {
+                  token.setFootprintId(grid.getType(), footprintId);
+                  token.setSnapToScale(true);
+                });
       }
     }
 
