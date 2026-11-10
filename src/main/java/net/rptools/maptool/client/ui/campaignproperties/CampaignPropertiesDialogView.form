@@ -767,7 +767,6 @@
                     <properties>
                       <layoutOrientation value="2"/>
                       <name value="tokenStatesStates"/>
-                      <preferredSize width="0" height="0"/>
                       <selectionMode value="0"/>
                       <visible value="true"/>
                       <visibleRowCount value="0"/>
