@@ -16,6 +16,7 @@ package net.rptools.clientserver.simple.connection;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import net.rptools.clientserver.ActivityListener;
@@ -212,7 +213,11 @@ public class SocketConnection extends AbstractConnection implements Connection {
             log.warn("Lost client {}", SocketConnection.this.getId(), e);
             return;
           } catch (IOException e) {
-            log.error(e);
+            if (isRoutineDisconnect(e)) {
+              log.info("Connection {} closed: {}", SocketConnection.this.getId(), e.getMessage());
+            } else {
+              log.warn("Closing connection {}: {}", SocketConnection.this.getId(), e.toString());
+            }
             return;
           } catch (Throwable t) {
             // Messages are framed only by their length header. Once reading one has failed part way
@@ -240,6 +245,22 @@ public class SocketConnection extends AbstractConnection implements Connection {
           (state, length, done) ->
               notifyListeners(ActivityListener.Direction.Inbound, state, length, done));
     }
+  }
+
+  /**
+   * Whether a read failed only because the connection ended: the peer closed it between messages,
+   * it was reset or dropped, or this side closed the socket. A server open to the internet sees
+   * these all the time -- players leaving, port scanners -- so they are not errors here. A stream
+   * that breaks inside a message, or a length no MapTool peer sends, still warrants a warning.
+   *
+   * @param e what reading threw
+   * @return true if it was an ordinary end of the connection
+   */
+  static boolean isRoutineDisconnect(IOException e) {
+    if (e instanceof SocketException) {
+      return true;
+    }
+    return !(e instanceof EOFException) && "Stream closed".equals(e.getMessage());
   }
 
   /**
