@@ -104,3 +104,4 @@ We currently recommend [IntelliJ IDEA](https://www.jetbrains.com/idea/) as our e
 although Eclipse and other IDE's should work just fine as well. For IntelliJ IDEA, simply open the
 project folder and it will detect it as a Gradle project and you should be ready to go with minimal
 effort.
+
