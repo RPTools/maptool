@@ -90,12 +90,12 @@ public class MapFunctions extends AbstractFunction {
       var statusBar = MapTool.getFrame().getCoordinateStatusBar();
       if (!statusBar.hasCoordinates()) {
         throw new ParserException(
-                //I18N.getText("macro.function.general.argumentTypeInvalid", functionName));
-                "getStatusBarMapCoordinates(): No cursor coordinates are available. "
-              + "Move the mouse over the map and try again.");
+                I18N.getText("macro.function.general.argumentTypeInvalid", functionName));
       }
-      return "{\"x\":" + statusBar.getMapX()
-           + ",\"y\":" + statusBar.getMapY() + "}";
+      JsonObject statusBarMapCoordinates = new JsonObject();
+      statusBarMapCoordinates.addProperty("x", statusBar.getMapX());
+      statusBarMapCoordinates.addProperty("y", statusBar.getMapY());
+      return statusBarMapCoordinates.toString();
     } else if (functionName.equalsIgnoreCase("getMapIDs")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       final var mapName = parameters.get(0).toString();

@@ -48,26 +48,16 @@ public class CoordinateStatusBar extends JLabel {
     return getMinimumSize();
   }
 
-   /*
-  public void clear() {
-    setText(""); // $NON-NLS-1$
-  }
-
-  public void update(int x, int y) {
-    setText("  " + x + ", " + y); // $NON-NLS-1$ //$NON-NLS-2$
-  }
-   */
-
   public void clear() {
     hasCoordinates = false;
-    setText("");
+    setText(""); // $NON-NLS-1$
   }
 
   public void update(int x, int y) {
     mapX = x;
     mapY = y;
     hasCoordinates = true;
-    setText(" " + x + ", " + y);
+    setText(" " + x + ", " + y); // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   public int getMapX() {
