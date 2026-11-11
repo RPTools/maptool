@@ -45,7 +45,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-${{ runner.arch }}-gradle-
     - name: Build with Gradle
-      run: ./gradlew --no-daemon jpackage zipJpackageImage
+      run: ./gradlew --no-daemon jpackage zipJpackageImage -PnoGit -PgitCommit='${{ github.sha }}' -PgitTag='${{ github.event.release.tag_name }}'
       # After Gradle completes, publishable artifacts will be placed under releases/renamed/
 
     # region Arch package build, by transforming the RPM.
@@ -73,7 +73,7 @@ jobs:
     # region Build shadow JAR on Windows. Not for any reason, it just needs to get built in one place
     - name: Build uberJar on Windows
       if: runner.os == 'windows' && runner.arch == 'x64'
-      run: ./gradlew shadowJar
+      run: ./gradlew shadowJar -PnoGit -PgitCommit='${{ github.sha }}' -PgitTag='${{ github.event.release.tag_name }}'
     # endregion
 
     - name: Upload release assets
