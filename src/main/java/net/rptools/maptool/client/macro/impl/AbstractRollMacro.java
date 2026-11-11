@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.macro.impl;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 
 public abstract class AbstractRollMacro extends AbstractMacro {
@@ -22,7 +23,8 @@ public abstract class AbstractRollMacro extends AbstractMacro {
   protected String roll(String roll) {
 
     try {
-      String text = roll + " => " + MapTool.getParser().expandRoll(roll);
+      String text =
+          roll + " => " + MapTool.getParser().expandRoll(new MapToolVariableResolver(null), roll);
 
       return text;
     } catch (Exception e) {
