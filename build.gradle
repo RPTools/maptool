@@ -37,59 +37,62 @@ defaultTasks 'clean', 'build'
 // Custom properties
 def appSemVer = ""
 ext {
-    // Allow packagers to build from the source code tarball, which doesn't
-    // have '.git'
-    revisionFull = project.findProperty('gitCommit')
-    revision = revisionFull ? revisionFull.substring(0, 10) : ''
-    tagVersion = project.findProperty('gitTag')
-    environment = 'Production'
-    sentryDSN = sentry_production_dsn
-
-    if (!project.hasProperty('noGit')) {
-        // Get tag and commit info from Git to use for version numbering
-        def details = versionDetails()
-
-        revision = details.gitHash
-        revisionFull = details.gitHashFull
-        // Do not count as production if changes (committed or otherwise) have been made to the tree
-        // since the tag. And if the tag is a nightly tag, give it the special "Nightly" environment
-        // instead of counting it the same as a production release.
-        if (!details.isCleanTag) {
-            tagVersion = 'SNAPSHOT-' + revision
-            project.description = "SNAPSHOT-" + revision
-            environment = "Development"
-            sentryDSN = sentry_development_dsn
-        }
-        else if (details.lastTag.startsWith('nightly')) {
-            tagVersion = 'NIGHTLY-' + revision
-            project.description = "NIGHTLY-" + revision
-            environment = "Nightly"
-            sentryDSN = sentry_production_dsn
-        }
-        else {
-            tagVersion = details.lastTag
-            environment = "Production"
-            sentryDSN = sentry_production_dsn
-        }
+    // region Get information from git.
+    if (project.hasProperty('noGit')) {
+        // Read everything from project properties instead of git itself.
+        // This allows packages to build from the source code tarball which doesn't have `/.git/`.
+        def gitHash = project.findProperty('gitCommit')
+        gitDetails = [
+                gitHashFull: gitHash ?: '',
+                gitHash: gitHash ? gitHash.substring(0, 10) : '',
+                isCleanTag: gitHash ? true : false,
+                lastTag: project.findProperty('gitTag'),
+        ]
     }
+    else {
+        // Read from git proper. This will fail if not in a git repo.
+        gitDetails = versionDetails()
+    }
+    // endregion
 
-    // This will strip anything other than core semver from the tag
-    // e.g. "1.7.2-rc.1" becomes "1.7.2"
-    def foundTags = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
+    // Will be overwritten for clean semantic version tags.
+    appSemVer = defaultVersion
 
-    // If no semver exists, like in dev environment use a defaultVersion from gradle.properties
-    if (foundTags.isEmpty()) {
-        appSemVer = defaultVersion
-    } else {
-        appSemVer = foundTags[0]
-        developerRelease = ""
+    // Do not count as production if changes (committed or otherwise) have been made to the tree
+    // since the tag. And if the tag is a nightly tag, give it the special "Nightly" environment
+    // instead of counting it the same as a production release.
+    if (!gitDetails.isCleanTag) {
+        // Dev build. Ignore any provided tag since it isn't meaningful.
+        tagVersion = 'SNAPSHOT-' + gitDetails.gitHash
+        project.description = "SNAPSHOT-" + gitDetails.gitHash
+        environment = "Development"
+        sentryDSN = sentry_development_dsn
+    }
+    else if (gitDetails.lastTag.startsWith('nightly')) {
+        tagVersion = gitDetails.lastTag;
+        project.description = "NIGHTLY-" + gitDetails.gitHash
+        environment = "Nightly"
+        sentryDSN = sentry_production_dsn
+    }
+    else {
+        tagVersion = gitDetails.lastTag;
+
+        // This will strip anything other than core semver from the tag
+        // e.g. "1.7.2-rc.1" becomes "1.7.2"
+        def foundTags = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
+        if (!foundTags.isEmpty()) {
+            appSemVer = foundTags[0]
+            developerRelease = ""
+        }
+
+        environment = "Production"
+        sentryDSN = sentry_production_dsn
     }
 
     // vendor, tagVersion, appSemVer, and DSN's defaults are set in gradle.properties
     println 'Configuring for ' + project.name + developerRelease + " " + tagVersion + " by " + vendor
     println "AppVersion: " + appSemVer
 
-    // vendor, tagVersion, appSemVer, and DSNs defaults are set in gradle.properties
     println "OS Detected: '${osdetector.os}' on '${osdetector.arch}'"
 
     // region Alternate, human-friendly names for platforms (OS & architecture)
@@ -136,8 +139,8 @@ def jarManifestAttributes = [
         'Implementation-Title': project.name + developerRelease,
         'Implementation-Version': tagVersion,
         'Implementation-Vendor': vendor,
-        'Git-Commit': revision,
-        'Git-Commit-SHA': revisionFull,
+        'Git-Commit': gitDetails.gitHash,
+        'Git-Commit-SHA': gitDetails.gitHashFull,
         'Built-By': System.getProperty('user.name'),
         'Built-Date': new Date(),
         'Built-JDK': System.getProperty('java.version'),
@@ -407,6 +410,10 @@ tasks.register('renameInstaller', Copy) {
     rename { String fileName ->
         {
             fileName = fileName.replaceFirst("(?i)^(${project.name})", "\$1-${brandedOs}")
+            // Particularly for nightly builds, replace the default version with something nicer for
+            // humans.
+            fileName = fileName.replaceFirst("${appSemVer}", "${tagVersion}")
+
             // Insert platform details to distinguish apple builds, since they aren't by default.
             if (osdetector.os == 'osx') {
                 fileName = fileName.replaceAll('([.][^.]*)$', "-${brandedArch}\$1");
@@ -433,7 +440,7 @@ def zipJpackageImage = tasks.register('zipJpackageImage', Zip) {
     from "${jpackageImage.jpackageData.imageOutputDirOrDefault}${File.separator}${jpackageImage.jpackageData.imageNameOrDefault}${extension}"
     // Workflow code will look for release artifacts under /renamed
     destinationDirectory = file("${jpackageImage.jpackageData.installerOutputDir}/renamed")
-    archiveFileName = "${project.name}-${brandedOs}-${appSemVer}-${brandedArch}${extension}.zip"
+    archiveFileName = "${project.name}-${brandedOs}-${tagVersion}-${brandedArch}${extension}.zip"
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -542,13 +549,6 @@ shadowJar {
 jar {
     manifest {
         attributes jarManifestAttributes
-    }
-}
-
-// For logging Git Commit during CI
-task displayGitInfo {
-    doLast {
-        println 'Git-Commit-SHA: ' + revisionFull
     }
 }
 
