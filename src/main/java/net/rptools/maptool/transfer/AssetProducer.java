@@ -35,7 +35,7 @@ public class AssetProducer {
   private long currentPosition = 0;
 
   public AssetProducer(MD5Key id, String name, File assetFile) {
-    if (!assetFile.exists() || assetFile.isDirectory()) {
+    if (assetFile == null || !assetFile.exists() || assetFile.isDirectory()) {
       throw new IllegalArgumentException(assetFile + " is an invalid asset path");
     }
     this.id = id;
