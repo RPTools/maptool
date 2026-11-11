@@ -1810,7 +1810,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
             || !overlay.showPlayer(token, MapTool.getPlayer())) {
           continue;
         }
-        overlay.paintOverlay(locG, token, bounds, stateValue);
+        overlay.paintOverlay(locG, token, bounds, stateValue, this);
       }
       timer.stop("token-list-9");
 
@@ -1825,7 +1825,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
           continue;
         }
 
-        overlay.paintOverlay(locG, token, bounds, barValue);
+        overlay.paintOverlay(locG, token, bounds, barValue, this);
       }
       locG.dispose();
       timer.stop("token-list-10");
