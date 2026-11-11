@@ -527,7 +527,7 @@ shadowJar {
     mergeServiceFiles()
 
     archiveBaseName = project.name + '-' + tagVersion
-    destinationDirectory = file("$rootDir/releases")
+    destinationDirectory = file("$rootDir/releases/renamed")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     archiveClassifier = null
 
