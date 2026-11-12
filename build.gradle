@@ -464,7 +464,6 @@ dependencies {
     implementation(libs.bundles.batik)
     implementation(libs.bundles.pdfbox)
     implementation(libs.bundles.jai.imageio)
-    implementation(libs.webp.imageio)
 
     implementation(libs.bundles.jide) // Currently hosted on nerps.net/repo
     implementation(libs.fifesoft.rsyntaxtexxtarea)

@@ -37,7 +37,7 @@ import net.rptools.parser.function.ParameterException;
  */
 public class StrPropFunctions extends AbstractFunction {
   // Changed to allow spaces within keys, although spaces on either end of keys or
-  // values will be trimmed. http://forums.rptools.net/viewtopic.php?f=3&t=23841
+  // values will be trimmed. https://forums.rptools.net/viewtopic.php?f=3&t=23841
   // Added "." to allowed key names since variable names can contain dots.
   private static final String keyValuePatt = "\\s*([\\w .]+)\\s*=\\s*(.*)";
   private static final Pattern keyValueParser = Pattern.compile(keyValuePatt);
@@ -91,7 +91,7 @@ public class StrPropFunctions extends AbstractFunction {
       delimPatt = fullyQuoteString(delim);
     }
     // Changed to allow spaces within keys, although spaces on either end of keys or
-    // values will be trimmed. http://forums.rptools.net/viewtopic.php?f=3&t=23841
+    // values will be trimmed. https://forums.rptools.net/viewtopic.php?f=3&t=23841
     // Added "." to allowed key names since variable names can contain dots.
     final String entryPatt = "\\s*([\\w .]+\\s*=.*?)" + delimPatt + "|([\\w .]+\\s*=.*)";
     final Pattern entryParser = Pattern.compile(entryPatt);

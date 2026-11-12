@@ -4,7 +4,7 @@ junit = "6.1.3"
 imageio = "3.15.3"
 sentry = "7.22.5"
 jide = "3.7.9"
-flatlaf = "3.6.1"
+flatlaf = "3.7.2"
 handlebars = "4.5.8"
 handlebars-jackson = "4.3.1"
 jai-imageio = "1.4.0"
@@ -52,6 +52,7 @@ imageio-tiff = { group = "com.twelvemonkeys.imageio", name = "imageio-tiff", ver
 imageio-batik = { group = "com.twelvemonkeys.imageio", name = "imageio-batik", version.ref = "imageio" }
 imageio-tga = { group = "com.twelvemonkeys.imageio", name = "imageio-tga", version.ref = "imageio" }
 imageio-bmp = { group = "com.twelvemonkeys.imageio", name = "imageio-bmp", version.ref = "imageio" }
+imageio-webp = { group = "com.twelvemonkeys.imageio", name = "imageio-webp", version.ref = "imageio" }
 
 batik-all = { group = "org.apache.xmlgraphics", name = "batik-all", version = "1.20" }
 batik-awt = { group = "org.apache.xmlgraphics", name="batik-awt-util", version = "1.20" }
@@ -63,8 +64,6 @@ pdfbox-tools = { group = "org.apache.pdfbox", name = "pdfbox-tools", version.ref
 # For pdf image extraction, specifically for jpeg2000 (jpx) support.
 jai-imageio-core = { group = "com.github.jai-imageio", name = "jai-imageio-core", version.ref = "jai-imageio" }
 jai-imageio-jpeg = { group = "com.github.jai-imageio", name = "jai-imageio-jpeg2000", version.ref = "jai-imageio" }
-# WebP support
-webp-imageio = { group = "com.github.gotson", name = "webp-imageio", version = "0.2.2" }
 
 # JIDE UI libraries. Currently hosted on nerps.net/repo
 jide-common = { group = "com.jidesoft", name = "jide-common", version.ref = "jide" }
@@ -180,6 +179,7 @@ imageio = [
   "imageio-batik",
   "imageio-tga",
   "imageio-bmp",
+  "imageio-webp",
 ]
 batik = ["batik-all", "batik-awt", "batik-transcoder"]
 pdfbox = ["pdfbox", "pdfbox-tools"]
