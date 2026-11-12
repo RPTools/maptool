@@ -76,6 +76,13 @@ public class LoadTokenStatesMacro implements Macro {
         MapToolUtil.uploadAssetIds(overlay.getAssetIds());
         MapTool.getCampaign().getTokenStatesMap().put(overlay.getName(), overlay);
       } // endfor
+      // Token states are campaign properties, and the code above changes only this client's
+      // copy. A GM's change is sent to the server, as the Campaign Properties dialog sends it, so
+      // that the server's campaign and the other players get the new states. A player's change
+      // stays local: players cannot change campaign properties.
+      if (MapTool.getPlayer().isGM()) {
+        MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+      }
       MapTool.addLocalMessage(I18N.getText("loadtokenstates.loaded", overlays.size()));
     } catch (FileNotFoundException e) {
       MapTool.addLocalMessage(
