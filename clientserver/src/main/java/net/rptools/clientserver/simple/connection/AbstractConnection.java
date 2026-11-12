@@ -75,7 +75,7 @@ public abstract class AbstractConnection implements Connection {
     }
   }
 
-  private byte[] inflate(byte[] compressedMessage) {
+  private byte[] inflate(byte[] compressedMessage) throws IOException {
     InputStream bytesIn = new ByteArrayInputStream(compressedMessage);
     try {
       InputStream ios = new ZstdCompressorInputStream(bytesIn);
@@ -83,7 +83,7 @@ public abstract class AbstractConnection implements Connection {
       ios.close();
       return decompressed;
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IOException("Message could not be decompressed: " + e.getMessage(), e);
     }
   }
 
@@ -119,7 +119,13 @@ public abstract class AbstractConnection implements Connection {
     }
   }
 
-  protected final void dispatchCompressedMessage(byte[] compressedMessage) {
+  /**
+   * Decompresses a message from the peer and passes it to the message handlers.
+   *
+   * @param compressedMessage the message as it arrived
+   * @throws IOException if the message is not compressed the way MapTool compresses messages
+   */
+  protected final void dispatchCompressedMessage(byte[] compressedMessage) throws IOException {
     var message = inflate(compressedMessage);
     dispatchMessage(message);
   }

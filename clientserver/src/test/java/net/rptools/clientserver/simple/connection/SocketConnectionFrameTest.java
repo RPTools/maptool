@@ -21,13 +21,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import net.rptools.clientserver.ActivityListener;
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream;
 import org.junit.jupiter.api.Test;
 
 /** How a connection reads messages, including from peers that send nonsense. */
@@ -119,6 +122,36 @@ class SocketConnectionFrameTest {
     assertFalse(
         SocketConnection.isRoutineDisconnect(
             new IOException("Message length -1 is outside 0..2147483647")));
+  }
+
+  @Test
+  void aMessageThatIsNotCompressedIsAnIOException() {
+    var connection = new SocketConnection("test", "localhost", 1);
+    IOException e =
+        assertThrows(
+            IOException.class,
+            () ->
+                connection.dispatchCompressedMessage(
+                    "GET / HTTP/1.0\r\n\r\n".getBytes(StandardCharsets.US_ASCII)));
+    assertTrue(e.getMessage().startsWith("Message could not be decompressed"));
+    assertFalse(SocketConnection.isRoutineDisconnect(e));
+  }
+
+  @Test
+  void aCompressedMessageReachesTheHandlers() throws IOException {
+    var connection = new SocketConnection("test", "localhost", 1);
+    List<byte[]> received = new ArrayList<>();
+    connection.addMessageHandler((id, message) -> received.add(message));
+    byte[] original = "hello".getBytes(StandardCharsets.US_ASCII);
+    var compressed = new ByteArrayOutputStream();
+    try (var out = new ZstdCompressorOutputStream(compressed)) {
+      out.write(original);
+    }
+
+    connection.dispatchCompressedMessage(compressed.toByteArray());
+
+    assertEquals(1, received.size());
+    assertArrayEquals(original, received.get(0));
   }
 
   @Test
