@@ -217,8 +217,6 @@ public class TokenTopologyPanel extends JPanel {
     Dimension panelSize = getSize();
     Dimension panelUsableSize = new Dimension(panelSize.width - 10, panelSize.height - 10);
 
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-
     // Gather info
     BufferedImage image = ImageManager.getImage(token.getImageAssetId());
     Dimension originalImgSize = new Dimension(image.getWidth(), image.getHeight());
