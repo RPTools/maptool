@@ -107,11 +107,16 @@ public class TokenFootprints implements Iterable<Map.Entry<GUID, TokenFootprint>
    * Case-insensitive name lookup.
    *
    * @param name The footprint name to look up.
-   * @return The ID for the footprint with name {@code name}, or {@link Optional#empty()} if there
-   *     is no match.
+   * @return The ID and {@link TokenFootprint} with name {@code name}, or {@link Optional#empty()}
+   *     if there is no match.
    */
-  public Optional<GUID> getIdByName(String name) {
-    return Optional.ofNullable(idsByName.get(name));
+  public Optional<Map.Entry<GUID, TokenFootprint>> getEntryByName(String name) {
+    var id = idsByName.get(name);
+    if (id == null) {
+      return Optional.empty();
+    }
+
+    return Optional.of(Map.entry(id, footprints.get(id)));
   }
 
   /**

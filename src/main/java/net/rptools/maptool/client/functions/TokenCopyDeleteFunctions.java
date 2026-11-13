@@ -384,10 +384,10 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       } else {
         grid.getType()
             .getFootprints()
-            .getIdByName(size)
+            .getEntryByName(size)
             .ifPresent(
-                footprintId -> {
-                  token.setFootprintId(grid.getType(), footprintId);
+                entry -> {
+                  token.setFootprintId(grid.getType(), entry.getKey());
                   token.setSnapToScale(true);
                 });
       }

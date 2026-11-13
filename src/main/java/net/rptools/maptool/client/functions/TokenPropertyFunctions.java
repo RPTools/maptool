@@ -1038,10 +1038,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     GridType gridType = zone.getGrid().getType();
-    var maybeId = gridType.getFootprints().getIdByName(size);
-    if (maybeId.isPresent()) {
-      MapTool.serverCommand().setTokenFootprint(zone, token, gridType, maybeId.get());
-      return size;
+    var entry = gridType.getFootprints().getEntryByName(size);
+    if (entry.isPresent()) {
+      MapTool.serverCommand().setTokenFootprint(zone, token, gridType, entry.get().getKey());
+      return entry.get().getValue().getName();
     }
     throw new ParserException(
         I18N.getText("macro.function.tokenProperty.invalidSize", "setSize", size));
