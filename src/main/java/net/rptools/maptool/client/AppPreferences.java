@@ -21,7 +21,7 @@ import java.util.prefs.Preferences;
 import net.rptools.lib.image.RenderQuality;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.preferences.Preference;
@@ -627,7 +627,7 @@ public class AppPreferences {
 
   public static final Preference<String> defaultGridType =
       store
-          .defineString("defaultGridType", Grid.GridType.Square.toString())
+          .defineString("defaultGridType", GridType.Square.toString())
           .setLabel("Preferences.label.maps.grid")
           .setTooltip("Preferences.label.maps.grid.tooltip");
 
