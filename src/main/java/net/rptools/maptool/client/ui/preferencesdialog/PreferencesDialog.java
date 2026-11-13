@@ -149,6 +149,10 @@ public class PreferencesDialog extends AbeillePanel {
   /** JComboBox variable used to display vision type options. */
   private final JComboBox<Zone.VisionType> visionTypeCombo = getComboBox("visionTypeCombo");
 
+  /** JComboBox variable used to display show coordinate options. */
+  private final JComboBox<Zone.ShowCoordinates> showCoordinatesCombo =
+      getComboBox("showCoordinatesCombo");
+
   /** JComboBox variable used to display map sorting options. */
   private final JComboBox<AppPreferences.MapSortType> mapSortType = getComboBox("mapSortTypeCombo");
 
@@ -1586,6 +1590,13 @@ public class PreferencesDialog extends AbeillePanel {
         e ->
             AppPreferences.defaultVisionType.set(
                 (Zone.VisionType) visionTypeCombo.getSelectedItem()));
+
+    showCoordinatesCombo.setModel(new DefaultComboBoxModel<>(Zone.ShowCoordinates.values()));
+    showCoordinatesCombo.setSelectedItem(AppPreferences.defaultShowCoordinates.get());
+    showCoordinatesCombo.addItemListener(
+        e ->
+            AppPreferences.defaultShowCoordinates.set(
+                (Zone.ShowCoordinates) showCoordinatesCombo.getSelectedItem()));
 
     mapSortType.setModel(new DefaultComboBoxModel<>(AppPreferences.MapSortType.values()));
     mapSortType.setSelectedItem(AppPreferences.mapSortType.get());

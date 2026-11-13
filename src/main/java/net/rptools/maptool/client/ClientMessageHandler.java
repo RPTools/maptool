@@ -55,6 +55,7 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.ShowCoordinates;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -177,6 +178,7 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_WALL_DATA_MSG -> handle(msg.getUpdateWallDataMsg());
         case UPDATE_LOOKUP_TABLE_MSG -> handle(msg.getUpdateLookupTableMsg());
         case DELETE_LOOKUP_TABLE_MSG -> handle(msg.getDeleteLookupTableMsg());
+        case SET_SHOW_COORDINATES_MSG -> handle(msg.getSetShowCoordinatesMsg());
         default -> log.warn(msgType + "not handled.");
       }
       log.debug(id + " handled: " + msgType);
@@ -1112,6 +1114,21 @@ public class ClientMessageHandler implements MessageHandler {
         () -> {
           client.getCampaign().getLookupTableMap().remove(msg.getTableName());
           MapTool.getFrame().getLookupTablePanel().refreshStructure();
+        });
+  }
+
+  private void handle(SetShowCoordinatesMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          ShowCoordinates showCoordinates =
+              ShowCoordinates.valueOf(msg.getShowCoordinates().name());
+          var zone = client.getCampaign().getZone(zoneGUID);
+          if (zone != null) {
+            zone.setShowCoordinates(showCoordinates);
+            MapTool.getFrame().getCoordinateStatusBar().reset();
+            MapTool.getFrame().refresh();
+          }
         });
   }
 }

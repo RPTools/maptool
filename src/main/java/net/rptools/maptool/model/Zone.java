@@ -312,6 +312,77 @@ public class Zone {
     MBL;
   }
 
+  /**
+   * Enum for who can be shown grid coordinates on this zone.
+   *
+   * <p>Note: This enum's names may seem verbose but necessary to avoid {@code .proto} generation
+   * clashes with other enum names under {@code ZoneDto}'s other descendant enum Dtos.
+   */
+  public enum ShowCoordinates {
+    SHOW_COORDS_TO_ALL("all"),
+    SHOW_COORDS_TO_GM_ONLY("gm_only"),
+    SHOW_COORDS_TO_NONE("none");
+
+    /**
+     * standardised shorthand for use in related MTScript function parameters, given the verbose
+     * enum names
+     */
+    private final String option;
+
+    /** used for labels within related UI components (e.g. comboboxes) */
+    private final String displayName;
+
+    ShowCoordinates(String option) {
+      this.option = option;
+      this.displayName = I18N.getString("Zone.ShowCoordinates." + name());
+    }
+
+    public String getOption() {
+      return option;
+    }
+
+    /**
+     * Get the enum value from the option.
+     *
+     * @param option the option
+     * @return an Optional containing the enum value if found, or empty
+     */
+    public static Optional<ShowCoordinates> fromOption(String option) {
+      return Arrays.stream(values())
+          .filter(value -> value.option.equalsIgnoreCase(option))
+          .findFirst();
+    }
+
+    /**
+     * Evaluation of whether map coordinates should be shown or not based on the enum and {@link
+     * Player.Role}.
+     *
+     * @param role the player role
+     * @return true (i.e. show) / false (i.e. do not show)
+     */
+    public boolean shouldShow(Player.Role role) {
+      return switch (this) {
+        case SHOW_COORDS_TO_ALL -> true;
+        case SHOW_COORDS_TO_GM_ONLY -> Player.Role.GM == role;
+        case SHOW_COORDS_TO_NONE -> false;
+      };
+    }
+
+    /**
+     * List valid options, used in error reporting and resolution guidance.
+     *
+     * @return a list of valid options
+     */
+    public static List<String> validOptions() {
+      return Arrays.stream(values()).map(ShowCoordinates::getOption).toList();
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
+  }
+
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
   public static final int DEFAULT_PIXELS_CELL = 50;
   public static final int DEFAULT_UNITS_PER_CELL = 5;
@@ -427,6 +498,8 @@ public class Zone {
 
   private TokenSelection tokenSelection = TokenSelection.ALL;
 
+  private ShowCoordinates showCoordinates = ShowCoordinates.SHOW_COORDS_TO_ALL;
+
   // These are transitionary properties, very soon the width and height won't matter
   private int height;
   private int width;
@@ -490,6 +563,14 @@ public class Zone {
 
   public void setFogPaint(DrawablePaint paint) {
     fogPaint = paint;
+  }
+
+  public ShowCoordinates getShowCoordinates() {
+    return showCoordinates;
+  }
+
+  public void setShowCoordinates(ShowCoordinates showCoordinates) {
+    this.showCoordinates = showCoordinates;
   }
 
   /**
@@ -578,6 +659,7 @@ public class Zone {
     fogPaint = zone.fogPaint;
     visionType = zone.visionType;
     lightingStyle = zone.lightingStyle;
+    showCoordinates = zone.showCoordinates;
 
     undo = new UndoPerZone(this); // Undo/redo manager isn't copied
     setName(zone.getName());
@@ -2130,6 +2212,10 @@ public class Zone {
       tokenSelection = TokenSelection.ALL;
     }
 
+    if (showCoordinates == null) {
+      showCoordinates = ShowCoordinates.SHOW_COORDS_TO_ALL;
+    }
+
     if (drawables == null) {
       drawables = new LinkedList<>();
     }
@@ -2269,6 +2355,7 @@ public class Zone {
     zone.visionType = VisionType.valueOf(dto.getVisionType().name());
     zone.lightingStyle = LightingStyle.valueOf(dto.getLightingStyle().name());
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
+    zone.showCoordinates = ShowCoordinates.valueOf(dto.getShowCoordinates().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
 
@@ -2331,6 +2418,7 @@ public class Zone {
     dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
     dto.setLightingStyle(ZoneDto.LightingStyleDto.valueOf(lightingStyle.name()));
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
+    dto.setShowCoordinates(ZoneDto.ShowCoordinatesDto.valueOf(showCoordinates.name()));
     dto.setHeight(height);
     dto.setWidth(width);
     return dto.build();
