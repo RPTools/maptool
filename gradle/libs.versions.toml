@@ -6,7 +6,6 @@ sentry = "7.22.5"
 jide = "3.7.9"
 flatlaf = "3.7.2"
 handlebars = "4.5.8"
-handlebars-jackson = "4.3.1"
 jai-imageio = "1.4.0"
 graalvm-js = "21.2.0"
 pdfbox = "3.0.0"
@@ -90,7 +89,7 @@ tinylaf-nocp = { group = "de.muntjak.tinylookandfeel", name = "tinylaf-nocp", ve
 
 handlebars = { group = "com.github.jknack", name = "handlebars", version.ref = "handlebars" }
 handlebars-helpers = { group = "com.github.jknack", name = "handlebars-helpers", version.ref = "handlebars" }
-handlebars-jackson-helper = { group = "com.github.jknack", name = "handlebars-jackson2", version.ref = "handlebars-jackson" }
+handlebars-jackson-helper = { group = "com.github.jknack", name = "handlebars-jackson3", version.ref = "handlebars" }
 
 # Apache commons and other utilities
 # parsing of configuration data
