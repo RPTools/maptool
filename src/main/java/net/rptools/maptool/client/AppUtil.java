@@ -21,6 +21,8 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -368,10 +370,13 @@ public class AppUtil {
       final var visitor =
           new SimpleFileVisitor<Path>() {
             public long totalSize = 0;
+            // Hard links share a file key, so only count them once.
+            private final Set<Object> seenFileKeys = new HashSet<>();
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-              if (!attrs.isSymbolicLink()) {
+              Object fileKey = attrs.fileKey();
+              if (!attrs.isSymbolicLink() && (fileKey == null || seenFileKeys.add(fileKey))) {
                 totalSize += attrs.size();
               }
               return FileVisitResult.CONTINUE;
