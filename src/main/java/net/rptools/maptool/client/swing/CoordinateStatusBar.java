@@ -22,6 +22,9 @@ import net.rptools.maptool.language.I18N;
 public class CoordinateStatusBar extends JLabel {
 
   private static final Dimension minSize = new Dimension(75, 10);
+  private int mapX;
+  private int mapY;
+  private boolean hasCoordinates;
 
   public CoordinateStatusBar() {
     setToolTipText(I18N.getString("CoordinateStatusBar.mapCoordinates")); // $NON-NLS-1$
@@ -46,10 +49,26 @@ public class CoordinateStatusBar extends JLabel {
   }
 
   public void clear() {
+    hasCoordinates = false;
     setText(""); // $NON-NLS-1$
   }
 
   public void update(int x, int y) {
-    setText("  " + x + ", " + y); // $NON-NLS-1$ //$NON-NLS-2$
+    mapX = x;
+    mapY = y;
+    hasCoordinates = true;
+    setText(" " + x + ", " + y); // $NON-NLS-1$ //$NON-NLS-2$
+  }
+
+  public int getMapX() {
+    return mapX;
+  }
+
+  public int getMapY() {
+    return mapY;
+  }
+
+  public boolean hasCoordinates() {
+    return hasCoordinates;
   }
 }
