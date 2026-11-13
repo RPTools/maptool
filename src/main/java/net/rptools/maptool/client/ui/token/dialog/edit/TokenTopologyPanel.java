@@ -227,15 +227,14 @@ public class TokenTopologyPanel extends JPanel {
     Graphics2D g2d = (Graphics2D) g;
 
     // Background
-    ((Graphics2D) g)
-        .setPaint(
-            new TexturePaint(
-                squaresTexture,
-                new java.awt.Rectangle(
-                    0, 0, squaresTexture.getWidth() * 2, squaresTexture.getHeight() * 2)));
+    g2d.setPaint(
+        new TexturePaint(
+            squaresTexture,
+            new java.awt.Rectangle(
+                0, 0, squaresTexture.getWidth() * 2, squaresTexture.getHeight() * 2)));
 
     g2d.fillRect(0, 0, panelSize.width, panelSize.height);
-    AppStyle.shadowBorder.paintWithin((Graphics2D) g, 0, 0, panelSize.width, panelSize.height);
+    AppStyle.shadowBorder.paintWithin(g2d, 0, 0, panelSize.width, panelSize.height);
 
     final int x =
         (int)
@@ -314,8 +313,8 @@ public class TokenTopologyPanel extends JPanel {
 
     if (isInProgress()) {
       Color color = new Color(0, 0, 0, 200);
-      g.setColor(color);
-      g.fillRect(0, 0, this.getWidth(), this.getHeight());
+      g2d.setColor(color);
+      g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 
       String workingText = I18N.getText("EditTokenDialog.vbl.label.working");
       Font font = new Font("Serif", Font.BOLD, 24);
