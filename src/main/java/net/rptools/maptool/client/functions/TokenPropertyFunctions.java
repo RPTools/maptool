@@ -1018,8 +1018,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
   private String getSize(Zone zone, Token token) {
     GridType gridType = zone.getGrid().getType();
     return token.isSnapToScale()
-        ? ""
-        : gridType.getFootprints().get(token.getFootprintId(gridType)).getName();
+        ? gridType.getFootprints().get(token.getFootprintId(gridType)).getName()
+        : "";
   }
 
   /**
