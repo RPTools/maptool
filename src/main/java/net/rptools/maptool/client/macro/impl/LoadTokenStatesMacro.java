@@ -46,6 +46,11 @@ public class LoadTokenStatesMacro implements Macro {
    */
   @SuppressWarnings("unchecked")
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+    if (!MapTool.getPlayer().isGM()) {
+      MapTool.addLocalMessage(I18N.getText("slash.mustBeGM", "loadtokenstates"));
+      return;
+    }
+
     // Was the token states file passed?
     File aliasFile = null;
     if (macro.length() > 0) {
@@ -77,12 +82,9 @@ public class LoadTokenStatesMacro implements Macro {
         MapTool.getCampaign().getTokenStatesMap().put(overlay.getName(), overlay);
       } // endfor
       // Token states are campaign properties, and the code above changes only this client's
-      // copy. A GM's change is sent to the server, as the Campaign Properties dialog sends it, so
-      // that the server's campaign and the other players get the new states. A player's change
-      // stays local: players cannot change campaign properties.
-      if (MapTool.getPlayer().isGM()) {
-        MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      }
+      // copy. Send them to the server, as the Campaign Properties dialog does, so that the
+      // server's campaign and the other players get the new states.
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       MapTool.addLocalMessage(I18N.getText("loadtokenstates.loaded", overlays.size()));
     } catch (FileNotFoundException e) {
       MapTool.addLocalMessage(
