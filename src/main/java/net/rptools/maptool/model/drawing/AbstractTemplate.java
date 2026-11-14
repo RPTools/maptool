@@ -18,6 +18,7 @@ import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -324,7 +325,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
 
   @Override
   protected void draw(Zone zone, Graphics2D g) {
-    paint(zone, g, true, false);
+    paintWithoutAntialiasing(zone, g, true, false);
   }
 
   @Override
@@ -335,8 +336,24 @@ public abstract class AbstractTemplate extends AbstractDrawing {
     if (old != AlphaComposite.Clear) {
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
     }
-    paint(zone, g, false, true);
+    paintWithoutAntialiasing(zone, g, false, true);
     g.setComposite(old);
+  }
+
+  /**
+   * Templates are made of whole grid cells, so they are painted without antialiasing. An eraser
+   * template then clears exactly the pixels of the template under it. With antialiasing it only
+   * partly clears the edge pixels, which leaves a faint outline at any zoom other than 100%. Burst
+   * and blast templates turn antialiasing back on in their own {@link #paint}.
+   */
+  private void paintWithoutAntialiasing(Zone zone, Graphics2D g, boolean border, boolean area) {
+    Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+    try {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+      paint(zone, g, border, area);
+    } finally {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
   }
 
   /*---------------------------------------------------------------------------------------------
