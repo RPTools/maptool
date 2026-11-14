@@ -1024,4 +1024,8 @@ public class InitiativeList implements Serializable {
       return comparison;
     }
   }
+
+  public TokenInitiativeDescComparator getComparator() {
+    return new TokenInitiativeDescComparator();
+  }
 }
