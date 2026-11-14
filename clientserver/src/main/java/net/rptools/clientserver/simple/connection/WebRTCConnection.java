@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import dev.onvoid.webrtc.*;
 import dev.onvoid.webrtc.media.MediaStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -550,7 +551,11 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
       var message = readMessage(channelBuffer.data);
       if (message != null) {
-        dispatchCompressedMessage(message);
+        try {
+          dispatchCompressedMessage(message);
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
       }
     }
 

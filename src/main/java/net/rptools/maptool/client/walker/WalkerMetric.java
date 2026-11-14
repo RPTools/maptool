@@ -17,19 +17,19 @@ package net.rptools.maptool.client.walker;
 import net.rptools.maptool.language.I18N;
 
 public enum WalkerMetric {
-  NO_DIAGONALS(),
-  MANHATTAN(),
-  ONE_TWO_ONE(),
-  ONE_ONE_ONE();
+  NO_DIAGONALS("WalkerMetric.NO_DIAGONALS"),
+  MANHATTAN("WalkerMetric.MANHATTAN"),
+  ONE_TWO_ONE("WalkerMetric.ONE_TWO_ONE"),
+  ONE_ONE_ONE("WalkerMetric.ONE_ONE_ONE");
 
-  private final String displayName;
+  private final String displayNameKey;
 
-  WalkerMetric() {
-    displayName = I18N.getString("WalkerMetric." + name());
+  WalkerMetric(String displayNameKey) {
+    this.displayNameKey = displayNameKey;
   }
 
   @Override
   public String toString() {
-    return displayName;
+    return I18N.getString(displayNameKey);
   }
 }

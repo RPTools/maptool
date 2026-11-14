@@ -577,7 +577,7 @@ public class InitiativeListCellRenderer extends JPanel
               || overlay.isMouseover()) {
             continue;
           }
-          overlay.paintOverlay((Graphics2D) g, token, bounds, stateSet);
+          overlay.paintOverlay((Graphics2D) g, token, bounds, stateSet, this);
         }
         for (String bar : MapTool.getCampaign().getTokenBarsMap().keySet()) {
           Object barSet = token.getState(bar);
@@ -585,7 +585,7 @@ public class InitiativeListCellRenderer extends JPanel
           if (overlay == null || !overlay.showPlayer(token, MapTool.getPlayer())) {
             continue;
           }
-          overlay.paintOverlay((Graphics2D) g, token, bounds, barSet);
+          overlay.paintOverlay((Graphics2D) g, token, bounds, barSet, this);
         }
         g.setClip(old);
       }

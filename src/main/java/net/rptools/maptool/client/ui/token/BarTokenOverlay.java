@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.token;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 import net.rptools.maptool.server.proto.BarTokenOverlayDto.SideDto;
@@ -83,24 +84,38 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * @param value The percentage of the bar that is painted.
    * @return The size of the bar to be painted.
    */
-  public int calcBarSize(int size, double value) {
-    if (value == 0) return 0;
-    if (value == 1) return size;
-    if (increments == 0) return (int) Math.ceil(size * value);
+  protected int calcBarSize(int size, double value) {
+    if (value <= 0) {
+      return 0;
+    }
+    if (value >= 1) {
+      return size;
+    }
+
+    var increments = getIncrements();
+    if (increments <= 0) {
+      return (int) Math.ceil(size * value);
+    }
     double iSize = 1.0 / (increments - 1);
-    return (int) (size * findIncrement(value) * iSize);
+    return (int) (size * findIncrement(value, increments) * iSize);
   }
 
   /**
    * Find the increment for the passed value
    *
+   * <p>Requires {@code increments > 0}.
+   *
    * @param value Find the increment for this value.
-   * @return The increment for the value or -1 if no increments defined.
+   * @return The increment for the value, where the result satisfies {@code 0 <= result && result <
+   *     increments}.
    */
-  public int findIncrement(double value) {
-    if (increments == 0) return -1;
-    if (value == 0) return 0;
-    if (value == 1) return increments - 1;
+  protected static int findIncrement(double value, int increments) {
+    if (value <= 0) {
+      return 0;
+    }
+    if (value >= 1) {
+      return increments - 1;
+    }
     return (int) Math.ceil(value * (increments - 1));
   }
 
@@ -122,12 +137,9 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * AbstractTokenOverlay Method implementation
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle, java.lang.Object)
-   */
   @Override
-  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
+  public void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, Object value, ImageObserver observer) {
     if (value == null) return;
     double val = 0;
     if (value instanceof Number) {
@@ -141,7 +153,7 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
     } // endif
     if (val < 0) val = 0;
     if (val > 1) val = 1;
-    paintOverlay(g, token, bounds, val);
+    paintOverlay(g, token, bounds, val, observer);
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -159,8 +171,11 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    *     clip also has to take into account the edge of the window. If you draw based on the clip it
    *     will be off for partial token painting.
    * @param value A value between 0 and 1 inclusive used to paint the bar.
+   * @param observer An image observer to notify as images become available. Used to support
+   *     non-blocking rendering for image-based bars.
    */
-  public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value);
+  protected abstract void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, double value, ImageObserver observer);
 
   /*---------------------------------------------------------------------------------------------
    * Side enumeration
@@ -188,32 +203,42 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
   public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
     var bar =
         switch (dto.getType()) {
-          case DRAWN -> DrawnBarTokenOverlay.fromDto(dto);
-          case MULTIPLE_IMAGE -> MultipleImageBarTokenOverlay.fromDto(dto);
-          case SINGLE_IMAGE -> SingleImageBarTokenOverlay.fromDto(dto);
-          case TWO_IMAGES -> TwoImageBarTokenOverlay.fromDto(dto);
-          case TWO_TONE -> TwoToneBarTokenOverlay.fromDto(dto);
+          case DRAWN -> DrawnBarTokenOverlay.fromDtoImpl(dto);
+          case MULTIPLE_IMAGE -> MultipleImageBarTokenOverlay.fromDtoImpl(dto);
+          case SINGLE_IMAGE -> SingleImageBarTokenOverlay.fromDtoImpl(dto);
+          case TWO_IMAGES -> TwoImageBarTokenOverlay.fromDtoImpl(dto);
+          case TWO_TONE -> TwoToneBarTokenOverlay.fromDtoImpl(dto);
           case UNRECOGNIZED -> null;
         };
     if (bar != null) {
-      switch (dto.getSide()) {
-        case TOP -> bar.setSide(Side.TOP);
-        case LEFT -> bar.setSide(Side.LEFT);
-        case RIGHT -> bar.setSide(Side.RIGHT);
-        case BOTTOM -> bar.setSide(Side.BOTTOM);
-      }
+      bar.fillFrom(dto.getCommon());
+      bar.setIncrements(dto.getIncrements());
+      bar.setSide(
+          switch (dto.getSide()) {
+            case TOP, UNRECOGNIZED -> Side.TOP;
+            case LEFT -> Side.LEFT;
+            case RIGHT -> Side.RIGHT;
+            case BOTTOM -> Side.BOTTOM;
+          });
     }
     return bar;
   }
 
-  protected void setSideDto(BarTokenOverlayDto.Builder dto) {
-    switch (side) {
-      case TOP -> dto.setSide(SideDto.TOP);
-      case BOTTOM -> dto.setSide(SideDto.BOTTOM);
-      case LEFT -> dto.setSide(SideDto.LEFT);
-      case RIGHT -> dto.setSide(SideDto.RIGHT);
-    }
+  public BarTokenOverlayDto toDto() {
+    return toDtoImpl().build();
   }
 
-  public abstract BarTokenOverlayDto toDto();
+  protected BarTokenOverlayDto.Builder toDtoImpl() {
+    var dto = BarTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setIncrements(getIncrements());
+    dto.setSide(
+        switch (side) {
+          case TOP -> SideDto.TOP;
+          case BOTTOM -> SideDto.BOTTOM;
+          case LEFT -> SideDto.LEFT;
+          case RIGHT -> SideDto.RIGHT;
+        });
+    return dto;
+  }
 }

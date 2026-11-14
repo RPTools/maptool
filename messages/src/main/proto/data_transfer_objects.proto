@@ -6,6 +6,7 @@ option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto";
 option java_outer_classname = "DataTranferObjectProtos";
 
+import "common.proto";
 import "drawing_dto.proto";
 import "google/protobuf/wrappers.proto";
 /*
@@ -35,7 +36,7 @@ message ServerPolicyDto {
 }
 
 message CampaignDto {
-  string id = 1;
+  GuidDto id = 1;
   string name = 2;
   google.protobuf.BoolValue has_used_fog_toolbar = 3;
   CampaignPropertiesDto properties = 4;
@@ -77,7 +78,7 @@ message LightSourceDto {
   }
   repeated LightDto lights = 1;
   google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue id = 3;
+  optional GuidDto id = 3;
   LightTypeDto type = 4;
   bool scale_with_token = 5;
   bool ignores_VBL = 6;
@@ -105,7 +106,7 @@ message LightDto {
 }
 
 message HaloDto {
-  string id = 1;
+  GuidDto id = 1;
   string name = 2;
   bool gm_only = 3;
   bool owner_only = 4;
@@ -392,7 +393,7 @@ message TokenDto {
     SQUARE = 2;
     FIGURE = 3;
   }
-  string id = 1;
+  GuidDto id = 1;
   bool being_impersonated = 2;
   string exposed_area_guid = 3;
   map<string, string> image_asset_map = 4;
@@ -589,7 +590,7 @@ message AssetDto {
 }
 
 message LabelDto {
-  string id = 1;
+  GuidDto id = 1;
   string label = 2;
   int32 x = 3;
   int32 y = 4;
@@ -629,7 +630,7 @@ message ZoneDto {
     INTEGER = 2;
   }
   int64 creation_time = 1;
-  string id = 2;
+  GuidDto id = 2;
   GridDto grid = 3;
   int32 grid_color = 4;
   float image_scale_x = 5;
@@ -808,7 +809,7 @@ message TransferableAddOnLibraryDto {
 }
 
 message TokenFootPrintDto {
-  string id = 1;
+  GuidDto id = 1;
   string name = 2;
   string localizedName = 3;
   bool is_default = 4;
@@ -837,7 +838,7 @@ enum TopologyDirectionModifier {
 }
 
 message VertexDto {
-  string id = 1;
+  GuidDto id = 1;
   DoublePointDto position = 2;
 }
 

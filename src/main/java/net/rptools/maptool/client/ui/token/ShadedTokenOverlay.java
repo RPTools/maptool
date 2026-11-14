@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
 import java.util.Objects;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.ShadedTokenOverlayDto;
@@ -72,7 +73,7 @@ public final class ShadedTokenOverlay extends BooleanTokenOverlay {
   }
 
   @Override
-  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
+  public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds, ImageObserver observer) {
     g.setColor(color);
     g.fill(bounds);
   }

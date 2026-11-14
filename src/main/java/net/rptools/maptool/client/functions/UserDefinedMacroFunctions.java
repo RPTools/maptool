@@ -95,7 +95,6 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   public Object evaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    MapToolVariableResolver newResolver;
     JsonArray jarr = new JsonArray();
 
     for (Object obj : parameters) {
@@ -116,20 +115,12 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     String output;
     FunctionDefinition funcDef = userDefinedFunctions.get(functionName);
 
-    if (funcDef.newVariableContext) {
-      newResolver =
-          new MapToolVariableResolver(((MapToolVariableResolver) resolver).getTokenInContext());
-    } else {
-      newResolver = (MapToolVariableResolver) resolver;
-    }
-
     try {
       currentFunction.push(functionName);
       output =
           MapTool.getParser()
               .runMacro(
                   (MapToolVariableResolver) resolver,
-                  newResolver.getTokenInContext(),
                   funcDef.macroName,
                   macroArgs,
                   funcDef.newVariableContext);

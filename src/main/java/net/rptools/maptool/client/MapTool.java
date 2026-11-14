@@ -1188,6 +1188,27 @@ public class MapTool {
     return client.getPlayer();
   }
 
+  /**
+   * Send the campaign's macro buttons to the server.
+   *
+   * <p>These macros live in the campaign, so every change to them has to be published. The server
+   * passes it on to the other connected clients; without it they keep showing the old macros. When
+   * this client is not the host -- a GM connected to a game someone else hosts, or to a dedicated
+   * server -- the server's own campaign also changes only through this, so an unpublished change
+   * stays on this client: it is missing from the host's saves and from the campaign later clients
+   * receive. Callers that change these macros should call this afterwards rather than talking to
+   * the server themselves, so that there is one place to look.
+   *
+   * @param gmPanel whether the GM panel's macros changed rather than the campaign panel's
+   */
+  public static void publishCampaignMacros(boolean gmPanel) {
+    if (gmPanel) {
+      serverCommand().updateGmMacros(getCampaign().getGmMacroButtonPropertiesArray());
+    } else {
+      serverCommand().updateCampaignMacros(getCampaign().getMacroButtonPropertiesArray());
+    }
+  }
+
   public static void startPersonalServer(Campaign campaign)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     var player = new LocalPlayer();
@@ -1777,16 +1798,15 @@ public class MapTool {
       log.error("msg.error.genesysFont", e);
     }
 
-    /**
+    /*
      * This is a tweak that makes the Chinese version work better.
      *
-     * <p>Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
-     * wikipedia.org/wiki/CJK_characters</a> before making changes. And
-     * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
+     * Consider reviewing https://en.wikipedia.org/wiki/CJK_characters before making changes. And
+     * https://unicode.scarfboy.com/ is also a really cool site.
      */
     if (Locale.CHINA.equals(Locale.getDefault())) {
       // The following font name appears to be "Sim Sun". It can be downloaded
-      // from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
+      // from here: https://fr.cooltext.com/Fonts-Unicode-Chinese
       Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
       FontUIResource fontRes = new FontUIResource(f);
       for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator();
