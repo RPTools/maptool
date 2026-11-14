@@ -330,12 +330,15 @@ public class MapPropertiesDialog extends JDialog {
     zone.setBackgroundPaint(backgroundPaint);
     zone.setMapAssetId(mapAsset != null ? mapAsset.getMD5Key() : null);
 
+    // The server command sets the landing map on this client's campaign and tells the server,
+    // which holds its own copy of the campaign. A new map need not have reached the server yet:
+    // the server stores the ID as given.
     var campaign = MapTool.getClient().getCampaign();
     if (getIsLandingMapCheckBox().isSelected()) {
-      campaign.setLandingMapId(zone.getId());
+      MapTool.serverCommand().setLandingMap(zone.getId());
     } else if (zone.getId().equals(campaign.getLandingMapId())) {
       // This zone was the landing map but got toggled off.
-      campaign.setLandingMapId(null);
+      MapTool.serverCommand().setLandingMap(null);
     }
   }
 

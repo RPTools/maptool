@@ -304,7 +304,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
   public static @Nonnull LightSource fromDto(@Nonnull LightSourceDto dto) {
     return new LightSource(
         dto.hasName() ? dto.getName().getValue() : null,
-        dto.hasId() ? GUID.valueOf(dto.getId().getValue()) : null,
+        dto.hasId() ? GUID.fromDto(dto.getId()) : null,
         Type.valueOf(dto.getType().name()),
         dto.getScaleWithToken(),
         dto.getIgnoresVBL(),
@@ -318,7 +318,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
       dto.setName(StringValue.of(name));
     }
     if (id != null) {
-      dto.setId(StringValue.of(id.toString()));
+      dto.setId(id.toDto());
     }
     dto.setType(LightSourceDto.LightTypeDto.valueOf(type.name()));
     dto.setScaleWithToken(scaleWithToken);

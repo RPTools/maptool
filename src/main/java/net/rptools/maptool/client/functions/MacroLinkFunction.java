@@ -34,7 +34,6 @@ import net.rptools.maptool.client.functions.exceptions.AbortFunctionException;
 import net.rptools.maptool.client.functions.exceptions.AssertFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.macro.MacroLocationFactory;
-import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -457,9 +456,10 @@ public class MacroLinkFunction extends AbstractFunction {
           if (zone == null) {
             doOutput(null, outputTo, macroName, args, outputToPlayers);
           } else if (t.equalsIgnoreCase("impersonated")) {
-            CommandPanel cmd = MapTool.getFrame().getCommandPanel();
-            GUID guid = cmd.getIdentityGUID();
-            Token token = guid != null ? zone.getToken(guid) : zone.resolveToken(cmd.getIdentity());
+            var identity = MapTool.getClient().getImpersonation();
+            GUID guid = identity.getIdentityGUID();
+            Token token =
+                guid != null ? zone.getToken(guid) : zone.resolveToken(identity.getIdentity());
 
             doOutput(token, outputTo, macroName, args, outputToPlayers);
           } else if (t.equalsIgnoreCase("selected")) {
@@ -497,19 +497,14 @@ public class MacroLinkFunction extends AbstractFunction {
       throws ParserException {
 
     var loc = macroLocationFactory.createMacroLinkLocation(macroName);
-    if (MapTool.getParser().isMacroTrusted()) {
-      MapTool.getParser().enterTrustedContext(macroName, loc);
-    } else {
-      MapTool.getParser().enterUntrustedContext(macroName, loc);
-    }
-
     String line = "";
     // Execute the macro
-    try {
+    try (var ignored =
+        MapTool.getParser().isMacroTrusted()
+            ? MapTool.getParser().enterTrustedContext(macroName, loc)
+            : MapTool.getParser().enterUntrustedContext(macroName, loc)) {
       MapToolVariableResolver resolver = new MapToolVariableResolver(token);
-      line = MapTool.getParser().runMacro(resolver, token, macroName, args);
-    } finally {
-      MapTool.getParser().exitContext();
+      line = MapTool.getParser().runMacro(resolver, macroName, args, true);
     }
 
     // Don't output blank messages. Fixes #1867.
@@ -632,7 +627,7 @@ public class MacroLinkFunction extends AbstractFunction {
             null,
             playerName,
             MessageUtil.getFormattedWhisperRecipient(
-                message, MapTool.getFrame().getCommandPanel().getIdentity())));
+                message, MapTool.getClient().getImpersonation().getIdentity())));
   }
 
   private static String getSelf() {

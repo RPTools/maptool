@@ -20,6 +20,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.util.List;
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
@@ -40,11 +41,6 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
   /** ID of the top image displayed in the overlay. */
   private MD5Key topAssetId;
 
-  /** Needed for serialization */
-  public TwoImageBarTokenOverlay() {
-    this(DEFAULT_STATE_NAME, null, null);
-  }
-
   /**
    * Create the complete image overlay.
    *
@@ -58,9 +54,6 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     bottomAssetId = theBottomAssetId;
   }
 
-  /**
-   * @see AbstractTokenOverlay#clone()
-   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new TwoImageBarTokenOverlay(getName(), topAssetId, bottomAssetId);
@@ -76,16 +69,13 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     return overlay;
   }
 
-  /**
-   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle, double)
-   */
   @Override
-  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
+  public void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, double value, ImageObserver observer) {
 
     // Get the images
     BufferedImage[] images = {
-      ImageManager.getImageAndWait(topAssetId), ImageManager.getImageAndWait(bottomAssetId),
+      ImageManager.getImage(topAssetId, observer), ImageManager.getImage(bottomAssetId, observer),
     };
 
     Dimension d = bounds.getSize();
@@ -178,19 +168,16 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     return List.of(this.topAssetId, this.bottomAssetId);
   }
 
-  public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
-    var bar = new TwoImageBarTokenOverlay();
-    bar.fillFrom(dto.getCommon());
-    bar.bottomAssetId = new MD5Key(dto.getAssetIds(0));
-    bar.topAssetId = new MD5Key(dto.getAssetIds(1));
-    return bar;
+  protected static BarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
+    return new TwoImageBarTokenOverlay(
+        DEFAULT_STATE_NAME, new MD5Key(dto.getAssetIds(0)), new MD5Key(dto.getAssetIds(1)));
   }
 
-  public BarTokenOverlayDto toDto() {
-    var dto = BarTokenOverlayDto.newBuilder().setCommon(getCommonDto());
-    dto.addAssetIds(bottomAssetId.toString());
-    dto.addAssetIds(topAssetId.toString());
-    setSideDto(dto);
-    return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.TWO_IMAGES).build();
+  @Override
+  protected BarTokenOverlayDto.Builder toDtoImpl() {
+    return super.toDtoImpl()
+        .setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.TWO_IMAGES)
+        .addAssetIds(bottomAssetId.toString())
+        .addAssetIds(topAssetId.toString());
   }
 }

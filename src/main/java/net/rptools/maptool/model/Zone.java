@@ -87,47 +87,47 @@ public class Zone {
 
   /** The vision type (OFF, DAY, NIGHT). */
   public enum VisionType {
-    OFF(),
-    DAY(),
-    NIGHT();
+    OFF("visionType.OFF"),
+    DAY("visionType.DAY"),
+    NIGHT("visionType.NIGHT");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    VisionType() {
-      displayName = I18N.getString("visionType." + name());
+    VisionType(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
   /** How lights should be rendered into the zone. */
   public enum LightingStyle {
     /** Lights are to be rendered as part of the map's environment, approximation illumination. */
-    ENVIRONMENTAL(),
+    ENVIRONMENTAL("lightingStyle.ENVIRONMENTAL"),
     /** Lights are to be alpha-composited on top of the map. */
-    OVERTOP();
+    OVERTOP("lightingStyle.OVERTOP");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    LightingStyle() {
-      displayName = I18N.getString("lightingStyle." + name());
+    LightingStyle(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
   public enum Layer {
-    TOKEN(),
-    GM(),
-    OBJECT(),
-    BACKGROUND();
+    TOKEN("layer.token"),
+    GM("layer.gm"),
+    OBJECT("layer.object"),
+    BACKGROUND("layer.background");
 
     /**
      * Gets the layer that players should be on by default.
@@ -168,15 +168,15 @@ public class Zone {
       return valueOf(name);
     }
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    Layer() {
-      displayName = I18N.getString("layer." + name().toLowerCase());
+    Layer(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
 
     /**
@@ -288,19 +288,19 @@ public class Zone {
 
   /** Control how A* Pathfinding distances is rounded off due to terrain costs */
   public enum AStarRoundingOptions {
-    NONE(),
-    CELL_UNIT(),
-    INTEGER();
+    NONE("Zone.AStarRoundingOptions.NONE"),
+    CELL_UNIT("Zone.AStarRoundingOptions.CELL_UNIT"),
+    INTEGER("Zone.AStarRoundingOptions.INTEGER");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    AStarRoundingOptions() {
-      displayName = I18N.getString("Zone.AStarRoundingOptions." + name());
+    AStarRoundingOptions(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -627,8 +627,6 @@ public class Zone {
         Token old = zone.tokenMap.get(oldGUID);
         Token token = new Token(old, keepIds); // keep old ids at server start
         if (old.getExposedAreaGUID() != null) {
-          GUID guid = new GUID();
-          token.setExposedAreaGUID(guid);
           // Update the TEA on the new map, since we have the Token object available...
           ExposedAreaMetaData eamd = zone.getExposedAreaMetaData(old.getExposedAreaGUID());
           if (eamd != null) {
@@ -2218,7 +2216,7 @@ public class Zone {
   public static Zone fromDto(ZoneDto dto) {
     var zone = new Zone();
     zone.creationTime = dto.getCreationTime();
-    zone.id = GUID.valueOf(dto.getId());
+    zone.id = GUID.fromDto(dto.getId());
     zone.grid = Grid.fromDto(dto.getGrid());
     zone.grid.setZone(zone);
     zone.gridColor = dto.getGridColor();
@@ -2284,7 +2282,7 @@ public class Zone {
       dto.setPlayerAlias(StringValue.of(playerAlias));
     }
     dto.setCreationTime(creationTime);
-    dto.setId(id.toString());
+    dto.setId(id.toDto());
     dto.setGrid(grid.toDto());
     dto.setGridColor(gridColor);
     dto.setImageScaleX(imageScaleX);

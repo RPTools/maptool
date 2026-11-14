@@ -314,20 +314,21 @@ public class TokenVBL {
   }
 
   public enum JTS_SimplifyMethodType {
-    DOUGLAS_PEUCKER_SIMPLIFIER(),
-    TOPOLOGY_PRESERVING_SIMPLIFIER(),
-    VW_SIMPLIFIER(),
-    NONE();
+    DOUGLAS_PEUCKER_SIMPLIFIER("TokenVBL.JTS_SimplifyMethodType.DOUGLAS_PEUCKER_SIMPLIFIER"),
+    TOPOLOGY_PRESERVING_SIMPLIFIER(
+        "TokenVBL.JTS_SimplifyMethodType.TOPOLOGY_PRESERVING_SIMPLIFIER"),
+    VW_SIMPLIFIER("TokenVBL.JTS_SimplifyMethodType.VW_SIMPLIFIER"),
+    NONE("TokenVBL.JTS_SimplifyMethodType.NONE");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    JTS_SimplifyMethodType() {
-      displayName = I18N.getString("TokenVBL.JTS_SimplifyMethodType." + name());
+    JTS_SimplifyMethodType(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
 
     public static JTS_SimplifyMethodType getDefault() {

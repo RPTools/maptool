@@ -756,6 +756,8 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
       properties.setToolTip(getToolTipTextField().getText());
       properties.setDisplayHotKey(getDisplayHotkeyCheckBox().isSelected());
 
+      // This also publishes campaign and GM macros to the server, including a newly created one,
+      // for which no button exists yet.
       properties.save();
 
       if (button != null) {
@@ -838,17 +840,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
             }
           }
           MapTool.getFrame().getSelectionPanel().reset();
-        }
-        if (button.getPanelClass().equals("CampaignPanel")) {
-          MapTool.serverCommand()
-              .updateCampaignMacros(MapTool.getCampaign().getMacroButtonPropertiesArray());
-          MapTool.getFrame().getCampaignPanel().reset();
-        }
-
-        if (button.getPanelClass().equals("GmPanel")) {
-          MapTool.serverCommand()
-              .updateGmMacros(MapTool.getCampaign().getGmMacroButtonPropertiesArray());
-          MapTool.getFrame().getGmPanel().reset();
         }
       }
     }

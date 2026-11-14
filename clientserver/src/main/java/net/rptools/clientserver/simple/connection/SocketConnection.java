@@ -16,7 +16,9 @@ package net.rptools.clientserver.simple.connection;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import net.rptools.clientserver.ActivityListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +35,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
   private ReceiveThread receive;
   private Socket socket;
 
-  // Only valid for pending connections before #open() is called.
+  // Only valid for outgoing connections before #open() is called.
   private String hostName;
   private int port;
 
@@ -43,15 +45,21 @@ public class SocketConnection extends AbstractConnection implements Connection {
     this.port = port;
   }
 
+  /**
+   * A connection for a socket that has already been accepted. Nothing is read from it until {@link
+   * #open()} is called, so whoever accepted it can first add the handlers for its messages: a
+   * message the peer sends straight away would otherwise be read and dispatched to nobody, and
+   * lost.
+   *
+   * @param id the connection's ID
+   * @param socket the accepted socket
+   */
   public SocketConnection(String id, Socket socket) {
     super(id);
-    connect(socket);
+    this.socket = socket;
   }
 
-  private void connect(Socket socket) {
-    assert this.socket != null : "Should only call #connect() not already open";
-
-    this.socket = socket;
+  private void startThreads() {
     this.send = new SendThread(socket);
     this.receive = new ReceiveThread(socket);
 
@@ -61,11 +69,18 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
   @Override
   public void open() throws IOException {
-    if (this.socket != null) {
+    if (this.send != null) {
       throw new IOException("The connection has already been opened.");
     }
+    if (isClosed()) {
+      // Closed before it was opened, e.g. refused while its handlers were being added.
+      return;
+    }
 
-    connect(new Socket(hostName, port));
+    if (this.socket == null) {
+      this.socket = new Socket(hostName, port);
+    }
+    startThreads();
   }
 
   @Override
@@ -80,8 +95,10 @@ public class SocketConnection extends AbstractConnection implements Connection {
       return;
     }
 
-    receive.interrupt();
-    send.interrupt();
+    if (receive != null) {
+      receive.interrupt();
+      send.interrupt();
+    }
 
     try {
       socket.close();
@@ -196,11 +213,23 @@ public class SocketConnection extends AbstractConnection implements Connection {
             log.warn("Lost client {}", SocketConnection.this.getId(), e);
             return;
           } catch (IOException e) {
-            log.error(e);
+            if (isRoutineDisconnect(e)) {
+              log.info("Connection {} closed: {}", SocketConnection.this.getId(), e.getMessage());
+            } else {
+              log.warn("Closing connection {}: {}", SocketConnection.this.getId(), e.toString());
+            }
             return;
           } catch (Throwable t) {
-            // don't let anything kill this thread via exception
-            log.error("Unexpected error", t);
+            // Messages are framed only by their length header. Once reading one has failed part way
+            // through, the next bytes are the middle of that message, not the start of another, so
+            // carrying on reads garbage lengths -- which used to allocate huge arrays and take the
+            // whole process down with it. Nothing can resynchronise the stream: drop the
+            // connection.
+            log.error(
+                "Unexpected error reading from {}; closing the connection",
+                SocketConnection.this.getId(),
+                t);
+            return;
           }
         }
       } finally {
@@ -210,30 +239,107 @@ public class SocketConnection extends AbstractConnection implements Connection {
     }
 
     private byte[] readMessage(InputStream in) throws IOException {
-      int b32 = in.read();
-      int b24 = in.read();
-      int b16 = in.read();
-      int b8 = in.read();
-
-      if (b32 < 0) {
-        throw new IOException("Stream closed");
-      }
-      int length = (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
-
-      notifyListeners(ActivityListener.Direction.Inbound, ActivityListener.State.Start, length, 0);
-
-      byte[] ret = new byte[length];
-      for (int i = 0; i < length; i++) {
-        ret[i] = (byte) in.read();
-
-        if (i != 0 && i % ActivityListener.CHUNK_SIZE == 0) {
-          notifyListeners(
-              ActivityListener.Direction.Inbound, ActivityListener.State.Progress, length, i);
-        }
-      }
-      notifyListeners(
-          ActivityListener.Direction.Inbound, ActivityListener.State.Complete, length, length);
-      return ret;
+      return readFrame(
+          in,
+          MAX_MESSAGE_BYTES,
+          (state, length, done) ->
+              notifyListeners(ActivityListener.Direction.Inbound, state, length, done));
     }
+  }
+
+  /**
+   * Whether a read failed only because the connection ended: the peer closed it between messages,
+   * it was reset or dropped, or this side closed the socket. A server open to the internet sees
+   * these all the time -- players leaving, port scanners -- so they are not errors here. A stream
+   * that breaks inside a message, or a length no MapTool peer sends, still warrants a warning.
+   *
+   * @param e what reading threw
+   * @return true if it was an ordinary end of the connection
+   */
+  static boolean isRoutineDisconnect(IOException e) {
+    if (e instanceof SocketException) {
+      return true;
+    }
+    return !(e instanceof EOFException) && "Stream closed".equals(e.getMessage());
+  }
+
+  /**
+   * The largest message accepted from a peer, in bytes. A whole campaign travels as one message,
+   * and campaigns of well over a gigabyte exist, so by default any length an array can hold is
+   * accepted. Can be lowered with the {@code maptool.maxMessageBytes} system property.
+   */
+  static final int MAX_MESSAGE_BYTES =
+      Integer.getInteger("maptool.maxMessageBytes", Integer.MAX_VALUE);
+
+  /**
+   * Messages up to this size get their whole buffer up front. A larger one gets the rest of its
+   * buffer only once this much of it has actually arrived, so a peer cannot make this process
+   * reserve memory just by sending a large length header, while a large campaign is still read into
+   * a single buffer of its own size, with at most this much copied along the way.
+   */
+  static final int EAGER_ALLOCATION_BYTES = 8 * 1024 * 1024;
+
+  /** Receives progress while a message is read. */
+  @FunctionalInterface
+  interface FrameProgress {
+    void report(ActivityListener.State state, int length, int done);
+  }
+
+  /**
+   * Reads one length-prefixed message.
+   *
+   * <p>The stream carries nothing but a four byte length before each message, so anything wrong
+   * with a frame -- the stream ending inside it, or a length no peer would send -- means the stream
+   * can no longer be trusted, and this throws rather than returning a partial or invented message.
+   *
+   * @param in the stream to read from
+   * @param maxLength the largest length accepted
+   * @param progress told when the message starts, as it arrives, and when it is complete
+   * @return the message
+   * @throws IOException if the stream ends, or the length is negative or larger than {@code
+   *     maxLength}
+   */
+  static byte[] readFrame(InputStream in, int maxLength, FrameProgress progress)
+      throws IOException {
+    int b32 = in.read();
+    if (b32 < 0) {
+      throw new IOException("Stream closed");
+    }
+    int b24 = in.read();
+    int b16 = in.read();
+    int b8 = in.read();
+    if ((b24 | b16 | b8) < 0) {
+      throw new EOFException("Stream closed inside a message header");
+    }
+    int length = (b32 << 24) | (b24 << 16) | (b16 << 8) | b8;
+    if (length < 0 || length > maxLength) {
+      throw new IOException(
+          "Message length "
+              + length
+              + " is outside 0.."
+              + maxLength
+              + "; the peer is not speaking the MapTool protocol");
+    }
+
+    progress.report(ActivityListener.State.Start, length, 0);
+    byte[] buffer = new byte[Math.min(length, EAGER_ALLOCATION_BYTES)];
+    int done = 0;
+    int reported = 0;
+    while (done < length) {
+      if (done == buffer.length) {
+        buffer = Arrays.copyOf(buffer, length);
+      }
+      int read = in.read(buffer, done, Math.min(buffer.length - done, ActivityListener.CHUNK_SIZE));
+      if (read < 0) {
+        throw new EOFException("Stream closed after " + done + " of " + length + " bytes");
+      }
+      done += read;
+      if (done - reported >= ActivityListener.CHUNK_SIZE) {
+        progress.report(ActivityListener.State.Progress, length, done);
+        reported = done;
+      }
+    }
+    progress.report(ActivityListener.State.Complete, length, length);
+    return buffer;
   }
 }

@@ -14,11 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import java.awt.Color;
@@ -33,7 +28,6 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,8 +41,6 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
@@ -100,10 +92,6 @@ public class Token implements Cloneable {
   /** The stat sheet properties for the token. */
   @Nullable private StatSheetProperties statSheet;
 
-  /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
-  private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
-      new Gson().getAdapter(JsonObject.class);
-
   public boolean getAllowURIAccess() {
     if (allowURIAccess && !isLibToken()) {
       allowURIAccess = false;
@@ -128,37 +116,37 @@ public class Token implements Cloneable {
   }
 
   public enum TokenShape {
-    TOP_DOWN(),
-    CIRCLE(),
-    SQUARE(),
-    FIGURE();
+    TOP_DOWN("Token.TokenShape.TOP_DOWN"),
+    CIRCLE("Token.TokenShape.CIRCLE"),
+    SQUARE("Token.TokenShape.SQUARE"),
+    FIGURE("Token.TokenShape.FIGURE");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    TokenShape() {
-      displayName = I18N.getString("Token.TokenShape." + name());
+    TokenShape(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
   /** Type of character: PC or NPC. */
   public enum Type {
-    PC(),
-    NPC();
+    PC("Token.Type.PC"),
+    NPC("Token.Type.NPC");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    Type() {
-      displayName = I18N.getString("Token.Type." + name());
+    Type(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -296,21 +284,26 @@ public class Token implements Cloneable {
 
   /** Terrain Modifier Operations */
   public enum TerrainModifierOperation {
-    NONE(), // Default, no terrain modifications to pathfinding cost
-    MULTIPLY(), // All tokens with this type are added together and multiplied against the Cell cost
-    ADD(), // All tokens with this type are added together and added to the cell cost
-    BLOCK(), // Movement through tokens with this type are blocked just as if they had MBL
-    FREE(); // Any cell with a token of this type in it has ALL movement costs removed
+    /** Default, no terrain modifications to pathfinding cost */
+    NONE("Token.TerrainModifierOperation.NONE"),
+    /** All tokens with this type are added together and multiplied against the Cell cost */
+    MULTIPLY("Token.TerrainModifierOperation.MULTIPLY"),
+    /** All tokens with this type are added together and added to the cell cost */
+    ADD("Token.TerrainModifierOperation.ADD"),
+    /** Movement through tokens with this type are blocked just as if they had MBL */
+    BLOCK("Token.TerrainModifierOperation.BLOCK"),
+    /** Any cell with a token of this type in it has ALL movement costs removed */
+    FREE("Token.TerrainModifierOperation.FREE");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    TerrainModifierOperation() {
-      displayName = I18N.getString("Token.TerrainModifierOperation." + name());
+    TerrainModifierOperation(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -1899,96 +1892,6 @@ public class Token implements Cloneable {
   }
 
   /**
-   * Evaluate the provided expression with the resolver
-   *
-   * @param resolver the variable resolver to parse code inside the property
-   * @param key the key of the value
-   * @param val An expression to evaluate
-   * @return The evaluated value
-   */
-  @Nonnull
-  public Object evaluateProperty(
-      @Nullable MapToolVariableResolver resolver, @Nonnull String key, @Nonnull Object val) {
-    if (val.toString().trim().startsWith("{")) {
-      /*
-       * The normal Gson evaluator was too lenient in identifying JSON objects, so we had to move
-       * that lower (see #1560). But we would really like to avoid the performance cost of
-       * attempting to parse anything that actually is a proper JSON, so let's try a stricter
-       * evaluation process here first (see #2396).
-       */
-      try {
-        try (JsonReader reader = new JsonReader(new StringReader(val.toString()))) {
-          JsonObject result = strictGsonObjectAdapter.read(reader);
-          // in case of a situation like {"a": 1}{"b": 2}, the above would have stopped at the first
-          // complete object.  This next line will throw an exception on finding another top-level
-          // object, allowing us to move on with other evaluation.
-          reader.hasNext();
-          if (result.isJsonObject()) {
-            return result;
-          }
-        }
-      } catch (IOException e) {
-        // deliberately ignored - continue parsing
-      }
-    }
-    // try to convert it to a JSON array. Fixes #2057.
-    if (val.toString().trim().startsWith("[")) {
-      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-      if (json.isJsonArray()) {
-        return json;
-      }
-    }
-    try {
-      log.debug(
-          "Evaluating property: '{}' for token {} ({})----------------------------------------------------------------------------------",
-          key,
-          getName(),
-          getId());
-      val = MapTool.getParser().parseLine(resolver, this, val.toString());
-    } catch (ParserException pe) {
-      log.debug("Ignoring Parse Exception, continuing to evaluate {}", key);
-      val = val.toString();
-    }
-    if (val == null) {
-      return "";
-    }
-    // Finally we try convert it to a JSON object. Fixes #1560.
-    if (val.toString().trim().startsWith("{")) {
-      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-      if (json.isJsonObject()) {
-        return json;
-      }
-    }
-
-    return val;
-  }
-
-  @Nonnull
-  public Object getEvaluatedProperty(@Nonnull String key) {
-    return getEvaluatedProperty(null, key);
-  }
-
-  /**
-   * Returns the evaluated property corresponding to the key.
-   *
-   * @param resolver the variable resolver to parse code inside the property
-   * @param key the key of the value
-   * @return the value
-   */
-  @Nonnull
-  public Object getEvaluatedProperty(
-      @Nullable MapToolVariableResolver resolver, @Nonnull String key) {
-    Object val = getProperty(key);
-    if (val == null) {
-      val = getPropertyDefault(key);
-    }
-    if (val == null) {
-      return "";
-    }
-    return evaluateProperty(resolver, key, val);
-  }
-
-  /**
    * @return all property names, all in lowercase.
    */
   public Set<String> getPropertyNames() {
@@ -3075,7 +2978,7 @@ public class Token implements Cloneable {
 
   public static Token fromDto(TokenDto dto) {
     var token = new Token();
-    token.id = GUID.valueOf(dto.getId());
+    token.id = GUID.fromDto(dto.getId());
     token.beingImpersonated = dto.getBeingImpersonated();
     token.exposedAreaGUID = GUID.valueOf(dto.getExposedAreaGuid());
     var assetMap = dto.getImageAssetMapMap();
@@ -3191,7 +3094,7 @@ public class Token implements Cloneable {
 
   public TokenDto toDto() {
     var dto = TokenDto.newBuilder();
-    dto.setId(id.toString());
+    dto.setId(id.toDto());
     dto.setBeingImpersonated(beingImpersonated);
     dto.setExposedAreaGuid(exposedAreaGUID.toString());
     for (var key : imageAssetMap.keySet()) {

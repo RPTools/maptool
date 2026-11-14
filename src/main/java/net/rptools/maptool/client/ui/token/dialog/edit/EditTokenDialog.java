@@ -15,19 +15,10 @@
 package net.rptools.maptool.client.ui.token.dialog.edit;
 
 import com.google.common.collect.Iterables;
-import com.jidesoft.combobox.MultilineStringExComboBox;
-import com.jidesoft.combobox.PopupPanel;
-import com.jidesoft.grid.MultilineStringCellEditor;
-import com.jidesoft.grid.NavigableModel;
-import com.jidesoft.grid.Property;
-import com.jidesoft.grid.PropertyPane;
 import com.jidesoft.grid.PropertyTable;
-import com.jidesoft.grid.PropertyTableModel;
-import com.jidesoft.plaf.basic.BasicExComboBoxUI;
 import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -44,14 +35,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.text.Position.Bias;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -113,7 +102,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private final TokenPropertiesDialog view;
   private final RSyntaxTextArea xmlStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private final RSyntaxTextArea textStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
-  private final WordWrapCellRenderer propertyCellRenderer = new WordWrapCellRenderer();
 
   private boolean tokenSaved;
   private final GenericDialogFactory dialogFactory =
@@ -125,20 +113,18 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private AutoGenerateTopologySwingWorker autoGenerateTopologySwingWorker =
       new AutoGenerateTopologySwingWorker(false, Color.BLACK);
 
+  private TokenPropertiesEditorPanel tokenPropertiesEditorPanel;
+
   private EditTokenDialog(TokenPropertiesDialog view) {
     super(view.getRootComponent());
     this.view = view;
+    tokenPropertiesEditorPanel = new TokenPropertiesEditorPanel(this);
     panelInit();
   }
 
   /** Create a new token notes dialog. */
   public EditTokenDialog() {
     this(new TokenPropertiesDialog());
-  }
-
-  @SuppressWarnings("unused")
-  public void initPropertyTable() {
-    getPropertyTable().setModel(new TokenPropertyTableModel());
   }
 
   @SuppressWarnings("unused")
@@ -374,7 +360,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     var propertyType = token.getPropertyType();
     getPropertyTypeCombo().setSelectedItem(propertyType);
     /* Make sure the right properties are displayed. */
-    updatePropertiesTable(token, propertyType);
+    tokenPropertiesEditorPanel.updatePropertiesTable(token, propertyType);
 
     getSightTypeCombo()
         .setSelectedItem(
@@ -647,7 +633,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         .addItemListener(
             e -> {
               if (e.getStateChange() == ItemEvent.SELECTED) {
-                updatePropertiesTable(
+                tokenPropertiesEditorPanel.updatePropertiesTable(
                     getModel(), (String) getPropertyTypeCombo().getSelectedItem());
               }
             });
@@ -678,22 +664,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     DefaultComboBoxModel model = new DefaultComboBoxModel(typeList.toArray());
     getImageTableCombo().setModel(model);
-  }
-
-  /**
-   * Updates the property table.
-   *
-   * @param propertyType the property type of the token (unused).
-   */
-  private void updatePropertiesTable(@Nullable Token token, final String propertyType) {
-    EventQueue.invokeLater(
-        () -> {
-          PropertyTable pp = getPropertyTable();
-          var propertyList = MapTool.getCampaign().getTokenPropertyList(propertyType);
-          pp.setModel(
-              new TokenPropertyTableModel(token, propertyType, propertyList, propertyCellRenderer));
-          pp.expandAll();
-        });
   }
 
   public JComboBox getSizeCombo() {
@@ -917,12 +887,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     /* Properties */
     var tableModel = getPropertyTable().getModel();
-    if (getPropertyTable().getModel() instanceof TokenPropertyTableModel tokenPropertyTableModel) {
+    if (getPropertyTable().getModel()
+        instanceof TokenPropertiesEditorPanel.TokenPropertyTableModel tokenPropertyTableModel) {
       tokenPropertyTableModel.applyTo(token);
     } else {
       log.warn(
           "Property table model is not of the expected type; expected {} but got {}",
-          TokenPropertyTableModel.class,
+          TokenPropertiesEditorPanel.TokenPropertyTableModel.class,
           tableModel.getClass());
     }
 
@@ -1251,31 +1222,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   public void initPropertiesPanel() {
-    PropertyTable propertyTable =
-        new PropertyTable() {
-          @Override
-          public String getToolTipText(MouseEvent event) {
-            String text = super.getToolTipText(event);
-            return text != null && text.length() > 100 ? text.substring(0, 100) + " ..." : text;
-          }
-        };
-    propertyTable.setFillsViewportHeight(true);
-    propertyTable.setName("propertiesTable");
-
-    /* wrap button and functionality */
-    JPanel buttonsAndPropertyTable = new JPanel();
-    buttonsAndPropertyTable.setLayout(new BorderLayout());
-    JCheckBox wrapToggle = new JCheckBox(I18N.getString("EditTokenDialog.msg.wrap"));
-    wrapToggle.addActionListener(
-        e -> {
-          propertyCellRenderer.setLineWrap(wrapToggle.isSelected());
-          propertyTable.repaint();
-        });
-    buttonsAndPropertyTable.add(wrapToggle, BorderLayout.PAGE_END);
-
-    PropertyPane pane = new PropertyPane(propertyTable);
-    buttonsAndPropertyTable.add(pane, BorderLayout.CENTER);
-    replaceComponent("propertiesPanel", "propertiesTable", buttonsAndPropertyTable);
+    tokenPropertiesEditorPanel.reset(getModel());
+    replaceComponent("propertiesPanel", "propertiesTable", tokenPropertiesEditorPanel);
   }
 
   public void initTokenLayoutPanel() {
@@ -1918,143 +1866,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
   }
 
-  /* needed to change the popup for properties */
-  private static class MTMultilineStringExComboBox extends MultilineStringExComboBox {
-
-    final ResourceBundle a = ResourceBundle.getBundle("com.jidesoft.combobox.combobox");
-
-    public ResourceBundle getResourceBundle(Locale paramLocale) {
-      return ResourceBundle.getBundle("com.jidesoft.combobox.combobox", paramLocale);
-    }
-
-    public PopupPanel createPopupComponent() {
-      MTMultilineStringPopupPanel pp =
-          new MTMultilineStringPopupPanel(
-              getResourceBundle(Locale.getDefault()).getString("ComboBox.multilineStringTitle"));
-      return pp;
-    }
-  }
-
-  /* the cell editor for property popups */
-  private static class MTMultilineStringCellEditor extends MultilineStringCellEditor {
-
-    protected MTMultilineStringExComboBox createMultilineStringComboBox() {
-      MTMultilineStringExComboBox localMultilineStringExComboBox =
-          new MTMultilineStringExComboBox();
-      localMultilineStringExComboBox.setEditable(true);
-      localMultilineStringExComboBox.setUI(new BasicExComboBoxUI());
-      return localMultilineStringExComboBox;
-    }
-  }
-
-  /* the property popup table */
-  private static class MTMultilineStringPopupPanel extends PopupPanel {
-
-    private RSyntaxTextArea j = createTextArea();
-
-    public MTMultilineStringPopupPanel() {
-      this("");
-    }
-
-    public MTMultilineStringPopupPanel(String paramString) {
-      this.setResizable(true);
-      /* Set the color style via Theme */
-      try {
-        File themeFile =
-            new File(
-                AppConstants.THEMES_DIR, AppPreferences.defaultMacroEditorTheme.get() + ".xml");
-        Theme theme = Theme.load(new FileInputStream(themeFile));
-        theme.apply(j);
-
-        j.revalidate();
-      } catch (IOException e) {
-        log.error("Error while loading multiline property editor theme", e);
-      }
-      JScrollPane localJScrollPane = new RTextScrollPane(j);
-      localJScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-      localJScrollPane.setAutoscrolls(true);
-      localJScrollPane.setPreferredSize(new Dimension(300, 200));
-      setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));
-      setLayout(new BorderLayout());
-      setTitle(paramString);
-      add(localJScrollPane, "Center");
-      setDefaultFocusComponent(j);
-      j.setLineWrap(false);
-      JCheckBox wrapToggle = new JCheckBox(I18N.getString("EditTokenDialog.msg.wrap"));
-      wrapToggle.addActionListener(e -> j.setLineWrap(!j.getLineWrap()));
-
-      DefaultComboBoxModel syntaxListModel = new DefaultComboBoxModel();
-      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_NONE);
-      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_JSON);
-      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE);
-      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_HTML);
-      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_XML);
-      JComboBox syntaxComboBox = new JComboBox(syntaxListModel);
-      syntaxComboBox.addActionListener(
-          e -> j.setSyntaxEditingStyle(syntaxComboBox.getSelectedItem().toString()));
-
-      add(syntaxComboBox, BorderLayout.BEFORE_FIRST_LINE);
-      add(wrapToggle, BorderLayout.AFTER_LAST_LINE);
-    }
-
-    public Object getSelectedObject() {
-      return j.getText();
-    }
-
-    public void setSelectedObject(Object paramObject) {
-      if (paramObject != null) {
-        j.setText(paramObject.toString());
-      } else {
-        j.setText("");
-      }
-    }
-
-    protected RSyntaxTextArea createTextArea() {
-      RSyntaxTextArea textArea = new RSyntaxTextArea();
-      textArea.setUseFocusableTips(false);
-      textArea.setAnimateBracketMatching(true);
-      textArea.setBracketMatchingEnabled(true);
-      textArea.setLineWrap(false);
-      textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
-      return textArea;
-    }
-  }
-
-  /* cell renderer for properties table */
-  private static class WordWrapCellRenderer extends RSyntaxTextArea implements TableCellRenderer {
-
-    WordWrapCellRenderer() {
-      setLineWrap(false);
-      setWrapStyleWord(true);
-
-      /* Set the color style via Theme */
-      try {
-        File themeFile =
-            new File(
-                AppConstants.THEMES_DIR, AppPreferences.defaultMacroEditorTheme.get() + ".xml");
-        Theme theme = Theme.load(new FileInputStream(themeFile));
-        theme.apply(this);
-
-        revalidate();
-      } catch (IOException e) {
-        log.error("Error while loading theme", e);
-      }
-    }
-
-    public Component getTableCellRendererComponent(
-        JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-      if (value == null) {
-        value = "";
-      }
-      setText(value.toString());
-      setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
-      if (table.getRowHeight(row) != getPreferredSize().height) {
-        table.setRowHeight(row, getPreferredSize().height);
-      }
-      return this;
-    }
-  }
-
   private class AutoGenerateTopologySwingWorker extends SwingWorker<Void, Area> {
     private final boolean regenerate;
     private final Color ignoredColor;
@@ -2147,87 +1958,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   /* MODELS */
-  private static class TokenPropertyTableModel
-      extends PropertyTableModel<TokenPropertyTableModel.EditTokenProperty>
-      implements NavigableModel {
-    private final List<TokenProperty> propertyList;
-    private final Map<String, String> propertyMap;
-
-    public TokenPropertyTableModel() {
-      propertyList = List.of();
-      propertyMap = Map.of();
-    }
-
-    public TokenPropertyTableModel(
-        @Nullable Token model,
-        String propertyType,
-        List<TokenProperty> propertyList,
-        TableCellRenderer propertyCellRenderer) {
-      this.propertyList = propertyList;
-
-      this.propertyMap = new HashMap<>();
-      for (TokenProperty property : propertyList) {
-        String value = model == null ? null : (String) model.getProperty(property.getName());
-        if (value == null) {
-          value = property.getDefaultValue();
-        }
-        this.propertyMap.put(property.getName(), value);
-      }
-
-      var gridProperties = new ArrayList<EditTokenProperty>();
-      for (var tokenProperty : propertyList) {
-        var gridProperty = new EditTokenProperty(tokenProperty.getName(), propertyType);
-        gridProperty.setTableCellRenderer(propertyCellRenderer);
-        gridProperty.setCellEditor(new MTMultilineStringCellEditor());
-        gridProperties.add(gridProperty);
-      }
-      setOriginalProperties(gridProperties);
-    }
-
-    public void applyTo(Token token) {
-      for (TokenProperty property : propertyList) {
-        String value = propertyMap.get(property.getName());
-        if (property.getDefaultValue() != null && property.getDefaultValue().equals(value)) {
-          token.setProperty(property.getName(), null); // Clear original value
-          continue;
-        }
-        token.setProperty(property.getName(), value);
-      }
-    }
-
-    @Override
-    public boolean isNavigableAt(int rowIndex, int columnIndex) {
-      /* make the property name column non-navigable so that tab takes you directly to the next property value cell. */
-      return (columnIndex != 0);
-    }
-
-    @Override
-    public boolean isNavigationOn() {
-      return true;
-    }
-
-    class EditTokenProperty extends Property {
-      public EditTokenProperty(String key, String propertyType) {
-        super(key, key, String.class, propertyType);
-      }
-
-      @Override
-      public Object getValue() {
-        return propertyMap.get(getName());
-      }
-
-      @Override
-      public void setValue(Object value) {
-        propertyMap.put(getName(), (String) value);
-      }
-
-      @Override
-      public boolean hasValue() {
-        return propertyMap.get(getName()) != null;
-      }
-    }
-  }
-
   private static final class OwnerListModel extends AbstractListModel<Selectable> {
 
     private static final long serialVersionUID = 2375600545516097234L;

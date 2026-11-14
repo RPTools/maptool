@@ -58,11 +58,13 @@ public class CampaignPanel extends AbstractMacroPanel {
       }
     }
     MapTool.getFrame().getCampaignPanel().reset();
+    MapTool.publishCampaignMacros(false);
   }
 
   public static void clearPanel() {
     AbstractMacroPanel.clearHotkeys(MapTool.getFrame().getCampaignPanel());
     MapTool.getCampaign().getMacroButtonPropertiesArray().clear();
     MapTool.getFrame().getCampaignPanel().reset();
+    MapTool.publishCampaignMacros(false);
   }
 }
