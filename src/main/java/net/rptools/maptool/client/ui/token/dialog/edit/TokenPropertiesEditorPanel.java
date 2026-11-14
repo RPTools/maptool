@@ -42,7 +42,7 @@ public class TokenPropertiesEditorPanel extends PropertyPane {
   private static final Logger log = LogManager.getLogger();
   private final EditTokenDialog editTokenDialog;
   private final WordWrapCellRenderer wordWrapCellRenderer = new WordWrapCellRenderer();
-  private static final String GM = I18N.getText("permission.displayName.gm");
+  private static final String GM = I18N.getText("permission.gm.name");
   private static final String GM_SUFFIX = String.format(" (%s)", GM);
   private Token token;
   private TableSearchable searchable;
