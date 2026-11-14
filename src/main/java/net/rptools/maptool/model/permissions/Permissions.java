@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.permissions;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -222,6 +223,7 @@ public enum Permissions implements DisplayName.WithTooltip {
             Token token;
             Player player;
 
+            // make sure we have a token and a player
             if (token_ instanceof Token t && player_ instanceof Player p) {
               token = t;
               player = p;
@@ -231,14 +233,18 @@ public enum Permissions implements DisplayName.WithTooltip {
             } else {
               return false;
             }
+
             if (!player.isGM() && token.getType().equals(Token.Type.PC)) {
+              // All players and PCs are on the same side
               return true;
             } else {
+              // For a GM, all GMs; for a player, all players
               List<Player> teamMates =
                   MapTool.getPlayerList().stream()
                       .dropWhile(pl -> pl.isGM() != player.isGM())
                       .toList();
               final Set<String> owners = token.getOwners();
+              // test token is owned by a teammate
               return !teamMates.stream()
                   .filter(pl -> owners.contains(pl.getName()))
                   .toList()
@@ -247,6 +253,7 @@ public enum Permissions implements DisplayName.WithTooltip {
           });
       setAccessorTest(
           (Permissions permission, Object player) ->
+              // for RPG the only real test is for GM status
               switch (permission) {
                 case ALL -> true;
                 case GM -> player instanceof Player p && p.isGM();
@@ -261,6 +268,7 @@ public enum Permissions implements DisplayName.WithTooltip {
             }
 
             if (player instanceof Player p && token instanceof Token t) {
+              // need to determine if player, is GM, Owner, Friend, or Opponent
               AccessorType accessorType;
               if (p.isGM()) {
                 accessorType = AccessorType.GM;
@@ -271,6 +279,7 @@ public enum Permissions implements DisplayName.WithTooltip {
               } else {
                 accessorType = AccessorType.OPPONENT;
               }
+              // See if they are on the list
               return accessorType.accessAllowed(permission);
             }
 
@@ -282,29 +291,22 @@ public enum Permissions implements DisplayName.WithTooltip {
     /**
      *
      *
-     * <h4>Essentially an immiutable table to lookup if access is allowed against a permission.
-     * </h4>
-     *
-     * <p>The boolean array {@link #access} is ordered according to the ordinal values of <code>
-     * NONE GM OWNER ALLIED ALL OWNER_ONLY ALLIED_ONLY OWNER_ALLIED_ONLY OPPONENT_ONLY</code>
+     * <h4>Just a convenient holder for allowable permissions lookup</h4>
      */
     private enum AccessorType {
-      GM(new boolean[] {false, true, true, true, true, false, false, false, false}),
-      OWNER(new boolean[] {false, false, true, false, true, true, false, true, false}),
-      ALLY(new boolean[] {false, false, false, true, true, false, true, true, false}),
-      OPPONENT(new boolean[] {false, false, false, false, true, false, false, false, true});
+      GM(EnumSet.of(Permissions.GM, Permissions.OWNER, ALLIED, ALL)),
+      OWNER(EnumSet.of(Permissions.OWNER, ALL, OWNER_ONLY, OWNER_ALLIED_ONLY)),
+      ALLY(EnumSet.of(ALLIED, ALL, ALLIED_ONLY, OWNER_ALLIED_ONLY)),
+      OPPONENT(EnumSet.of(ALL, OPPONENT_ONLY));
 
-      final boolean[] access;
+      final EnumSet<Permissions> access;
 
-      AccessorType(boolean[] access) {
+      AccessorType(EnumSet<Permissions> access) {
         this.access = access;
       }
 
       boolean accessAllowed(Permissions permission) {
-        if (permission.ordinal() > 8) {
-          return false;
-        }
-        return access[permission.ordinal()];
+        return access.contains(permission);
       }
     }
   }
