@@ -140,8 +140,11 @@ public class InitiativePanel extends JPanel
   /** Flag indicating that additional information should be shown in the title bar. */
   private boolean showTitleInfo = AppPreferences.initiativePanelShowsInfoInTitle.get();
 
-  /** Flag indicating that title bar change needs action. */
-  private boolean showTitleInfoPending = true;
+  /**
+   * Flag indicating that {@link #showTitleInfo} has changed, or updates to the model should be
+   * processed.
+   */
+  private boolean updateTitleInfo = true;
 
   /** Frame used in docking manager */
   private DockableFrame dockableFrame = null;
@@ -631,15 +634,19 @@ public class InitiativePanel extends JPanel
   }
 
   private void updateFrameTitle() {
-    if (!MapTool.getPlayer().isGM() || getDockableFrame() == null && !showTitleInfoPending) {
+    if (!updateTitleInfo) {
+      return;
+    }
+    if (!MapTool.getPlayer().isGM() || getDockableFrame() == null) {
       return;
     }
     SwingUtilities.invokeLater(
         () -> {
           String tooltip, text;
           if (isShowTitleInfo()) {
+            // display token counts in the title bar
             int pc = 0, npc = 0;
-            if (list != null && list.getSize() > 0 && MapTool.getPlayer().isGM()) {
+            if (list != null && list.getSize() > 0) {
               for (TokenInitiative ti : list.getTokens()) {
                 if (ti.getToken().getType().equals(Type.PC)) {
                   pc++;
@@ -662,13 +669,16 @@ public class InitiativePanel extends JPanel
             dockableFrame.setSideTitle(text);
             dockableFrame.setTabTitle(text);
           } else {
+            // preference is false but current state is to show additional info.
+            // reset the title bar to normal
             text = I18N.getText("panel.Initiative");
             tooltip = I18N.getText("panel.Initiative.description");
             dockableFrameTitleComponent.setText(text);
             dockableFrameTitleComponent.setToolTipText(tooltip);
             dockableFrame.setSideTitle(text);
             dockableFrame.setTabTitle(text);
-            showTitleInfoPending = false;
+            // disable updating title info
+            updateTitleInfo = false;
           }
         });
   }
@@ -829,7 +839,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           showTitleInfo = ((JCheckBoxMenuItem) e.getSource()).isSelected();
-          showTitleInfoPending = true;
+          updateTitleInfo = true;
           AppPreferences.initiativePanelShowsInfoInTitle.set(showTitleInfo);
           updateFrameTitle();
         }
