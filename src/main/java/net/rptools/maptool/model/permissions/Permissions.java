@@ -15,7 +15,6 @@
 package net.rptools.maptool.model.permissions;
 
 import javax.annotation.Nullable;
-
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.DisplayName;
 import net.rptools.maptool.model.TokenProperty;
@@ -131,5 +130,4 @@ public enum Permissions implements DisplayName.WithTooltip {
   public void setDisplayName(String value) {
     // unused
   }
-
 }
