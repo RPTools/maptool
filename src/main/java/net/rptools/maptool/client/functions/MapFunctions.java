@@ -90,7 +90,7 @@ public class MapFunctions extends AbstractFunction {
       var statusBar = MapTool.getFrame().getCoordinateStatusBar();
       if (!statusBar.hasCoordinates()) {
         throw new ParserException(
-                I18N.getText("macro.function.general.argumentTypeInvalid", functionName));
+            I18N.getText("macro.function.general.unknownMapCoordinates", functionName));
       }
       JsonObject statusBarMapCoordinates = new JsonObject();
       statusBarMapCoordinates.addProperty("x", statusBar.getMapX());
