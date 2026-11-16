@@ -98,7 +98,8 @@ public class EventMacroUtil {
     boolean isVetoed = false;
     try {
       MapToolVariableResolver resolver =
-          callEventHandler(eventName, libraryNamespace, args, tokenInContext, varsToInitialize);
+          callEventHandler(
+              eventName, libraryNamespace, args, tokenInContext, varsToInitialize, false);
       BigDecimal vetoValue = BigDecimal.ZERO;
       if (resolver.getVariable(vetoVariable) instanceof BigDecimal) {
         vetoValue = (BigDecimal) resolver.getVariable(vetoVariable);
@@ -120,30 +121,6 @@ public class EventMacroUtil {
           e);
     }
     return isVetoed;
-  }
-
-  /**
-   * Utility wrapper for running a specified macro as an event handler, getting back the variable
-   * resolver instance that can be checked for any particular outputs.
-   *
-   * <p>Called macros will output to chat as normal - to suppress, see {@link
-   * #callEventHandler(String, String, String, Token, Map, boolean)}
-   *
-   * @param eventName the name of the event being run
-   * @param libraryNamespace the namespace of the library containing the event handler
-   * @param args the argument string to pass
-   * @param tokenInContext token to set as current, if any
-   * @param varsToSet any variables that should be initialized in the macro scope
-   * @return the variable resolver containing the resulting variable states
-   */
-  public static MapToolVariableResolver callEventHandler(
-      final String eventName,
-      final String libraryNamespace,
-      final String args,
-      final Token tokenInContext,
-      Map<String, Object> varsToSet) {
-
-    return callEventHandler(eventName, libraryNamespace, args, tokenInContext, varsToSet, false);
   }
 
   /**
@@ -194,8 +171,7 @@ public class EventMacroUtil {
                               "library.error.noEventHandler", eventName, libraryNamespace)));
       String macroTarget = eventTarget + "@lib:" + libraryNamespace;
 
-      String resultVal =
-          MapTool.getParser().runMacro(newResolver, tokenInContext, macroTarget, args, false);
+      String resultVal = MapTool.getParser().runMacro(newResolver, macroTarget, args, false);
       if (!suppressChatOutput && resultVal != null && !resultVal.equals("")) {
         MapTool.addMessage(
             new TextMessage(
@@ -215,27 +191,6 @@ public class EventMacroUtil {
           e);
     }
     return newResolver;
-  }
-
-  /**
-   * Utility wrapper for running a specified macro as an event handler, getting back the variable
-   * resolver instance that can be checked for any particular outputs.
-   *
-   * <p>Called macros will output to chat as normal - to suppress, see {@link
-   * #callEventHandlerOld(String, String, Token, Map, boolean)}
-   *
-   * @param macroTarget the fully-qualified macro name
-   * @param args the argument string to pass
-   * @param tokenInContext token to set as current, if any
-   * @param varsToSet any variables that should be initialized in the macro scope
-   * @return the variable resolver containing the resulting variable states
-   */
-  public static MapToolVariableResolver callEventHandlerOld(
-      final String macroTarget,
-      final String args,
-      final Token tokenInContext,
-      Map<String, Object> varsToSet) {
-    return callEventHandlerOld(macroTarget, args, tokenInContext, varsToSet, false);
   }
 
   /**
@@ -269,13 +224,13 @@ public class EventMacroUtil {
       }
       var loc = macroLocationFactory.createEventLocation(macroTarget);
 
-      MapTool.getParser().enterTrustedContext(loc.getName(), loc);
-      String resultVal =
-          MapTool.getParser().runMacro(newResolver, tokenInContext, macroTarget, args, false);
-      if (!suppressChatOutput && resultVal != null && !resultVal.equals("")) {
-        MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.SAY, null, MapTool.getPlayer().getName(), resultVal, null));
+      try (var ignored = MapTool.getParser().enterTrustedContext(loc.getName(), loc)) {
+        String resultVal = MapTool.getParser().runMacro(newResolver, macroTarget, args, false);
+        if (!suppressChatOutput && resultVal != null && !resultVal.equals("")) {
+          MapTool.addMessage(
+              new TextMessage(
+                  TextMessage.Channel.SAY, null, MapTool.getPlayer().getName(), resultVal, null));
+        }
       }
     } catch (AbortFunctionException afe) {
       // Do nothing
@@ -285,8 +240,6 @@ public class EventMacroUtil {
       MapTool.addLocalMessage(
           "Event continuing after error running " + macroTarget + ": " + e.getMessage());
       LOGGER.debug("error running {}: {}", macroTarget, e.getMessage(), e);
-    } finally {
-      MapTool.getParser().exitContext();
     }
     return newResolver;
   }

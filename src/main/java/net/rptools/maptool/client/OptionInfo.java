@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -430,23 +429,21 @@ class OptionInfo {
   }
 
   /** Returns a param, parsing it as an expression if it is a string. */
-  public Object getParsedParam(
-      int index, MapToolVariableResolver res, Token tokenInContext, MapToolLineParser parser)
+  public Object getParsedParam(int index, MapToolVariableResolver res, MapToolLineParser parser)
       throws ParserException {
     Object retval = params[index];
     // No parsing is done if the param isn't a String (e.g. it's already a BigDecimal)
     if (params[index] instanceof String) {
-      Result result = parser.parseExpression(res, tokenInContext, (String) params[index], false);
+      Result result = parser.parseExpression(res, (String) params[index], false);
       retval = result.getValue();
     }
     return retval;
   }
 
   /** Returns a param as int, parsing it as an expression if it is a string. */
-  public int getParsedIntParam(
-      int index, MapToolVariableResolver res, Token tokenInContext, MapToolLineParser parser)
+  public int getParsedIntParam(int index, MapToolVariableResolver res, MapToolLineParser parser)
       throws ParserException {
-    Object retval = getParsedParam(index, res, tokenInContext, parser);
+    Object retval = getParsedParam(index, res, parser);
     if (!(retval instanceof BigDecimal)) {
       throw new ParserException(I18N.getText("lineParser.notValidNumber", retval.toString()));
     }

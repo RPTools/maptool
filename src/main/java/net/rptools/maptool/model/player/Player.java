@@ -25,22 +25,18 @@ import net.rptools.maptool.server.proto.PlayerDto;
 public class Player {
 
   public enum Role {
-    PLAYER(),
-    GM();
+    PLAYER("userTerm.Player"),
+    GM("userTerm.GM");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    Role() {
-      if (name().equals("GM")) {
-        displayName = I18N.getString("userTerm.GM");
-      } else {
-        displayName = I18N.getString("userTerm.Player");
-      }
+    Role(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 

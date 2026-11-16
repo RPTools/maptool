@@ -759,9 +759,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         if (ele.isJsonObject() || ele.isJsonArray()) {
           dest.add(key, jsonEvaluate(ele, resolver));
         } else {
-          Object result =
-              EvalMacroFunctions.evalMacro(
-                  resolver, resolver.getTokenInContext(), ele.getAsString());
+          Object result = EvalMacroFunctions.evalMacro(resolver, ele.getAsString());
           dest.add(key, asJsonElement(result));
         }
       }
@@ -773,9 +771,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         if (ele.isJsonObject() || ele.isJsonArray()) {
           dest.add(jsonEvaluate(ele, resolver));
         } else {
-          Object result =
-              EvalMacroFunctions.evalMacro(
-                  resolver, resolver.getTokenInContext(), ele.getAsString());
+          Object result = EvalMacroFunctions.evalMacro(resolver, ele.getAsString());
           dest.add(asJsonElement(result));
         }
       }

@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.AppUtil;
@@ -33,7 +32,9 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 
 /*
  * User Preferences are stored next to jar when installed.
@@ -43,11 +44,9 @@ public class UserJvmOptions {
 
   private static final Logger log = LogManager.getLogger(UserJvmOptions.class);
 
-  private static final String I18N_RESOURCE_PREFIX = "i18n_";
-  private static final String I18N_RESOURCE_PATH = "net/rptools/maptool/language";
   private static final String CURRENT_DATA_DIR = AppUtil.getAppHome().getName();
-  private static final Pattern UNIT_PATTERN = Pattern.compile("^([0-9]+)[g|G|m|M|k|K]$");
-  private static final Map<String, String> LANGUAGE_MAP = getResourceBundles();
+  private static final Pattern UNIT_PATTERN = Pattern.compile("^([0-9]+)[gGmMkK]$");
+  private static final List<Locale> KNOWN_LOCALES = getKnownLocales();
 
   private static FileBasedConfigurationBuilder<INIConfiguration> configurationBuilder;
   private static SubnodeConfiguration jvmNodeConfiguration;
@@ -60,8 +59,6 @@ public class UserJvmOptions {
     setJvmOption(JVM_OPTION.STACK_SIZE, "");
     setJvmOption(JVM_OPTION.ASSERTIONS, "");
     setJvmOption(JVM_OPTION.DATA_DIR, "");
-    setJvmOption(JVM_OPTION.LOCALE_LANGUAGE, "");
-    setJvmOption(JVM_OPTION.LOCALE_COUNTRY, "");
     setJvmOption(JVM_OPTION.JAVA2D_D3D, "");
     setJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION, "");
     setJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION, "");
@@ -138,8 +135,7 @@ public class UserJvmOptions {
                     value);
               } else if (key.startsWith("-XX")) {
                 String value = "";
-                String newKey =
-                    key + ":" + jvmNodeConfiguration.getString(key).replaceAll("\\=", "");
+                String newKey = key + ":" + jvmNodeConfiguration.getString(key).replace("=", "");
                 jvmNodeConfiguration.setProperty(newKey, value);
                 jvmNodeConfiguration.clearProperty(key);
 
@@ -185,20 +181,6 @@ public class UserJvmOptions {
   }
 
   public static String getJvmOption(JVM_OPTION option) {
-    if (option.equals(JVM_OPTION.LOCALE_LANGUAGE)) {
-      // Translate 2 letter language code to display language
-      String languageCode =
-          jvmNodeConfiguration.getString(option.parameterName, option.defaultValue);
-      for (Entry<String, String> entry : LANGUAGE_MAP.entrySet()) {
-        if (Objects.equals(languageCode, entry.getValue())) {
-          return entry.getKey();
-        }
-      }
-
-      // Language Code not found, default option to English
-      return "English";
-    }
-
     return jvmNodeConfiguration.getString(option.parameterName, option.defaultValue);
   }
 
@@ -208,12 +190,6 @@ public class UserJvmOptions {
   }
 
   public static void setJvmOption(JVM_OPTION option, String value) {
-    // Translate display language to 2 letter language code
-    // English will be a blank value so option is removed completely from cfg
-    if (option.equals(JVM_OPTION.LOCALE_LANGUAGE)) {
-      value = LANGUAGE_MAP.get(value);
-    }
-
     if (value.isBlank()) {
       log.debug("Clearing property: {}, value is blank {}", option.parameterName, value);
       jvmNodeConfiguration.clearProperty(option.parameterName);
@@ -247,34 +223,42 @@ public class UserJvmOptions {
     }
   }
 
-  private static Map<String, String> getResourceBundles() {
-    Map<String, String> languages = new TreeMap<>();
+  private static List<Locale> getKnownLocales() {
+    var i18nResourcePattern = Pattern.compile("i18n(?:_([^/]*))?\\.properties$");
+    var i18nPackage = "net.rptools.maptool.language";
 
-    Locale loc = new Locale("en");
-    languages.put(loc.getDisplayLanguage(), "");
+    Reflections reflections =
+        new Reflections(
+            new ConfigurationBuilder()
+                .forPackage(i18nPackage)
+                .setInputsFilter(
+                    new FilterBuilder()
+                        .includePackage(i18nPackage)
+                        .excludePackage(i18nPackage + ".macro_descriptions"))
+                .setScanners(Scanners.Resources));
+    Set<String> resourcePathSet = reflections.getResources(i18nResourcePattern);
+    log.debug("getResourceBundles() resourcePathSet: {}", resourcePathSet);
 
-    Reflections reflections = new Reflections(I18N_RESOURCE_PATH, new ResourcesScanner());
-    Set<String> resourcePathSet =
-        reflections.getResources(Pattern.compile(I18N_RESOURCE_PREFIX + ".*\\.properties"));
-    log.debug("getResourceBundles() resourcePathSet: " + resourcePathSet.toString());
-
+    List<Locale> locales = new ArrayList<>();
     for (String resourcePath : resourcePathSet) {
-      int index = I18N_RESOURCE_PATH.length() + I18N_RESOURCE_PREFIX.length() + 1;
-      String languageCode = resourcePath.substring(index, index + 2);
+      var matcher = i18nResourcePattern.matcher(resourcePath);
+      if (matcher.find()) {
+        var languageTag = matcher.group(1);
 
-      // Crowdin file i18n_ach.properties isn't a language. Fix #1686.
-      if (!languageCode.equals("ac")) {
-        Locale locale = new Locale(languageCode);
-        languages.put(locale.getDisplayLanguage(), languageCode);
+        // Special case: the root i18n.properties is en-US despite not being called that.
+        locales.add(
+            languageTag == null
+                ? Locale.of("en", "US")
+                : Locale.forLanguageTag(languageTag.replace("_", "-")));
       }
     }
 
-    log.debug("languages: " + languages.toString());
-    return languages;
+    log.debug("languages: {}", locales);
+    return locales;
   }
 
-  public static Set<String> getLanguages() {
-    return LANGUAGE_MAP.keySet();
+  public static List<Locale> getLocales() {
+    return Collections.unmodifiableList(KNOWN_LOCALES);
   }
 
   public enum JVM_OPTION {
@@ -283,8 +267,6 @@ public class UserJvmOptions {
     STACK_SIZE("-Xss", ""),
     ASSERTIONS("-ea", ""),
     DATA_DIR("-DMAPTOOL_DATADIR", CURRENT_DATA_DIR),
-    LOCALE_LANGUAGE("-Duser..language", ""),
-    LOCALE_COUNTRY("-Duser..country", ""),
     JAVA2D_D3D("-Dsun..java2d..d3d", "true"),
     JAVA2D_OPENGL_OPTION("-Dsun..java2d..opengl", "false"),
     MACOSX_EMBEDDED_OPTION("-Djavafx..macosx..embedded", "false");

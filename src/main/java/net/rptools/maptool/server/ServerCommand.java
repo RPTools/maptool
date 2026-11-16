@@ -213,6 +213,8 @@ public interface ServerCommand {
 
   void setTokenMaskTopology(Token token, @Nullable Area area, Zone.TopologyType topologyType);
 
+  void setTokenFootprint(Zone zone, Token token, GridType gridType, GUID footprintId);
+
   void updateTokenProperty(Token token, Token.Update update, int value);
 
   void updateTokenProperty(Token token, Token.Update update, String value1, String value2);
@@ -233,8 +235,6 @@ public interface ServerCommand {
   void updateTokenProperty(Token token, Token.Update update, double value1, double value2);
 
   void updateTokenProperty(Token token, Token.Update update, double value1, int value2, int value3);
-
-  void updateTokenProperty(Token token, Token.Update update, Grid grid, TokenFootprint footprint);
 
   void updateTokenProperty(Token token, Token.Update update, List<String> values);
 

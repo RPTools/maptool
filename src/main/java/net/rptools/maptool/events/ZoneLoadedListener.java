@@ -51,7 +51,8 @@ public class ZoneLoadedListener {
               libraryNamespace,
               currentZR.getZone().getId().toString(),
               null,
-              Collections.emptyMap());
+              Collections.emptyMap(),
+              false);
         } catch (InterruptedException | ExecutionException e) {
           LOGGER.error(I18N.getText("library.error.notFound"), e);
           throw new AssertionError("Error retrieving library namespace");

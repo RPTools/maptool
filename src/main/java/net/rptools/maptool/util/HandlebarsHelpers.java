@@ -16,7 +16,10 @@ package net.rptools.maptool.util;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
-import com.github.jknack.handlebars.*;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
+import com.github.jknack.handlebars.TagType;
 import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.helper.EmbeddedHelper;
 import com.github.jknack.handlebars.helper.LogHelper;
@@ -24,6 +27,7 @@ import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.helper.ext.AssignHelper;
 import com.github.jknack.handlebars.helper.ext.IncludeHelper;
 import com.github.jknack.handlebars.helper.ext.NumberHelper;
+import com.github.jknack.handlebars.jackson.JacksonHelper;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
@@ -33,7 +37,10 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +52,7 @@ public class HandlebarsHelpers {
     StringHelpers.register(handlebars);
     MoreStringHelpers.register(handlebars);
     Arrays.stream(ConditionalHelpers.values()).forEach(h -> handlebars.registerHelper(h.name(), h));
-    handlebars.registerHelper("json", Jackson2Helper.INSTANCE);
+    handlebars.registerHelper("json", JacksonHelper.INSTANCE);
     NumberHelper.register(handlebars);
     handlebars.registerHelper(EmbeddedHelper.NAME, EmbeddedHelper.INSTANCE);
     handlebars.registerHelper(AssignHelper.NAME, AssignHelper.INSTANCE);
@@ -78,7 +85,6 @@ public class HandlebarsHelpers {
      * &lt;/script&gt;
      * </pre>
      */
-    @SuppressWarnings("SpellCheckingInspection")
     @Override
     public Object apply(final Object context, final Options options) {
       if (context == null || context instanceof String s && s.isBlank()) {

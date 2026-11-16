@@ -248,9 +248,8 @@ public class StatSheetContext {
         .forEach(
             tp -> {
               if (tp.getStatSheetViewPermission().hasPermission(player, token)) {
-                Object value = token.getEvaluatedProperty(resolver, tp.getName());
-                //noinspection ConstantValue
-                if (value == null || value instanceof String sValue && sValue.isBlank()) {
+                Object value = resolver.getEvaluatedTokenProperty(tp.getName());
+                if (value instanceof String sValue && sValue.isBlank()) {
                   return;
                 }
                 properties.add(

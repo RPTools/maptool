@@ -21,6 +21,7 @@ import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.ImpersonationState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.macro.impl.*;
 import net.rptools.maptool.language.I18N;
@@ -338,7 +339,10 @@ public class MacroManager {
               tokenInContext = zone.resolveToken(identity.getIdentity());
             }
           }
-          details = MapTool.getParser().parseLine(tokenInContext, details, macroExecutionContext);
+          details =
+              MapTool.getParser()
+                  .parseLine(
+                      new MapToolVariableResolver(tokenInContext), details, macroExecutionContext);
           trustedPath = MapTool.getParser().isMacroPathTrusted();
         }
         context.addTransform(key + " " + details);

@@ -20,6 +20,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.ImageObserver;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.ShapeTokenOverlayDto;
 import org.apache.logging.log4j.LogManager;
@@ -115,7 +116,8 @@ public abstract sealed class AbstractShapeTokenOverlay extends BooleanTokenOverl
   }
 
   @Override
-  public final void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
+  public final void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, ImageObserver observer) {
     g.setColor(color);
     g.setStroke(stroke);
     g.draw(getShape(bounds));

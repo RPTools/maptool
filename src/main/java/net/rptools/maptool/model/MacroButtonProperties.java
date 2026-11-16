@@ -25,6 +25,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.macro.MacroLocation;
 import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
@@ -822,7 +823,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
             token.getName(),
             token.getId());
       }
-      return MapTool.getParser().parseLine(token, toolTip, context);
+      return MapTool.getParser().parseLine(new MapToolVariableResolver(token), toolTip, context);
     } catch (ParserException pe) {
       return toolTip;
     }
@@ -995,7 +996,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     return result.toString();
   }
 
-  // function found at http://www.rgagnon.com/javadetails/java-0448.html
+  // function found at https://www.rgagnon.com/javadetails/java-0448.html
   // to pad a string by inserting additional characters
   public static String paddingString(String s, int n, char c, boolean paddingLeft) {
     StringBuilder str = new StringBuilder(s);
