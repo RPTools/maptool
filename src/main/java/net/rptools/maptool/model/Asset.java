@@ -830,6 +830,26 @@ public final class Asset {
   }
 
   /**
+   * Returns the detected {@link MediaType} for this {@code Asset}.
+   *
+   * @return the {@link MediaType} of the {@code Asset}.
+   */
+  public MediaType getMediaType() {
+    try {
+      String filename = name;
+      if (filename != null
+          && extension != null
+          && !extension.isEmpty()
+          && !filename.endsWith("." + extension)) {
+        filename = filename + "." + extension;
+      }
+      return getMediaType(filename != null ? filename : "", data != null ? data : new byte[0]);
+    } catch (IOException e) {
+      return MediaType.OCTET_STREAM;
+    }
+  }
+
+  /**
    * Returns if the {@code Asset} is broken or not.
    *
    * @return {@code true} if the {@code Asset} is broken.
