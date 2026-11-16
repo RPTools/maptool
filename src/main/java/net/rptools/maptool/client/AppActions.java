@@ -1800,7 +1800,7 @@ public class AppActions {
             return;
           }
 
-          new CampaignManager().clearCampaignData();
+          new CampaignManager().replaceCampaignData();
 
           Campaign campaign = CampaignFactory.createBasicCampaign();
           AppState.setCampaignFile(null);

@@ -479,14 +479,14 @@ public class ClientMessageHandler implements MessageHandler {
   }
 
   private void handle(RemoveAllAddOnLibrariesMsg msg) {
-    new LibraryManager().deregisterAddOnLibraries();
+    new LibraryManager().deregisterAddOnLibrariesLocally();
   }
 
   private void handle(RemoveAddOnLibraryMsg msg) {
     var remLibraryManager = new LibraryManager();
     var removedNamespaces = msg.getNamespacesList();
     for (String namespace : removedNamespaces) {
-      remLibraryManager.deregisterAddOnLibrary(namespace);
+      remLibraryManager.deregisterAddOnLibraryLocally(namespace);
     }
   }
 
@@ -502,7 +502,7 @@ public class ClientMessageHandler implements MessageHandler {
             Asset asset = AssetManager.getAsset(a);
             try {
               var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-              new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+              new LibraryManager().reregisterAddOnLibraryLocally(addOnLibrary);
             } catch (IOException e) {
               SwingUtilities.invokeLater(
                   () ->

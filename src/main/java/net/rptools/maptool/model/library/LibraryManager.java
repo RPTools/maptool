@@ -27,6 +27,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroLocation;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryData;
 import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
@@ -160,6 +162,44 @@ public class LibraryManager {
   }
 
   /**
+   * Whether add-on library changes made in this client are sent to the server.
+   *
+   * <p>They are when this client hosts the game, and when it is a GM connected to someone else's
+   * server: either way the other players and the server's campaign need the change. A player cannot
+   * change the campaign's add-ons, and a personal server has nobody to tell.
+   *
+   * @return true if add-on changes made here should be sent to the server
+   */
+  private static boolean publishesAddOnChanges() {
+    if (MapTool.isHostingServer()) {
+      return true;
+    }
+    return !MapTool.isPersonalServer() && MapTool.getPlayer() != null && MapTool.getPlayer().isGM();
+  }
+
+  /**
+   * Tells the server about an add-on library added here.
+   *
+   * <p>The message names the library by its asset key only. A client that hosts the game shares the
+   * asset manager with the server, so that is enough there. Any other server may never have seen
+   * the library file, so it is sent first, as {@code setBoard} sends a board image.
+   *
+   * @param addOn the library to publish
+   */
+  private static void publishAddOnLibrary(AddOnLibrary addOn)
+      throws ExecutionException, InterruptedException {
+    if (!MapTool.isHostingServer()) {
+      Asset asset = AssetManager.getAsset(addOn.getAssetKey());
+      if (asset != null) {
+        MapTool.serverCommand().putAsset(asset);
+      } else {
+        log.warn("Add-on library {} has no asset here to send to the server", addOn.getAssetKey());
+      }
+    }
+    MapTool.serverCommand().addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOn)));
+  }
+
+  /**
    * Register and add-on library.
    *
    * @param addOn the Add On to register.
@@ -167,8 +207,8 @@ public class LibraryManager {
   public boolean registerAddOnLibrary(AddOnLibrary addOn) {
     try {
       addOnLibraryManager.registerLibrary(addOn);
-      if (MapTool.isHostingServer()) {
-        MapTool.serverCommand().addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOn)));
+      if (publishesAddOnChanges()) {
+        publishAddOnLibrary(addOn);
       }
     } catch (ExecutionException | InterruptedException | IllegalStateException e) {
       log.error("Error registering add-on in library", e);
@@ -183,10 +223,21 @@ public class LibraryManager {
    * @param namespace the namespace to deregister.
    */
   public void deregisterAddOnLibrary(String namespace) {
-    addOnLibraryManager.deregisterLibrary(namespace);
-    if (MapTool.isHostingServer()) {
+    deregisterAddOnLibraryLocally(namespace);
+    if (publishesAddOnChanges()) {
       MapTool.serverCommand().removeAddOnLibrary(List.of(namespace));
     }
+  }
+
+  /**
+   * Deregisters one add-on library in this client only, without telling the server.
+   *
+   * <p>Use this when applying a removal the server has sent: it has already happened elsewhere.
+   *
+   * @param namespace the namespace to deregister.
+   */
+  public void deregisterAddOnLibraryLocally(String namespace) {
+    addOnLibraryManager.deregisterLibrary(namespace);
   }
 
   /**
@@ -195,13 +246,34 @@ public class LibraryManager {
    * @param addOnLibrary the add-on in library to register.
    */
   public boolean reregisterAddOnLibrary(AddOnLibrary addOnLibrary) {
+    if (!reregisterAddOnLibraryLocally(addOnLibrary)) {
+      return false;
+    }
+    if (publishesAddOnChanges()) {
+      try {
+        publishAddOnLibrary(addOnLibrary);
+      } catch (InterruptedException | ExecutionException e) {
+        log.error("Error publishing add-on library to the server", e);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Registers an add-on library in this client only, replacing any existing one, without telling
+   * the server.
+   *
+   * <p>Use this when applying a library the server has sent, from a message or while connecting:
+   * publishing it again would send it straight back where it came from.
+   *
+   * @param addOnLibrary the add-on library to register.
+   * @return false if the library could not be registered.
+   */
+  public boolean reregisterAddOnLibraryLocally(AddOnLibrary addOnLibrary) {
     try {
       addOnLibraryManager.deregisterLibrary(addOnLibrary.getNamespace().get());
       addOnLibraryManager.registerLibrary(addOnLibrary);
-      if (MapTool.isHostingServer()) {
-        MapTool.serverCommand()
-            .addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOnLibrary)));
-      }
     } catch (InterruptedException | ExecutionException e) {
       log.error("Error registering add-on in library", e);
       return false;
@@ -304,16 +376,31 @@ public class LibraryManager {
     return addOnLibraryManager.toDto();
   }
 
-  /** de-registers all libraries from the library manager. */
+  /**
+   * Deregisters all libraries in this client, without telling the server.
+   *
+   * <p>This runs when a client lets go of the campaign it holds, which happens while joining a
+   * server and again while leaving one. It is not a change to the game, so the server is not told:
+   * on leaving, that would remove the campaign's add-ons from the server for everyone.
+   */
   public void deregisterAllLibraries() {
-    deregisterAddOnLibraries();
+    deregisterAddOnLibrariesLocally();
     libraryTokenManager.clearLibraries();
   }
 
-  /** de-registers all the add-on in libraries. */
-  public void deregisterAddOnLibraries() {
+  /**
+   * Deregisters all the add-on libraries in this client only, without telling the server.
+   *
+   * @see #deregisterAddOnLibraries()
+   */
+  public void deregisterAddOnLibrariesLocally() {
     addOnLibraryManager.removeAllLibraries();
-    if (MapTool.isHostingServer()) {
+  }
+
+  /** Deregisters all the add-on libraries, and tells the server. */
+  public void deregisterAddOnLibraries() {
+    deregisterAddOnLibrariesLocally();
+    if (publishesAddOnChanges()) {
       MapTool.serverCommand().removeAllAddOnLibraries();
     }
   }
