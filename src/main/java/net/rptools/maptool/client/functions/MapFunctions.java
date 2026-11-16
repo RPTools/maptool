@@ -27,8 +27,8 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.InvalidGUIDException;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
@@ -231,7 +231,7 @@ public class MapFunctions extends AbstractFunction {
             gridConfig.has("type")
                 ? gridConfig.getAsJsonPrimitive("type").getAsString()
                 : AppPreferences.defaultGridType.get();
-        final var grid = GridFactory.createGrid(Grid.GridType.fromString(gridType));
+        final var grid = GridFactory.createGrid(GridType.fromString(gridType));
 
         final var gridColor =
             gridConfig.has("color")

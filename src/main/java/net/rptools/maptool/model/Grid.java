@@ -20,7 +20,6 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -33,7 +32,6 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
-import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.zones.GridChanged;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -46,48 +44,6 @@ import org.apache.logging.log4j.Logger;
  * @author trevor
  */
 public abstract class Grid implements Cloneable {
-  public enum GridType {
-    Square,
-    Isometric,
-    HexVertical,
-    HexHorizontal,
-    None;
-
-    public boolean isHex() {
-      return this == HexVertical || this == HexHorizontal;
-    }
-
-    public boolean isIsometric() {
-      return this == Isometric;
-    }
-
-    public boolean isNone() {
-      return this == None;
-    }
-
-    public String toString() {
-      return switch (this) {
-        case Square -> "Square";
-        case Isometric -> "Isometric";
-        case HexVertical -> "Vertical Hex";
-        case HexHorizontal -> "Horizontal Hex";
-        case None -> "None";
-      };
-    }
-
-    public static GridType fromString(String string) {
-      return switch (string) {
-        case "Square" -> Square;
-        case "Isometric" -> Isometric;
-        case "Vertical Hex" -> HexVertical;
-        case "Horizontal Hex" -> HexHorizontal;
-        case "None" -> None;
-        default ->
-            throw new IllegalArgumentException(
-                String.format("\"%s\" is not a valid grid type", string));
-      };
-    }
-  }
 
   /**
    * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm
@@ -108,7 +64,6 @@ public abstract class Grid implements Cloneable {
   protected transient Map<KeyStroke, Action> movementKeys = null;
   private transient Zone zone;
   private transient Area cellShape;
-  private transient List<TokenFootprint> footprintList;
   private int offsetX = 0;
   private int offsetY = 0;
   private int size;
@@ -120,56 +75,6 @@ public abstract class Grid implements Cloneable {
   public Grid(Grid grid) {
     setSize(grid.getSize());
     setOffset(grid.offsetX, grid.offsetY);
-  }
-
-  public static Shape createGridShape(GridType gridType, double size) {
-    final Shape gridShape;
-    int sides = 0;
-    double startAngle = 0;
-    double increment;
-    double skew = 0;
-    double hScale = 1;
-    double vScale = 1;
-    final double root2 = Math.sqrt(2d);
-    final double root3 = Math.sqrt(3d);
-    switch (gridType) {
-      case HexHorizontal -> {
-        sides = 6;
-        startAngle = Math.TAU / 12;
-        hScale = vScale = root3 / 3d;
-      }
-      case HexVertical -> {
-        sides = 6;
-        hScale = vScale = root3 / 3d;
-      }
-      case Isometric -> {
-        sides = 4;
-        vScale = 0.5;
-      }
-      case None -> {
-        return new Ellipse2D.Double(-size / 2d, -size / 2d, size, size);
-      }
-      case Square -> {
-        sides = 4;
-        hScale = vScale = root2 / 2d;
-        startAngle = Math.TAU / 8d;
-      }
-    }
-    increment = Math.TAU / sides;
-    Path2D path = new Path2D.Double();
-    path.moveTo(Math.cos(startAngle) * size * hScale, Math.sin(startAngle) * size * vScale);
-    for (int i = 1; i < sides; i++) {
-      path.lineTo(
-          Math.cos(startAngle + i * increment) * size * hScale,
-          Math.sin(startAngle + i * increment) * size * vScale);
-    }
-    path.closePath();
-    if (skew != 0) {
-      gridShape = AffineTransform.getShearInstance(skew, 0).createTransformedShape(path);
-    } else {
-      gridShape = path;
-    }
-    return gridShape;
   }
 
   protected Object readResolve() {
@@ -262,48 +167,6 @@ public abstract class Grid implements Cloneable {
    * @return Point of the coordinates.
    */
   public abstract Point2D.Double getCellCenter(CellPoint cell);
-
-  protected OffsetTranslator getOffsetTranslator() {
-    return null;
-  }
-
-  protected abstract List<TokenFootprint> createFootprints();
-
-  public TokenFootprint getDefaultFootprint() {
-    for (TokenFootprint footprint : getFootprints()) {
-      if (footprint.isDefault()) {
-        return footprint;
-      }
-    }
-    // None specified, use the first
-    return getFootprints().get(0);
-  }
-
-  public TokenFootprint getFootprint(GUID guid) {
-    if (guid == null) {
-      return getDefaultFootprint();
-    }
-    for (TokenFootprint footprint : getFootprints()) {
-      if (footprint.getId().equals(guid)) {
-        return footprint;
-      }
-    }
-    return getDefaultFootprint();
-  }
-
-  public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      footprintList = createFootprints();
-
-      OffsetTranslator offsetTranslator = getOffsetTranslator();
-      if (offsetTranslator != null) {
-        for (var footprint : footprintList) {
-          footprint.addOffsetTranslator(offsetTranslator);
-        }
-      }
-    }
-    return footprintList;
-  }
 
   public boolean useMetric() {
     return false; // only square & iso use metrics
@@ -554,7 +417,7 @@ public abstract class Grid implements Cloneable {
       }
       case BEAM -> {
         // Make at least 1 pixel on each side, so it's at least visible at 100% zoom.
-        var pixelWidth = Math.max(2, width * getSize() / zone.getUnitsPerCell());
+        var pixelWidth = Math.max(2, width * getSize() / getZone().getUnitsPerCell());
         Shape lineShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
 
         visibleArea =
@@ -624,7 +487,9 @@ public abstract class Grid implements Cloneable {
       int offsetAngle,
       boolean scaleWithToken) {
     double visionRange =
-        ((range == 0) ? zone.getTokenVisionDistance() : range) * getSize() / zone.getUnitsPerCell();
+        ((range == 0) ? getZone().getTokenVisionDistance() : range)
+            * getSize()
+            / getZone().getUnitsPerCell();
 
     Rectangle footprint = token.getFootprint(this).getBounds(this);
 
@@ -701,7 +566,7 @@ public abstract class Grid implements Cloneable {
 
   private void fireGridChanged() {
     getGridShapeCache().clear();
-    new MapToolEventBus().getMainEventBus().post(new GridChanged(this.zone));
+    new MapToolEventBus().getMainEventBus().post(new GridChanged(getZone()));
   }
 
   /**
@@ -933,7 +798,7 @@ public abstract class Grid implements Cloneable {
 
     if (range > 0) {
       final Stopwatch stopwatch = Stopwatch.createStarted();
-      final int gridRadius = (int) (range / zone.getUnitsPerCell());
+      final int gridRadius = (int) (range / getZone().getUnitsPerCell());
 
       if (scaleWithToken) {
         visibleArea = getScaledGridArea(token, gridRadius);

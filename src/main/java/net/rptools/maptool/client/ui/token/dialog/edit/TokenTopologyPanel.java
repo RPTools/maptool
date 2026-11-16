@@ -54,7 +54,6 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
@@ -216,41 +215,26 @@ public class TokenTopologyPanel extends JPanel {
   @Override
   protected void paintComponent(Graphics g) {
     Dimension panelSize = getSize();
-    Dimension panelUsableSize =
-        new Dimension(Math.round(panelSize.width - 10), Math.round(panelSize.height - 10));
-
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    Dimension panelUsableSize = new Dimension(panelSize.width - 10, panelSize.height - 10);
 
     // Gather info
     BufferedImage image = ImageManager.getImage(token.getImageAssetId());
-    java.awt.Rectangle tokenSize = token.getFootprintBounds(zone);
     Dimension originalImgSize = new Dimension(image.getWidth(), image.getHeight());
     Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-
-    // If figure we need to calculate an additional offset for the token height
-    double iso_ho = 0;
-    if (token.getShape() == TokenShape.FIGURE) {
-      double th = token.getHeight() * (double) tokenSize.width / token.getWidth();
-      iso_ho = tokenSize.height - th;
-      tokenSize =
-          new java.awt.Rectangle(
-              tokenSize.x, tokenSize.y - (int) iso_ho, tokenSize.width, (int) th);
-    }
 
     AwtUtil.constrainTo(imgSize, panelUsableSize.width, panelUsableSize.height);
     Point centerPoint = new Point(panelSize.width / 2, panelSize.height / 2);
     Graphics2D g2d = (Graphics2D) g;
 
     // Background
-    ((Graphics2D) g)
-        .setPaint(
-            new TexturePaint(
-                squaresTexture,
-                new java.awt.Rectangle(
-                    0, 0, squaresTexture.getWidth() * 2, squaresTexture.getHeight() * 2)));
+    g2d.setPaint(
+        new TexturePaint(
+            squaresTexture,
+            new java.awt.Rectangle(
+                0, 0, squaresTexture.getWidth() * 2, squaresTexture.getHeight() * 2)));
 
     g2d.fillRect(0, 0, panelSize.width, panelSize.height);
-    AppStyle.shadowBorder.paintWithin((Graphics2D) g, 0, 0, panelSize.width, panelSize.height);
+    AppStyle.shadowBorder.paintWithin(g2d, 0, 0, panelSize.width, panelSize.height);
 
     final int x =
         (int)
@@ -329,8 +313,8 @@ public class TokenTopologyPanel extends JPanel {
 
     if (isInProgress()) {
       Color color = new Color(0, 0, 0, 200);
-      g.setColor(color);
-      g.fillRect(0, 0, this.getWidth(), this.getHeight());
+      g2d.setColor(color);
+      g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 
       String workingText = I18N.getText("EditTokenDialog.vbl.label.working");
       Font font = new Font("Serif", Font.BOLD, 24);

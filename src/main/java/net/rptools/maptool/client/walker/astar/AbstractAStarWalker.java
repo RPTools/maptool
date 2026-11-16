@@ -459,7 +459,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           continue;
         }
 
-        Set<CellPoint> occupiedCells = footprint.getOccupiedCells(node.position);
+        Set<CellPoint> occupiedCells =
+            footprint.getOccupiedCells(
+                node.position, zone.getGrid().getType().getOffsetTranslator());
         for (CellPoint cellPoint : occupiedCells) {
           // Check whether moving the occupied cell to its new location would be prohibited by VBL.
           var cellNeighbor =
@@ -552,7 +554,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
   private boolean tokenFootprintIntersectsVBL(CellPoint position) {
     var points =
-        footprint.getOccupiedCells(position).stream()
+        footprint
+            .getOccupiedCells(position, zone.getGrid().getType().getOffsetTranslator())
+            .stream()
             .map(
                 cellPoint -> {
                   var bounds = zone.getGrid().getBounds(cellPoint);
