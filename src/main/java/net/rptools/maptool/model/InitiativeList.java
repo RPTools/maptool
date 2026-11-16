@@ -131,6 +131,15 @@ public class InitiativeList implements Serializable {
    *-------------------------------------------------------------------------------------------*/
 
   /**
+   * @return the token initiative that has the initiative, or null if none does. Unlike {@link
+   *     #getTokenInitiative(int)}, "none" is not an error: it is the state of a new or emptied
+   *     list.
+   */
+  private TokenInitiative currentInitiative() {
+    return getCurrent() < 0 ? null : getTokenInitiative(getCurrent());
+  }
+
+  /**
    * Get the token initiative data at the passed index. Allows the other state to be set.
    *
    * @param index Index of the token initiative data needed.
@@ -174,7 +183,7 @@ public class InitiativeList implements Serializable {
   public TokenInitiative insertToken(int index, Token token) {
     startUnitOfWork();
     TokenInitiative currentInitiative =
-        getTokenInitiative(getCurrent()); // Save the currently selected initiative
+        currentInitiative(); // Save the currently selected initiative
     if (index == -1) {
       index = tokens.size();
     }
@@ -234,7 +243,7 @@ public class InitiativeList implements Serializable {
     // clear current
     startUnitOfWork();
     TokenInitiative currentInitiative =
-        getTokenInitiative(getCurrent()); // Save the currently selected initiative
+        currentInitiative(); // Save the currently selected initiative
     int currentInitIndex = indexOf(currentInitiative);
     if (currentInitIndex == index) {
       if (tokens.size() == 1) {
@@ -494,7 +503,7 @@ public class InitiativeList implements Serializable {
   public void sort(boolean ascendingOrder) {
     startUnitOfWork();
     TokenInitiative currentInitiative =
-        getTokenInitiative(getCurrent()); // Save the currently selected initiative
+        currentInitiative(); // Save the currently selected initiative
 
     Collections.sort(tokens, new TokenInitiativeDescComparator());
     if (ascendingOrder) {
@@ -539,8 +548,7 @@ public class InitiativeList implements Serializable {
 
     // Save the current position, the token moves but the initiative does not.
     TokenInitiative newInitiative = null;
-    TokenInitiative currentInitiative =
-        getTokenInitiative(getCurrent()); // Save the current initiative
+    TokenInitiative currentInitiative = currentInitiative(); // Save the current initiative
     if (oldIndex == current) {
       newInitiative = getTokenInitiative(oldIndex != 0 ? oldIndex - 1 : 1);
       current = (oldIndex != 0 ? oldIndex - 1 : 1);
