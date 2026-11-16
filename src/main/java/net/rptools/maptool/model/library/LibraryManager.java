@@ -182,7 +182,8 @@ public class LibraryManager {
    *
    * <p>The message names the library by its asset key only. A client that hosts the game shares the
    * asset manager with the server, so that is enough there. Any other server may never have seen
-   * the library file, so it is sent first, as {@code setBoard} sends a board image.
+   * the library file, so it is sent first, as {@code setBoard} sends a board image. Without the
+   * file the library is not announced at all: the other clients could not load it.
    *
    * @param addOn the library to publish
    */
@@ -190,11 +191,13 @@ public class LibraryManager {
       throws ExecutionException, InterruptedException {
     if (!MapTool.isHostingServer()) {
       Asset asset = AssetManager.getAsset(addOn.getAssetKey());
-      if (asset != null) {
-        MapTool.serverCommand().putAsset(asset);
-      } else {
-        log.warn("Add-on library {} has no asset here to send to the server", addOn.getAssetKey());
+      if (asset == null) {
+        log.warn(
+            "Add-on library {} has no asset here, so it is not sent to the server",
+            addOn.getAssetKey());
+        return;
       }
+      MapTool.serverCommand().putAsset(asset);
     }
     MapTool.serverCommand().addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOn)));
   }
