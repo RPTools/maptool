@@ -236,7 +236,15 @@ public class MapToolServer {
             releaseClientConnection(conn);
           } else {
             log.debug("About to add new client");
-            addRemoteConnection(conn, player);
+            try {
+              addRemoteConnection(conn, player);
+            } catch (RuntimeException e) {
+              // An exception thrown here would only complete the future returned by whenComplete,
+              // which nothing reads: the player would stay connected without the campaign, and
+              // nothing would be logged.
+              log.error("Could not add {} to the session", player.getName(), e);
+              releaseClientConnection(conn);
+            }
           }
         });
     // Make sure the client is allowed
