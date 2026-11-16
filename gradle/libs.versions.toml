@@ -117,7 +117,7 @@ jsonpath = { group = "com.jayway.jsonpath", name = "json-path", version = "3.0.0
 # HTML parsing
 jsoup = { group = "org.jsoup", name = "jsoup", version = "1.24.1" }
 # XML utilities, for Hero Lab integration
-jcabi-xml = { group = "com.jcabi", name = "jcabi-xml", version = "0.37.1" }
+jcabi-xml = { group = "com.jcabi", name = "jcabi-xml", version = "0.37.3" }
 # Serialization for saving campaigns, maps, tokens, etc.
 xstream = { group = "com.thoughtworks.xstream", name = "xstream", version = "1.4.21" }
 
