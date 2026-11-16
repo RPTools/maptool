@@ -149,6 +149,7 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
   public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
     var bar = new SingleImageBarTokenOverlay();
     bar.fillFrom(dto.getCommon());
+    bar.setIncrements(dto.getIncrements());
     bar.assetId = new MD5Key(dto.getAssetIds(0));
     return bar;
   }
