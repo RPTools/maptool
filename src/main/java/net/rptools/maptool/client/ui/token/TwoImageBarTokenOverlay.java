@@ -181,6 +181,7 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
   public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
     var bar = new TwoImageBarTokenOverlay();
     bar.fillFrom(dto.getCommon());
+    bar.setIncrements(dto.getIncrements());
     bar.bottomAssetId = new MD5Key(dto.getAssetIds(0));
     bar.topAssetId = new MD5Key(dto.getAssetIds(1));
     return bar;

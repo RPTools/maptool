@@ -136,6 +136,7 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
   public static DrawnBarTokenOverlay fromDto(BarTokenOverlayDto dto) {
     var bar = new DrawnBarTokenOverlay();
     bar.fillFrom(dto);
+    bar.setIncrements(dto.getIncrements());
     return bar;
   }
 
