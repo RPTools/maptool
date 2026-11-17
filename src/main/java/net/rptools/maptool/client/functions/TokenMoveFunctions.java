@@ -48,6 +48,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.EventMacroUtil;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -173,31 +174,26 @@ public class TokenMoveFunctions extends AbstractFunction {
       }
       Path<?> path = tokenInContext.getLastPath();
       List<Map<String, Integer>> returnPoints = new ArrayList<Map<String, Integer>>();
-      Token target;
 
-      if ((parameters.size() == 1) || parameters.size() == 2) {
-        String targetToken = (String) parameters.get(0);
-        String jsonPath = parameters.size() == 2 ? parameters.get(1).toString() : "";
-        target = zone.resolveToken(targetToken);
-        if (target == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.unknownToken", functionName, targetToken));
-        }
-        List<Map<String, Integer>> pathPoints = null;
-        if (jsonPath != null && !jsonPath.equals("")) {
-          returnPoints = crossedToken(zone, tokenInContext, target, jsonPath);
-        } else {
-          pathPoints = getLastPathList(path, true);
-          returnPoints = crossedToken(zone, tokenInContext, target, pathPoints);
-        }
-        JsonArray retVal = pathPointsToJSONArray(returnPoints);
-        returnPoints = null;
-        return retVal;
-      } else {
+      if (parameters.size() < 1 || parameters.size() > 2) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
       }
+
+      Token target = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, -1);
+
+      String jsonPath = parameters.size() == 2 ? parameters.get(1).toString() : "";
+      List<Map<String, Integer>> pathPoints = null;
+      if (jsonPath != null && !jsonPath.equals("")) {
+        returnPoints = crossedToken(zone, tokenInContext, target, jsonPath);
+      } else {
+        pathPoints = getLastPathList(path, true);
+        returnPoints = crossedToken(zone, tokenInContext, target, pathPoints);
+      }
+      JsonArray retVal = pathPointsToJSONArray(returnPoints);
+      returnPoints = null;
+      return retVal;
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }

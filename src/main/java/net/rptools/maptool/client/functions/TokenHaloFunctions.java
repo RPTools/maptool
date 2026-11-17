@@ -128,26 +128,12 @@ public class TokenHaloFunctions extends AbstractFunction {
    */
   private Object getHalo(MapToolVariableResolver resolver, List<Object> args)
       throws ParserException {
-    Token token;
-
-    if (args.size() == 1) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPermOther", "getHalo"));
-      }
-      token = FindTokenFunctions.findToken(args.get(0).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.unknownToken", "getHalo", args.get(0).toString()));
-      }
-    } else if (args.size() == 0) {
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(I18N.getText("macro.function.general.noImpersonated", "getHalo"));
-      }
-    } else {
+    if (args.size() > 1) {
       throw new ParserException(
           I18N.getText("macro.function.general.tooManyParam", "getHalo", 1, args.size()));
     }
+
+    Token token = FunctionUtil.getTokenFromParam(resolver, "getHalo", args, 0, -1);
     return getHalo(token);
   }
 
@@ -209,7 +195,6 @@ public class TokenHaloFunctions extends AbstractFunction {
   private Object setHalo(MapToolVariableResolver resolver, List<Object> args)
       throws ParserException {
 
-    Token token;
     Object value = args.get(0);
 
     switch (args.size()) {
@@ -220,23 +205,10 @@ public class TokenHaloFunctions extends AbstractFunction {
         throw new ParserException(
             I18N.getText("macro.function.general.tooManyParam", "setHalo", 2, args.size()));
       case 1:
-        token = resolver.getTokenInContext();
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", "setHalo"));
-        }
-        break;
       case 2:
-        if (!MapTool.getParser().isMacroTrusted()) {
-          throw new ParserException(I18N.getText("macro.function.general.noPermOther", "setHalo"));
-        }
-        token = FindTokenFunctions.findToken(args.get(1).toString(), null);
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownToken", "setHalo", args.get(1).toString()));
-        }
     }
+
+    Token token = FunctionUtil.getTokenFromParam(resolver, "setHalo", args, 1, -1);
     setHalo(token, value);
     return value;
   }
