@@ -157,6 +157,8 @@ public interface ServerCommand {
 
   void setVisionType(GUID zoneGUID, VisionType visionType);
 
+  void setShowCoordinates(GUID zoneGUID, Zone.ShowCoordinates showCoordinates);
+
   void updateCampaignMacros(List<MacroButtonProperties> properties);
 
   void updateGmMacros(List<MacroButtonProperties> properties);

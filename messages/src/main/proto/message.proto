@@ -93,5 +93,6 @@ message Message {
     UpdateWallDataMsg update_wall_data_msg = 77;
     PutLookupTableMsg update_lookup_table_msg = 78;
     DeleteLookupTableMsg delete_lookup_table_msg = 79;
+    SetShowCoordinatesMsg set_show_coordinates_msg = 80;
   }
 }
