@@ -374,7 +374,7 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
                 Asset asset = AssetManager.getAsset(a);
                 try {
                   var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-                  libraryManager.reregisterAddOnLibrary(addOnLibrary);
+                  libraryManager.reregisterAddOnLibraryLocally(addOnLibrary);
                 } catch (IOException e) {
                   SwingUtilities.invokeLater(
                       () -> {
