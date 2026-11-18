@@ -20,6 +20,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.ImageObserver;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.FlowShapeTokenOverlayDto;
 import org.apache.logging.log4j.LogManager;
@@ -96,9 +97,9 @@ public abstract sealed class AbstractFlowShapeTokenOverlay extends BooleanTokenO
   }
 
   @Override
-  public final void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
+  public final void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, ImageObserver observer) {
     g.setColor(getColor());
-    Rectangle2D gridCellBounds = getFlow().getStateBounds2D(bounds, token, getName());
     Shape s = getShape(getFlow().getStateBounds2D(bounds, token, getName()));
     g.fill(s);
   }

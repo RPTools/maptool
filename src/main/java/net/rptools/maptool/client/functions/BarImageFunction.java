@@ -77,12 +77,8 @@ public class BarImageFunction extends AbstractFunction {
         assetId.append(two.getBottomAssetId().toString());
       }
     } else if (over instanceof MultipleImageBarTokenOverlay many) {
-      int increment = 0;
-      int max_increments = many.getAssetIds().size();
-      if (value != null) {
-        increment = Math.clamp(over.findIncrement(value.doubleValue()), 0, max_increments);
-      }
-      assetId.append(many.getAssetIds().get(increment).toString());
+      var assetMd5 = many.getAssetForValue(value == null ? 0. : value.doubleValue());
+      assetId.append(assetMd5);
     } else {
       throw new ParserException(
           I18N.getText("macro.function.barImage.notImage", functionName, barName));

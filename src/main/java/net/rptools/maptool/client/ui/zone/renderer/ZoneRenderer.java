@@ -603,16 +603,27 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     viewModel.setZoneScale(zoneScale.withOffset(snappedXOffset, snappedYOffset));
   }
 
-  public void enforceView(int x, int y, double scale, int gmWidth, int gmHeight) {
+  /**
+   * Forces the player view, fitting the new view to the GM viewport.
+   *
+   * @param x The center point of the new view
+   * @param y The center point of the new view
+   * @param scale The scale of the new view.
+   * @param gmViewSize The size of the GM viewport that needs to be fit into, or {@code null} if we
+   *     don't need to fit to the GM viewport.
+   */
+  public void enforceView(int x, int y, double scale, @Nullable Dimension gmViewSize) {
     int width = getWidth();
     int height = getHeight();
 
-    if ((width * gmHeight) < (height * gmWidth)) {
-      // Our aspect ratio is narrower than server's, so fit to width
-      scale = scale * width / gmWidth;
-    } else {
-      // Our aspect ratio is shorter than server's, so fit to height
-      scale = scale * height / gmHeight;
+    if (gmViewSize != null) {
+      if ((width * gmViewSize.height) < (height * gmViewSize.width)) {
+        // Our aspect ratio is narrower than server's, so fit to width
+        scale = scale * width / gmViewSize.width;
+      } else {
+        // Our aspect ratio is shorter than server's, so fit to height
+        scale = scale * height / gmViewSize.height;
+      }
     }
 
     previousScale = viewModel.getZoneScale().getScale();
@@ -1333,7 +1344,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       Set<CellPoint> pathSet = new HashSet<>();
       List<ZonePoint> waypointList = new LinkedList<>();
       for (CellPoint p : cellPath) {
-        pathSet.addAll(footprint.getOccupiedCells(p));
+        pathSet.addAll(footprint.getOccupiedCells(p, grid.getType().getOffsetTranslator()));
 
         if (pathCP.isWaypoint(p) && previousPoint != null) {
           ZonePoint zp = grid.convert(p);
@@ -1810,7 +1821,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
             || !overlay.showPlayer(token, MapTool.getPlayer())) {
           continue;
         }
-        overlay.paintOverlay(locG, token, bounds, stateValue);
+        overlay.paintOverlay(locG, token, bounds, stateValue, this);
       }
       timer.stop("token-list-9");
 
@@ -1825,7 +1836,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
           continue;
         }
 
-        overlay.paintOverlay(locG, token, bounds, barValue);
+        overlay.paintOverlay(locG, token, bounds, barValue, this);
       }
       locG.dispose();
       timer.stop("token-list-10");
@@ -2267,7 +2278,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
    */
   public void addTokens(
       List<Token> tokens, ZonePoint zp, List<Boolean> configureTokens, boolean showDialog) {
-    GridCapabilities gridCaps = zone.getGrid().getCapabilities();
+    Grid grid = zone.getGrid();
+    GridCapabilities gridCaps = grid.getCapabilities();
     boolean isGM = MapTool.getPlayer().isGM();
     List<String> failedPaste = new ArrayList<>(tokens.size());
     List<GUID> selectThese = new ArrayList<>(tokens.size());
@@ -2283,7 +2295,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       token.setSnapToGrid(
           gridCaps.isSnapToGridSupported() && AppPreferences.tokensStartSnapToGrid.get());
       if (token.isSnapToGrid()) {
-        zp = zone.getGrid().convert(zone.getGrid().convert(zp));
+        zp = grid.convert(grid.convert(zp));
       }
       token.setX(zp.x);
       token.setY(zp.y);
@@ -2293,7 +2305,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
         token.setWidth(image.getWidth(null));
         token.setHeight(image.getHeight(null));
-        token.setFootprint(zone.getGrid(), zone.getGrid().getDefaultFootprint());
+        token.setFootprintId(grid.getType(), grid.getType().getFootprints().getDefaultId());
         token.guessAndSetShape();
       }
 

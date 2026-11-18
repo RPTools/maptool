@@ -24,7 +24,6 @@ import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -122,8 +121,6 @@ public class CallFunction extends AbstractFunction {
   private Object doCall(
       MapToolVariableResolver resolver, String macroName, JsonArray args, boolean defer)
       throws ParserException {
-    Token tokenInContext = resolver.getTokenInContext();
-
     resolver.setVariable(MapToolLineParser.ARGS_PASSED_AS_VARIABLE_NAME, args);
 
     if (defer) {
@@ -133,9 +130,9 @@ public class CallFunction extends AbstractFunction {
               MapTool.getParser()
                   .runMacro(
                       resolver,
-                      tokenInContext,
                       macroName,
-                      MapToolLineParser.ARGS_PASSED_AS_VARIABLE_INDICATOR);
+                      MapToolLineParser.ARGS_PASSED_AS_VARIABLE_INDICATOR,
+                      true);
             } catch (ParserException e) {
               MapTool.addErrorMessage(e);
             }
@@ -143,11 +140,7 @@ public class CallFunction extends AbstractFunction {
       return ""; // Defered macros will return nothing as the excution will be done later
     } else {
       return MapTool.getParser()
-          .runMacro(
-              resolver,
-              tokenInContext,
-              macroName,
-              MapToolLineParser.ARGS_PASSED_AS_VARIABLE_INDICATOR);
+          .runMacro(resolver, macroName, MapToolLineParser.ARGS_PASSED_AS_VARIABLE_INDICATOR, true);
     }
   }
 

@@ -131,7 +131,7 @@ public class ShapeDrawable extends AbstractDrawing {
     var shape = Mapper.map(getShape());
     var dto =
         ShapeDrawableDto.newBuilder()
-            .setId(getId().toString())
+            .setId(getId().toDto())
             .setLayer(getLayer().name())
             .setShape(shape)
             .setUseAntiAliasing(getUseAntiAliasing());
@@ -143,7 +143,7 @@ public class ShapeDrawable extends AbstractDrawing {
 
   public static ShapeDrawable fromDto(ShapeDrawableDto dto) {
     var shape = Mapper.map(dto.getShape());
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new ShapeDrawable(id, shape, dto.getUseAntiAliasing());
     if (dto.hasName()) {
       drawable.setName(dto.getName().getValue());

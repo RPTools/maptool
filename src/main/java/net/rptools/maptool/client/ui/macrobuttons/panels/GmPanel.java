@@ -63,11 +63,13 @@ public class GmPanel extends AbstractMacroPanel {
       }
     }
     getGmPanel().reset();
+    MapTool.publishCampaignMacros(true);
   }
 
   public static void clearPanel() {
     AbstractMacroPanel.clearHotkeys(getGmPanel());
     getGmMacroButtonArray().clear();
     getGmPanel().reset();
+    MapTool.publishCampaignMacros(true);
   }
 }

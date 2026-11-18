@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import dev.onvoid.webrtc.*;
 import dev.onvoid.webrtc.media.MediaStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -376,20 +377,9 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
         int chunkSize = 16 * 1024;
 
         while (buffer.remaining() > 0) {
-          var amountToSend = Math.min(buffer.remaining(), chunkSize);
-          ByteBuffer part = buffer;
+          ByteBuffer part =
+              buffer.slice(buffer.position(), Math.min(buffer.remaining(), chunkSize));
 
-          if (amountToSend != buffer.capacity()) {
-            // we need to allocation a new ByteBuffer because send calls ByteBuffer.array()
-            // which would return
-            // the whole byte[] and not only the slice. But the lib doesn't use
-            // ByteBuffer.arrayOffset().
-            var slice = buffer.slice(buffer.position(), amountToSend);
-            part = ByteBuffer.allocate(amountToSend);
-            part.put(slice);
-          }
-
-          buffer.position(buffer.position() + amountToSend);
           try {
             localDataChannel.send(new RTCDataChannelBuffer(part, true));
           } catch (Exception e) {
@@ -398,6 +388,8 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
             return;
           }
           log.debug(prefix() + " sent " + part.capacity() + " bytes");
+
+          buffer.position(buffer.position() + part.capacity());
         }
       }
 
@@ -468,11 +460,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
               + event.getPort()
               + " text: "
               + event.getErrorText());
-    }
-
-    @Override
-    public void onIceCandidatesRemoved(RTCIceCandidate[] candidates) {
-      log.info(prefix() + "PeerConnection.onIceCandidatesRemoved");
     }
 
     @Override
@@ -564,7 +551,11 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
       var message = readMessage(channelBuffer.data);
       if (message != null) {
-        dispatchCompressedMessage(message);
+        try {
+          dispatchCompressedMessage(message);
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
       }
     }
 

@@ -437,8 +437,10 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                 MacroButtonPrefs.saveMacroButtonsAtNextIndex(toAdd);
               } else if ("CampaignPanel".equals(panelClass)) {
                 MapTool.getCampaign().addMacroButtonPropertiesAtNextIndex(toAdd, false);
+                MapTool.publishCampaignMacros(false);
               } else if ("GmPanel".equals(panelClass)) {
                 MapTool.getCampaign().addMacroButtonPropertiesAtNextIndex(toAdd, true);
+                MapTool.publishCampaignMacros(true);
               }
             }
 
@@ -784,6 +786,9 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
             || panelClass.equals("GlobalPanel")
             || panelClass.equals("GmPanel")) {
           areaGroup.getPanel().renameMacroGroup(macroGroup, newMacroGroupName);
+          if (!panelClass.equals("GlobalPanel")) {
+            MapTool.publishCampaignMacros(panelClass.equals("GmPanel"));
+          }
         } else if (tokenId != null) {
           getToken().renameMacroGroup(macroGroup, newMacroGroupName);
         }

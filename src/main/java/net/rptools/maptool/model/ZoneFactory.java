@@ -85,8 +85,7 @@ public class ZoneFactory {
     zone.setVisionType(AppPreferences.defaultVisionType.get());
     zone.setShowCoordinates(AppPreferences.defaultShowCoordinates.get());
 
-    zone.setGrid(
-        GridFactory.createGrid(Grid.GridType.fromString(AppPreferences.defaultGridType.get())));
+    zone.setGrid(GridFactory.createGrid(GridType.fromString(AppPreferences.defaultGridType.get())));
     zone.setGridColor(AppPreferences.defaultGridColor.get().getRGB());
     zone.getGrid().setSize(AppPreferences.defaultGridSize.get());
     zone.getGrid().setOffset(0, 0);

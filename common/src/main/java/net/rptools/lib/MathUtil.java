@@ -68,4 +68,14 @@ public class MathUtil {
       double valueToMap, double in_min, double in_max, double out_min, double out_max) {
     return (valueToMap - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
   }
+
+  /**
+   * Checks whether an integer is even.
+   *
+   * @param i The number to check.
+   * @return {@code true} is {@code i} is a multiple of two.
+   */
+  public static boolean isEven(int i) {
+    return (i & 1) == 0;
+  }
 }

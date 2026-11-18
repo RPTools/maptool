@@ -102,7 +102,7 @@ public class DrawnLabel extends AbstractDrawing {
   @Override
   public DrawableDto toDto() {
     var dto = DrawnLabelDto.newBuilder();
-    dto.setId(getId().toString())
+    dto.setId(getId().toDto())
         .setLayer(getLayer().name())
         .setBounds(Mapper.map(bounds))
         .setText(getText())
@@ -114,7 +114,7 @@ public class DrawnLabel extends AbstractDrawing {
   }
 
   public static DrawnLabel fromDto(DrawnLabelDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new DrawnLabel(id, dto.getText(), Mapper.map(dto.getBounds()), dto.getFont());
     if (dto.hasName()) {
       drawable.setName(dto.getName().getValue());

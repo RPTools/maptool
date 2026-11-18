@@ -172,7 +172,7 @@ public final class Halo implements Serializable {
 
   public static @Nonnull Halo fromDto(@Nonnull HaloDto dto) {
     return new Halo(
-        GUID.valueOf(dto.getId()),
+        GUID.fromDto(dto.getId()),
         dto.getName(),
         dto.getGmOnly(),
         dto.getOwnerOnly(),
@@ -187,7 +187,7 @@ public final class Halo implements Serializable {
 
   public @Nonnull HaloDto toDto() {
     var dto = HaloDto.newBuilder();
-    dto.setId(id.toString());
+    dto.setId(id.toDto());
     dto.setName(name);
     dto.setGmOnly(gmOnly);
     dto.setOwnerOnly(ownerOnly);

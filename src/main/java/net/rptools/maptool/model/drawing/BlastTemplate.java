@@ -256,7 +256,7 @@ public class BlastTemplate extends ConeTemplate {
   @Override
   public DrawableDto toDto() {
     var dto = BlastTemplateDto.newBuilder();
-    dto.setId(getId().toString())
+    dto.setId(getId().toDto())
         .setLayer(getLayer().name())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
@@ -270,7 +270,7 @@ public class BlastTemplate extends ConeTemplate {
   }
 
   public static BlastTemplate fromDto(BlastTemplateDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new BlastTemplate(id, dto.getOffsetX(), dto.getOffsetY());
     drawable.setRadius(dto.getRadius());
     var vertex = dto.getVertex();

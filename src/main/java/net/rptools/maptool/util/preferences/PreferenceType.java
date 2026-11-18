@@ -16,8 +16,11 @@ package net.rptools.maptool.util.preferences;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.prefs.Preferences;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Defines how preferences with a value of type {@code T} can be read and written.
@@ -256,6 +259,44 @@ interface PreferenceType<T> {
     @Override
     public Color get(Preferences storage, String key, Supplier<Color> defaultValue) {
       return new Color(storage.getInt(key, defaultValue.get().getRGB()), hasAlpha);
+    }
+  }
+
+  final class AnyType<T> implements PreferenceType<T> {
+    private final Class<T> type;
+    private final Function<@NonNull String, @Nullable T> load;
+    private final Function<@Nullable T, @NonNull String> store;
+
+    public AnyType(
+        Class<T> type,
+        Function<@NonNull String, @Nullable T> load,
+        Function<@Nullable T, @NonNull String> store) {
+      this.type = type;
+      this.load = load;
+      this.store = store;
+    }
+
+    @Override
+    public Class<T> getValueClass() {
+      return type;
+    }
+
+    @Override
+    public void set(Preferences storage, String key, T value) {
+      if (value == null) {
+        storage.remove(key);
+      } else {
+        storage.put(key, store.apply(value));
+      }
+    }
+
+    @Override
+    public T get(Preferences storage, String key, Supplier<T> defaultValue) {
+      var stored = storage.get(key, null);
+      if (stored == null) {
+        return defaultValue.get();
+      }
+      return load.apply(stored);
     }
   }
 }

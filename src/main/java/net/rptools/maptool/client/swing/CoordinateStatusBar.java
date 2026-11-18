@@ -41,6 +41,15 @@ public class CoordinateStatusBar extends JLabel {
   /** Localization tooltip for when the label is enabled (i.e. shown). */
   private final String enabledToolTip = I18N.getString("CoordinateStatusBar.mapCoordinates");
 
+  /** Representation of the X map coordinate */
+  private Integer mapX;
+
+  /** Representation of the Y map coordinate */
+  private Integer mapY;
+
+  /** Whether the coordinate status bar has any coordinates */
+  private boolean hasCoordinates;
+
   /** Localization tooltip for when the label is disabled (i.e. not shown). */
   private final String disabledToolTip =
       I18N.getString("CoordinateStatusBar.mapCoordinates.hidden");
@@ -83,6 +92,21 @@ public class CoordinateStatusBar extends JLabel {
     return getMinimumSize();
   }
 
+  /** Get the coordinate status bars representation of the X map coordinate */
+  public Integer getMapX() {
+    return mapX;
+  }
+
+  /** Get the coordinate status bars representation of the Y map coordinate */
+  public Integer getMapY() {
+    return mapY;
+  }
+
+  /** Get whether the coordinate status bars has any coordinates */
+  public boolean hasCoordinates() {
+    return hasCoordinates;
+  }
+
   /**
    * Resets the CoordinateStatusBar (setting text to blank and checks show coordinate permissions)
    * by sending a {@code null} to {@link AbstractPoint} to {@link #update(AbstractPoint)}.
@@ -106,10 +130,18 @@ public class CoordinateStatusBar extends JLabel {
       boolean showCoordinates =
           zr.getZone().getShowCoordinates().shouldShow(MapTool.getPlayer().getRole());
 
-      String coordinatesText =
-          (abstractPoint != null && showCoordinates)
-              ? abstractPoint.x + ", " + abstractPoint.y
-              : "";
+      String coordinatesText;
+      if (abstractPoint != null && showCoordinates) {
+        hasCoordinates = true;
+        mapX = abstractPoint.x;
+        mapY = abstractPoint.y;
+        coordinatesText = mapX + ", " + mapY;
+      } else {
+        hasCoordinates = false;
+        mapX = null;
+        mapY = null;
+        coordinatesText = "";
+      }
 
       if (isEnabled() != showCoordinates) {
         setEnabled(showCoordinates);

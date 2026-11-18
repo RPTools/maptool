@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -151,26 +150,12 @@ public class TokenVisibleFunction extends AbstractFunction {
    */
   private static Object getVisible(VariableResolver resolver, List<Object> args)
       throws ParserException {
-    Token token;
-
-    if (args.size() == 1) {
-      token = FindTokenFunctions.findToken(args.get(0).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken", "getVisible", args.get(0).toString()));
-      }
-    } else if (args.size() == 0) {
-      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "getVisible"));
-      }
-    } else {
+    if (args.size() > 1) {
       throw new ParserException(
           I18N.getText("macro.function.general.tooManyParam", "getVisible", 1, args.size()));
     }
+
+    Token token = FunctionUtil.getTokenFromParam(resolver, "getVisible", args, 0, -1);
     return getVisible(token);
   }
 
@@ -183,95 +168,47 @@ public class TokenVisibleFunction extends AbstractFunction {
    */
   private static Object setVisible(VariableResolver resolver, List<Object> args)
       throws ParserException {
-    Object val;
-    Token token;
-
-    if (args.size() == 2) {
-      token = FindTokenFunctions.findToken(args.get(1).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken", "setVisible", args.get(1).toString()));
-      }
-    } else if (args.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "setVisible"));
-      }
-    } else if (args.size() == 0) {
+    if (args.size() == 0) {
       throw new ParserException(
           I18N.getText("macro.function.general.notEnoughParam", "setVisible", 1, args.size()));
-    } else {
+    } else if (args.size() > 2) {
       throw new ParserException(
           I18N.getText("macro.function.general.tooManyParam", "setVisible", 2, args.size()));
     }
-    val = args.get(0);
+
+    Object val = args.get(0);
+    Token token = FunctionUtil.getTokenFromParam(resolver, "setVisible", args, 1, -1);
     setVisible(token, val);
     return val;
   }
 
   private static Object setOwnerOnlyVisible(VariableResolver resolver, List<Object> args)
       throws ParserException {
-    Object val;
-    Token token;
-
-    if (args.size() == 2) {
-      token = FindTokenFunctions.findToken(args.get(1).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken",
-                "setOwnerOnlyVisible",
-                args.get(1).toString()));
-      }
-    } else if (args.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "setOwnerOnlyVisible"));
-      }
-    } else if (args.size() == 0) {
+    if (args.size() == 0) {
       throw new ParserException(
           I18N.getText(
               "macro.function.general.notEnoughParam", "setOwnerOnlyVisible", 1, args.size()));
-    } else {
+    } else if (args.size() > 2) {
       throw new ParserException(
           I18N.getText(
               "macro.function.general.tooManyParam", "setOwnerOnlyVisible", 2, args.size()));
     }
-    val = args.get(0);
+
+    Object val = args.get(0);
+    Token token = FunctionUtil.getTokenFromParam(resolver, "setOwnerOnlyVisible", args, 1, -1);
     setOwnerOnlyVisible(token, val);
     return val;
   }
 
   private static Object getOwnerOnlyVisible(VariableResolver resolver, List<Object> args)
       throws ParserException {
-    Token token;
-
-    if (args.size() == 1) {
-      token = FindTokenFunctions.findToken(args.get(0).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken",
-                "getOwnerOnlyVisible",
-                args.get(0).toString()));
-      }
-    } else if (args.size() == 0) {
-      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "getOwnerOnlyVisible"));
-      }
-    } else {
+    if (args.size() > 1) {
       throw new ParserException(
           I18N.getText(
               "macro.function.general.tooManyParam", "getOwnerOnlyVisible", 1, args.size()));
     }
+
+    Token token = FunctionUtil.getTokenFromParam(resolver, "getOwnerOnlyVisible", args, 0, -1);
     return getOwnerOnlyVisible(token);
   }
 
@@ -358,26 +295,12 @@ public class TokenVisibleFunction extends AbstractFunction {
    */
   private static Object getAlwaysVisible(VariableResolver resolver, List<Object> args)
       throws ParserException {
-    Token token;
-
-    if (args.size() == 1) {
-      token = FindTokenFunctions.findToken(args.get(0).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken", "getAlwaysVisible", args.get(0).toString()));
-      }
-    } else if (args.size() == 0) {
-      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "getAlwaysVisible"));
-      }
-    } else {
+    if (args.size() > 1) {
       throw new ParserException(
           I18N.getText("macro.function.general.tooManyParam", "getAlwaysVisible", 1, args.size()));
     }
+
+    Token token = FunctionUtil.getTokenFromParam(resolver, "getAlwaysVisible", args, 0, -1);
     return getAlwaysVisible(token);
   }
 }

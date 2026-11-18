@@ -59,12 +59,8 @@ public class CampaignProperties implements Serializable {
   private static final String PROP_PREFIX = "Default.campaign.tokenProperty.name.";
   private static final String SHORT_PROP_PREFIX = "Default.campaign.tokenProperty.name.short.";
 
-  /** The property type to fall back to for the default when none is defined. */
-  private static final String FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE =
-      I18N.getText("Default.campaign.tokenPropertyType");
-
   /** The default property type for tokens. */
-  private String defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
+  private String defaultTokenPropertyType = I18N.getText("Default.campaign.tokenPropertyType");
 
   private Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
 
@@ -787,7 +783,7 @@ public class CampaignProperties implements Serializable {
     }
 
     if (defaultTokenPropertyType == null) {
-      defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
+      defaultTokenPropertyType = I18N.getText("Default.campaign.tokenPropertyType");
     }
     return this;
   }
@@ -890,7 +886,7 @@ public class CampaignProperties implements Serializable {
     if (dto.hasDefaultTokenPropertyType()) {
       props.defaultTokenPropertyType = dto.getDefaultTokenPropertyType().getValue();
     } else {
-      props.defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
+      props.defaultTokenPropertyType = I18N.getText("Default.campaign.tokenPropertyType");
     }
 
     return props;

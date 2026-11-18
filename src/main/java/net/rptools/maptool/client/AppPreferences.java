@@ -16,11 +16,12 @@ package net.rptools.maptool.client;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.Locale;
 import java.util.prefs.Preferences;
 import net.rptools.lib.image.RenderQuality;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.preferences.Preference;
@@ -30,12 +31,23 @@ import net.rptools.maptool.util.preferences.PreferenceStore;
 public class AppPreferences {
   private static final PreferenceStore store =
       new PreferenceStore(Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs"));
-  private static final boolean PRINT_KEYS_MISSING_I18N_ON_STARTUP =
-      false; // for finding pesky wabbitses
+
+  /** For finding pesky wabbitses */
+  private static final boolean PRINT_KEYS_MISSING_I18N_ON_STARTUP = false;
 
   public static PreferenceStore getAppPreferenceStore() {
     return store;
   }
+
+  public static final Preference<Locale> locale =
+      store.define(
+          "localeOverride",
+          "Preferences.label.localeOverride",
+          "Preferences.label.localeOverride.tooltip",
+          Locale.class,
+          null,
+          string -> string == null ? null : Locale.forLanguageTag(string),
+          locale -> locale == null ? null : locale.toLanguageTag());
 
   public static final Preference<Boolean> fillSelectionBox =
       store.defineBoolean(
@@ -624,7 +636,7 @@ public class AppPreferences {
 
   public static final Preference<String> defaultGridType =
       store
-          .defineString("defaultGridType", Grid.GridType.Square.toString())
+          .defineString("defaultGridType", GridType.Square.toString())
           .setLabel("Preferences.label.maps.grid")
           .setTooltip("Preferences.label.maps.grid.tooltip");
 
@@ -675,7 +687,7 @@ public class AppPreferences {
   public static final Preference<String> defaultUserName =
       store
           .defineString(
-              "defaultUsername", I18N.getString("Preferences.client.default.username.value"))
+              "defaultUsername", () -> I18N.getString("Preferences.client.default.username.value"))
           .setLabel("Preferences.label.client.default.username")
           .setTooltip("Preferences.label.client.default.username.tooltip");
 
@@ -753,6 +765,9 @@ public class AppPreferences {
           "Preferences.label.loadMRU",
           "Preferences.label.loadMRU.tooltip",
           false);
+
+  public static final Preference<Boolean> initiativePanelShowsInfoInTitle =
+      store.defineBoolean("initShowTitleInfo", true);
 
   public static final Preference<Boolean> initiativePanelShowsTokenImage =
       store.defineBoolean("initShowTokens", true);
@@ -853,18 +868,18 @@ public class AppPreferences {
   // Based off vision type enum in Zone.java, this could easily get tossed somewhere else if
   // preferred.
   public enum MapSortType {
-    DISPLAYNAME(),
-    GMNAME();
+    DISPLAYNAME("mapSortType.DISPLAYNAME"),
+    GMNAME("mapSortType.GMNAME");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    MapSortType() {
-      displayName = I18N.getString("mapSortType." + name());
+    MapSortType(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -873,15 +888,15 @@ public class AppPreferences {
     Masks("uvttLosImportType.masks"),
     Prompt("uvttLosImportType.prompt");
 
-    private final String displayName;
+    private final String displayNameKey;
 
     UvttLosImportType(String key) {
-      displayName = I18N.getString(key);
+      displayNameKey = key;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 

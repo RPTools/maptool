@@ -338,7 +338,7 @@ public class ConeTemplate extends RadiusTemplate {
   @Override
   public DrawableDto toDto() {
     var dto = ConeTemplateDto.newBuilder();
-    dto.setId(getId().toString())
+    dto.setId(getId().toDto())
         .setLayer(getLayer().name())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
@@ -350,7 +350,7 @@ public class ConeTemplate extends RadiusTemplate {
   }
 
   public static ConeTemplate fromDto(ConeTemplateDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new ConeTemplate(id);
     drawable.setRadius(dto.getRadius());
     var vertex = dto.getVertex();

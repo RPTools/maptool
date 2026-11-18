@@ -15,11 +15,7 @@
 package net.rptools.maptool.client.tool;
 
 import com.google.common.collect.Iterables;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -98,13 +94,22 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   }
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-    if (walker != null) {
-      renderer.renderPath(g, walker.getPath(), renderer.getZone().getGrid().getDefaultFootprint());
-      ScreenPoint sp = walker.getLastPoint().convertToScreen(renderer);
+    var zone = renderer.getZone();
 
-      int y = (int) sp.y - 10;
-      int x = (int) sp.x + (int) (renderer.getScaledGridSize() / 2);
-      GraphicsUtil.drawBoxedString(g, Double.toString(walker.getDistance()), x, y);
+    if (walker != null) {
+      renderer.renderPath(
+          g, walker.getPath(), zone.getGrid().getType().getFootprints().getDefault());
+
+      // distance label position to be below the last cell in the path and justified centrally
+      Rectangle lastCellPointBounds = zone.getGrid().getBounds(walker.getLastPoint());
+      ZonePoint zp =
+          new ZonePoint(
+              (int) lastCellPointBounds.getCenterX(), (int) lastCellPointBounds.getMaxY());
+      ScreenPoint sp =
+          ScreenPoint.fromZonePointRnd(renderer.getViewModel().getZoneScale(), zp.x, zp.y);
+
+      GraphicsUtil.drawBoxedString(
+          g, Double.toString(walker.getDistance()), (int) sp.x, (int) sp.y + 10);
     } else if (gridlessPath != null) {
       // distance
       double c = 0;
@@ -125,8 +130,8 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       }
       assert lastZP != null : "Our non-empty iterable was empty!";
 
-      c /= renderer.getZone().getGrid().getSize();
-      c *= renderer.getZone().getUnitsPerCell();
+      c /= zone.getGrid().getSize();
+      c *= zone.getUnitsPerCell();
 
       Object oldAA = SwingUtil.useAntiAliasing(g);
       try {
@@ -135,7 +140,10 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
 
         String distance = NumberFormat.getInstance().format(c);
         ScreenPoint sp = renderer.getViewModel().getZoneScale().toScreenSpace(lastZP.x, lastZP.y);
-        GraphicsUtil.drawBoxedString(g, distance, (int) sp.x, (int) sp.y - 20);
+
+        // distance label position to be below measure tool cursor and left justified
+        GraphicsUtil.drawBoxedString(g, distance, (int) sp.x, (int) sp.y + 20, SwingUtilities.LEFT);
+
       } finally {
         SwingUtil.restoreAntiAliasing(g, oldAA);
       }

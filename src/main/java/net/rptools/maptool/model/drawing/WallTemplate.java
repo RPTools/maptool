@@ -89,7 +89,7 @@ public class WallTemplate extends LineTemplate {
   @Override
   public DrawableDto toDto() {
     var dto = WallTemplateDto.newBuilder();
-    dto.setId(getId().toString())
+    dto.setId(getId().toDto())
         .setLayer(getLayer().name())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
@@ -105,7 +105,7 @@ public class WallTemplate extends LineTemplate {
   }
 
   public static WallTemplate fromDto(WallTemplateDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new WallTemplate(id);
     drawable.setRadius(dto.getRadius());
     var vertex = dto.getVertex();

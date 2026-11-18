@@ -258,7 +258,7 @@ public final class PasswordFilePlayerDatabase
             pwObject.addProperty(
                 "salt", Base64.getEncoder().withoutPadding().encodeToString(v.password.salt()));
           }
-          pwObject.addProperty("role", v.role().toString());
+          pwObject.addProperty("role", v.role().name());
           passwords.add(pwObject);
 
           if (v.blockedReason() != null && !v.blockedReason.isEmpty()) {

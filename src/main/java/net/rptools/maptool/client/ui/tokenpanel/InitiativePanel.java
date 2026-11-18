@@ -14,17 +14,18 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
+import static net.rptools.maptool.client.ui.MapToolFrame.MTFrame.INITIATIVE;
+
 import com.google.common.eventbus.Subscribe;
+import com.jidesoft.docking.DockableFrame;
+import com.jidesoft.docking.event.DockableFrameAdapter;
+import com.jidesoft.docking.event.DockableFrameEvent;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -32,6 +33,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -62,7 +64,7 @@ public class InitiativePanel extends JPanel
    * Instance Variables
    *-------------------------------------------------------------------------------------------*/
 
-  /** Model containing all of the tokens in this initiative. */
+  /** Model containing all the tokens in this initiative. */
   private InitiativeList list;
 
   /** The model used to display a list in the panel; */
@@ -98,7 +100,7 @@ public class InitiativePanel extends JPanel
   /** The component that contains the initiative menu. */
   private final JPopupMenu popupMenu;
 
-  /** The menu item that tells the GM if NPC's are visible. */
+  /** The menu item that tells the GM if NPCs are visible. */
   private JCheckBoxMenuItem hideNPCMenuItem;
 
   /**
@@ -135,10 +137,32 @@ public class InitiativePanel extends JPanel
    */
   private boolean initPanelButtonsDisabled;
 
+  /** Flag indicating that additional information should be shown in the title bar. */
+  private boolean showTitleInfo = AppPreferences.initiativePanelShowsInfoInTitle.get();
+
+  /**
+   * Flag indicating that {@link #showTitleInfo} has changed, or updates to the model should be
+   * processed.
+   */
+  private boolean updateTitleInfo = true;
+
+  /** Frame used in docking manager */
+  private DockableFrame dockableFrame = null;
+
+  /** Custom title component for {@link #dockableFrame} */
+  private final JLabel dockableFrameTitleComponent = new JLabel();
+
+  /** Display text used in {@link #dockableFrameTitleComponent} & {@link #dockableFrame} titles */
+  private static final String TITLE_LABEL_TEXT = "%s (%d, %d)";
+
+  /** Tooltip text used in {@link #dockableFrameTitleComponent} */
+  private static final String TITLE_LABEL_TOOLTIP_TEXT =
+      "<html><b>%s: </b>%d<br><b>%s: </b>%d</html>";
+
   /*---------------------------------------------------------------------------------------------
    * Constructor
    *-------------------------------------------------------------------------------------------*/
-  /** Setup the menu */
+  /** Set up the menu */
   public InitiativePanel() {
 
     // Build the form and add it's component
@@ -178,7 +202,7 @@ public class InitiativePanel extends JPanel
 
     // Set up the list with an empty model
     displayList =
-        new JList<TokenInitiative>() {
+        new JList<>() {
           @Override
           public boolean getScrollableTracksViewportWidth() {
             // Make sure the width of the list always tracks with the width of the panel. Without
@@ -243,9 +267,13 @@ public class InitiativePanel extends JPanel
         "initPanel.warnWhenResettingRoundCounter", TOGGLE_WARN_WHEN_RESETTING_COUNTER_ACTION);
     I18N.setAction("initPanel.next", NEXT_ACTION);
     I18N.setAction("initPanel.prev", PREV_ACTION);
+    I18N.setAction("initPanel.showTokenCountInTitle", SHOW_TOKEN_COUNT_IN_TITLE);
+
     updateView();
 
     new MapToolEventBus().getMainEventBus().register(this);
+
+    SwingUtilities.invokeLater(() -> dockableFrame = getDockableFrame());
   }
 
   private static class TextlessButton extends JButton {
@@ -266,6 +294,7 @@ public class InitiativePanel extends JPanel
    * GM's and Player's properly
    */
   public void updateView() {
+    updateFrameTitle();
     displayList.setDragEnabled(hasGMPermission());
 
     // Set up the buttons
@@ -329,10 +358,16 @@ public class InitiativePanel extends JPanel
       popupMenu.addSeparator();
       popupMenu.add(new JMenuItem(REMOVE_TOKEN_ACTION));
     } // endif
+    if (MapTool.getPlayer().isGM()) {
+      popupMenu.addSeparator();
+      JCheckBoxMenuItem showTitleInfoCB = new JCheckBoxMenuItem(SHOW_TOKEN_COUNT_IN_TITLE);
+      showTitleInfoCB.setSelected(AppPreferences.initiativePanelShowsInfoInTitle.get());
+      popupMenu.add(showTitleInfoCB);
+    }
     valueChanged(null);
   }
 
-  /** Remove all of the tokens from the model and clear round and current */
+  /** Remove all the tokens from the model and clear round and current */
   public void clearTokens() {
     list.clearModel();
   }
@@ -403,6 +438,13 @@ public class InitiativePanel extends JPanel
   }
 
   /**
+   * @return Getter for showTitleInfo
+   */
+  public boolean isShowTitleInfo() {
+    return showTitleInfo;
+  }
+
+  /**
    * @return Getter for model
    */
   public InitiativeListModel getModel() {
@@ -410,7 +452,7 @@ public class InitiativePanel extends JPanel
   }
 
   /**
-   * Set the zone that we are currently working on.
+   * Set the zone we are working on.
    *
    * @param aZone The new zone
    */
@@ -442,15 +484,14 @@ public class InitiativePanel extends JPanel
   public boolean hasOwnerPermission(Token token) {
     if (token == null) return false;
     if (hasGMPermission()) return true;
-    if (ownerPermissions
+    return ownerPermissions
         && (!MapTool.getServerPolicy().useStrictTokenManagement()
-            || token.isOwner(MapTool.getPlayer().getName()))) return true;
-    return false;
+            || token.isOwner(MapTool.getPlayer().getName()));
   }
 
   /**
    * See if the current player has permission to execute GM restricted actions. This is <b>not</b>
-   * related to so-called <i>trusted macros</i> in MTscript.
+   * related to so-called <i>trusted macros</i> in MT Script.
    *
    * @return The value <code>true</code> if this player has permission for all actions.
    */
@@ -503,7 +544,7 @@ public class InitiativePanel extends JPanel
    * Updates the "Disable Panel Buttons" setting, and tweaks the Next/Previous button tooltips
    * appropriately. Updates the view.
    *
-   * @param initPanelButtonsDisabled
+   * @param initPanelButtonsDisabled disable panel buttons
    */
   public void setInitPanelButtonsDisabled(boolean initPanelButtonsDisabled) {
     this.initPanelButtonsDisabled = initPanelButtonsDisabled;
@@ -526,8 +567,7 @@ public class InitiativePanel extends JPanel
   public boolean isMovementLocked(Token token) {
     if (!movementLock || list == null || list.getSize() == 0) return false;
     if (model.getCurrentTokenInitiative() == null) return true;
-    if (model.getCurrentTokenInitiative().getToken() == token) return false;
-    return true;
+    return model.getCurrentTokenInitiative().getToken() != token;
   }
 
   /**
@@ -553,7 +593,94 @@ public class InitiativePanel extends JPanel
 
     int oldSize = model.getSize();
     setList(list);
-    if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();
+    if (oldSize != model.getSize()) {
+      displayList.getSelectionModel().clearSelection();
+    }
+  }
+
+  public DockableFrame getDockableFrame() {
+    if (dockableFrame == null) {
+      MapToolFrame mapToolFrame = MapTool.getFrame();
+      if (mapToolFrame == null) { // this happens on startup before everything gets loaded
+        return null;
+      }
+      dockableFrame = mapToolFrame.getFrame(INITIATIVE);
+      if (dockableFrame != null) {
+        dockableFrame.setTitleLabelComponent(dockableFrameTitleComponent);
+
+        dockableFrame.addDockableFrameListener(
+            new DockableFrameAdapter() {
+              @Override
+              public void dockableFrameAdded(DockableFrameEvent dockableFrameEvent) {
+                super.dockableFrameAdded(dockableFrameEvent);
+                updateFrameTitle();
+              }
+
+              @Override
+              public void dockableFrameShown(DockableFrameEvent dockableFrameEvent) {
+                super.dockableFrameShown(dockableFrameEvent);
+                updateFrameTitle();
+              }
+
+              @Override
+              public void dockableFrameTabShown(DockableFrameEvent dockableFrameEvent) {
+                super.dockableFrameTabShown(dockableFrameEvent);
+                updateFrameTitle();
+              }
+            });
+      }
+    }
+    return dockableFrame;
+  }
+
+  private void updateFrameTitle() {
+    if (!updateTitleInfo) {
+      return;
+    }
+    if (!MapTool.getPlayer().isGM() || getDockableFrame() == null) {
+      return;
+    }
+    SwingUtilities.invokeLater(
+        () -> {
+          String tooltip, text;
+          if (isShowTitleInfo()) {
+            // display token counts in the title bar
+            int pc = 0, npc = 0;
+            if (list != null && list.getSize() > 0) {
+              for (TokenInitiative ti : list.getTokens()) {
+                if (ti.getToken().getType().equals(Type.PC)) {
+                  pc++;
+                } else {
+                  npc++;
+                }
+              }
+            }
+
+            text = String.format(TITLE_LABEL_TEXT, I18N.getText("panel.Initiative"), pc, npc);
+            tooltip =
+                String.format(
+                    TITLE_LABEL_TOOLTIP_TEXT,
+                    I18N.getText("Token.Type.PC"),
+                    pc,
+                    I18N.getText("Token.Type.NPC"),
+                    npc);
+            dockableFrameTitleComponent.setText(text);
+            dockableFrameTitleComponent.setToolTipText(tooltip);
+            dockableFrame.setSideTitle(text);
+            dockableFrame.setTabTitle(text);
+          } else {
+            // preference is false but current state is to show additional info.
+            // reset the title bar to normal
+            text = I18N.getText("panel.Initiative");
+            tooltip = I18N.getText("panel.Initiative.description");
+            dockableFrameTitleComponent.setText(text);
+            dockableFrameTitleComponent.setToolTipText(tooltip);
+            dockableFrame.setSideTitle(text);
+            dockableFrame.setTabTitle(text);
+            // disable updating title info
+            updateTitleInfo = false;
+          }
+        });
   }
 
   @Subscribe
@@ -612,28 +739,29 @@ public class InitiativePanel extends JPanel
    */
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
-    if (evt.getPropertyName().equals(InitiativeList.ROUND_PROP)) {
-      updateRound();
-    } else if (evt.getPropertyName().equals(InitiativeList.CURRENT_PROP)) {
-      Token t = list.getCurrentToken();
-      if (t == null) return;
-      String s = I18N.getText("initPanel.displayMessage", t.getName());
-      if (InitiativeListModel.isTokenVisible(t, list.isHideNPC())
-          && t.getType() != Type.NPC
-          && AppPreferences.showInitiativeGainedMessage.get())
-        MapTool.addMessage(TextMessage.say(null, s));
-      displayList.ensureIndexIsVisible(model.getDisplayIndex(list.getCurrent()));
-      NEXT_ACTION.setEnabled(
-          !isInitPanelButtonsDisabled() && hasOwnerPermission(list.getCurrentToken()));
-    } else if (evt.getPropertyName().equals(InitiativeList.TOKENS_PROP)) {
-      if ((evt.getOldValue() == null && evt.getNewValue() instanceof TokenInitiative)
-          || (evt.getNewValue() == null & evt.getOldValue() instanceof TokenInitiative))
-        displayList.getSelectionModel().clearSelection();
-    } else if (evt.getPropertyName().equals(InitiativeList.HIDE_NPCS_PROP)) {
-      displayList.getSelectionModel().clearSelection();
-    } else if (evt.getPropertyName().equals(InitiativeList.OWNER_PERMISSIONS_PROP)) {
-      updateView();
-    } // endif
+    updateFrameTitle();
+    switch (evt.getPropertyName()) {
+      case InitiativeList.ROUND_PROP -> updateRound();
+      case InitiativeList.CURRENT_PROP -> {
+        Token t = list.getCurrentToken();
+        if (t == null) return;
+        String s = I18N.getText("initPanel.displayMessage", t.getName());
+        if (InitiativeListModel.isTokenVisible(t, list.isHideNPC())
+            && t.getType() != Type.NPC
+            && AppPreferences.showInitiativeGainedMessage.get())
+          MapTool.addMessage(TextMessage.say(null, s));
+        displayList.ensureIndexIsVisible(model.getDisplayIndex(list.getCurrent()));
+        NEXT_ACTION.setEnabled(
+            !isInitPanelButtonsDisabled() && hasOwnerPermission(list.getCurrentToken()));
+      }
+      case InitiativeList.TOKENS_PROP -> {
+        if ((evt.getOldValue() == null && evt.getNewValue() instanceof TokenInitiative)
+            || (evt.getNewValue() == null & evt.getOldValue() instanceof TokenInitiative))
+          displayList.getSelectionModel().clearSelection();
+      }
+      case InitiativeList.HIDE_NPCS_PROP -> displayList.getSelectionModel().clearSelection();
+      case InitiativeList.OWNER_PERMISSIONS_PROP -> updateView();
+    }
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -702,6 +830,18 @@ public class InitiativePanel extends JPanel
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
           AppPreferences.initiativePanelShowsTokenImage.set(showTokens);
+        }
+      };
+
+  /** This action toggles the display of token counts in the title bar. */
+  public final Action SHOW_TOKEN_COUNT_IN_TITLE =
+      new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          showTitleInfo = ((JCheckBoxMenuItem) e.getSource()).isSelected();
+          updateTitleInfo = true;
+          AppPreferences.initiativePanelShowsInfoInTitle.set(showTitleInfo);
+          updateFrameTitle();
         }
       };
 
@@ -776,7 +916,7 @@ public class InitiativePanel extends JPanel
         }
       };
 
-  /** This action will set the initiative state of the currently selected token. */
+  /** This action will set the initiative state of the current selected token. */
   public final Action SET_INIT_STATE_VALUE =
       new AbstractAction() {
         @Override
@@ -788,7 +928,7 @@ public class InitiativePanel extends JPanel
           if (hasGMPermission()
               && token != null
               && token.getGMName() != null
-              && token.getGMName().trim().length() != 0)
+              && !token.getGMName().trim().isEmpty())
             sName += " (" + token.getGMName().trim() + ")";
           String s = I18N.getText("initPanel.enterState", sName);
           String input = JOptionPane.showInputDialog(s, ti.getState());
@@ -797,7 +937,7 @@ public class InitiativePanel extends JPanel
         }
       };
 
-  /** This action will clear the initiative state of the currently selected token. */
+  /** This action will clear the initiative state of the current selected token. */
   public final Action CLEAR_INIT_STATE_VALUE =
       new AbstractAction() {
         @Override
@@ -831,7 +971,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          List<Token> tokens = new ArrayList<Token>();
+          List<Token> tokens = new ArrayList<>();
           for (Token token : list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer)) {
             if (token.getType() == Type.PC) tokens.add(token);
           } // endfor

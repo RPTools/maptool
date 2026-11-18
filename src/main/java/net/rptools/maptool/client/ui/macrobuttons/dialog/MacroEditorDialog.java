@@ -59,6 +59,7 @@ import org.fife.rsta.ui.search.SearchEvent;
 import org.fife.rsta.ui.search.SearchListener;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DescWindowVisibility;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -491,7 +492,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
     ac.setAutoCompleteEnabled(true);
     ac.setAutoActivationEnabled(true);
     ac.setAutoActivationDelay(500);
-    ac.setShowDescWindow(true);
+    ac.setDescWindowVisibility(DescWindowVisibility.ALWAYS);
     ac.setAutoCompleteSingleChoices(false);
     ac.install(macroEditorRSyntaxTextArea);
 
@@ -755,6 +756,8 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
       properties.setToolTip(getToolTipTextField().getText());
       properties.setDisplayHotKey(getDisplayHotkeyCheckBox().isSelected());
 
+      // This also publishes campaign and GM macros to the server, including a newly created one,
+      // for which no button exists yet.
       properties.save();
 
       if (button != null) {
@@ -837,17 +840,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
             }
           }
           MapTool.getFrame().getSelectionPanel().reset();
-        }
-        if (button.getPanelClass().equals("CampaignPanel")) {
-          MapTool.serverCommand()
-              .updateCampaignMacros(MapTool.getCampaign().getMacroButtonPropertiesArray());
-          MapTool.getFrame().getCampaignPanel().reset();
-        }
-
-        if (button.getPanelClass().equals("GmPanel")) {
-          MapTool.serverCommand()
-              .updateGmMacros(MapTool.getCampaign().getGmMacroButtonPropertiesArray());
-          MapTool.getFrame().getGmPanel().reset();
         }
       }
     }

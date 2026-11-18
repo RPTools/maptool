@@ -32,14 +32,10 @@ public class MapToolLineParserTest {
   private static final MapToolLineParser parser = MapTool.getParser();
 
   private Result parseExpression(
-      String expression,
-      boolean makeDeterministic,
-      Token tokenInContext,
-      MapToolVariableResolver resolver)
+      String expression, boolean makeDeterministic, MapToolVariableResolver resolver)
       throws ParserException {
     return parser.parseExpression(
         resolver == null ? new MapToolVariableResolver(null) : resolver,
-        tokenInContext,
         expression,
         makeDeterministic);
   }
@@ -53,58 +49,56 @@ public class MapToolLineParserTest {
     assertLinesMatch(Collections.singletonList(expected), Collections.singletonList(actual));
   }
 
-  private String parseLine(String line, Token tokenInContext, MapToolVariableResolver resolver)
-      throws ParserException {
+  private String parseLine(String line, MapToolVariableResolver resolver) throws ParserException {
     var loc = MacroLocationFactory.getInstance().createChatLocation();
     MapToolMacroContext ctx = new MapToolMacroContext("test", loc, true);
-    return parser.parseLine(
-        resolver == null ? new MapToolVariableResolver(tokenInContext) : resolver,
-        tokenInContext,
-        line,
-        ctx);
+    return parser.parseLine(resolver, line, ctx);
   }
 
   @Test
   public void testMacros() throws ParserException {
 
     // no branch
-    assertEquals("a var gives 1", parseLine("a var gives [r: a = 1]", null, null));
+    assertEquals(
+        "a var gives 1", parseLine("a var gives [r: a = 1]", new MapToolVariableResolver(null)));
 
     // branch type if
     assertEquals(
         "a condition leads to 1",
-        parseLine("a condition leads to [r: if(1 == 1, 1, 0)]", null, null));
+        parseLine("a condition leads to [r: if(1 == 1, 1, 0)]", new MapToolVariableResolver(null)));
     assertEquals(
         "a d10 roll is always a No Critical Hit",
         parseLine(
             "a d10 roll[h: d20roll = 1d10] is always a [r,if(d20roll == 20): output = \"Critical"
                 + " Hit\"; output = \"No Critical Hit\"]",
-            null,
-            null));
+            new MapToolVariableResolver(null)));
     assertEquals(
         "a hidden evaluation gives nothing",
-        parseLine("a hidden evaluation gives nothing[h: if(1 == 1, 1, 0)]", null, null));
+        parseLine(
+            "a hidden evaluation gives nothing[h: if(1 == 1, 1, 0)]",
+            new MapToolVariableResolver(null)));
     // expanded rolls contain MessagePanel's ASCII control characters that mark of roll information
     // (line 182)
     assertMatches(
         "expanded roll shows ...if(1 == 1, 1, 0) = 1.",
-        parseLine("expanded roll shows [e: if(1 == 1, 1, 0)]", null, null));
+        parseLine("expanded roll shows [e: if(1 == 1, 1, 0)]", new MapToolVariableResolver(null)));
 
     // branch type count loop
     assertEquals(
         "a loop yields hit, hit, hit",
-        parseLine("a loop yields [r, count(3): \"hit\" ]", null, null));
+        parseLine("a loop yields [r, count(3): \"hit\" ]", new MapToolVariableResolver(null)));
 
     // branch type switch
     assertEquals(
         "switched is 1",
         parseLine(
             "switched is [h:a=1][r,switch(a): case 0: 0; case 1: 1; case 2: 2; default: -1]",
-            null,
-            null));
+            new MapToolVariableResolver(null)));
 
     // eval macro
-    assertEquals("got evaluated", parseLine("got [r: evalMacro('[r:\"evaluated\"]')]", null, null));
+    assertEquals(
+        "got evaluated",
+        parseLine("got [r: evalMacro('[r:\"evaluated\"]')]", new MapToolVariableResolver(null)));
 
     // macro
     MacroButtonProperties macro = new MacroButtonProperties(0);
@@ -115,7 +109,9 @@ public class MapToolLineParserTest {
     token.saveMacro(macro);
 
     assertEquals(
-        "hello world", parseLine("hello [MACRO(\"testMacro@TOKEN\"): \"world\"]", token, null));
+        "hello world",
+        parseLine(
+            "hello [MACRO(\"testMacro@TOKEN\"): \"world\"]", new MapToolVariableResolver(token)));
   }
 
   @Test
@@ -141,7 +137,7 @@ public class MapToolLineParserTest {
           }
         };
 
-    Result result = parseExpression("Strength = 6", false, token, res);
+    Result result = parseExpression("Strength = 6", false, res);
 
     assertEquals(new BigDecimal(6), result.getValue());
     assertEquals("6", token.getProperty("Strength"));
@@ -152,15 +148,15 @@ public class MapToolLineParserTest {
 
     // no branch
     String macro = "[r: 1]";
-    assertEquals("1", parseLine(macro, null, null));
+    assertEquals("1", parseLine(macro, new MapToolVariableResolver(null)));
 
     // no branch code
     macro = "[r, code: {  1 }]";
-    assertEquals("1", parseLine(macro, null, null));
+    assertEquals("1", parseLine(macro, new MapToolVariableResolver(null)));
 
     // if
     macro = "[r, if(1 == 1): \"true\"; \"false\"]";
-    assertEquals("true", parseLine(macro, null, null));
+    assertEquals("true", parseLine(macro, new MapToolVariableResolver(null)));
 
     // if CODE
     macro =
@@ -170,7 +166,7 @@ public class MapToolLineParserTest {
             + "{"
             + "  [\"always false\"]"
             + "}]";
-    assertEquals("still true", parseLine(macro, null, null));
+    assertEquals("still true", parseLine(macro, new MapToolVariableResolver(null)));
 
     // switch
     MapToolVariableResolver res = new MapToolVariableResolver(null);
@@ -181,7 +177,7 @@ public class MapToolLineParserTest {
             + "case 2: \"two\";"
             + "case 3: \"three\";"
             + "default: \"default\"]";
-    assertEquals("two", parseLine(macro, null, res));
+    assertEquals("two", parseLine(macro, res));
     res.setVariable("a", "100");
     macro =
         "[r, switch(a):"
@@ -189,7 +185,7 @@ public class MapToolLineParserTest {
             + "case 2: \"two\";"
             + "case 3: \"three\";"
             + "default: \"default\"]";
-    assertEquals("default", parseLine(macro, null, res));
+    assertEquals("default", parseLine(macro, res));
 
     // switch CODE
     res.setVariable("a", "3");
@@ -199,7 +195,7 @@ public class MapToolLineParserTest {
             + "case 2: { [a = \"two\"] };"
             + "case 3: { [a = \"three\"] };"
             + "default: { [a = \"default\"] }]";
-    parseLine(macro, null, res);
+    parseLine(macro, res);
     assertEquals("three", res.getVariable("a"));
   }
 
@@ -208,26 +204,26 @@ public class MapToolLineParserTest {
 
     // if , deterministic
     String ifcondition = "if(1==1,\"match\",\"no match\")";
-    Result result = parseExpression(ifcondition, true, null, null);
+    Result result = parseExpression(ifcondition, true, new MapToolVariableResolver(null));
     assertEquals(result.getValue(), "match");
     assertEquals(result.getDetailExpression(), "match");
 
     // if, non deterministic
     ifcondition = "if(1==1,\"match\",\"no match\")";
-    result = parseExpression(ifcondition, false, null, null);
+    result = parseExpression(ifcondition, false, new MapToolVariableResolver(null));
     assertEquals("match", result.getValue());
     assertEqualsIgnoreSpaces(ifcondition, result.getDetailExpression());
 
     // if, deterministic
     ifcondition = "if(1<2,\"match\",\"no match\")";
-    result = parseExpression(ifcondition, true, null, null);
+    result = parseExpression(ifcondition, true, new MapToolVariableResolver(null));
     assertEquals("match", result.getValue());
     assertEquals("match", result.getDetailExpression());
 
     // if, non deterministic, the result is equal to deterministic but detailed expression is not
     // resolved to a deterministic value
     ifcondition = "if(1<2,\"match\",\"no match\")";
-    result = parseExpression(ifcondition, false, null, null);
+    result = parseExpression(ifcondition, false, new MapToolVariableResolver(null));
     assertEquals("match", result.getValue());
     assertEqualsIgnoreSpaces(ifcondition, result.getDetailExpression());
   }
@@ -238,12 +234,12 @@ public class MapToolLineParserTest {
     MapToolVariableResolver resolver = new MapToolVariableResolver(null);
 
     // "match" + "this", deterministic
-    Result result = parseExpression("\"match\"+\"this\"", true, null, resolver);
+    Result result = parseExpression("\"match\"+\"this\"", true, resolver);
     assertEquals("matchthis", result.getValue());
     assertEquals("\"match\" + \"this\"", result.getDetailExpression());
 
     // "match" + "this", non deterministic
-    result = parseExpression("\"match\"+\"this\"", false, null, resolver);
+    result = parseExpression("\"match\"+\"this\"", false, resolver);
     assertEquals("matchthis", result.getValue());
     assertEquals("\"match\" + \"this\"", result.getDetailExpression());
   }
@@ -254,25 +250,25 @@ public class MapToolLineParserTest {
     MapToolVariableResolver resolver = new MapToolVariableResolver(null);
 
     // a = 1, deterministic
-    Result result = parseExpression("a = 1", true, null, resolver);
+    Result result = parseExpression("a = 1", true, resolver);
     assertEquals(result.getValue(), BigDecimal.ONE);
     assertEquals(resolver.getVariable("a"), BigDecimal.ONE);
     assertEquals(result.getDetailExpression(), "a = 1");
 
     // a = a * 10, deterministic
-    result = parseExpression("a = a * 10", true, null, resolver);
+    result = parseExpression("a = a * 10", true, resolver);
     assertEquals(result.getValue(), BigDecimal.TEN);
     assertEquals(resolver.getVariable("a"), BigDecimal.TEN);
     assertEquals(result.getDetailExpression(), "a = (1 * 10)");
 
     // a = 1, non-deterministic
-    result = parseExpression("a = 1", false, null, resolver);
+    result = parseExpression("a = 1", false, resolver);
     assertEquals(result.getValue(), BigDecimal.ONE);
     assertEquals(resolver.getVariable("a"), BigDecimal.ONE);
     assertEquals(result.getDetailExpression(), "a = 1");
 
     // a = a * 10
-    result = parseExpression("a = a * 10", false, null, resolver);
+    result = parseExpression("a = a * 10", false, resolver);
     assertEquals(result.getValue(), BigDecimal.TEN);
     assertEquals(resolver.getVariable("a"), BigDecimal.TEN);
     assertEquals(result.getDetailExpression(), "a = (a * 10)");

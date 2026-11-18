@@ -118,10 +118,13 @@ public class CommandPanel extends JPanel {
     return MapTool.getClient().getImpersonation();
   }
 
-  /** Clears both the identity stack and the global identity. */
+  /**
+   * Clears both the identity stack and the global identity.
+   *
+   * @see ImpersonationState#clearAllIdentities()
+   */
   public void clearAllIdentities() {
-    impersonation().clearContextIdentities();
-    setGlobalIdentity(emptyIdentity);
+    impersonation().clearAllIdentities();
   }
 
   /**
@@ -221,15 +224,10 @@ public class CommandPanel extends JPanel {
    * the global identity; otherwise, replace the current context identity.
    *
    * @param macroIdentity the identity to change to
+   * @see ImpersonationState#setIdentity(TokenIdentity)
    */
   public void setIdentity(TokenIdentity macroIdentity) {
-    if (!impersonation().hasContextIdentity()) {
-      setGlobalIdentity(macroIdentity);
-    } else {
-      // Deliberately silent, like entering and leaving a context: only the global identity is
-      // ever announced.
-      impersonation().replaceContextIdentity(macroIdentity);
-    }
+    impersonation().setIdentity(macroIdentity);
   }
 
   /**

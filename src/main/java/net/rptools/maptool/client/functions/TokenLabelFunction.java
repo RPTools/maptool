@@ -78,29 +78,12 @@ public class TokenLabelFunction extends AbstractFunction {
    */
   private static Object getLabel(MapToolVariableResolver resolver, List<Object> args)
       throws ParserException {
-    Token token;
-
-    if (args.size() == 1) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPermOther", "getLabel"));
-      }
-
-      token = FindTokenFunctions.findToken(args.get(0).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken", "getLabel", args.get(0).toString()));
-      }
-    } else if (args.isEmpty()) {
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "getLabel"));
-      }
-    } else {
+    if (args.size() > 1) {
       throw new ParserException(
           I18N.getText("macro.function.general.tooManyParam", "getLabel", 1, args.size()));
     }
+
+    Token token = FunctionUtil.getTokenFromParam(resolver, "getLabel", args, 0, -1);
     return getLabel(token);
   }
 

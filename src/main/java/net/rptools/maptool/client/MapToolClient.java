@@ -34,6 +34,7 @@ import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
@@ -245,6 +246,30 @@ public class MapToolClient {
    */
   public ImpersonationState getImpersonation() {
     return impersonation;
+  }
+
+  /**
+   * The map this client is currently showing, for code that needs the map but not the window.
+   *
+   * <p>For now this asks the window. Unlike {@code
+   * MapTool.getFrame().getCurrentZoneRenderer().getZone()}, it does not fail where there is no
+   * window -- on a server run without a UI, or in unit tests -- or when no map is open. It returns
+   * {@code null} in all of those cases, so a caller can treat them all as "no map is open", which
+   * most callers already handle.
+   *
+   * <p>Like the frame itself, this is meant to be called from the thread that runs macros and
+   * updates the UI.
+   *
+   * @return the zone of the map this client is showing, or {@code null} if there is no window or no
+   *     map is open.
+   */
+  public @Nullable Zone getCurrentZone() {
+    var frame = MapTool.getFrame();
+    if (frame == null) {
+      return null;
+    }
+    var renderer = frame.getCurrentZoneRenderer();
+    return renderer == null ? null : renderer.getZone();
   }
 
   public LocalPlayer getPlayer() {

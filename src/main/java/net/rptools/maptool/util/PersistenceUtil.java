@@ -583,7 +583,7 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
-        new CampaignManager().clearCampaignData();
+        new CampaignManager().replaceCampaignData();
         loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
 

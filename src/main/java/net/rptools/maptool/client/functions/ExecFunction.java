@@ -211,12 +211,10 @@ public class ExecFunction extends AbstractFunction {
     Parser parser = new ExpressionParserFactory().createMT().getParser();
     Function function = parser.getFunction(functionName);
     var loc = macroLocationFactory.createExecFunctionLocation(functionName);
-    MapTool.getParser().enterTrustedContext(functionName, loc);
-    try {
+    try (var ignored = MapTool.getParser().enterTrustedContext(functionName, loc)) {
       function.evaluate(parser, new MapToolVariableResolver(null), functionName, execArgs);
     } catch (ParserException pe) {
       log.error("execFunction failed:", pe);
     }
-    MapTool.getParser().exitContext();
   }
 }

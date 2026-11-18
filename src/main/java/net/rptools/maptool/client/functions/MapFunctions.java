@@ -27,8 +27,8 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.InvalidGUIDException;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
@@ -68,7 +68,8 @@ public class MapFunctions extends AbstractFunction {
         "getMapVision",
         "setMapVision",
         "getMapShowCoordinates",
-        "setMapShowCoordinates");
+        "setMapShowCoordinates",
+        "getStatusBarMapCoordinates");
   }
 
   public static MapFunctions getInstance() {
@@ -86,6 +87,17 @@ public class MapFunctions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.map.none", functionName));
       }
       return currentZR.getZone().getId().toString();
+    } else if (functionName.equalsIgnoreCase("getStatusBarMapCoordinates")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
+      var statusBar = MapTool.getFrame().getCoordinateStatusBar();
+      if (!statusBar.hasCoordinates()) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownMapCoordinates", functionName));
+      }
+      JsonObject statusBarMapCoordinates = new JsonObject();
+      statusBarMapCoordinates.addProperty("x", statusBar.getMapX());
+      statusBarMapCoordinates.addProperty("y", statusBar.getMapY());
+      return statusBarMapCoordinates.toString();
     } else if (functionName.equalsIgnoreCase("getMapIDs")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       final var mapName = parameters.get(0).toString();
@@ -246,7 +258,7 @@ public class MapFunctions extends AbstractFunction {
             gridConfig.has("type")
                 ? gridConfig.getAsJsonPrimitive("type").getAsString()
                 : AppPreferences.defaultGridType.get();
-        final var grid = GridFactory.createGrid(Grid.GridType.fromString(gridType));
+        final var grid = GridFactory.createGrid(GridType.fromString(gridType));
 
         final var gridColor =
             gridConfig.has("color")

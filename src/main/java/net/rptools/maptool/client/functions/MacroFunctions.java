@@ -647,6 +647,7 @@ public class MacroFunctions extends AbstractFunction {
     List<MacroButtonProperties> list = new ArrayList<>(1);
     list.add(0, mbp);
     MapTool.getCampaign().addMacroButtonPropertiesAtNextIndex(list, gmPanel);
+    MapTool.publishCampaignMacros(gmPanel);
 
     return BigDecimal.valueOf(mbp.getIndex());
   }
@@ -801,6 +802,7 @@ public class MacroFunctions extends AbstractFunction {
       }
     }
     MapTool.getCampaign().saveMacroButtonProperty(mbp, gmPanel);
+    MapTool.publishCampaignMacros(gmPanel);
     return "";
   }
 
@@ -888,6 +890,7 @@ public class MacroFunctions extends AbstractFunction {
     } else {
       MapTool.getCampaign().setMacroButtonPropertiesArray(list);
     }
+    MapTool.publishCampaignMacros(gmPanel);
     return "";
   }
 
@@ -941,6 +944,7 @@ public class MacroFunctions extends AbstractFunction {
       } else {
         MapTool.getCampaign().setMacroButtonPropertiesArray(list);
       }
+      MapTool.publishCampaignMacros(gmPanel);
       AbstractMacroPanel macroPanel =
           gmPanel ? MapTool.getFrame().getGmPanel() : MapTool.getFrame().getCampaignPanel();
       MapTool.getFrame().updateKeyStrokes(); // ensure hotkeys are updated
