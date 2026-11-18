@@ -19,10 +19,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -51,31 +51,11 @@ public class isVisibleFunction extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> param)
       throws ParserException {
     ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-    Token token = null;
 
     // If there is more than two parameters (x,y) then the third parameter is the token
     // to test visibility for, so perform all the usual checks for trusted and fetch
     // the token from the zone.
-    if (param.size() > 2) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-      }
-      token = zr.getZone().resolveToken(param.get(2).toString());
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken", functionName, param.get(2).toString()));
-      }
-    } else {
-      MapToolVariableResolver mvr = (MapToolVariableResolver) resolver;
-      if (mvr.getTokenInContext() != null) {
-        token = mvr.getTokenInContext();
-      }
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.initiative.noImpersonated", functionName));
-      }
-    }
+    Token token = FunctionUtil.getTokenFromParam(resolver, functionName, param, 2, -1);
 
     if (!(param.get(0) instanceof BigDecimal)) {
       throw new ParserException(
