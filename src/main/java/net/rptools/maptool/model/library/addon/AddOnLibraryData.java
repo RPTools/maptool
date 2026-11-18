@@ -199,7 +199,10 @@ public class AddOnLibraryData implements LibraryData {
         .thenApply(
             has -> {
               if (!has) {
-                ds.createNamespace(DATA_TYPE, dataNameSpace);
+                // Wait for the namespace, including the message that announces it, before setting a
+                // property in it. Otherwise the property's message can reach the other clients
+                // first, and they reject it because the namespace doesn't exist there yet.
+                ds.createNamespace(DATA_TYPE, dataNameSpace).join();
                 ds.setProperty(
                         DATA_TYPE,
                         dataNameSpace,
