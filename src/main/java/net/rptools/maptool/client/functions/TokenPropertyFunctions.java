@@ -847,7 +847,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("flipTokenX")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+      MapTool.serverCommand()
+          .updateTokenProperty(token, Token.Update.setFlippedX, !token.isFlippedX());
       return token.isFlippedX() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
@@ -859,7 +860,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("flipTokenY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+      MapTool.serverCommand()
+          .updateTokenProperty(token, Token.Update.setFlippedY, !token.isFlippedY());
       return token.isFlippedY() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
@@ -871,7 +873,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("flipTokenIso")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipIso);
+      MapTool.serverCommand()
+          .updateTokenProperty(token, Token.Update.setFlippedIso, !token.getIsFlippedIso());
       return token.getIsFlippedIso() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 

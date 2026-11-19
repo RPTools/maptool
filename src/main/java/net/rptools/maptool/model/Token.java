@@ -195,9 +195,9 @@ public class Token implements Cloneable {
     addLightSource,
     setHasSight,
     setSightType,
-    flipX,
-    flipY,
-    flipIso,
+    setFlippedX,
+    setFlippedY,
+    setFlippedIso,
     setSpeechName,
     removeFacing,
     clearHalos,
@@ -2648,7 +2648,7 @@ public class Token implements Cloneable {
         setIsAlwaysVisible(parameters.get(0).getBoolValue());
         break;
       case setOpacity:
-        setTokenOpacity(Float.parseFloat(parameters.get(0).getStringValue()));
+        setTokenOpacity((float) parameters.get(0).getDoubleValue());
         break;
       case setTerrainModifier:
         setTerrainModifier(parameters.get(0).getDoubleValue());
@@ -2745,14 +2745,14 @@ public class Token implements Cloneable {
         deleteMacro(parameters.get(0).getIntValue());
         macroChanged = true;
         break;
-      case flipX:
-        setFlippedX(!isFlippedX());
+      case setFlippedX:
+        setFlippedX(parameters.get(0).getBoolValue());
         break;
-      case flipY:
-        setFlippedY(!isFlippedY());
+      case setFlippedY:
+        setFlippedY(parameters.get(0).getBoolValue());
         break;
-      case flipIso:
-        setIsFlippedIso(!getIsFlippedIso());
+      case setFlippedIso:
+        setIsFlippedIso(parameters.get(0).getBoolValue());
         break;
     }
     if (lightChanged) {
