@@ -346,8 +346,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              MapTool.serverCommand()
-                  .updateTokenProperty(token, Token.Update.setFlippedX, !token.isFlippedX());
+              MapTool.serverCommand().setTokenFlippedX(token, !token.isFlippedX());
             }
             MapTool.getFrame().refresh();
           }
@@ -364,8 +363,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              MapTool.serverCommand()
-                  .updateTokenProperty(token, Token.Update.setFlippedY, !token.isFlippedY());
+              MapTool.serverCommand().setTokenFlippedY(token, !token.isFlippedY());
             }
             MapTool.getFrame().refresh();
           }
@@ -382,8 +380,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              MapTool.serverCommand()
-                  .updateTokenProperty(token, Token.Update.setFlippedIso, !token.getIsFlippedIso());
+              MapTool.serverCommand().setTokenFlippedIso(token, !token.getIsFlippedIso());
             }
             MapTool.getFrame().refresh();
           }
@@ -554,7 +551,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token == null) {
           continue;
         }
-        MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToScale, false);
+        MapTool.serverCommand().setTokenSnapToScale(token, false);
         renderer.flush(token);
       }
       renderer.repaint();
@@ -1118,8 +1115,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           zp = token.getSnappedPoint(zone);
         }
         // Updates both snap-to-grid and new location in one command
-        Token.Update update = Token.Update.setSnapToGridAndXY;
-        MapTool.serverCommand().updateTokenProperty(token, update, !snapToGrid, zp.x, zp.y);
+        MapTool.serverCommand().setTokenSnapToGridAndXY(token, !snapToGrid, zp.x, zp.y);
       }
     }
   }

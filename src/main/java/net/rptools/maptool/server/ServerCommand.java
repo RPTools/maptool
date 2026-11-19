@@ -14,13 +14,16 @@
  */
 package net.rptools.maptool.server;
 
+import java.awt.Color;
 import java.awt.geom.Area;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
@@ -193,6 +196,20 @@ public interface ServerCommand {
 
   void removeData(String type, String namespace, String name);
 
+  void setTokenType(Token token, Token.Type type);
+
+  void setTokenName(Token token, String name);
+
+  void setTokenGmName(Token token, String gmName);
+
+  void setTokenLabel(Token token, String label);
+
+  void setTokenSpeechName(Token token, String speechName);
+
+  void setTokenNotes(Token token, String notes);
+
+  void setTokenGmNotes(Token token, String gmNotes);
+
   /**
    * Adds or removes a light source on {@code token}.
    *
@@ -202,6 +219,8 @@ public interface ServerCommand {
    * @param lightSource The light source to add.
    */
   void toggleLightSourceOnToken(Token token, boolean toggleOn, LightSource lightSource);
+
+  void clearTokenLightSources(Token token);
 
   /**
    * Adds or removes a halo source on {@code token}.
@@ -213,41 +232,96 @@ public interface ServerCommand {
    */
   void toggleHaloSourceOnToken(Token token, boolean toggleOn, Halo halo);
 
+  void clearTokenHalos(Token token);
+
+  void setTokenHaloColor(Token token, Color color);
+
+  void clearTokenHaloColor(Token token);
+
+  void setTokenHasSight(Token token, boolean hasSight);
+
+  void setTokenSightType(Token token, String sightTypeName);
+
   void setTokenMaskTopology(Token token, @Nullable Area area, Zone.TopologyType topologyType);
 
   void setTokenFootprint(Zone zone, Token token, GridType gridType, GUID footprintId);
 
-  void updateTokenProperty(Token token, Token.Update update, int value);
+  void setTokenXY(Token token, int x, int y);
 
-  void updateTokenProperty(Token token, Token.Update update, String value1, String value2);
+  void setTokenZOrder(Token token, int zOrder);
 
-  void updateTokenProperty(
-      Token token, Token.Update update, List<MacroButtonProperties> workingMacros, boolean b);
+  void setTokenFacing(Token token, int facing);
 
-  void updateTokenProperty(Token token, Token.Update update);
+  void clearTokenFacing(Token token);
 
-  void updateTokenProperty(Token token, Token.Update update, MacroButtonProperties value);
+  void setTokenFlippedX(Token token, boolean flippedX);
 
-  void updateTokenProperty(Token token, Token.Update update, String value);
+  void setTokenFlippedY(Token token, boolean flippedY);
 
-  void updateTokenProperty(Token token, Token.Update update, int value1, int value2);
+  void setTokenFlippedIso(Token token, boolean flippedIso);
 
-  void updateTokenProperty(Token token, Token.Update update, boolean value);
+  void setTokenSnapToGrid(Token token, boolean snapToGrid);
 
-  void updateTokenProperty(Token token, Token.Update update, double value1, double value2);
+  void setTokenSnapToGridAndXY(Token token, boolean snapToGrid, int x, int y);
 
-  void updateTokenProperty(Token token, Token.Update update, double value1, int value2, int value3);
+  void setTokenSnapToScale(Token token, boolean snapToScale);
 
-  void updateTokenProperty(Token token, Token.Update update, List<String> values);
+  void setTokenScaleXY(Token token, double scaleX, double scaleY);
 
-  void updateTokenProperty(Token token, Token.Update update, double value);
+  void setTokenLayout(Token token, double scale, int offsetX, int offsetY);
 
-  void updateTokenProperty(
-      Token token, Token.Update update, boolean value1, int value2, int value3);
+  void setTokenTerrainModifiersIgnored(
+      Token token, Collection<TerrainModifierOperation> operations);
 
-  void updateTokenProperty(Token token, Token.Update update, String value1, boolean value2);
+  void setTokenTerrainModifier(Token token, double modifier);
 
-  void updateTokenProperty(Token token, Token.Update update, String value, BigDecimal value2);
+  void setTokenTerrainModifierOperation(Token token, TerrainModifierOperation operation);
+
+  void setTokenBar(Token token, String barName, BigDecimal barValue);
+
+  void setTokenState(Token token, String stateName, boolean stateOn);
+
+  void setAllTokenStates(Token token, boolean statesOn);
+
+  void putTokenMacros(Token token, List<MacroButtonProperties> macros);
+
+  void replaceTokenMacros(Token token, List<MacroButtonProperties> macros);
+
+  void saveTokenMacro(Token token, MacroButtonProperties macro);
+
+  void deleteTokenMacro(Token token, int macroIndex);
+
+  void setTokenPropertyType(Token token, String propertyTypeName);
+
+  void setTokenProperty(Token token, String propertyName, String propertyValue);
+
+  void resetTokenProperty(Token token, String propertyName);
+
+  void setTokenLayer(Token token, Zone.Layer layer);
+
+  void setTokenShape(Token token, Token.TokenShape shape);
+
+  void setTokenLayerShape(Token token, Zone.Layer layer, Token.TokenShape shape);
+
+  void setTokenImageAsset(Token token, MD5Key assetId);
+
+  void setTokenPortraitImage(Token token, @Nullable MD5Key assetId);
+
+  void setTokenCharsheetImage(Token token, @Nullable MD5Key assetId);
+
+  void setTokenOpacity(Token token, double opacity);
+
+  void addTokenOwner(Token token, String ownerName);
+
+  void clearTokenOwners(Token token);
+
+  void setTokenOwnedByAll(Token token, boolean ownedByAll);
+
+  void setTokenVisible(Token token, boolean visible);
+
+  void setTokenVisibleOnlyToOwner(Token token, boolean visibleOnlyToOwner);
+
+  void setTokenAlwaysVisible(Token token, boolean alwaysVisible);
 
   void updatePlayerStatus(Player player);
 

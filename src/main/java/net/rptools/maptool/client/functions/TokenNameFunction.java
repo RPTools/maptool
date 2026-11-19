@@ -86,6 +86,6 @@ public class TokenNameFunction extends AbstractFunction {
    */
   public static void setName(Token token, String name) throws ParserException {
     token.validateName(name);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setName, name);
+    MapTool.serverCommand().setTokenName(token, name);
   }
 }

@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.gamedata.MTScriptDataConversion;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
@@ -113,11 +112,8 @@ public class TokenLibraryData implements LibraryData {
             () -> {
               Object tokenVal = new MTScriptDataConversion().convertToMTScriptType(value);
               MapTool.serverCommand()
-                  .updateTokenProperty(
-                      libraryToken.getToken().get(),
-                      Token.Update.setProperty,
-                      value.getName(),
-                      tokenVal.toString());
+                  .setTokenProperty(
+                      libraryToken.getToken().get(), value.getName(), tokenVal.toString());
               return null;
             });
   }

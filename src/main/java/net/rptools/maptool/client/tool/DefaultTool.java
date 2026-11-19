@@ -379,8 +379,7 @@ public abstract class DefaultTool extends Tool
           .forEach(
               token -> {
                 if (token != null && AppUtil.playerOwns(token)) {
-                  MapTool.serverCommand()
-                      .updateTokenProperty(token, Token.Update.setFlippedX, !token.isFlippedX());
+                  MapTool.serverCommand().setTokenFlippedX(token, !token.isFlippedX());
                 }
               });
       MapTool.getFrame().refresh();
@@ -397,8 +396,7 @@ public abstract class DefaultTool extends Tool
           .forEach(
               token -> {
                 if (token != null && AppUtil.playerOwns(token)) {
-                  MapTool.serverCommand()
-                      .updateTokenProperty(token, Token.Update.setFlippedY, !token.isFlippedY());
+                  MapTool.serverCommand().setTokenFlippedY(token, !token.isFlippedY());
                 }
               });
       MapTool.getFrame().refresh();

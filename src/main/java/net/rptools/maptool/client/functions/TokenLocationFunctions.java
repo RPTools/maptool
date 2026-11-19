@@ -109,7 +109,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       int newZOrder = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setZOrder, newZOrder);
+      MapTool.serverCommand().setTokenZOrder(token, newZOrder);
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equalsIgnoreCase("getTokenMap")) {
@@ -559,7 +559,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       y -= offset.y;
     }
     ZonePoint zp = getZonePoint(x, y, useDistance);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setXY, zp.x, zp.y);
+    MapTool.serverCommand().setTokenXY(token, zp.x, zp.y);
     return "";
   }
 
