@@ -12,6 +12,7 @@ import "google/protobuf/wrappers.proto";
  * protobuf classes end with "Dto" or "Msg".
  */
 
+import "common.proto";
 import "data_transfer_objects.proto";
 import "drawing_dto.proto";
 import "gamedata.proto";
@@ -346,11 +347,10 @@ message UpdateTokenMoveMsg {
   IntPointDto point = 3;
 }
 
-message UpdateTokenPropertyMsg {
- string zone_guid = 1;
- string token_guid = 2;
- TokenUpdateDto property = 3;
- repeated TokenPropertyValueDto values = 4;
+message UpdateTokenMsg {
+  GuidDto zone_guid = 1;
+  GuidDto token_guid = 2;
+  repeated TokenUpdateDto update = 3;
 }
 
 message RemoveAddOnLibraryMsg {

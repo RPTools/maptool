@@ -404,15 +404,25 @@ public class ServerMessageHandler implements MessageHandler {
         });
   }
 
-  private void handle(UpdateTokenPropertyMsg msg) {
+  private void handle(UpdateTokenMsg msg) {
     EventQueue.invokeLater(
         () -> {
-          Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
-          Token token = zone.getToken(GUID.valueOf(msg.getTokenGuid()));
-          token.updateProperty(
-              zone,
-              Token.Update.valueOf(msg.getProperty().name()),
-              msg.getValuesList()); // update server version of token
+          var zoneGUID = GUID.fromDto(msg.getZoneGuid());
+          var tokenGUID = GUID.fromDto(msg.getTokenGuid());
+
+          var zone = server.getCampaign().getZone(zoneGUID);
+          if (zone == null) {
+            // Nothing to apply it to.
+            return;
+          }
+
+          var token = zone.getToken(tokenGUID);
+          if (token == null) {
+            // Nothing to apply it to.
+            return;
+          }
+
+          token.updateProperties(zone, msg.getUpdateList());
         });
   }
 
@@ -867,11 +877,10 @@ public class ServerMessageHandler implements MessageHandler {
     if (newToken) {
       // don't send whole token back to sender, instead just send new ZOrder
       var msg =
-          UpdateTokenPropertyMsg.newBuilder()
-              .setZoneGuid(zoneGUID.toString())
-              .setTokenGuid(token.getId().toString())
-              .setProperty(TokenUpdateDto.valueOf(Token.Update.setZOrder.name()))
-              .addValues(0, TokenPropertyValueDto.newBuilder().setIntValue(zOrder));
+          UpdateTokenMsg.newBuilder()
+              .setZoneGuid(zoneGUID.toDto())
+              .setTokenGuid(token.getId().toDto())
+              .addUpdate(TokenUpdateDto.newBuilder().setSetZ(zOrder));
       server.sendMessage(clientId, Message.newBuilder().setUpdateTokenPropertyMsg(msg).build());
     }
   }
