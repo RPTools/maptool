@@ -58,9 +58,9 @@ public class TokenStateFunction extends AbstractFunction {
       throws ParserException {
     if (functionName.equalsIgnoreCase("setAllStates")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
-      Boolean val = getBooleanFromValue(args.get(0));
+      boolean val = getBooleanFromValue(args.get(0));
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setAllStates, val);
+      MapTool.serverCommand().setAllTokenStates(token, val);
       return val ? BigDecimal.valueOf(1) : BigDecimal.valueOf(0);
     } else if (functionName.equalsIgnoreCase("getState")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
@@ -130,13 +130,13 @@ public class TokenStateFunction extends AbstractFunction {
       throws ParserException {
     boolean set = getBooleanFromValue(val);
     if (stateName.equals(ALL_STATES)) {
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setAllStates, set);
+      MapTool.serverCommand().setAllTokenStates(token, set);
     } else {
       if (!MapTool.getCampaign().getTokenStatesMap().containsKey(stateName)) {
         throw new ParserException(
             I18N.getText("macro.function.tokenStateFunctions.unknownState", stateName));
       }
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, stateName, set);
+      MapTool.serverCommand().setTokenState(token, stateName, set);
     }
     return set ? BigDecimal.valueOf(1) : BigDecimal.valueOf(0);
   }

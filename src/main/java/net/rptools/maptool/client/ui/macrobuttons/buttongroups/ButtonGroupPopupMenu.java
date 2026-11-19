@@ -385,8 +385,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                 }
               }
               if (!toAdd.isEmpty()) {
-                MapTool.serverCommand()
-                    .updateTokenProperty(token, Token.Update.saveMacroList, toAdd, false);
+                MapTool.serverCommand().putTokenMacros(token, toAdd);
               }
             }
 

@@ -145,8 +145,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("setPropertyType")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setPropertyType, parameters.get(0).toString());
+      MapTool.serverCommand().setTokenPropertyType(token, parameters.get(0).toString());
       return "";
     }
 
@@ -221,7 +220,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("setPC")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setPC);
+      MapTool.serverCommand().setTokenType(token, Token.Type.PC);
       return "";
     }
 
@@ -231,7 +230,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("setNPC")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setNPC);
+      MapTool.serverCommand().setTokenType(token, Token.Type.NPC);
       return "";
     }
 
@@ -325,7 +324,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       String property = parameters.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
 
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.resetProperty, property);
+      MapTool.serverCommand().resetTokenProperty(token, property);
       return "";
     }
 
@@ -338,7 +337,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       String value = parameters.get(1).toString();
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setProperty, property, value);
+      MapTool.serverCommand().setTokenProperty(token, property, value);
       return "";
     }
 
@@ -458,7 +457,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       String gmNotes = parameters.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setGMNotes, gmNotes);
+      MapTool.serverCommand().setTokenGmNotes(token, gmNotes);
       return token.getGMNotes();
     }
 
@@ -479,7 +478,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       String notes = parameters.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setNotes, notes);
+      MapTool.serverCommand().setTokenNotes(token, notes);
       return token.getNotes();
     }
 
@@ -491,7 +490,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       Zone zone = token.getZoneRenderer().getZone();
       int zOrder = zone.getLargestZOrder() + 1;
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setZOrder, zOrder);
+      MapTool.serverCommand().setTokenZOrder(token, zOrder);
       return BigDecimal.valueOf(token.getZOrder());
     }
 
@@ -503,7 +502,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       Zone zone = token.getZoneRenderer().getZone();
       int zOrder = zone.getSmallestZOrder() - 1;
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setZOrder, zOrder);
+      MapTool.serverCommand().setTokenZOrder(token, zOrder);
       return BigDecimal.valueOf(token.getZOrder());
     }
 
@@ -616,7 +615,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       BigDecimal facing = getBigDecimalFromParam(functionName, parameters, 0);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, facing.intValue());
+      MapTool.serverCommand().setTokenFacing(token, facing.intValue());
       return "";
     }
 
@@ -626,7 +625,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("removeTokenFacing")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.removeFacing);
+      MapTool.serverCommand().clearTokenFacing(token);
       return "";
     }
 
@@ -679,7 +678,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       // keep the
       // ownership there.
       String myself = MapTool.getPlayer().getName();
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.clearAllOwners);
+      MapTool.serverCommand().clearTokenOwners(token);
       String s = parameters.get(0).toString();
       if (StringUtil.isEmpty(s)) {
         // Do nothing when trusted, since all ownership should be turned off for an empty string
@@ -688,16 +687,15 @@ public class TokenPropertyFunctions extends AbstractFunction {
         JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0));
         if (json != null && json.isJsonArray()) {
           for (JsonElement ele : json.getAsJsonArray()) {
-            MapTool.serverCommand()
-                .updateTokenProperty(token, Token.Update.addOwner, ele.getAsString());
+            MapTool.serverCommand().addTokenOwner(token, ele.getAsString());
           }
         } else {
-          MapTool.serverCommand().updateTokenProperty(token, Token.Update.addOwner, s);
+          MapTool.serverCommand().addTokenOwner(token, s);
         }
       }
       if (!trusted) // If not trusted we must have been in the owner list -- keep us there.
       {
-        MapTool.serverCommand().updateTokenProperty(token, Token.Update.addOwner, myself);
+        MapTool.serverCommand().addTokenOwner(token, myself);
       }
       return "";
     }
@@ -714,9 +712,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
       BigDecimal ownedByAll = getBigDecimalFromParam(functionName, parameters, 0);
 
       if (ownedByAll.compareTo(BigDecimal.ZERO) == 0) {
-        MapTool.serverCommand().updateTokenProperty(token, Token.Update.setOwnedByAll, false);
+        MapTool.serverCommand().setTokenOwnedByAll(token, false);
       } else {
-        MapTool.serverCommand().updateTokenProperty(token, Token.Update.setOwnedByAll, true);
+        MapTool.serverCommand().setTokenOwnedByAll(token, true);
       }
       return token.isOwnedByAll() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
@@ -744,7 +742,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Token.TokenShape newShape =
           Token.TokenShape.valueOf(
               parameters.get(0).toString().toUpperCase().trim().replace(" ", "_"));
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setShape, newShape.name());
+      MapTool.serverCommand().setTokenShape(token, newShape);
       return token.getShape().name();
     }
 
@@ -821,8 +819,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
         newScaleX = oldWidth / token.getWidth();
         newScaleY = magnitude / token.getHeight();
       }
-      MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setScaleXY, newScaleX, newScaleY);
+      MapTool.serverCommand().setTokenScaleXY(token, newScaleX, newScaleY);
       return magnitude;
     }
 
@@ -835,7 +832,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       Boolean toGrid = FunctionUtil.getBooleanValue(parameters.get(0));
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToGrid, toGrid);
+      MapTool.serverCommand().setTokenSnapToGrid(token, toGrid);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
@@ -847,8 +844,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("flipTokenX")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setFlippedX, !token.isFlippedX());
+      MapTool.serverCommand().setTokenFlippedX(token, !token.isFlippedX());
       return token.isFlippedX() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
@@ -860,8 +856,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("flipTokenY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setFlippedY, !token.isFlippedY());
+      MapTool.serverCommand().setTokenFlippedY(token, !token.isFlippedY());
       return token.isFlippedY() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
@@ -873,8 +868,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("flipTokenIso")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setFlippedIso, !token.getIsFlippedIso());
+      MapTool.serverCommand().setTokenFlippedIso(token, !token.getIsFlippedIso());
       return token.getIsFlippedIso() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
@@ -931,8 +925,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
         yOffset = token.getAnchorY();
       }
 
-      MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setLayout, scale, xOffset, yOffset);
+      MapTool.serverCommand().setTokenLayout(token, scale, xOffset, yOffset);
       return "";
     }
 
@@ -1036,7 +1029,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
    */
   private String setSize(Zone zone, Token token, String size) throws ParserException {
     if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToScale, false);
+      MapTool.serverCommand().setTokenSnapToScale(token, false);
       return "";
     }
 
@@ -1098,10 +1091,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
     if (forceShape) {
       final var shape = token.guessAndSetShape();
-      MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setLayerShape, layer.name(), shape.name());
+      MapTool.serverCommand().setTokenLayerShape(token, layer, shape);
     } else {
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer.name());
+      MapTool.serverCommand().setTokenLayer(token, layer);
     }
 
     return layer.name();

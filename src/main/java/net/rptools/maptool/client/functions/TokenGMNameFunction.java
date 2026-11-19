@@ -86,7 +86,7 @@ public class TokenGMNameFunction extends AbstractFunction {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", "setGMName"));
     }
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setGMName, gmName);
+    MapTool.serverCommand().setTokenGmName(token, gmName);
     return gmName;
   }
 }

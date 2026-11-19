@@ -312,7 +312,7 @@ public class ButtonGroup extends AbstractButtonGroup {
       int index = properties.getIndex();
 
       if (token != null) {
-        MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
+        MapTool.serverCommand().deleteTokenMacro(token, index);
       }
     } else {
       // not quite sure where that macro came from

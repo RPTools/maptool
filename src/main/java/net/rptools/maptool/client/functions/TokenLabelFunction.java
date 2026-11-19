@@ -54,7 +54,7 @@ public class TokenLabelFunction extends AbstractFunction {
    * @param label the label to set.
    */
   public static void setLabel(Token token, String label) {
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLabel, label);
+    MapTool.serverCommand().setTokenLabel(token, label);
   }
 
   @Override

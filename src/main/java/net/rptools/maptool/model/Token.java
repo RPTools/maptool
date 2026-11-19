@@ -2900,17 +2900,17 @@ public class Token implements Cloneable {
         panelLookChanged = true;
         break;
       case setPortraitImage:
-        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
-          setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
-        } else {
+        if (parameters.isEmpty()) {
           setPortraitImage(null);
+        } else {
+          setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
         }
         break;
       case setCharsheetImage:
-        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
-          setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
-        } else {
+        if (parameters.isEmpty()) {
           setCharsheetImage(null);
+        } else {
+          setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
         }
         break;
       case setLayout:

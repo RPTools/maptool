@@ -1062,7 +1062,7 @@ public class PointerTool extends DefaultTool {
                     AppPreferences.faceVertex.get(),
                     direction < 0);
       }
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, facing);
+      MapTool.serverCommand().setTokenFacing(token, facing);
     }
     renderer.repaint();
   }
