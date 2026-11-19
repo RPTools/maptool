@@ -196,6 +196,8 @@ public interface ServerCommand {
 
   void removeData(String type, String namespace, String name);
 
+  // region Token updates
+
   void setTokenType(Token token, Token.Type type);
 
   void setTokenName(Token token, String name);
@@ -322,6 +324,8 @@ public interface ServerCommand {
   void setTokenVisibleOnlyToOwner(Token token, boolean visibleOnlyToOwner);
 
   void setTokenAlwaysVisible(Token token, boolean alwaysVisible);
+
+  // endregion
 
   void updatePlayerStatus(Player player);
 

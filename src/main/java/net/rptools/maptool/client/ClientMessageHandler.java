@@ -409,17 +409,25 @@ public class ClientMessageHandler implements MessageHandler {
         });
   }
 
-  private void handle(UpdateTokenPropertyMsg msg) {
+  private void handle(UpdateTokenMsg msg) {
     EventQueue.invokeLater(
         () -> {
-          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var zoneGUID = GUID.fromDto(msg.getZoneGuid());
+          var tokenGUID = GUID.fromDto(msg.getTokenGuid());
+
           var zone = client.getCampaign().getZone(zoneGUID);
-          var tokenGUID = GUID.valueOf(msg.getTokenGuid());
-          var token = zone.getToken(tokenGUID);
-          if (token != null) {
-            Token.Update update = Token.Update.valueOf(msg.getProperty().name());
-            token.updateProperty(zone, update, msg.getValuesList());
+          if (zone == null) {
+            // Nothing to apply it to.
+            return;
           }
+
+          var token = zone.getToken(tokenGUID);
+          if (token == null) {
+            // Nothing to apply it to.
+            return;
+          }
+
+          token.updateProperties(zone, msg.getUpdateList());
         });
   }
 
