@@ -346,7 +346,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+              MapTool.serverCommand()
+                  .updateTokenProperty(token, Token.Update.setFlippedX, !token.isFlippedX());
             }
             MapTool.getFrame().refresh();
           }
@@ -363,7 +364,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+              MapTool.serverCommand()
+                  .updateTokenProperty(token, Token.Update.setFlippedY, !token.isFlippedY());
             }
             MapTool.getFrame().refresh();
           }
@@ -380,8 +382,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              token.setIsFlippedIso(!token.getIsFlippedIso());
-              MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+              MapTool.serverCommand()
+                  .updateTokenProperty(token, Token.Update.setFlippedIso, !token.getIsFlippedIso());
             }
             MapTool.getFrame().refresh();
           }

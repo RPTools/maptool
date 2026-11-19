@@ -104,11 +104,10 @@ public class TokenImage extends AbstractFunction {
       }
 
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
-      String strOpacity = args.get(0).toString();
-      FunctionUtil.paramAsFloat(functionName, args, 0, true);
+      var opacity = FunctionUtil.paramAsFloat(functionName, args, 0, true);
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setOpacity, strOpacity);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setOpacity, opacity);
       return token.getTokenOpacity();
     }
 
@@ -333,7 +332,7 @@ public class TokenImage extends AbstractFunction {
   private static void setImage(Token token, String assetName) throws ParserException {
     MD5Key md5key = getMD5Key(assetName, SET_IMAGE);
     MapTool.serverCommand()
-        .updateTokenProperty(token, Token.Update.setImageAsset, (String) null, md5key.toString());
+        .updateTokenProperty(token, Token.Update.setImageAsset, md5key.toString());
   }
 
   private static void setPortrait(Token token, String assetName) throws ParserException {
