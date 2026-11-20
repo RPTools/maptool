@@ -8,6 +8,7 @@ option java_outer_classname = "DataTranferObjectProtos";
 
 import "common.proto";
 import "drawing_dto.proto";
+import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 /*
  * For easier differentiation between protobuf classes and "normal" classes
@@ -381,6 +382,10 @@ enum GridTypeDto {
 }
 
 message TokenDto {
+  enum Type {
+    PC = 0;
+    NPC = 1;
+  }
   message State {
     oneof state_type {
       bool bool_value = 1;
@@ -629,6 +634,12 @@ message ZoneDto {
     CELL_UNIT = 1;
     INTEGER = 2;
   }
+  enum LayerDto {
+    TOKEN = 0;
+    HIDDEN = 1;
+    OBJECT = 2;
+    BACKGROUND = 3;
+  }
   enum ShowCoordinatesDto {
     SHOW_COORDS_TO_ALL = 0;
     SHOW_COORDS_TO_GM_ONLY = 1;
@@ -705,66 +716,103 @@ message HexGridDto {
   double hex_ratio = 2;
 }
 
-enum TokenUpdateDto {
-    setState = 0;
-    setAllStates = 1;
-    setPropertyType = 2;
-    setPC = 3;
-    setNPC = 4;
-    setLayer = 5;
-    setLayerShape = 6;
-    setShape = 7;
-    setSnapToScale = 8;
-    setSnapToGrid = 9;
-    setSnapToGridAndXY = 10;
-    setFootprint = 11;
-    setProperty = 12;
-    resetProperty = 13;
-    setZOrder = 14;
-    setFacing = 15;
-    clearAllOwners = 16;
-    setOwnedByAll = 17;
-    addOwner = 18;
-    setScaleX = 19;
-    setScaleY = 20;
-    setScaleXY = 21;
-    setNotes = 22;
-    setGMNotes = 23;
-    saveMacro = 24;
-    saveMacroList = 25;
-    deleteMacro = 26;
-    setX = 27;
-    setY = 28;
-    setXY = 29;
-    setHaloColor = 30;
-    setLabel = 31;
-    setName = 32;
-    setGMName = 33;
-    setVisible = 34;
-    setVisibleOnlyToOwner = 35;
-    setIsAlwaysVisible = 36;
-    setOpacity = 37;
-    setTerrainModifier = 38;
-    setTerrainModifierOperation = 39;
-    setTerrainModifiersIgnored = 40;
-    setMaskTopology = 41;
-    setImageAsset = 42;
-    setPortraitImage = 43;
-    setCharsheetImage = 44;
-    setLayout = 45;
-    clearLightSources = 48;
-    removeLightSource = 49;
-    addLightSource = 50;
-    setHasSight = 51;
-    setSightType = 52;
-    flipX = 53;
-    flipY = 54;
-    flipIso = 55;
-    setSpeechName = 56;
-    removeFacing = 57;
-    clearHalos = 58;
-    removeHalo = 59;
-    addHalo = 60;
+message TokenUpdateDto {
+  message State {
+    string name = 1;
+    bool on = 2;
+  }
+
+  message Bar {
+    string name = 1;
+    double value = 2;
+  }
+
+  message Mask {
+    TopologyTypeDto type = 1;
+    optional AreaDto area = 2;
+  }
+
+  message Footprint {
+    GridTypeDto type = 1;
+    GuidDto id = 2;
+  }
+
+  message IgnoredModifiers {
+    repeated TerrainModifierOperationDto modifiers = 1;
+  }
+
+  message Macros {
+    repeated MacroButtonPropertiesDto macros = 1;
+  }
+
+  message Property {
+    string name = 1;
+    string value = 2;
+  }
+
+  oneof update {
+    TokenDto.Type set_type = 3;
+    string set_name = 4;
+    string set_gm_name = 5;
+    string set_label = 6;
+    string set_speech_name = 7;
+    string set_notes = 8;
+    string set_gm_notes = 9;
+    GuidDto enable_light_source = 10;
+    GuidDto disable_light_source = 11;
+    google.protobuf.Empty clear_light_sources = 12;
+    GuidDto enable_halo = 13;
+    GuidDto disable_halo = 14;
+    google.protobuf.Empty clear_halos = 15;
+    int32 set_halo_color = 16;
+    google.protobuf.Empty clear_halo_color = 17;
+    bool set_has_sight = 18;
+    string set_sight_type = 19;
+    Mask set_token_mask_topology = 20;
+    Footprint set_footprint = 21;
+    int32 set_x = 22;
+    int32 set_y = 23;
+    int32 set_z = 24;
+    int32 set_facing = 25;
+    google.protobuf.Empty clear_facing = 26;
+    bool set_flipped_x = 27;
+    bool set_flipped_y = 28;
+    bool set_flipped_iso = 29;
+    bool set_snap_to_grid = 30;
+    bool set_snap_to_scale = 31;
+    double set_scale_x = 32;
+    double set_scale_y = 33;
+    double set_size_scale = 34;
+    int32 set_anchor_x = 35;
+    int32 set_anchor_y = 36;
+    IgnoredModifiers set_ignored_modifiers = 37;
+    TerrainModifierOperationDto set_terrain_modifier_operation = 38;
+    double set_terrain_modifier = 39;
+    State set_state = 40;
+    bool set_all_states = 41;
+    Bar set_bar = 42;
+    Macros put_macros = 43;
+    Macros replace_macros = 44;
+    MacroButtonPropertiesDto save_macro = 45;
+    int32 delete_macro = 46;
+    string set_property_type = 47;
+    Property set_property = 48;
+    string reset_property = 49;
+    ZoneDto.LayerDto set_layer = 50;
+    TokenDto.TokenShape set_shape = 51;
+    string set_image_asset = 52;
+    string set_portrait_asset = 53;
+    google.protobuf.Empty clear_portrait_asset = 54;
+    string set_charsheet_asset = 55;
+    google.protobuf.Empty clear_charsheet_asset = 56;
+    double set_opacity = 57;
+    string add_owner = 58;
+    google.protobuf.Empty clear_owners = 59;
+    bool set_owned_by_all = 60;
+    bool set_visible = 61;
+    bool set_visible_to_owner_only = 62;
+    bool set_always_visible = 63;
+  }
 }
 
 message AssetTransferHeaderDto {

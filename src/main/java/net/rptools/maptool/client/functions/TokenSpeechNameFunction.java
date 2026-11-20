@@ -69,7 +69,7 @@ public class TokenSpeechNameFunction extends AbstractFunction {
    * @param token the token to get the name of.
    * @return the name of the token.
    */
-  public static String getSpeechName(Token token) {
+  private static String getSpeechName(Token token) {
     return token.getSpeechName();
   }
 
@@ -78,9 +78,8 @@ public class TokenSpeechNameFunction extends AbstractFunction {
    *
    * @param token The token to set the name of.
    * @param name the name of the token.
-   * @throws ParserException if an error occurs.
    */
-  public static void setSpeechName(Token token, String name) throws ParserException {
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSpeechName, name);
+  private static void setSpeechName(Token token, String name) {
+    MapTool.serverCommand().setTokenSpeechName(token, name);
   }
 }

@@ -77,7 +77,7 @@ message Message {
     UpdateInitiativeMsg update_initiative_msg = 61;
     UpdateTokenInitiativeMsg update_token_initiative_msg = 62;
     UpdateTokenMoveMsg update_token_move_msg = 63;
-    UpdateTokenPropertyMsg update_token_property_msg = 64;
+    UpdateTokenMsg update_token_property_msg = 64;
     RemoveAddOnLibraryMsg remove_add_on_library_msg = 65;
     RemoveAllAddOnLibrariesMsg remove_all_add_on_libraries_msg = 66;
     AddAddOnLibraryMsg add_add_on_library_msg = 67;

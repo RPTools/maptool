@@ -40,6 +40,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.ClientMessageHandler;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -47,7 +48,7 @@ import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
 import net.rptools.maptool.server.proto.TokenDto;
-import net.rptools.maptool.server.proto.TokenPropertyValueDto;
+import net.rptools.maptool.server.proto.TokenUpdateDto;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
@@ -131,6 +132,28 @@ public class Token implements Cloneable {
     public String toString() {
       return I18N.getString(displayNameKey);
     }
+
+    public TokenDto.TokenShape toDto() {
+      return switch (this) {
+        case TOP_DOWN -> TokenDto.TokenShape.TOP_DOWN;
+        case CIRCLE -> TokenDto.TokenShape.CIRCLE;
+        case SQUARE -> TokenDto.TokenShape.SQUARE;
+        case FIGURE -> TokenDto.TokenShape.FIGURE;
+      };
+    }
+
+    public static TokenShape fromDto(TokenDto.TokenShape dto) {
+      return switch (dto) {
+        case TOP_DOWN -> TOP_DOWN;
+        case CIRCLE -> CIRCLE;
+        case SQUARE -> SQUARE;
+        case FIGURE -> FIGURE;
+        case UNRECOGNIZED -> {
+          log.warn("Received unrecognized shape. Defaulting to {}", CIRCLE.name());
+          yield CIRCLE;
+        }
+      };
+    }
   }
 
   /** Type of character: PC or NPC. */
@@ -148,69 +171,24 @@ public class Token implements Cloneable {
     public String toString() {
       return I18N.getString(displayNameKey);
     }
-  }
 
-  /** Type of update for the token. */
-  public enum Update {
-    setState,
-    setAllStates,
-    setPropertyType,
-    setPC,
-    setNPC,
-    setLayer,
-    setLayerShape,
-    setShape,
-    setSnapToScale,
-    setSnapToGrid,
-    setSnapToGridAndXY,
-    setFootprint,
-    setProperty,
-    resetProperty,
-    setZOrder,
-    setFacing,
-    clearAllOwners,
-    setOwnedByAll,
-    addOwner,
-    setScaleX,
-    setScaleY,
-    setScaleXY,
-    setNotes,
-    setGMNotes,
-    saveMacro,
-    saveMacroList,
-    deleteMacro,
-    setX,
-    setY,
-    setXY,
-    setHaloColor,
-    setLabel,
-    setName,
-    setGMName,
-    setVisible,
-    setVisibleOnlyToOwner,
-    setIsAlwaysVisible,
-    setOpacity,
-    setTerrainModifier,
-    setTerrainModifierOperation,
-    setTerrainModifiersIgnored,
-    setMaskTopology,
-    setImageAsset,
-    setPortraitImage,
-    setCharsheetImage,
-    setLayout,
-    clearLightSources,
-    removeLightSource,
-    addLightSource,
-    setHasSight,
-    setSightType,
-    flipX,
-    flipY,
-    flipIso,
-    setSpeechName,
-    removeFacing,
-    clearHalos,
-    removeHalo,
-    addHalo,
+    public TokenDto.Type toDto() {
+      return switch (this) {
+        case PC -> TokenDto.Type.PC;
+        case NPC -> TokenDto.Type.NPC;
+      };
+    }
+
+    public static Type fromDto(TokenDto.Type dto) {
+      return switch (dto) {
+        case PC -> PC;
+        case NPC -> NPC;
+        case UNRECOGNIZED -> {
+          log.warn("Received unrecognized type. Defaulting to {}", NPC.name());
+          yield NPC;
+        }
+      };
+    }
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -304,6 +282,30 @@ public class Token implements Cloneable {
     @Override
     public String toString() {
       return I18N.getString(displayNameKey);
+    }
+
+    public TerrainModifierOperationDto toDto() {
+      return switch (this) {
+        case NONE -> TerrainModifierOperationDto.NONE;
+        case MULTIPLY -> TerrainModifierOperationDto.MULTIPLY;
+        case ADD -> TerrainModifierOperationDto.ADD;
+        case BLOCK -> TerrainModifierOperationDto.BLOCK;
+        case FREE -> TerrainModifierOperationDto.FREE;
+      };
+    }
+
+    public static TerrainModifierOperation fromDto(TerrainModifierOperationDto dto) {
+      return switch (dto) {
+        case NONE -> NONE;
+        case MULTIPLY -> MULTIPLY;
+        case ADD -> ADD;
+        case BLOCK -> BLOCK;
+        case FREE -> FREE;
+        case UNRECOGNIZED -> {
+          log.warn("Received unrecognized type. Defaulting to {}", NONE.name());
+          yield NONE;
+        }
+      };
     }
   }
 
@@ -864,12 +866,14 @@ public class Token implements Cloneable {
     uniqueLightSources.clear();
   }
 
-  public void addLightSource(GUID lightSourceId) {
+  public boolean addLightSource(GUID lightSourceId) {
     if (lightSourceList.stream().anyMatch(source -> source.matches(lightSourceId))) {
       // Avoid duplicates.
-      return;
+      return false;
     }
+
     lightSourceList.add(new AttachedLightSource(lightSourceId));
+    return true;
   }
 
   public void removeLightSourceType(LightSource.Type lightType) {
@@ -952,13 +956,18 @@ public class Token implements Cloneable {
     return false;
   }
 
-  public void removeLightSource(GUID lightSourceId) {
-    lightSourceList.removeIf(als -> als.matches(lightSourceId));
+  public boolean removeLightSource(GUID lightSourceId) {
+    return lightSourceList.removeIf(als -> als.matches(lightSourceId));
   }
 
   /** Clear the lightSourceList */
-  public void clearLightSources() {
+  public boolean clearLightSources() {
+    if (lightSourceList.isEmpty()) {
+      return false;
+    }
+
     lightSourceList.clear();
+    return true;
   }
 
   public boolean hasLightSource(LightSource source) {
@@ -986,8 +995,8 @@ public class Token implements Cloneable {
     return Collections.unmodifiableList(lightSourceList);
   }
 
-  public void addHalo(GUID haloId) {
-    haloIdSet.add(haloId);
+  public boolean addHalo(GUID haloId) {
+    return haloIdSet.add(haloId);
   }
 
   public void removeGMOnlyHalos(Campaign campaign) {
@@ -1046,13 +1055,18 @@ public class Token implements Cloneable {
     return false;
   }
 
-  public void removeHalo(GUID haloId) {
-    haloIdSet.remove(haloId);
+  public boolean removeHalo(GUID haloId) {
+    return haloIdSet.remove(haloId);
   }
 
   /** Clear the list of halos */
-  public void clearHalos() {
+  public boolean clearHalos() {
+    if (haloIdSet.isEmpty()) {
+      return false;
+    }
+
     haloIdSet.clear();
+    return true;
   }
 
   public boolean hasHalo(GUID id) {
@@ -2708,282 +2722,261 @@ public class Token implements Cloneable {
   }
 
   /**
-   * Call the relevant setter from methodName with an array of parameters Called by
-   * ClientMethodHandler to deal with sent change to token
+   * Applies a sequence of edits to a token.
    *
-   * @param zone The zone where the token is
-   * @param update The method to be used
-   * @param parameters An array of parameters
+   * <p>Called by {@link ClientMessageHandler} to deal with sent change to token.
+   *
+   * @param zone The zone where the token is.
+   * @param updates The list of updates to apply to the token.
    */
-  public void updateProperty(Zone zone, Update update, List<TokenPropertyValueDto> parameters) {
-    boolean lightChanged = false;
-    boolean macroChanged = false;
-    boolean panelLookChanged = false; // appearance of token in a panel changed
-    Zone.TopologyType topologyChangeType = null;
-    switch (update) {
-      case setState:
-        var state = parameters.get(0).getStringValue();
-        var stateValue = parameters.get(1);
-        if (stateValue.hasBoolValue()) {
-          setState(state, stateValue.getBoolValue());
-        } else {
-          setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
+  public void updateProperties(Zone zone, List<TokenUpdateDto> updates) {
+    var lightChanged = false;
+    var topologyTypesChanged = EnumSet.noneOf(Zone.TopologyType.class);
+    var macroChanged = false;
+    var panelLookChanged = false;
+    for (var update : updates) {
+      switch (update.getUpdateCase()) {
+        case SET_TYPE -> {
+          setType(Token.Type.fromDto(update.getSetType()));
         }
-        break;
-      case setAllStates:
-        stateValue = parameters.get(0);
-        if (stateValue.hasBoolValue()) {
-          setAllStates(stateValue.getBoolValue());
-        } else {
-          setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
+        case SET_NAME -> {
+          setName(update.getSetName());
         }
-        break;
-      case setPropertyType:
-        setPropertyType(parameters.get(0).getStringValue());
-        break;
-      case setPC:
-        setType(Type.PC);
-        break;
-      case setNPC:
-        setType(Type.NPC);
-        break;
-      case setLayer:
-        setLayer(Zone.Layer.valueOf(parameters.get(0).getStringValue()));
-        break;
-      case setLayerShape:
-        setLayer(Zone.Layer.valueOf(parameters.get(0).getStringValue()));
-        setShape(TokenShape.valueOf(parameters.get(1).getStringValue()));
-        break;
-      case setShape:
-        setShape(TokenShape.valueOf(parameters.get(0).getStringValue()));
-        break;
-      case setSnapToScale:
-        setSnapToScale(parameters.get(0).getBoolValue());
-        break;
-      case setSnapToGrid:
-        setSnapToGrid(parameters.get(0).getBoolValue());
-        break;
-      case setSnapToGridAndXY:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case SET_GM_NAME -> {
+          setGMName(update.getSetGmName());
         }
-        setSnapToGrid(parameters.get(0).getBoolValue());
-        setX(parameters.get(1).getIntValue());
-        setY(parameters.get(2).getIntValue());
-        break;
-      case setFootprint:
-        setSnapToScale(true);
-        setFootprintId(
-            GridType.fromDto(parameters.get(0).getGridType()),
-            GUID.fromDto(parameters.get(1).getFootprintId()));
-        break;
-      case setProperty:
-        setProperty(parameters.get(0).getStringValue(), parameters.get(1).getStringValue());
-        break;
-      case resetProperty:
-        resetProperty(parameters.get(0).getStringValue());
-        break;
-      case setZOrder:
-        setZOrder(parameters.get(0).getIntValue());
-        zone.sortZOrder(); // update new ZOrder
-        break;
-      case setFacing:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case SET_LABEL -> {
+          setLabel(update.getSetLabel());
         }
-        setFacing(parameters.get(0).getIntValue());
-        break;
-      case removeFacing:
-        removeFacing();
-        break;
-      case clearAllOwners:
-        clearAllOwners();
-        panelLookChanged = true;
-        break;
-      case setOwnedByAll:
-        setOwnedByAll(parameters.get(0).getBoolValue());
-        panelLookChanged = true;
-        break;
-      case addOwner:
-        addOwner(parameters.get(0).getStringValue());
-        break;
-      case setScaleX:
-        setSnapToScale(false);
-        setScaleX(parameters.get(0).getDoubleValue());
-        break;
-      case setScaleY:
-        setSnapToScale(false);
-        setScaleY(parameters.get(0).getDoubleValue());
-        break;
-      case setScaleXY:
-        setSnapToScale(false);
-        setScaleX(parameters.get(0).getDoubleValue());
-        setScaleY(parameters.get(1).getDoubleValue());
-        break;
-      case setNotes:
-        setNotes(parameters.get(0).getStringValue());
-        break;
-      case setGMNotes:
-        setGMNotes(parameters.get(0).getStringValue());
-        break;
-      case setX:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case SET_SPEECH_NAME -> {
+          setSpeechName(update.getSetSpeechName());
         }
-        setX(parameters.get(0).getIntValue());
-        break;
-      case setY:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case SET_NOTES -> {
+          setNotes(update.getSetNotes());
         }
-        setY(parameters.get(0).getIntValue());
-        break;
-      case setXY:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case SET_GM_NOTES -> {
+          setGMNotes(update.getSetGmNotes());
         }
-        setX(parameters.get(0).getIntValue());
-        setY(parameters.get(1).getIntValue());
-        break;
-      case setHaloColor:
-        setHaloColor(
-            parameters.size() > 0 ? new Color(parameters.get(0).getIntValue(), true) : null);
-        break;
-      case setLabel:
-        setLabel(parameters.get(0).getStringValue());
-        break;
-      case setName:
-        setName(parameters.get(0).getStringValue());
-        panelLookChanged = true;
-        break;
-      case setGMName:
-        setGMName(parameters.get(0).getStringValue());
-        panelLookChanged = true;
-        break;
-      case setSpeechName:
-        setSpeechName(parameters.get(0).getStringValue());
-        break;
-      case setVisible:
-        setVisible(parameters.get(0).getBoolValue());
-        break;
-      case setVisibleOnlyToOwner:
-        setVisibleOnlyToOwner(parameters.get(0).getBoolValue());
-        break;
-      case setIsAlwaysVisible:
-        setIsAlwaysVisible(parameters.get(0).getBoolValue());
-        break;
-      case setOpacity:
-        setTokenOpacity(Float.parseFloat(parameters.get(0).getStringValue()));
-        break;
-      case setTerrainModifier:
-        setTerrainModifier(parameters.get(0).getDoubleValue());
-        break;
-      case setTerrainModifierOperation:
-        setTerrainModifierOperation(
-            TerrainModifierOperation.valueOf(parameters.get(0).getStringValue()));
-        break;
-      case setTerrainModifiersIgnored:
-        setTerrainModifiersIgnored(
-            parameters.get(0).getStringValues().getValuesList().stream()
-                .map(TerrainModifierOperation::valueOf)
-                .collect(Collectors.toSet()));
-        break;
-      case setMaskTopology:
-        {
-          final var topologyType = Zone.TopologyType.valueOf(parameters.get(0).getTopologyType());
-          setMaskTopology(topologyType, Mapper.map(parameters.get(1).getArea()));
-          topologyChangeType = topologyType;
-          break;
+        case ENABLE_LIGHT_SOURCE -> {
+          lightChanged |= addLightSource(GUID.fromDto(update.getEnableLightSource()));
         }
-      case setImageAsset:
-        setImageAsset(
-            parameters.get(0).hasStringValue() ? parameters.get(0).getStringValue() : null,
-            new MD5Key(parameters.get(1).getStringValue()));
-        panelLookChanged = true;
-        break;
-      case setPortraitImage:
-        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
-          setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
-        } else {
+        case DISABLE_LIGHT_SOURCE -> {
+          lightChanged |= removeLightSource(GUID.fromDto(update.getEnableLightSource()));
+        }
+        case CLEAR_LIGHT_SOURCES -> {
+          lightChanged |= clearLightSources();
+        }
+        case ENABLE_HALO -> {
+          addHalo(GUID.fromDto(update.getEnableHalo()));
+        }
+        case DISABLE_HALO -> {
+          removeHalo(GUID.fromDto(update.getEnableHalo()));
+        }
+        case CLEAR_HALOS -> {
+          clearHalos();
+        }
+        case SET_HALO_COLOR -> {
+          setHaloColor(new Color(update.getSetHaloColor(), true));
+        }
+        case CLEAR_HALO_COLOR -> {
+          setHaloColor(null);
+        }
+        case SET_HAS_SIGHT -> {
+          if (hasLightSources()) {
+            lightChanged = true;
+          }
+          setHasSight(update.getSetHasSight());
+        }
+        case SET_SIGHT_TYPE -> {
+          if (hasLightSources()) {
+            lightChanged = true;
+          }
+          setSightType(update.getSetSightType());
+        }
+        case SET_TOKEN_MASK_TOPOLOGY -> {
+          var mask = update.getSetTokenMaskTopology();
+          final var topologyType = Zone.TopologyType.fromDto(mask.getType());
+          final var area = mask.hasArea() ? Mapper.map(mask.getArea()) : null;
+
+          setMaskTopology(topologyType, area);
+          topologyTypesChanged.add(topologyType);
+        }
+        case SET_FOOTPRINT -> {
+          setSnapToScale(true);
+          setFootprintId(
+              GridType.fromDto(update.getSetFootprint().getType()),
+              GUID.fromDto(update.getSetFootprint().getId()));
+        }
+        case SET_X -> {
+          if (hasLightSources()) {
+            lightChanged = true;
+          }
+          setX(update.getSetX());
+        }
+        case SET_Y -> {
+          if (hasLightSources()) {
+            lightChanged = true;
+          }
+          setY(update.getSetY());
+        }
+        case SET_Z -> {
+          setZOrder(update.getSetZ());
+          zone.sortZOrder();
+        }
+        case SET_FACING -> {
+          if (hasLightSources()) {
+            lightChanged = true;
+          }
+          setFacing(update.getSetFacing());
+        }
+        case CLEAR_FACING -> {
+          if (hasLightSources()) {
+            lightChanged = true;
+          }
+          removeFacing();
+        }
+        case SET_FLIPPED_X -> {
+          setFlippedX(update.getSetFlippedX());
+        }
+        case SET_FLIPPED_Y -> {
+          setFlippedY(update.getSetFlippedY());
+        }
+        case SET_FLIPPED_ISO -> {
+          setIsFlippedIso(update.getSetFlippedIso());
+        }
+        case SET_SNAP_TO_GRID -> {
+          setSnapToGrid(update.getSetSnapToGrid());
+        }
+        case SET_SNAP_TO_SCALE -> {
+          setSnapToScale(update.getSetSnapToScale());
+        }
+        case SET_SCALE_X -> {
+          setSnapToScale(false);
+          setScaleX(update.getSetScaleX());
+        }
+        case SET_SCALE_Y -> {
+          setSnapToScale(false);
+          setScaleY(update.getSetScaleY());
+        }
+        case SET_SIZE_SCALE -> {
+          setSizeScale(update.getSetSizeScale());
+        }
+        case SET_ANCHOR_X -> {
+          setAnchorX(update.getSetAnchorX());
+        }
+        case SET_ANCHOR_Y -> {
+          setAnchorY(update.getSetAnchorY());
+        }
+        case SET_IGNORED_MODIFIERS -> {
+          var ignored = EnumSet.noneOf(TerrainModifierOperation.class);
+          for (var modifier : update.getSetIgnoredModifiers().getModifiersList()) {
+            ignored.add(TerrainModifierOperation.fromDto(modifier));
+          }
+          setTerrainModifiersIgnored(ignored);
+        }
+        case SET_TERRAIN_MODIFIER -> {
+          setTerrainModifier(update.getSetTerrainModifier());
+        }
+        case SET_TERRAIN_MODIFIER_OPERATION -> {
+          setTerrainModifierOperation(
+              TerrainModifierOperation.fromDto(update.getSetTerrainModifierOperation()));
+        }
+        case SET_STATE -> {
+          var state = update.getSetState();
+          setState(state.getName(), state.getOn());
+        }
+        case SET_ALL_STATES -> {
+          setAllStates(update.getSetAllStates());
+        }
+        case SET_BAR -> {
+          var bar = update.getSetBar();
+          setState(bar.getName(), bar.getValue());
+        }
+        case PUT_MACROS -> {
+          saveMacroList(
+              update.getPutMacros().getMacrosList().stream()
+                  .map(MacroButtonProperties::fromDto)
+                  .toList(),
+              false);
+        }
+        case REPLACE_MACROS -> {
+          saveMacroList(
+              update.getPutMacros().getMacrosList().stream()
+                  .map(MacroButtonProperties::fromDto)
+                  .toList(),
+              true);
+        }
+        case SAVE_MACRO -> {
+          saveMacro(MacroButtonProperties.fromDto(update.getSaveMacro()));
+          macroChanged = true;
+        }
+        case DELETE_MACRO -> {
+          deleteMacro(update.getDeleteMacro());
+          macroChanged = true;
+        }
+        case SET_PROPERTY_TYPE -> {
+          setPropertyType(update.getSetPropertyType());
+        }
+        case SET_PROPERTY -> {
+          var property = update.getSetProperty();
+          setProperty(property.getName(), property.getValue());
+        }
+        case RESET_PROPERTY -> {
+          resetProperty(update.getResetProperty());
+        }
+        case SET_LAYER -> {
+          setLayer(Zone.Layer.fromDto(update.getSetLayer()));
+        }
+        case SET_SHAPE -> {
+          setShape(Token.TokenShape.fromDto(update.getSetShape()));
+        }
+        case SET_IMAGE_ASSET -> {
+          setImageAsset(null, new MD5Key(update.getSetImageAsset()));
+          panelLookChanged = true;
+        }
+        case SET_PORTRAIT_ASSET -> {
+          setPortraitImage(new MD5Key(update.getSetPortraitAsset()));
+        }
+        case CLEAR_PORTRAIT_ASSET -> {
           setPortraitImage(null);
         }
-        break;
-      case setCharsheetImage:
-        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
-          setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
-        } else {
+        case SET_CHARSHEET_ASSET -> {
+          setCharsheetImage(new MD5Key(update.getSetCharsheetAsset()));
+        }
+        case CLEAR_CHARSHEET_ASSET -> {
           setCharsheetImage(null);
         }
-        break;
-      case setLayout:
-        setSizeScale(parameters.get(0).getDoubleValue());
-        setAnchor(parameters.get(1).getIntValue(), parameters.get(2).getIntValue());
-        break;
-      case clearLightSources:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case SET_OPACITY -> {
+          setTokenOpacity((float) update.getSetOpacity());
         }
-        clearLightSources();
-        break;
-      case removeLightSource:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case ADD_OWNER -> {
+          addOwner(update.getAddOwner());
         }
-        removeLightSource(GUID.valueOf(parameters.get(0).getLightSourceId()));
-        break;
-      case addLightSource:
-        lightChanged = true;
-        addLightSource(GUID.valueOf(parameters.get(0).getLightSourceId()));
-        break;
-      case clearHalos:
-        clearHalos();
-        break;
-      case removeHalo:
-        removeHalo(GUID.valueOf(parameters.get(0).getHaloId()));
-        break;
-      case addHalo:
-        addHalo(GUID.valueOf(parameters.get(0).getHaloId()));
-        break;
-      case setHasSight:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case CLEAR_OWNERS -> {
+          clearAllOwners();
+          panelLookChanged = true;
         }
-        setHasSight(parameters.get(0).getBoolValue());
-        break;
-      case setSightType:
-        if (hasLightSources()) {
-          lightChanged = true;
+        case SET_OWNED_BY_ALL -> {
+          setOwnedByAll(update.getSetOwnedByAll());
+          panelLookChanged = true;
         }
-        setSightType(parameters.get(0).getStringValue());
-        break;
-      case saveMacro:
-        saveMacro(MacroButtonProperties.fromDto(parameters.get(0).getMacros().getMacros(0)));
-        macroChanged = true;
-        break;
-      case saveMacroList:
-        saveMacroList(
-            parameters.get(0).getMacros().getMacrosList().stream()
-                .map(MacroButtonProperties::fromDto)
-                .collect(Collectors.toList()),
-            parameters.get(1).getBoolValue());
-        macroChanged = true;
-        break;
-      case deleteMacro:
-        deleteMacro(parameters.get(0).getIntValue());
-        macroChanged = true;
-        break;
-      case flipX:
-        setFlippedX(!isFlippedX());
-        break;
-      case flipY:
-        setFlippedY(!isFlippedY());
-        break;
-      case flipIso:
-        setIsFlippedIso(!getIsFlippedIso());
-        break;
+        case SET_VISIBLE -> {
+          setVisible(update.getSetVisible());
+        }
+        case SET_VISIBLE_TO_OWNER_ONLY -> {
+          setVisibleOnlyToOwner(update.getSetVisibleToOwnerOnly());
+        }
+        case SET_ALWAYS_VISIBLE -> {
+          setIsAlwaysVisible(update.getSetAlwaysVisible());
+        }
+        case UPDATE_NOT_SET -> {
+          // Nothing to do, it's nothing.
+        }
+      }
     }
+
     if (lightChanged) {
-      getZoneRenderer().flushLight(); // flush lights if it changed
+      getZoneRenderer().flushLight();
     }
     if (macroChanged) {
       zone.tokenMacroChanged(this);
@@ -2991,10 +2984,11 @@ public class Token implements Cloneable {
     if (panelLookChanged) {
       zone.tokenPanelChanged(this);
     }
-    if (topologyChangeType != null) {
-      zone.tokenMaskTopologyChanged(EnumSet.of(topologyChangeType));
+    if (!topologyTypesChanged.isEmpty()) {
+      zone.tokenMaskTopologyChanged(topologyTypesChanged);
     }
-    zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
+    // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
+    zone.tokenChanged(this);
   }
 
   public static Token fromDto(TokenDto dto) {

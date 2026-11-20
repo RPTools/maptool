@@ -176,10 +176,9 @@ public class FacingTool extends DefaultTool {
 
       // Send the facing (or lack thereof) to other players
       if (!token.hasFacing()) {
-        MapTool.serverCommand().updateTokenProperty(token, Token.Update.removeFacing);
+        MapTool.serverCommand().clearTokenFacing(token);
       } else {
-        MapTool.serverCommand()
-            .updateTokenProperty(token, Token.Update.setFacing, token.getFacing());
+        MapTool.serverCommand().setTokenFacing(token, token.getFacing());
       }
     }
     // Go back to the pointer tool

@@ -429,8 +429,7 @@ public class MapToolVariableResolver implements VariableResolver {
   protected void updateTokenProperty(Token token, String varname, String value) {
     // this logic allows unit tests to execute MT script that changes token properties
     // there should be no other context where we have no server of any kind
-    MapTool.serverCommand()
-        .updateTokenProperty(tokenInContext, Token.Update.setProperty, varname, value);
+    MapTool.serverCommand().setTokenProperty(tokenInContext, varname, value);
   }
 
   @Override

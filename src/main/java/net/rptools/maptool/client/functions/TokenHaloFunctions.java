@@ -71,7 +71,7 @@ public class TokenHaloFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.clearHalos);
+      MapTool.serverCommand().clearTokenHalos(token);
       return "";
     } else if (functionName.equalsIgnoreCase("getHalos")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 4);
@@ -179,9 +179,9 @@ public class TokenHaloFunctions extends AbstractFunction {
     var cmd = MapTool.serverCommand();
 
     if (haloColor != null) {
-      cmd.updateTokenProperty(token, Token.Update.setHaloColor, haloColor.getRGB());
+      cmd.setTokenHaloColor(token, haloColor);
     } else {
-      cmd.updateTokenProperty(token, Token.Update.setHaloColor);
+      cmd.clearTokenHaloColor(token);
     }
   }
 
