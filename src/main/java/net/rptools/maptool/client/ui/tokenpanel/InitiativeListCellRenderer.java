@@ -502,6 +502,7 @@ public class InitiativeListCellRenderer extends JPanel
       } else {
         nameLabel.setForeground(AppPreferences.pcMapLabelForeground.get());
       }
+      initLabel.setForeground(nameLabel.getForeground());
       nameLabel.setFont(getFont().deriveFont(tokenIsVisible ? Font.PLAIN : Font.ITALIC));
     }
   }
