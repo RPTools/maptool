@@ -27,8 +27,8 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.InvalidGUIDException;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
@@ -66,7 +66,10 @@ public class MapFunctions extends AbstractFunction {
         "getMapName",
         "setMapSelectButton",
         "getMapVision",
-        "setMapVision");
+        "setMapVision",
+        "getMapShowCoordinates",
+        "setMapShowCoordinates",
+        "getStatusBarMapCoordinates");
   }
 
   public static MapFunctions getInstance() {
@@ -84,6 +87,17 @@ public class MapFunctions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.map.none", functionName));
       }
       return currentZR.getZone().getId().toString();
+    } else if (functionName.equalsIgnoreCase("getStatusBarMapCoordinates")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
+      var statusBar = MapTool.getFrame().getCoordinateStatusBar();
+      if (!statusBar.hasCoordinates()) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownMapCoordinates", functionName));
+      }
+      JsonObject statusBarMapCoordinates = new JsonObject();
+      statusBarMapCoordinates.addProperty("x", statusBar.getMapX());
+      statusBarMapCoordinates.addProperty("y", statusBar.getMapY());
+      return statusBarMapCoordinates.toString();
     } else if (functionName.equalsIgnoreCase("getMapIDs")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       final var mapName = parameters.get(0).toString();
@@ -222,7 +236,20 @@ public class MapFunctions extends AbstractFunction {
                 config.getAsJsonPrimitive("ai rounding").getAsString().toUpperCase());
         newMap.setAStarRounding(aiRounding);
       }
-
+      if (config.has("show coordinates")) {
+        String optionText = config.getAsJsonPrimitive("show coordinates").getAsString();
+        newMap.setShowCoordinates(
+            Zone.ShowCoordinates.fromOption(optionText)
+                .orElseThrow(
+                    () ->
+                        new ParserException(
+                            I18N.getText(
+                                "macro.function.general.argumentTypeInvalidOption",
+                                functionName,
+                                "2 (\"show coordinates\")",
+                                optionText,
+                                String.join(", ", Zone.ShowCoordinates.validOptions())))));
+      }
       {
         final var gridConfig =
             config.has("grid") ? config.getAsJsonObject("grid") : new JsonObject();
@@ -231,7 +258,7 @@ public class MapFunctions extends AbstractFunction {
             gridConfig.has("type")
                 ? gridConfig.getAsJsonPrimitive("type").getAsString()
                 : AppPreferences.defaultGridType.get();
-        final var grid = GridFactory.createGrid(Grid.GridType.fromString(gridType));
+        final var grid = GridFactory.createGrid(GridType.fromString(gridType));
 
         final var gridColor =
             gridConfig.has("color")
@@ -418,6 +445,37 @@ public class MapFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
       return currentZR.getZone().getVisionType().toString();
+    } else if ("setMapShowCoordinates".equalsIgnoreCase(functionName)) {
+      FunctionUtil.blockUntrustedMacro(functionName);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      String optionText = parameters.getFirst().toString();
+      Zone.ShowCoordinates showCoordinates =
+          Zone.ShowCoordinates.fromOption(optionText)
+              .orElseThrow(
+                  () ->
+                      new ParserException(
+                          I18N.getText(
+                              "macro.function.general.argumentTypeInvalidOption",
+                              functionName,
+                              "1",
+                              optionText,
+                              String.join(", ", Zone.ShowCoordinates.validOptions()))));
+      ZoneRenderer zr = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 1);
+      Zone zone = zr.getZone();
+      if (zone == null) {
+        throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+      }
+      // update this client immediately
+      zone.setShowCoordinates(showCoordinates);
+      MapTool.getFrame().getCoordinateStatusBar().reset();
+      MapTool.getFrame().refresh();
+      // send up to other clients
+      MapTool.serverCommand().setShowCoordinates(zone.getId(), showCoordinates);
+      return "";
+    } else if ("getMapShowCoordinates".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+      ZoneRenderer zr = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 0);
+      return zr.getZone().getShowCoordinates().getOption();
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));

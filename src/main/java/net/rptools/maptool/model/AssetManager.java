@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -40,6 +42,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.regex.Pattern;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
@@ -48,6 +51,7 @@ import net.rptools.maptool.language.I18N;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tika.mime.MediaType;
 
 /**
  * This class handles the caching, loading, and downloading of assets. All assets are loaded through
@@ -88,6 +92,24 @@ public class AssetManager {
   /** Property string associated with asset type. */
   public static final String TYPE = "type";
 
+  /** Property string associated with asset format version in .info file. */
+  public static final String VERSION = "version";
+
+  /** Property string associated with asset media type in .info file. */
+  public static final String MEDIA_TYPE = "mediaType";
+
+  /** Property string associated with asset hash algorithm in .info file. */
+  public static final String HASH_ALGORITHM = "hashAlgorithm";
+
+  /** Current info file format version. */
+  public static final String CURRENT_INFO_VERSION = "1";
+
+  /** Default hash algorithm. */
+  public static final String DEFAULT_HASH_ALGORITHM = "MD5";
+
+  /** Pattern that valid asset keys must match, keys are hex encoded hashes. */
+  private static final Pattern VALID_ASSET_KEY = Pattern.compile("[0-9a-fA-F]+");
+
   /** Used to load assets from storage */
   private static AssetLoader assetLoader = new AssetLoader();
 
@@ -97,6 +119,24 @@ public class AssetManager {
   static {
     cacheDir = AppUtil.getAppHome("assetcache");
     usePersistentCache = true;
+  }
+
+  /**
+   * Return the directory used for the persistent asset cache.
+   *
+   * @return File representing the cache directory
+   */
+  static File getCacheDir() {
+    return cacheDir;
+  }
+
+  /**
+   * Set the directory used for the persistent asset cache.
+   *
+   * @param dir the cache directory to use
+   */
+  static void setCacheDir(File dir) {
+    cacheDir = dir;
   }
 
   /**
@@ -349,6 +389,35 @@ public class AssetManager {
   }
 
   /**
+   * Return the two-character subdirectory prefix for an asset key, or null if the key is less than
+   * 2 characters long.
+   *
+   * @param id MD5Key of the asset
+   * @return two-character lowercase string prefix, or null if shorter than 2 characters
+   */
+  static String getSubdirectoryPrefix(MD5Key id) {
+    if (id == null) {
+      return null;
+    }
+    String keyStr = id.toString();
+    if (keyStr.length() < 2) {
+      return null;
+    }
+    return keyStr.substring(0, 2).toLowerCase(Locale.ROOT);
+  }
+
+  /**
+   * Checks if the asset key is a valid hex encoded hash, and so is safe to use as a file name in
+   * the asset cache.
+   *
+   * @param id the {@link MD5Key} to check.
+   * @return {@code true} if the key is valid.
+   */
+  private static boolean isValidAssetKey(MD5Key id) {
+    return id != null && id.toString() != null && VALID_ASSET_KEY.matcher(id.toString()).matches();
+  }
+
+  /**
    * Checks the {@link Asset} id to ensure that the is {@link Asset} is valid.
    *
    * @param md5Key the {@link MD5Key} to check.
@@ -360,11 +429,9 @@ public class AssetManager {
       return null;
     }
 
-    // Check to see that the asset path wont escape the asset cache directory.
-    File inCache = cacheDir.getCanonicalFile().toPath().resolve(md5Key.toString()).toFile();
-    File toCheck = cacheDir.toPath().resolve(md5Key.toString()).toFile().getCanonicalFile();
-
-    if (!inCache.equals(toCheck)) {
+    // Only hex keys are allowed, this means that the asset path can not escape the asset cache
+    // directory or refer to a different file within it.
+    if (!isValidAssetKey(md5Key)) {
       return BAD_ASSET_LOCATION_KEY;
     }
 
@@ -429,6 +496,9 @@ public class AssetManager {
    * Retrieve the asset from the persistent cache. If the asset is not in the cache, or loading from
    * the cache failed then this function returns null.
    *
+   * <p>If the asset is only found in the legacy location an attempt is made to hard link it into
+   * its subdirectory, see {@link #tryLinkLegacyAssetToSubdir(MD5Key, Asset)}.
+   *
    * @param id MD5 of the requested asset
    * @return Asset from the cache
    */
@@ -448,22 +518,21 @@ public class AssetManager {
       byte[] data = FileUtils.readFileToByteArray(assetFile);
       Properties props = getAssetInfo(id);
 
-      String name = props.getProperty(NAME);
-      String type = props.getProperty(TYPE);
-
-      Asset asset;
-
-      if (type != null) {
-        asset = Asset.Type.valueOf(type).getFactory().apply(name, data);
-      } else {
-        asset = Asset.createAssetDetectType(props.getProperty(NAME), data);
-      }
-
-      if (!asset.getMD5Key().equals(id)) {
-        log.error("MD5 for asset " + asset.getName() + " corrupted; purging corrupted file");
-        assetFile.delete();
+      String hashAlgorithm = props.getProperty(HASH_ALGORITHM, DEFAULT_HASH_ALGORITHM);
+      if (!DEFAULT_HASH_ALGORITHM.equalsIgnoreCase(hashAlgorithm)) {
+        // Written by a newer version, leave it alone rather than treating it as corrupt.
+        log.warn("Unsupported hash algorithm {} for cached asset {}", hashAlgorithm, id);
         return null;
       }
+
+      if (!new MD5Key(data).equals(id)) {
+        log.error("MD5 for asset " + id + " corrupted; purging corrupted file");
+        purgeFromPersistentCache(id);
+        return null;
+      }
+
+      Asset asset = createAssetFromInfo(id, props, data);
+      tryLinkLegacyAssetToSubdir(id, asset);
 
       synchronized (assetMap) {
         var oldAsset = assetMap.get(id);
@@ -476,6 +545,65 @@ public class AssetManager {
     } catch (IOException ioe) {
       log.error("Could not load asset from persistent cache", ioe);
       return null;
+    }
+  }
+
+  /**
+   * Creates the {@link Asset} for the data using the information from its .info file. The {@link
+   * #TYPE} is used if present, as it can not always be determined from the media type (e.g. {@link
+   * Asset.Type#DATA} or {@link Asset.Type#MTLIB}), otherwise the {@link #MEDIA_TYPE}, and finally
+   * the type is detected from the data.
+   *
+   * @param id the key of the asset.
+   * @param props the contents of the .info file.
+   * @param data the data for the asset.
+   * @return the {@link Asset}.
+   * @throws IOException if an error occurs detecting the type.
+   */
+  private static Asset createAssetFromInfo(MD5Key id, Properties props, byte[] data)
+      throws IOException {
+    String name = props.getProperty(NAME);
+    String type = props.getProperty(TYPE);
+    String mediaType = props.getProperty(MEDIA_TYPE);
+
+    if (type != null && !type.isBlank()) {
+      try {
+        return Asset.Type.valueOf(type).getFactory().apply(name, data);
+      } catch (IllegalArgumentException e) {
+        log.warn("Unknown type '{}' for asset {}", type, id);
+      }
+    }
+
+    if (mediaType != null && !mediaType.isBlank()) {
+      var parsedMediaType = MediaType.parse(mediaType);
+      if (parsedMediaType != null) {
+        return Asset.Type.fromMediaType(parsedMediaType, name).getFactory().apply(name, data);
+      }
+      log.warn("Unable to parse mediaType '{}' for asset {}", mediaType, id);
+    }
+
+    return Asset.createAssetDetectType(name, data);
+  }
+
+  /**
+   * Removes the asset and its companion files from both the subdirectory and legacy locations of
+   * the persistent cache.
+   *
+   * @param id MD5 of the asset to purge.
+   */
+  private static void purgeFromPersistentCache(MD5Key id) {
+    for (File file :
+        new File[] {
+          getSubdirAssetFile(id),
+          getLegacyAssetFile(id),
+          getSubdirAssetInfoFile(id),
+          getLegacyAssetInfoFile(id),
+          getSubdirAssetLinkFile(id),
+          getLegacyAssetLinkFile(id)
+        }) {
+      if (file != null) {
+        file.delete();
+      }
     }
   }
 
@@ -532,16 +660,22 @@ public class AssetManager {
 
     File infoFile = getAssetInfoFile(id);
     Properties props = new Properties();
-    try (InputStream is = new FileInputStream(infoFile)) {
-      props.load(is);
-    } catch (IOException ioe) {
-      // do nothing
+    if (infoFile != null && infoFile.exists()) {
+      try (InputStream is = new FileInputStream(infoFile)) {
+        props.load(is);
+      } catch (IOException ioe) {
+        // do nothing
+      }
     }
     return props;
   }
 
   /**
    * Serialize the asset into the persistent cache.
+   *
+   * <p>If the asset already exists in the legacy location an attempt is made to hard link it into
+   * its subdirectory, see {@link #tryLinkLegacyAssetToSubdir(MD5Key, Asset)}. If that is not
+   * possible any missing .info file is written next to the legacy asset.
    *
    * @param asset Asset to serialize
    */
@@ -572,18 +706,37 @@ public class AssetManager {
               log.warn("Could not update statusbar while MapTool frame is loading.", npe);
             }
           });
+    } else {
+      tryLinkLegacyAssetToSubdir(asset.getMD5Key(), asset);
     }
     if (!assetInfoIsInPersistentCache(asset)) {
-
-      File infoFile = getAssetInfoFile(asset);
-      Properties props = new Properties();
-      try (OutputStream out = new FileOutputStream(infoFile)) {
-        props.put(NAME, asset.getName() != null ? asset.getName() : "");
-        props.put(TYPE, asset.getType().name());
-        props.store(out, "Asset Info");
+      try {
+        writeAssetInfo(getAssetInfoFile(asset), asset);
       } catch (IOException ioe) {
         log.error("Could not persist asset while writing image properties", ioe);
       }
+    }
+  }
+
+  /**
+   * Writes the .info file for the asset.
+   *
+   * @param infoFile the .info file to write.
+   * @param asset the asset to write the information for.
+   * @throws IOException if an error occurs writing the file.
+   */
+  private static void writeAssetInfo(File infoFile, Asset asset) throws IOException {
+    if (infoFile.getParentFile() != null) {
+      infoFile.getParentFile().mkdirs();
+    }
+    Properties props = new Properties();
+    props.put(VERSION, CURRENT_INFO_VERSION);
+    props.put(NAME, asset.getName() != null ? asset.getName() : "");
+    props.put(TYPE, asset.getType().name());
+    props.put(MEDIA_TYPE, asset.getMediaType().toString());
+    props.put(HASH_ALGORITHM, DEFAULT_HASH_ALGORITHM);
+    try (OutputStream out = new FileOutputStream(infoFile)) {
+      props.store(out, "Asset Info");
     }
   }
 
@@ -596,7 +749,7 @@ public class AssetManager {
   private static File getLocalReference(MD5Key id) {
 
     File lnkFile = getAssetLinkFile(id);
-    if (!lnkFile.exists()) {
+    if (lnkFile == null || !lnkFile.exists()) {
       return null;
     }
     try {
@@ -646,6 +799,9 @@ public class AssetManager {
     }
 
     // Keep track of this reference
+    if (lnkFile.getParentFile() != null) {
+      lnkFile.getParentFile().mkdirs();
+    }
     try (FileOutputStream out = new FileOutputStream(lnkFile, true)) { // For appending
       out.write((image.getAbsolutePath() + "\n").getBytes());
     }
@@ -673,25 +829,134 @@ public class AssetManager {
   }
 
   /**
-   * The assets information is in the persistent cache.
+   * Return the subdirectory asset file for the given asset id.
+   *
+   * @param id MD5 sum of the asset
+   * @return File in the subdirectory, or in root if id length &lt; 2, or null if the id is invalid
+   */
+  static File getSubdirAssetFile(MD5Key id) {
+    return getSubdirCacheFile(id, "");
+  }
+
+  /**
+   * Return the legacy (root) asset file for the given asset id.
+   *
+   * @param id MD5 sum of the asset
+   * @return File in the root cache directory, or null if the id is invalid
+   */
+  static File getLegacyAssetFile(MD5Key id) {
+    return getLegacyCacheFile(id, "");
+  }
+
+  /**
+   * Return the subdirectory asset info file for the given asset id.
+   *
+   * @param id MD5 sum of the asset
+   * @return File in the subdirectory, or in root if id length &lt; 2, or null if the id is invalid
+   */
+  static File getSubdirAssetInfoFile(MD5Key id) {
+    return getSubdirCacheFile(id, ".info");
+  }
+
+  /**
+   * Return the legacy (root) asset info file for the given asset id.
+   *
+   * @param id MD5 sum of the asset
+   * @return File in the root cache directory, or null if the id is invalid
+   */
+  static File getLegacyAssetInfoFile(MD5Key id) {
+    return getLegacyCacheFile(id, ".info");
+  }
+
+  /**
+   * Return the subdirectory asset link file for the given asset id.
+   *
+   * @param id MD5 sum of the asset
+   * @return File in the subdirectory, or in root if id length &lt; 2, or null if the id is invalid
+   */
+  static File getSubdirAssetLinkFile(MD5Key id) {
+    return getSubdirCacheFile(id, ".lnk");
+  }
+
+  /**
+   * Return the legacy (root) asset link file for the given asset id.
+   *
+   * @param id MD5 sum of the asset
+   * @return File in the root cache directory, or null if the id is invalid
+   */
+  static File getLegacyAssetLinkFile(MD5Key id) {
+    return getLegacyCacheFile(id, ".lnk");
+  }
+
+  /**
+   * Return the file in the asset's subdirectory of the cache.
+   *
+   * @param id MD5 sum of the asset
+   * @param suffix the suffix to add to the asset id for the file name.
+   * @return File in the subdirectory, or in root if id length &lt; 2, or null if the id is invalid
+   */
+  private static File getSubdirCacheFile(MD5Key id, String suffix) {
+    if (!isValidAssetKey(id) || cacheDir == null) {
+      return null;
+    }
+    String prefix = getSubdirectoryPrefix(id);
+    if (prefix == null) {
+      return getLegacyCacheFile(id, suffix);
+    }
+    return new File(new File(cacheDir, prefix), id + suffix);
+  }
+
+  /**
+   * Return the file in the legacy (root) location of the cache.
+   *
+   * @param id MD5 sum of the asset
+   * @param suffix the suffix to add to the asset id for the file name.
+   * @return File in the root cache directory, or null if the id is invalid
+   */
+  private static File getLegacyCacheFile(MD5Key id, String suffix) {
+    if (!isValidAssetKey(id) || cacheDir == null) {
+      return null;
+    }
+    return new File(cacheDir, id + suffix);
+  }
+
+  /**
+   * The assets information is in the persistent cache. Checks both the subdirectory and legacy
+   * locations.
    *
    * @param asset Asset to search for
    * @return True if the assets information exists in the persistent cache
    */
   private static boolean assetInfoIsInPersistentCache(Asset asset) {
-    return getAssetInfoFile(asset.getMD5Key()).exists();
+    if (asset == null || asset.getMD5Key() == null) {
+      return false;
+    }
+    File subDirInfoFile = getSubdirAssetInfoFile(asset.getMD5Key());
+    if (subDirInfoFile != null && subDirInfoFile.exists() && subDirInfoFile.length() > 0) {
+      return true;
+    }
+    File legacyInfoFile = getLegacyAssetInfoFile(asset.getMD5Key());
+    return legacyInfoFile != null && legacyInfoFile.exists() && legacyInfoFile.length() > 0;
   }
 
   /**
-   * Determine if the asset is in the persistent cache.
+   * Determine if the asset is in the persistent cache. Checks both the subdirectory and legacy
+   * locations.
    *
    * @param id MD5 sum of the asset
    * @return True if asset is in the persistent cache, false otherwise
    * @see this#assetIsInPersistentCache(Asset)
    */
   private static boolean assetIsInPersistentCache(MD5Key id) {
-
-    return getAssetCacheFile(id).exists() && getAssetCacheFile(id).length() > 0;
+    if (id == null) {
+      return false;
+    }
+    File subDirFile = getSubdirAssetFile(id);
+    if (subDirFile != null && subDirFile.exists() && subDirFile.length() > 0) {
+      return true;
+    }
+    File legacyFile = getLegacyAssetFile(id);
+    return legacyFile != null && legacyFile.exists() && legacyFile.length() > 0;
   }
 
   /**
@@ -740,14 +1005,62 @@ public class AssetManager {
   }
 
   /**
-   * Return the assets cache file, if any
+   * Return the assets cache file, if any. Checks the subdirectory location first, then the legacy
+   * (root) location. If it doesn't exist in either, returns the subdirectory location (or legacy if
+   * key length &lt; 2) for writes.
    *
    * @param id MD5 sum of the asset
-   * @return The assets cache file, or null if it doesn't have one
+   * @return The assets cache file, or null if id is not a valid asset key
    * @see AssetManager#getAssetCacheFile(Asset asset)
    */
   public static File getAssetCacheFile(MD5Key id) {
-    return new File(cacheDir.getAbsolutePath() + File.separator + id);
+    File subDirFile = getSubdirAssetFile(id);
+    if (subDirFile == null || subDirFile.exists()) {
+      return subDirFile;
+    }
+    File legacyFile = getLegacyAssetFile(id);
+    return legacyFile.exists() ? legacyFile : subDirFile;
+  }
+
+  /**
+   * Attempts to create a hard link in the subdirectory for an asset that only exists in the legacy
+   * (root) location, and writes a new .info file in that subdirectory. If the hard link creation
+   * fails, no copy or move is attempted and no .info file is created.
+   *
+   * @param id MD5Key of the asset
+   * @param asset the asset, used to write the .info file
+   * @return {@code true} if the asset is now in the subdirectory
+   */
+  static boolean tryLinkLegacyAssetToSubdir(MD5Key id, Asset asset) {
+    if (getSubdirectoryPrefix(id) == null) {
+      return false;
+    }
+    File subDirFile = getSubdirAssetFile(id);
+    File legacyFile = getLegacyAssetFile(id);
+    if (subDirFile == null || subDirFile.exists() || !legacyFile.exists()) {
+      return false;
+    }
+
+    try {
+      subDirFile.getParentFile().mkdirs();
+      Files.createLink(subDirFile.toPath(), legacyFile.toPath());
+    } catch (FileAlreadyExistsException e) {
+      // Created concurrently by another thread, continue
+    } catch (UnsupportedOperationException | IOException | SecurityException e) {
+      log.debug("Could not create hard link from legacy asset {} to {}", legacyFile, subDirFile, e);
+      return false;
+    }
+
+    File subDirInfoFile = getSubdirAssetInfoFile(id);
+    if (!subDirInfoFile.exists()) {
+      try {
+        writeAssetInfo(subDirInfoFile, asset);
+      } catch (IOException ioe) {
+        log.error("Could not write .info file after hard linking to {}", subDirInfoFile, ioe);
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -756,29 +1069,56 @@ public class AssetManager {
    * @param asset Asset to search for
    * @return The assets info file, or null if it doesn't have one
    */
-  private static File getAssetInfoFile(Asset asset) {
+  static File getAssetInfoFile(Asset asset) {
     return getAssetInfoFile(asset.getMD5Key());
   }
 
   /**
-   * Return the asset info file, if any
+   * Return the asset info file, if any. Checks the subdirectory location first, then the legacy
+   * (root) location. If neither exists, places it next to the asset data file (legacy if asset is
+   * legacy, else subdir).
    *
    * @param id MD5 sum of the asset
-   * @return File - The assets info file, or null if it doesn't have one
-   * @see this@getAssetInfoFile(Asset asset)
+   * @return File - The assets info file, or null if id is not a valid asset key
+   * @see this#getAssetInfoFile(Asset asset)
    */
-  private static File getAssetInfoFile(MD5Key id) {
-    return new File(cacheDir.getAbsolutePath() + File.separator + id + ".info");
+  static File getAssetInfoFile(MD5Key id) {
+    return getCompanionFile(getSubdirAssetInfoFile(id), getLegacyAssetInfoFile(id), id);
   }
 
   /**
-   * Return the asset link file, if any
+   * Return the asset link file, if any. Checks the subdirectory location first, then the legacy
+   * (root) location. If neither exists, places it next to the asset data file (legacy if asset is
+   * legacy, else subdir).
    *
    * @param id MD5 sum of the asset
-   * @return File The asset link file
+   * @return File The asset link file, or null if id is not a valid asset key
    */
-  private static File getAssetLinkFile(MD5Key id) {
-    return new File(cacheDir.getAbsolutePath() + File.separator + id + ".lnk");
+  static File getAssetLinkFile(MD5Key id) {
+    return getCompanionFile(getSubdirAssetLinkFile(id), getLegacyAssetLinkFile(id), id);
+  }
+
+  /**
+   * Return the companion (.info, .lnk) file to use for an asset. Checks the subdirectory location
+   * first, then the legacy (root) location. If neither exists, places it next to the asset data
+   * file (legacy if asset is legacy, else subdir).
+   *
+   * @param subDirFile the companion file in the subdirectory
+   * @param legacyFile the companion file in the legacy location
+   * @param id MD5 sum of the asset
+   * @return the companion file to use, or null if id is not a valid asset key
+   */
+  private static File getCompanionFile(File subDirFile, File legacyFile, MD5Key id) {
+    if (subDirFile == null || subDirFile.exists()) {
+      return subDirFile;
+    }
+    if (legacyFile.exists()) {
+      return legacyFile;
+    }
+    if (!getSubdirAssetFile(id).exists() && getLegacyAssetFile(id).exists()) {
+      return legacyFile;
+    }
+    return subDirFile;
   }
 
   /**

@@ -18,7 +18,6 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
 import java.awt.geom.Area;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,6 +27,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Zone.ShowCoordinates;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
@@ -123,6 +123,14 @@ public class ServerCommandClientImpl implements ServerCommand {
             .setZoneGuid(zoneGUID.toString())
             .setVision(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
     makeServerCall(Message.newBuilder().setSetVisionTypeMsg(msg).build());
+  }
+
+  public void setShowCoordinates(GUID zoneGUID, ShowCoordinates showCoordinates) {
+    var msg =
+        SetShowCoordinatesMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setShowCoordinates(ZoneDto.ShowCoordinatesDto.valueOf(showCoordinates.name()));
+    makeServerCall(Message.newBuilder().setSetShowCoordinatesMsg(msg).build());
   }
 
   public void updateCampaign(CampaignProperties properties) {
@@ -252,13 +260,20 @@ public class ServerCommandClientImpl implements ServerCommand {
    */
   public void updateTokenProperty(
       Token token, Token.Update update, TokenPropertyValueDto... parameters) {
-    Zone zone = token.getZoneRenderer().getZone();
-    GUID tokenGUID = token.getId();
-    GUID zoneGUID = zone.getId();
+    updateTokenProperty(token.getZoneRenderer().getZone(), token, update, List.of(parameters));
+  }
 
-    var parameterList = Arrays.stream(parameters).toList();
-    token.updateProperty(zone, update, parameterList); // update locally right away
-    updateTokenProperty(zoneGUID, tokenGUID, update, parameterList);
+  /**
+   * Simplifies the arguments for the method above.
+   *
+   * @param token the token to be updated
+   * @param update the type of token update
+   * @param parameters The message data
+   */
+  private void updateTokenProperty(
+      Zone zone, Token token, Token.Update update, List<TokenPropertyValueDto> parameters) {
+    token.updateProperty(zone, update, parameters); // update locally right away
+    updateTokenProperty(zone.getId(), token.getId(), update, parameters);
   }
 
   public void putLabel(GUID zoneGUID, Label label) {
@@ -701,6 +716,17 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   @Override
+  public void setTokenFootprint(Zone zone, Token token, GridType gridType, GUID footprintId) {
+    updateTokenProperty(
+        zone,
+        token,
+        Token.Update.setFootprint,
+        List.of(
+            TokenPropertyValueDto.newBuilder().setGridType(gridType.toDto()).build(),
+            TokenPropertyValueDto.newBuilder().setFootprintId(footprintId.toDto()).build()));
+  }
+
+  @Override
   public void updateTokenProperty(Token token, Token.Update update, int value) {
     updateTokenProperty(
         token, update, TokenPropertyValueDto.newBuilder().setIntValue(value).build());
@@ -787,16 +813,6 @@ public class ServerCommandClientImpl implements ServerCommand {
         TokenPropertyValueDto.newBuilder().setDoubleValue(value1).build(),
         TokenPropertyValueDto.newBuilder().setIntValue(value2).build(),
         TokenPropertyValueDto.newBuilder().setIntValue(value3).build());
-  }
-
-  @Override
-  public void updateTokenProperty(
-      Token token, Token.Update update, Grid grid, TokenFootprint footprint) {
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setGrid(grid.toDto()).build(),
-        TokenPropertyValueDto.newBuilder().setTokenFootPrint(footprint.toDto()).build());
   }
 
   @Override

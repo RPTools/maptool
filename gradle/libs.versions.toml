@@ -4,7 +4,7 @@ junit = "6.1.3"
 imageio = "3.15.3"
 sentry = "7.22.5"
 jide = "3.7.9"
-flatlaf = "3.7.2"
+flatlaf = "3.8"
 handlebars = "4.5.8"
 jai-imageio = "1.4.0"
 graalvm-js = "21.2.0"
@@ -29,10 +29,10 @@ icu4j = { group = "com.ibm.icu", name = "icu4j", version = "79.1" }
 # Networking
 # Web RTC
 websocket = { group = "org.java-websocket", name = "Java-WebSocket", version = "1.6.0" }
-webrtc = { group = "dev.onvoid.webrtc", name = "webrtc-java", version = "1.0.0" }
+webrtc = { group = "dev.onvoid.webrtc", name = "webrtc-java", version = "1.0.1" }
 # compression of messages between client and server
 apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.28.0" }
-zstd = { group = "com.github.luben", name = "zstd-jni", version = "1.5.7-26" }
+zstd = { group = "com.github.luben", name = "zstd-jni", version = "1.5.7-28" }
 # Protobuf
 protobuf-java = { group = "com.google.protobuf", name = "protobuf-java-util", version.ref = "protoc" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protoc" }
@@ -103,7 +103,7 @@ apache-commons-net = { group = "commons-net", name = "commons-net", version = "3
 # commandline parsing
 apache-commons-cli = { group = "commons-cli", name = "commons-cli", version = "1.11.0" }
 # String utilities
-apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", version = "3.21.0" }
+apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", version = "3.22.0" }
 # needed for preference dialog at runtime
 apache-commons-beanutils = { group = "commons-beanutils", name = "commons-beanutils", version = "1.11.0" }
 # For determining file type
@@ -117,7 +117,7 @@ jsonpath = { group = "com.jayway.jsonpath", name = "json-path", version = "3.0.0
 # HTML parsing
 jsoup = { group = "org.jsoup", name = "jsoup", version = "1.24.1" }
 # XML utilities, for Hero Lab integration
-jcabi-xml = { group = "com.jcabi", name = "jcabi-xml", version = "0.37.1" }
+jcabi-xml = { group = "com.jcabi", name = "jcabi-xml", version = "0.37.3" }
 # Serialization for saving campaigns, maps, tokens, etc.
 xstream = { group = "com.thoughtworks.xstream", name = "xstream", version = "1.4.21" }
 
@@ -204,7 +204,7 @@ jai-imageio = ["jai-imageio-core", "jai-imageio-jpeg"]
 graalvm-js = ["graalvm-js", "graalvm-js-scriptengine"]
 
 [plugins]
-git-version = { id = "com.palantir.git-version", version = "5.1.0" }
+git-version = { id = "com.palantir.git-version", version = "5.2.0" }
 osdetector = { id = "com.google.osdetector", version = "1.7.3" }
 javafx = { id = "org.openjfx.javafxplugin", version = "0.0.14" }
 jpackage-runtime = { id = "org.beryx.runtime", version = "2.0.1" }

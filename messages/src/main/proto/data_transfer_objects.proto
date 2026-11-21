@@ -629,6 +629,11 @@ message ZoneDto {
     CELL_UNIT = 1;
     INTEGER = 2;
   }
+  enum ShowCoordinatesDto {
+    SHOW_COORDS_TO_ALL = 0;
+    SHOW_COORDS_TO_GM_ONLY = 1;
+    SHOW_COORDS_TO_NONE = 2;
+  }
   int64 creation_time = 1;
   GuidDto id = 2;
   GridDto grid = 3;
@@ -663,6 +668,7 @@ message ZoneDto {
   TokenSelectionDto token_selection = 36;
   int32 height = 37;
   int32 width = 38;
+  ShowCoordinatesDto show_coordinates = 40;
 }
 
 message InitiativeListDto {
@@ -783,8 +789,8 @@ message TokenPropertyValueDto {
     LightSourceDto light_source = 7;
     AreaDto area = 8;
     StringListDto string_values = 9;
-    GridDto grid = 10;
-    TokenFootPrintDto token_foot_print = 11;
+    GridTypeDto grid_type = 10;
+    GuidDto footprint_id = 11;
     string topology_type = 12;
     string halo_id = 13;
     HaloDto halo = 14;
@@ -806,15 +812,6 @@ message TransferableAddOnLibraryDto {
   string namespace = 1;
   string version = 2;
   string asset_key = 3;
-}
-
-message TokenFootPrintDto {
-  GuidDto id = 1;
-  string name = 2;
-  string localizedName = 3;
-  bool is_default = 4;
-  double scale = 5;
-  repeated IntPointDto cell_set = 6;
 }
 
 // region WallTopology graph

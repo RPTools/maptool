@@ -21,7 +21,7 @@ import java.util.prefs.Preferences;
 import net.rptools.lib.image.RenderQuality;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.preferences.Preference;
@@ -369,6 +369,15 @@ public class AppPreferences {
           .setLabel("Preferences.label.maps.light")
           .setTooltip("Preferences.label.maps.light.tooltip");
 
+  public static final Preference<Zone.ShowCoordinates> defaultShowCoordinates =
+      store
+          .defineEnum(
+              Zone.ShowCoordinates.class,
+              "defaultShowCoordinates",
+              Zone.ShowCoordinates.SHOW_COORDS_TO_ALL)
+          .setLabel("Preferences.label.maps.showCoordinates")
+          .setTooltip("Preferences.label.maps.showCoordinates.tooltip");
+
   public static final Preference<MapSortType> mapSortType =
       store
           .defineEnum(MapSortType.class, "sortByGMName", MapSortType.GMNAME)
@@ -627,7 +636,7 @@ public class AppPreferences {
 
   public static final Preference<String> defaultGridType =
       store
-          .defineString("defaultGridType", Grid.GridType.Square.toString())
+          .defineString("defaultGridType", GridType.Square.toString())
           .setLabel("Preferences.label.maps.grid")
           .setTooltip("Preferences.label.maps.grid.tooltip");
 
@@ -756,6 +765,9 @@ public class AppPreferences {
           "Preferences.label.loadMRU",
           "Preferences.label.loadMRU.tooltip",
           false);
+
+  public static final Preference<Boolean> initiativePanelShowsInfoInTitle =
+      store.defineBoolean("initShowTitleInfo", true);
 
   public static final Preference<Boolean> initiativePanelShowsTokenImage =
       store.defineBoolean("initShowTokens", true);

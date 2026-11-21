@@ -558,9 +558,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     }
 
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(e.getX(), e.getY()));
-    if (cellUnderMouse != null) {
-      MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
-    }
+    MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse);
 
     if (SwingUtilities.isLeftMouseButton(e) && !SwingUtilities.isRightMouseButton(e)) {
       if (isDrawingSelectionBox) {

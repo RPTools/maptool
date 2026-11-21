@@ -704,9 +704,8 @@ public class PointerTool extends DefaultTool {
     }
 
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mouseX, mouseY));
-    if (cellUnderMouse != null) {
-      MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
-    }
+    MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse);
+
     if (SwingUtilities.isLeftMouseButton(e) && !SwingUtilities.isRightMouseButton(e)) {
       if (isDrawingSelectionBox) {
         int x1 = dragStartX;
