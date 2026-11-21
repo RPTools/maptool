@@ -74,18 +74,6 @@ public class TokenPropertiesEditorPanel extends PropertyPane {
             | SHOW_STATUS
             | SHOW_WHOLE_WORDS);
 
-    UIManager.getDefaults()
-        .entrySet()
-        .forEach(
-            entry -> {
-              if (entry.getKey() instanceof String key) {
-                if (key.toLowerCase().contains("table")
-                    || key.contains("jide")
-                    || key.startsWith("com.")) {
-                  System.out.println(key + ":" + entry.getValue());
-                }
-              }
-            });
     UIManager.getDefaults().put("Table.rowHeight", 24);
     // move sort buttons to searchable toolbar
     JideBoxLayout toolbarLayout = (JideBoxLayout) searchableBar.getLayout();
