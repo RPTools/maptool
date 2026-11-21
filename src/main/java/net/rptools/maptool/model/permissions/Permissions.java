@@ -16,6 +16,7 @@ package net.rptools.maptool.model.permissions;
 
 import javax.annotation.Nullable;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.DisplayName;
 import net.rptools.maptool.model.TokenProperty;
 
 /**
@@ -29,40 +30,41 @@ import net.rptools.maptool.model.TokenProperty;
  * <li>Introduces exclusive permissions beyond GM Only
  *
  *     <p>Used in {@link TokenProperty} for determining who can see a property on a pop-up attribute
- *     sheet, and whether a property appears in the token property editor.
+ *
+ *     <p>sheet, and whether a property appears in the token property editor.
  */
-public enum Permissions {
+public enum Permissions implements DisplayName.WithTooltip {
   // Order follows increasing visibility for accumulated permissions
 
   /** Nobody has permission */
-  NONE("permission.displayName.none"),
+  NONE("permission.none.name"),
   /** Only the GMs have permission */
-  GM("permission.displayName.gm"),
+  GM("permission.gm.name"),
   /** The GMs and the Owners have permission */
-  OWNER("permission.displayName.owner"),
+  OWNER("permission.owner.name"),
   /** The GMs, Owners, and the Owners' Allies have permission */
-  ALLIED("permission.displayName.allies"),
+  ALLIED("permission.allies.name"),
   /** Everyone has permission */
-  ALL("permission.displayName.all"),
+  ALL("permission.all.name"),
 
   // Exclusive permissions, i.e. Can exclude the GM, etc.
   /** Only the Owners have permission */
-  OWNER_ONLY("permission.displayName.owner.discrete"),
+  OWNER_ONLY("permission.owner.discrete.name"),
   /** Only the Owners' Allies have permission */
-  ALLIED_ONLY("permission.displayName.allies.discrete"),
+  ALLIED_ONLY("permission.allies.discrete.name"),
   /** Only the Owners and the Owners' Allies have permission */
-  OWNER_ALLIED_ONLY("permission.displayName.owner.allies.discrete"),
+  OWNER_ALLIED_ONLY("permission.owner.allies.discrete.name"),
   /** Only the Owners' Opponents have permission */
-  OPPONENT_ONLY("permission.displayName.opponent");
+  OPPONENT_ONLY("permission.opponent.name");
 
-  final String displayName;
+  private static PermissionsTests gateKeeper = new RPGGateKeeper();
+  final String i18nNameKey;
+  final String i18nDescriptionKey;
 
   Permissions(String i18nKey) {
-    this.displayName = I18N.getText(i18nKey);
-  }
-
-  public boolean hasPermission(@Nullable Object accessor, @Nullable Object target) {
-    return PermissionTest.hasPermission(this, accessor, target);
+    this.i18nNameKey = i18nKey;
+    this.i18nDescriptionKey = i18nKey + ".description";
+    I18N.getText(i18nKey);
   }
 
   public static Permissions fromString(String lookup) {
@@ -70,7 +72,7 @@ public enum Permissions {
       return valueOf(lookup);
     } catch (IllegalArgumentException e) {
       for (Permissions p : values()) {
-        if (p.name().equalsIgnoreCase(lookup) || p.displayName.equalsIgnoreCase(lookup)) {
+        if (p.name().equalsIgnoreCase(lookup) || p.i18nNameKey.equalsIgnoreCase(lookup)) {
           return p;
         }
       }
@@ -78,8 +80,54 @@ public enum Permissions {
     return null;
   }
 
+  public static void setGateKeeper(PermissionsTests gateKeeper) {
+    Permissions.gateKeeper = gateKeeper;
+  }
+
+  public boolean hasPermission(@Nullable Object accessor) {
+    return gateKeeper.getAccessorTest().apply(this, accessor);
+  }
+
+  public boolean hasPermission(@Nullable Object accessor, @Nullable Object object) {
+    return gateKeeper.getObjectAccessTest().apply(this, accessor, object);
+  }
+
+  public boolean isAllied(@Nullable Object accessor, @Nullable Object other) {
+    return gateKeeper.getObjectAllyTest().apply(accessor, other);
+  }
+
   @Override
   public String toString() {
-    return displayName;
+    return getDisplayName();
+  }
+
+  @Override
+  public String getDescription() {
+    return I18N.getMessage(i18nDescriptionKey);
+  }
+
+  @Override
+  public void setDescription(String value) {
+    // unused
+  }
+
+  @Override
+  public String getName() {
+    return name();
+  }
+
+  @Override
+  public void setName(String value) {
+    // unused
+  }
+
+  @Override
+  public String getDisplayName() {
+    return I18N.getMessage(i18nNameKey);
+  }
+
+  @Override
+  public void setDisplayName(String value) {
+    // unused
   }
 }

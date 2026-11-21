@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 import net.rptools.maptool.model.permissions.Permissions;
 import net.rptools.maptool.server.proto.TokenPropertyDto;
 
-public class TokenProperty implements DisplayNames, Serializable {
+public class TokenProperty implements DisplayName.WithShortName, Serializable {
   // new permissions
   public static final Permissions EDITOR_VIEW_DEFAULT = Permissions.OWNER;
   public static final Permissions EDITOR_EDIT_DEFAULT = Permissions.OWNER;
