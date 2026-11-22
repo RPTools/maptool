@@ -535,19 +535,7 @@ public class Token implements Cloneable {
     lastPath = null;
     // lightSourceList?
     ownerList.clear();
-    /**
-     * Lee: why shouldn't propertyType be set to what the framework uses? In case of multiple
-     * propertyType, give a choice; or incorporate in the Campaign Properties window a marker for
-     * what is default for new tokens.
-     */
     propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
-
-    /**
-     * Jamz: Like propertyType, why shouldn't sight be kept if it matches exists? Many creatures
-     * with DarkVision get reset and it makes it painful. I'm turning off this reset for now. If
-     * there are complaints/reasons, maybe the Import Dialog needs to be expanded to include
-     * checkboxes for these items...
-     */
 
     // Try and silently catch any errors if there is an issue with sightType...
     try {
@@ -1230,12 +1218,7 @@ public class Token implements Cloneable {
       return null;
     }
 
-    MD5Key imageId = result.getImageId();
-    if (imageId == null) {
-      return null;
-    }
-
-    return imageId;
+    return result.getImageId();
   }
 
   /**
@@ -1811,7 +1794,7 @@ public class Token implements Cloneable {
   }
 
   public List<String> getSetStates() {
-    List<String> setStates = new ArrayList<String>();
+    List<String> setStates = new ArrayList<>();
     for (Map.Entry<String, Object> entry : state.entrySet()) {
       if (entry.getValue() instanceof Boolean) {
         if ((Boolean) entry.getValue()) {
@@ -1974,12 +1957,12 @@ public class Token implements Cloneable {
    * @param newMacroList the macro list to add
    * @param clearOld whether the old macros at other indexes should be removed
    */
-  public void saveMacroList(List<MacroButtonProperties> newMacroList, boolean clearOld) {
+  private void saveMacroList(List<MacroButtonProperties> newMacroList, boolean clearOld) {
     if (clearOld) {
       macroPropertiesMap.clear();
     }
     for (MacroButtonProperties macro : newMacroList) {
-      if (macro.getLabel().trim().length() == 0 || macro.getCommand().trim().length() == 0) {
+      if (macro.getLabel().isBlank() || macro.getCommand().isBlank()) {
         continue;
       }
       macroPropertiesMap.put(macro.getIndex(), macro);
@@ -2224,7 +2207,6 @@ public class Token implements Cloneable {
    *
    * @return The List of initiative
    */
-  @SuppressWarnings("unchecked")
   public List<InitiativeList.TokenInitiative> getInitiatives() {
     Zone zone = getZoneRenderer().getZone();
     List<Integer> list = zone.getInitiativeList().indexOf(this);
@@ -2326,6 +2308,7 @@ public class Token implements Cloneable {
         return Integer.compare(o1.z, o2.z);
       };
 
+  @SuppressWarnings("ConstantConditions")
   protected Object readResolve() {
     if (image == null) {
       image = imageAssetMap.get(null);
@@ -2351,7 +2334,7 @@ public class Token implements Cloneable {
     }
 
     // Fix for pre 1.11.3 campaigns and token size issues
-    if (sizeMap != null && sizeMap.size() > 0) {
+    if (sizeMap != null && !sizeMap.isEmpty()) {
       Map<Object, GUID> oldSizeMap = new HashMap<>(sizeMap);
       sizeMap.clear();
       for (var entry : oldSizeMap.entrySet()) {
@@ -2438,7 +2421,7 @@ public class Token implements Cloneable {
     if (tokenOpacity == null) {
       tokenOpacity = 1.f;
     }
-    tokenOpacity = Math.max(0.f, Math.min(tokenOpacity, 1.f));
+    tokenOpacity = Math.clamp(tokenOpacity, 0.f, 1.f);
 
     if (macroMap != null) {
       // convert old-style macros
@@ -2842,7 +2825,7 @@ public class Token implements Cloneable {
     token.terrainModifiersIgnored.addAll(
         dto.getTerrainModifiersIgnoredList().stream()
             .map(m -> TerrainModifierOperation.valueOf(m.name()))
-            .collect(Collectors.toList()));
+            .toList());
 
     token.image = dto.hasImage() ? new MD5Key(dto.getImage()) : null;
     token.charsheetImage = dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage()) : null;
@@ -2852,10 +2835,8 @@ public class Token implements Cloneable {
         .map(LightSource::fromDto)
         .forEach(source -> token.uniqueLightSources.put(source.getId(), source));
     token.lightSourceList.addAll(
-        dto.getLightSourcesList().stream()
-            .map(AttachedLightSource::fromDto)
-            .collect(Collectors.toList()));
-    dto.getHaloGuidsList().stream().forEach(id -> token.haloIdSet.add(GUID.fromDto(id)));
+        dto.getLightSourcesList().stream().map(AttachedLightSource::fromDto).toList());
+    dto.getHaloGuidsList().forEach(id -> token.haloIdSet.add(GUID.fromDto(id)));
     token.sightType = dto.hasSightType() ? dto.getSightType() : null;
     token.hasSight = dto.getHasSight();
     token.hasImageTable = dto.getHasImageTable();
@@ -2879,7 +2860,7 @@ public class Token implements Cloneable {
                 default -> log.warn("unknown state type:" + stateDto.getStateTypeCase());
               }
             });
-    dto.getPropertiesMap().forEach((k, v) -> token.propertyMapCI.put(k, v.equals("") ? null : v));
+    dto.getPropertiesMap().forEach((k, v) -> token.propertyMapCI.put(k, v.isEmpty() ? null : v));
     dto.getMacroPropertiesMap()
         .forEach(
             (key, value) ->
@@ -3045,7 +3026,7 @@ public class Token implements Cloneable {
    *
    * @param statSheet the stat sheet properties for this token.
    */
-  public void setStatSheet(StatSheetProperties statSheet) {
+  public void setStatSheet(@Nullable StatSheetProperties statSheet) {
     this.statSheet = statSheet;
   }
 
