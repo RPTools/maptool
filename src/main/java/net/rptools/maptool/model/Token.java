@@ -16,15 +16,12 @@ package net.rptools.maptool.model;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Transparency;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,8 +31,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -2246,134 +2241,6 @@ public class Token implements Cloneable {
    */
   public int getFacingInDegrees() {
     return -getFacing() - 90;
-  }
-
-  /**
-   * Constructor to create a new token from a transfer object containing its property values. This
-   * is used to read in a new token from other apps that don't have access to the <code>Token</code>
-   * class.
-   *
-   * @param td Read the values from this transfer object.
-   */
-  public Token(TokenTransferData td) {
-    if (td.getLocation() != null) {
-      x = td.getLocation().x;
-      y = td.getLocation().y;
-    }
-    snapToScale = getBoolean(td, TokenTransferData.SNAP_TO_SCALE, true);
-    scaleX = getInt(td, TokenTransferData.WIDTH, 1);
-    scaleY = getInt(td, TokenTransferData.HEIGHT, 1);
-    snapToGrid = getBoolean(td, TokenTransferData.SNAP_TO_GRID, true);
-    isVisible = td.isVisible();
-    visibleOnlyToOwner = getBoolean(td, TokenTransferData.VISIBLE_OWNER_ONLY, false);
-    name = td.getName();
-    ownerList.addAll(td.getPlayers());
-    ownerType =
-        getInt(
-            td,
-            TokenTransferData.OWNER_TYPE,
-            ownerList.isEmpty() ? OWNER_TYPE_ALL : OWNER_TYPE_LIST);
-    tokenShape = (String) td.get(TokenTransferData.TOKEN_TYPE);
-    facing = td.getFacing();
-    notes = (String) td.get(TokenTransferData.NOTES);
-    gmNotes = (String) td.get(TokenTransferData.GM_NOTES);
-    gmName = (String) td.get(TokenTransferData.GM_NAME);
-
-    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
-
-    // Get the image and portrait for the token
-    Asset asset = createAssetFromIcon(td.getToken());
-    if (asset != null) {
-      image = asset.getMD5Key();
-    }
-    asset = createAssetFromIcon((ImageIcon) td.get(TokenTransferData.PORTRAIT));
-    if (asset != null) {
-      portraitImage = asset.getMD5Key();
-    }
-
-    // Get the macros
-    @SuppressWarnings("unchecked")
-    Map<String, Object> macros = (Map<String, Object>) td.get(TokenTransferData.MACROS);
-    macroMap = new HashMap<>();
-    for (var entry : macros.entrySet()) {
-      String macroName = entry.getKey();
-      Object macro = entry.getValue();
-      if (macro instanceof String) {
-        macroMap.put(macroName, (String) macro);
-      } else if (macro instanceof Map) {
-        @SuppressWarnings("unchecked")
-        MacroButtonProperties mbp = new MacroButtonProperties(this, (Map<String, String>) macro);
-        getMacroPropertiesMap(false).put(mbp.getIndex(), mbp);
-      } // endif
-    } // endfor
-    loadOldMacros();
-
-    // Get all of the non maptool specific state
-    for (String key : td.keySet()) {
-      if (key.startsWith(TokenTransferData.MAPTOOL)) {
-        continue;
-      }
-      setProperty(key, td.get(key));
-    } // endfor
-  }
-
-  private Asset createAssetFromIcon(ImageIcon icon) {
-    if (icon == null) {
-      return null;
-    }
-
-    // Make sure there is a buffered image for it
-    Image image = icon.getImage();
-    if (!(image instanceof BufferedImage)) {
-      image =
-          new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), Transparency.TRANSLUCENT);
-      Graphics2D g = ((BufferedImage) image).createGraphics();
-      icon.paintIcon(null, g, 0, 0);
-    }
-    // Create the asset
-    Asset asset = null;
-    try {
-      asset = Asset.createImageAsset(name, ImageUtil.imageToBytes((BufferedImage) image));
-      if (!AssetManager.hasAsset(asset)) {
-        AssetManager.putAsset(asset);
-      }
-    } catch (IOException e) {
-      log.error("Error while creating asset", e);
-    }
-    return asset;
-  }
-
-  /**
-   * Get an integer value from the map or return the default value
-   *
-   * @param map Get the value from this map
-   * @param propName The name of the property being read.
-   * @param defaultValue The value for the property if it is not set in the map.
-   * @return The value for the passed property
-   */
-  private static int getInt(Map<String, Object> map, String propName, int defaultValue) {
-    Integer integer = (Integer) map.get(propName);
-    if (integer == null) {
-      return defaultValue;
-    }
-    return integer;
-  }
-
-  /**
-   * Get a boolean value from the map or return the default value
-   *
-   * @param map Get the value from this map
-   * @param propName The name of the property being read.
-   * @param defaultValue The value for the property if it is not set in the map.
-   * @return The value for the passed property
-   */
-  private static boolean getBoolean(
-      Map<String, Object> map, String propName, boolean defaultValue) {
-    Boolean bool = (Boolean) map.get(propName);
-    if (bool == null) {
-      return defaultValue;
-    }
-    return bool;
   }
 
   /**
