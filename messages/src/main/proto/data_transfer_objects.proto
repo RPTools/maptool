@@ -409,8 +409,6 @@ message TokenDto {
   bool is_flipped_x = 45;
   bool is_flipped_y = 46;
   bool is_flipped_iso = 47;
-  int32 last_x = 12;
-  int32 last_y = 13;
   PathDto last_path = 14;
   bool snap_to_scale = 15;
   int32 width = 16;

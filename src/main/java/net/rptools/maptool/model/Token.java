@@ -27,7 +27,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -213,9 +212,6 @@ public class Token implements Cloneable {
     addHalo,
   }
 
-  public static final Comparator<Token> NAME_COMPARATOR =
-      (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName());
-
   private final Map<String, MD5Key> imageAssetMap = new HashMap<>();
   private String currentImageAsset;
 
@@ -223,8 +219,17 @@ public class Token implements Cloneable {
   private int y;
   private int z;
   private Integer facing = null;
-  private int lastX;
-  private int lastY;
+
+  /**
+   * @deprecated No longer used. Needed only to make sure deserialization doesn't fail.
+   */
+  @Deprecated private int lastX;
+
+  /**
+   * @deprecated No longer used. Needed only to make sure deserialization doesn't fail.
+   */
+  @Deprecated private int lastY;
+
   private Path<? extends AbstractPoint> lastPath;
 
   private int anchorX;
@@ -532,7 +537,6 @@ public class Token implements Cloneable {
     // hasSight?
     // height?
     lastPath = null;
-    lastX = lastY = 0;
     // lightSourceList?
     macroMap = null;
     ownerList.clear();
@@ -1336,25 +1340,15 @@ public class Token implements Cloneable {
   }
 
   public void setX(int x) {
-    lastX = this.x;
     this.x = x;
   }
 
   public void setY(int y) {
-    lastY = this.y;
     this.y = y;
   }
 
   public void setLastPath(Path<? extends AbstractPoint> path) {
     lastPath = path;
-  }
-
-  public int getLastY() {
-    return lastY;
-  }
-
-  public int getLastX() {
-    return lastX;
   }
 
   public Path<? extends AbstractPoint> getLastPath() {
@@ -2052,10 +2046,6 @@ public class Token implements Cloneable {
     return list;
   }
 
-  public boolean hasMacros(boolean secure) {
-    return !getMacroPropertiesMap(secure).isEmpty();
-  }
-
   public void setSpeechMap(Map<String, String> map) {
     getSpeechMap().clear();
     getSpeechMap().putAll(map);
@@ -2075,15 +2065,6 @@ public class Token implements Cloneable {
 
   private Map<String, String> getSpeechMap() {
     return speechMap;
-  }
-
-  /**
-   * Get a set containing the names of all set properties on this token.
-   *
-   * @return The set of state property names that have a value associated with them.
-   */
-  public Set<String> getStatePropertyNames() {
-    return state.keySet();
   }
 
   /**
@@ -2268,52 +2249,6 @@ public class Token implements Cloneable {
    */
   public int getFacingInDegrees() {
     return -getFacing() - 90;
-  }
-
-  /**
-   * Convert the token into a hash map. This is used to ship all of the properties for the token to
-   * other apps that do need access to the <code>Token</code> class.
-   *
-   * @return A map containing the properties of the token.
-   */
-  public TokenTransferData toTransferData() {
-    TokenTransferData td = new TokenTransferData();
-    td.setName(name);
-    td.setPlayers(ownerList);
-    td.setVisible(isVisible);
-    td.setLocation(new Point(x, y));
-    td.setFacing(facing);
-
-    // Set the properties
-    td.put(TokenTransferData.ID, id.toString());
-    td.put(TokenTransferData.ASSET_ID, imageAssetMap.get(null));
-    td.put(TokenTransferData.Z, z);
-    td.put(TokenTransferData.SNAP_TO_SCALE, snapToScale);
-    td.put(TokenTransferData.WIDTH, scaleX);
-    td.put(TokenTransferData.HEIGHT, scaleY);
-    td.put(TokenTransferData.SNAP_TO_GRID, snapToGrid);
-    td.put(TokenTransferData.OWNER_TYPE, ownerType);
-    td.put(TokenTransferData.VISIBLE_OWNER_ONLY, visibleOnlyToOwner);
-    td.put(TokenTransferData.TOKEN_TYPE, tokenShape);
-    td.put(TokenTransferData.NOTES, notes);
-    td.put(TokenTransferData.GM_NOTES, gmNotes);
-    td.put(TokenTransferData.GM_NAME, gmName);
-
-    // Put all of the serializable state into the map
-    for (String key : getStatePropertyNames()) {
-      Object value = getState(key);
-      if (value instanceof Serializable) {
-        td.put(key, value);
-      }
-    }
-    td.putAll(state);
-
-    // Create the image from the asset and add it to the map
-    Image image = ImageManager.getImageAndWait(imageAssetMap.get(null));
-    if (image != null) {
-      td.setToken(new ImageIcon(image)); // Image icon makes it serializable.
-    }
-    return td;
   }
 
   /**
@@ -3009,9 +2944,7 @@ public class Token implements Cloneable {
     }
     token.currentImageAsset =
         dto.hasCurrentImageAsset() ? dto.getCurrentImageAsset().getValue() : null;
-    token.lastX = dto.getLastX();
     token.x = dto.getX();
-    token.lastY = dto.getLastY();
     token.y = dto.getY();
     token.z = dto.getZ();
     token.lastPath = dto.hasLastPath() ? Path.fromDto(dto.getLastPath()) : null;
@@ -3125,9 +3058,7 @@ public class Token implements Cloneable {
     if (currentImageAsset != null) {
       dto.setCurrentImageAsset(StringValue.of(currentImageAsset));
     }
-    dto.setLastX(lastX);
     dto.setX(x);
-    dto.setLastY(lastY);
     dto.setY(y);
     dto.setZ(z);
     if (facing != null) {
