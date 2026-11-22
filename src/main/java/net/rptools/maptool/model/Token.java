@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -2938,7 +2936,7 @@ public class Token implements Cloneable {
     var token = new Token();
     token.id = GUID.fromDto(dto.getId());
     token.beingImpersonated = dto.getBeingImpersonated();
-    token.exposedAreaGUID = GUID.valueOf(dto.getExposedAreaGuid());
+    token.exposedAreaGUID = GUID.fromDto(dto.getExposedAreaGuid());
     token.x = dto.getX();
     token.y = dto.getY();
     token.z = dto.getZ();
@@ -2957,7 +2955,7 @@ public class Token implements Cloneable {
     token.isFlippedX = dto.getIsFlippedX();
     token.isFlippedY = dto.getIsFlippedY();
     token.isFlippedIso = dto.getIsFlippedIso();
-    token.facing = dto.hasFacing() ? dto.getFacing().getValue() : null;
+    token.facing = dto.hasFacing() ? dto.getFacing() : null;
 
     dto.getSizeMapMap().forEach((k, v) -> token.sizeMap.put(k, GUID.valueOf(v)));
     token.snapToGrid = dto.getSnapToGrid();
@@ -2978,9 +2976,9 @@ public class Token implements Cloneable {
     token.tokenType = dto.getTokenType();
     token.layer = dto.getLayer();
     token.propertyType = dto.getPropertyType();
-    token.haloColorValue = dto.hasHaloColor() ? dto.getHaloColor().getValue() : null;
+    token.haloColorValue = dto.hasHaloColor() ? dto.getHaloColor() : null;
     token.visionOverlayColorValue =
-        dto.hasVisionOverlayColor() ? dto.getVisionOverlayColor().getValue() : null;
+        dto.hasVisionOverlayColor() ? dto.getVisionOverlayColor() : null;
     token.tokenOpacity = dto.getTokenOpacity();
     token.speechName = dto.getSpeechName();
     token.terrainModifier = dto.getTerrainModifier();
@@ -2992,10 +2990,8 @@ public class Token implements Cloneable {
             .collect(Collectors.toList()));
 
     token.image = dto.hasImage() ? new MD5Key(dto.getImage()) : null;
-    token.charsheetImage =
-        dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage().getValue()) : null;
-    token.portraitImage =
-        dto.hasPortraitImage() ? new MD5Key(dto.getPortraitImage().getValue()) : null;
+    token.charsheetImage = dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage()) : null;
+    token.portraitImage = dto.hasPortraitImage() ? new MD5Key(dto.getPortraitImage()) : null;
 
     dto.getUniqueLightSourcesList().stream()
         .map(LightSource::fromDto)
@@ -3004,15 +3000,15 @@ public class Token implements Cloneable {
         dto.getLightSourcesList().stream()
             .map(AttachedLightSource::fromDto)
             .collect(Collectors.toList()));
-    dto.getHaloGuidsList().stream().forEach(id -> token.haloIdSet.add(new GUID(id)));
-    token.sightType = dto.hasSightType() ? dto.getSightType().getValue() : null;
+    dto.getHaloGuidsList().stream().forEach(id -> token.haloIdSet.add(GUID.fromDto(id)));
+    token.sightType = dto.hasSightType() ? dto.getSightType() : null;
     token.hasSight = dto.getHasSight();
     token.hasImageTable = dto.getHasImageTable();
-    token.imageTableName = dto.hasImageTableName() ? dto.getImageTableName().getValue() : null;
-    token.label = dto.hasLabel() ? dto.getLabel().getValue() : null;
-    token.notes = dto.hasNotes() ? dto.getNotes().getValue() : "";
-    token.gmNotes = dto.hasGmNotes() ? dto.getGmNotes().getValue() : "";
-    token.gmName = dto.hasGmName() ? dto.getGmName().getValue() : "";
+    token.imageTableName = dto.hasImageTableName() ? dto.getImageTableName() : null;
+    token.label = dto.hasLabel() ? dto.getLabel() : null;
+    token.notes = dto.hasNotes() ? dto.getNotes() : "";
+    token.gmNotes = dto.hasGmNotes() ? dto.getGmNotes() : "";
+    token.gmName = dto.hasGmName() ? dto.getGmName() : "";
     token.notesType = dto.getNotesType();
     token.gmNotesType = dto.getGmNotesType();
 
@@ -3046,12 +3042,12 @@ public class Token implements Cloneable {
     var dto = TokenDto.newBuilder();
     dto.setId(id.toDto());
     dto.setBeingImpersonated(beingImpersonated);
-    dto.setExposedAreaGuid(exposedAreaGUID.toString());
+    dto.setExposedAreaGuid(exposedAreaGUID.toDto());
     dto.setX(x);
     dto.setY(y);
     dto.setZ(z);
     if (facing != null) {
-      dto.setFacing(Int32Value.of(facing));
+      dto.setFacing(facing);
     }
     dto.setAnchorX(anchorX);
     dto.setAnchorY(anchorY);
@@ -3098,10 +3094,10 @@ public class Token implements Cloneable {
     dto.setPropertyType(propertyType);
 
     if (haloColorValue != null) {
-      dto.setHaloColor(Int32Value.of(haloColorValue));
+      dto.setHaloColor(haloColorValue);
     }
     if (visionOverlayColorValue != null) {
-      dto.setVisionOverlayColor(Int32Value.of(visionOverlayColorValue));
+      dto.setVisionOverlayColor(visionOverlayColorValue);
     }
     dto.setTokenOpacity(tokenOpacity);
     dto.setSpeechName(speechName);
@@ -3119,37 +3115,37 @@ public class Token implements Cloneable {
       dto.setImage(image.toString());
     }
     if (charsheetImage != null) {
-      dto.setCharsheetImage(StringValue.of(charsheetImage.toString()));
+      dto.setCharsheetImage(charsheetImage.toString());
     }
     if (portraitImage != null) {
-      dto.setPortraitImage(StringValue.of(portraitImage.toString()));
+      dto.setPortraitImage(portraitImage.toString());
     }
     dto.addAllUniqueLightSources(
         uniqueLightSources.values().stream().map(LightSource::toDto).collect(Collectors.toList()));
     dto.addAllLightSources(
         lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
-    dto.addAllHaloGuids(haloIdSet.stream().map(GUID::toString).collect(Collectors.toList()));
+    dto.addAllHaloGuids(haloIdSet.stream().map(GUID::toDto).collect(Collectors.toList()));
     if (sightType != null) {
-      dto.setSightType(StringValue.of(sightType));
+      dto.setSightType(sightType);
     }
     dto.setHasSight(hasSight);
     dto.setHasImageTable(hasImageTable);
     if (imageTableName != null) {
-      dto.setImageTableName(StringValue.of(imageTableName));
+      dto.setImageTableName(imageTableName);
     }
     if (label != null) {
-      dto.setLabel(StringValue.of(label));
+      dto.setLabel(label);
     }
     if (notes != null) {
-      dto.setNotes(StringValue.of(notes));
+      dto.setNotes(notes);
     }
     dto.setNotesType(notesType);
     if (gmNotes != null) {
-      dto.setGmNotes(StringValue.of(gmNotes));
+      dto.setGmNotes(gmNotes);
     }
     dto.setGmNotesType(gmNotesType);
     if (gmName != null) {
-      dto.setGmName(StringValue.of(gmName));
+      dto.setGmName(gmName);
     }
     state.forEach(
         (key, state) -> {

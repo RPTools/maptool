@@ -395,7 +395,7 @@ message TokenDto {
   }
   GuidDto id = 1;
   bool being_impersonated = 2;
-  string exposed_area_guid = 3;
+  GuidDto exposed_area_guid = 3;
   optional string image = 4;
   int32 x = 6;
   int32 y = 7;
@@ -433,26 +433,26 @@ message TokenDto {
   string token_type = 34;
   string layer = 35;
   string property_type = 36;
-  google.protobuf.Int32Value facing = 37;
-  google.protobuf.Int32Value halo_color = 38;
-  google.protobuf.Int32Value  vision_overlay_color = 39;
+  optional int32 facing = 37;
+  optional int32 halo_color = 38;
+  optional int32 vision_overlay_color = 39;
   float token_opacity = 40;
   string speech_name = 41;
   double terrain_modifier = 42;
   TerrainModifierOperationDto terrain_modifier_operation = 43;
   repeated TerrainModifierOperationDto terrain_modifiers_ignored = 44;
-  google.protobuf.StringValue charsheet_image = 48;
-  google.protobuf.StringValue portrait_image = 49;
+  optional string charsheet_image = 48;
+  optional string portrait_image = 49;
   repeated LightSourceDto unique_light_sources = 72;
   repeated AttachedLightSourceDto light_sources = 50;
-  google.protobuf.StringValue sight_type = 51;
+  optional string sight_type = 51;
   bool has_sight = 52;
   bool has_image_table = 53;
-  google.protobuf.StringValue image_table_name = 54;
-  google.protobuf.StringValue label = 55;
-  google.protobuf.StringValue notes = 56;
-  google.protobuf.StringValue gm_notes = 57;
-  google.protobuf.StringValue gm_name = 58;
+  optional string image_table_name = 54;
+  optional string label = 55;
+  optional string notes = 56;
+  optional string gm_notes = 57;
+  optional string gm_name = 58;
   map<string, TokenDto.State> state = 59;
   map<string, string> properties = 60;
   map<int32, MacroButtonPropertiesDto> macro_properties = 61;
@@ -462,7 +462,7 @@ message TokenDto {
   string notes_type = 68;
   string gm_notes_type = 69;
   StatSheetPropertiesDto stat_sheet_properties = 70;
-  repeated string halo_guids = 73;
+  repeated GuidDto halo_guids = 73;
 }
 
 message PathDto {
@@ -488,7 +488,7 @@ message TerrainModifierOperationListDto {
 }
 
 message AttachedLightSourceDto {
-  string light_source_id = 1;
+  GuidDto light_source_id = 1;
 }
 
 message MacroButtonPropertiesDto {
