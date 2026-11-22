@@ -57,7 +57,7 @@ public enum Permissions implements DisplayName.WithTooltip {
   /** Only the Owners' Opponents have permission */
   OPPONENT_ONLY("permission.opponent.name");
 
-  private static PermissionsTests gateKeeper = new RPGGateKeeper();
+  private static GateKeeper gateKeeper = new GateKeeper.RPGInstance();
   final String i18nNameKey;
   final String i18nDescriptionKey;
 
@@ -80,20 +80,16 @@ public enum Permissions implements DisplayName.WithTooltip {
     return null;
   }
 
-  public static void setGateKeeper(PermissionsTests gateKeeper) {
+  public static void setGateKeeper(GateKeeper gateKeeper) {
     Permissions.gateKeeper = gateKeeper;
   }
 
   public boolean hasPermission(@Nullable Object accessor) {
-    return gateKeeper.getAccessorTest().apply(this, accessor);
+    return gateKeeper.testAccess(this, accessor);
   }
 
   public boolean hasPermission(@Nullable Object accessor, @Nullable Object object) {
-    return gateKeeper.getObjectAccessTest().apply(this, accessor, object);
-  }
-
-  public boolean isAllied(@Nullable Object accessor, @Nullable Object other) {
-    return gateKeeper.getObjectAllyTest().apply(accessor, other);
+    return gateKeeper.testAccess(this, accessor, object);
   }
 
   @Override
