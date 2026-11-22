@@ -374,7 +374,13 @@ public class Token implements Cloneable {
 
   private CaseInsensitiveHashMap<Object> propertyMapCI = new CaseInsensitiveHashMap<>();
 
-  private Map<String, String> macroMap;
+  /**
+   * @deprecated No longer used. Needed only for deserialization since the contents need to be
+   *     loaded into the new representation.
+   * @see #macroPropertiesMap
+   */
+  @Deprecated private Map<String, String> macroMap;
+
   private Map<Integer, MacroButtonProperties> macroPropertiesMap = new HashMap<>();
 
   private Map<String, String> speechMap = new HashMap<>();
@@ -487,11 +493,6 @@ public class Token implements Cloneable {
         (key, value) ->
             macroPropertiesMap.put(key, new MacroButtonProperties(this, key, value, false)));
 
-    // convert old-style macros
-    if (token.macroMap != null) {
-      macroMap = new HashMap<>(token.macroMap);
-      loadOldMacros();
-    }
     speechMap.putAll(token.speechMap);
     sizeMap.putAll(token.sizeMap);
 
@@ -513,11 +514,6 @@ public class Token implements Cloneable {
     this.name = name;
     image = assetId;
 
-    // convert old-style macros
-    if (macroMap != null) {
-      loadOldMacros();
-    }
-
     propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
   }
 
@@ -538,7 +534,6 @@ public class Token implements Cloneable {
     // height?
     lastPath = null;
     // lightSourceList?
-    macroMap = null;
     ownerList.clear();
     /**
      * Lee: why shouldn't propertyType be set to what the framework uses? In case of multiple
@@ -1916,22 +1911,6 @@ public class Token implements Cloneable {
     return propertyMapCI;
   }
 
-  private void loadOldMacros() {
-    if (macroMap == null) {
-      return;
-    }
-    MacroButtonProperties prop;
-    for (var macro : macroMap.entrySet()) {
-      prop = new MacroButtonProperties(getMacroNextIndex());
-      prop.setLabel(macro.getKey());
-      prop.setCommand(macro.getValue());
-      prop.setApplyToTokens(true);
-      macroPropertiesMap.put(prop.getIndex(), prop);
-    }
-    macroMap = null;
-    log.debug("Token.loadOldMacros() set up {} new macros.", macroPropertiesMap.size());
-  }
-
   public int getMacroNextIndex() {
     Set<Integer> indexSet = macroPropertiesMap.keySet();
     int maxIndex = 0;
@@ -1950,9 +1929,6 @@ public class Token implements Cloneable {
    * @return the map
    */
   public Map<Integer, MacroButtonProperties> getMacroPropertiesMap(boolean secure) {
-    if (macroMap != null) {
-      loadOldMacros();
-    }
     if (secure && !AppUtil.playerOwns(this)) {
       return new HashMap<>(); // blank map
     } else {
@@ -2463,6 +2439,18 @@ public class Token implements Cloneable {
       tokenOpacity = 1.f;
     }
     tokenOpacity = Math.max(0.f, Math.min(tokenOpacity, 1.f));
+
+    if (macroMap != null) {
+      // convert old-style macros
+      for (var macro : macroMap.entrySet()) {
+        var prop = new MacroButtonProperties(getMacroNextIndex());
+        prop.setLabel(macro.getKey());
+        prop.setCommand(macro.getValue());
+        prop.setApplyToTokens(true);
+        macroPropertiesMap.put(prop.getIndex(), prop);
+      }
+      macroMap = null;
+    }
 
     return this;
   }
