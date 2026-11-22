@@ -213,7 +213,11 @@ public class Token implements Cloneable {
   }
 
   private final Map<String, MD5Key> imageAssetMap = new HashMap<>();
-  private String currentImageAsset;
+
+  /**
+   * @deprecated No longer used. Needed only to make sure deserialization doesn't fail.
+   */
+  @Deprecated private String currentImageAsset;
 
   private int x;
   private int y;
@@ -400,7 +404,6 @@ public class Token implements Cloneable {
    */
   public Token(Token token) {
     this(token.name, token.getImageAssetId());
-    currentImageAsset = token.currentImageAsset;
 
     x = token.x;
     y = token.y;
@@ -1204,11 +1207,7 @@ public class Token implements Cloneable {
   }
 
   public MD5Key getImageAssetId() {
-    MD5Key assetId = imageAssetMap.get(currentImageAsset);
-    if (assetId == null) {
-      assetId = imageAssetMap.get(null); // default image
-    }
-    return assetId;
+    return imageAssetMap.get(null);
   }
 
   /**
@@ -1263,19 +1262,14 @@ public class Token implements Cloneable {
   /**
    * Store the token image, and set the native Width and Height.
    *
-   * @param name the name of the image.
    * @param assetId the asset MD5Key.
    */
-  public void setImageAsset(String name, MD5Key assetId) {
-    imageAssetMap.put(name, assetId);
+  public void setImageAsset(MD5Key assetId) {
+    imageAssetMap.put(null, assetId);
 
     BufferedImage image = ImageManager.getImageAndWait(assetId);
     setWidth(image.getWidth(null));
     setHeight(image.getHeight(null));
-  }
-
-  public void setImageAsset(String name) {
-    currentImageAsset = name;
   }
 
   public Set<MD5Key> getAllImageAssets() {
@@ -2831,9 +2825,7 @@ public class Token implements Cloneable {
           break;
         }
       case setImageAsset:
-        setImageAsset(
-            parameters.get(0).hasStringValue() ? parameters.get(0).getStringValue() : null,
-            new MD5Key(parameters.get(1).getStringValue()));
+        setImageAsset(new MD5Key(parameters.get(0).getStringValue()));
         panelLookChanged = true;
         break;
       case setPortraitImage:
@@ -2942,8 +2934,6 @@ public class Token implements Cloneable {
       var nullKey = key.equals("") ? null : key;
       token.imageAssetMap.put(nullKey, new MD5Key(assetMap.get(key)));
     }
-    token.currentImageAsset =
-        dto.hasCurrentImageAsset() ? dto.getCurrentImageAsset().getValue() : null;
     token.x = dto.getX();
     token.y = dto.getY();
     token.z = dto.getZ();
@@ -3054,9 +3044,6 @@ public class Token implements Cloneable {
     for (var key : imageAssetMap.keySet()) {
       var notNullKey = key == null ? "" : key;
       dto.putImageAssetMap(notNullKey, imageAssetMap.get(key).toString());
-    }
-    if (currentImageAsset != null) {
-      dto.setCurrentImageAsset(StringValue.of(currentImageAsset));
     }
     dto.setX(x);
     dto.setY(y);

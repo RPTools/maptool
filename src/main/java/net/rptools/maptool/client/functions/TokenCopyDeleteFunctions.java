@@ -406,7 +406,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     // tokenImage
     if (newVals.has("tokenImage")) {
       MD5Key md5key = TokenImage.getMD5Key(newVals.get("tokenImage").getAsString(), COPY_FUNC);
-      token.setImageAsset(null, md5key);
+      token.setImageAsset(md5key);
     }
     // handoutImage
     if (newVals.has("tokenHandout")) {

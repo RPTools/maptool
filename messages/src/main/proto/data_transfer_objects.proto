@@ -397,7 +397,6 @@ message TokenDto {
   bool being_impersonated = 2;
   string exposed_area_guid = 3;
   map<string, string> image_asset_map = 4;
-  google.protobuf.StringValue current_image_asset = 5;
   int32 x = 6;
   int32 y = 7;
   int32 z = 8;
