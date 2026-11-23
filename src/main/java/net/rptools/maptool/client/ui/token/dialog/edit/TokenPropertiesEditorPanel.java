@@ -42,7 +42,7 @@ public class TokenPropertiesEditorPanel extends PropertyPane {
   private static final Logger log = LogManager.getLogger();
   private final EditTokenDialog editTokenDialog;
   private final WordWrapCellRenderer wordWrapCellRenderer = new WordWrapCellRenderer();
-  private static final String GM = I18N.getText("permission.displayName.gm");
+  private static final String GM = I18N.getText("permission.gm.name");
   private static final String GM_SUFFIX = String.format(" (%s)", GM);
   private Token token;
   private TableSearchable searchable;
@@ -74,18 +74,6 @@ public class TokenPropertiesEditorPanel extends PropertyPane {
             | SHOW_STATUS
             | SHOW_WHOLE_WORDS);
 
-    UIManager.getDefaults()
-        .entrySet()
-        .forEach(
-            entry -> {
-              if (entry.getKey() instanceof String key) {
-                if (key.toLowerCase().contains("table")
-                    || key.contains("jide")
-                    || key.startsWith("com.")) {
-                  System.out.println(key + ":" + entry.getValue());
-                }
-              }
-            });
     UIManager.getDefaults().put("Table.rowHeight", 24);
     // move sort buttons to searchable toolbar
     JideBoxLayout toolbarLayout = (JideBoxLayout) searchableBar.getLayout();

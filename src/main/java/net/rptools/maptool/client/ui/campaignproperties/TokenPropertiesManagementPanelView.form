@@ -192,7 +192,7 @@
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.gm"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.gm.name"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
@@ -203,7 +203,7 @@
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.owner"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.owner.name"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
@@ -216,7 +216,7 @@
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.gm"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.gm.description"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
@@ -242,7 +242,7 @@
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.owner"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.owner.description"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
@@ -253,7 +253,7 @@
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.allies"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.allies.name"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
@@ -266,7 +266,7 @@
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.allies"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.allies.description"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
@@ -283,7 +283,7 @@
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.opponent"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.opponent.name"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
@@ -296,7 +296,7 @@
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.opponent"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.opponent.description"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
@@ -307,7 +307,7 @@
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.allies.discrete"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.allies.discrete.name"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
@@ -320,7 +320,7 @@
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.allies.discrete"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.allies.discrete.description"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
@@ -331,7 +331,7 @@
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.all"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.all.name"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
@@ -344,7 +344,7 @@
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.all"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.all.description"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
@@ -355,7 +355,7 @@
                 <properties>
                   <font style="1"/>
                   <horizontalAlignment value="4"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.displayName.owner.discrete"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.owner.discrete.name"/>
                   <verticalAlignment value="1"/>
                 </properties>
               </component>
@@ -368,7 +368,7 @@
                   <focusable value="false"/>
                   <font swing-font="Label.font"/>
                   <lineWrap value="true"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.description.owner.discrete"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="permission.owner.discrete.description"/>
                   <wrapStyleWord value="true"/>
                 </properties>
               </component>
