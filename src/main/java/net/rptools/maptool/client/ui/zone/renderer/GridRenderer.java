@@ -33,10 +33,12 @@ import org.apache.logging.log4j.Logger;
 public class GridRenderer {
   private static final Logger log = LogManager.getLogger(GridRenderer.class);
 
+  private final RenderHelper renderHelper;
   private final ZoneRenderer renderer;
   private final Zone zone;
 
-  GridRenderer(ZoneRenderer renderer) {
+  GridRenderer(RenderHelper renderHelper, ZoneRenderer renderer) {
+    this.renderHelper = renderHelper.withTimerPrefix("GridRenderer");
     this.renderer = renderer;
     this.zone = renderer.getZone();
   }
@@ -46,8 +48,8 @@ public class GridRenderer {
     Color contrast = new Color(ImageUtil.negativeColourInt(gridColourInt));
     return new Color[] {
       gc,
-      ColorUtil.withAlpha(gc, 0.14f),
-      ColorUtil.withAlpha(contrast, 0.04f),
+      ColorUtil.withAlpha(gc, 0.1744f),
+      ColorUtil.withAlpha(contrast, 0.088f),
       ColorUtil.withAlpha(contrast, 0.05f)
     };
   }
@@ -86,7 +88,6 @@ public class GridRenderer {
     if (!AppState.isShowGrid()) {
       return;
     }
-
     var grid = zone.getGrid();
     var zoneScale = renderer.getViewModel().getZoneScale();
 
@@ -94,20 +95,31 @@ public class GridRenderer {
       return;
     }
 
-    var gridColours = getGridColours(zone.getGridColor());
+    renderHelper.bufferedRender(
+        g,
+        AlphaComposite.SrcOver,
+        screenG -> {
+          screenG.setComposite(AlphaComposite.Src);
 
-    var bounds = new Rectangle(0, 0, renderer.getWidth(), renderer.getHeight());
-    switch (grid) {
-      case SquareGrid squareGrid -> draw(g, squareGrid, gridColours, bounds);
-      case HexGrid hexGrid -> draw(g, hexGrid, gridColours, bounds);
-      case IsometricGrid isometricGrid -> draw(g, isometricGrid, gridColours, bounds);
-      case GridlessGrid gridlessGrid -> {
-        /* Nothing to do */
-      }
-      default -> {
-        log.error("Unknown grid type: {}", grid.getClass());
-      }
-    }
+          // Clear the buffer
+          var bounds = screenG.getClip().getBounds();
+          screenG.setPaint(new Color(0, true));
+          screenG.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+
+          // Now draw the grid to it.
+          var gridColours = getGridColours(zone.getGridColor());
+          switch (grid) {
+            case SquareGrid squareGrid -> draw(screenG, squareGrid, gridColours, bounds);
+            case HexGrid hexGrid -> draw(screenG, hexGrid, gridColours, bounds);
+            case IsometricGrid isometricGrid -> draw(screenG, isometricGrid, gridColours, bounds);
+            case GridlessGrid gridlessGrid -> {
+              /* Nothing to do */
+            }
+            default -> {
+              log.error("Unknown grid type: {}", grid.getClass());
+            }
+          }
+        });
   }
 
   public void renderCoordinates(Graphics2D g, PlayerView view) {
@@ -176,10 +188,14 @@ public class GridRenderer {
     int offV = grid.getOffV(zoneScale);
     int count = 0;
 
-    Object oldAntiAlias = SwingUtil.useAntiAliasing(g);
     g.setColor(new Color(zone.getGridColor()));
     g.setStroke(new BasicStroke(AppState.getGridLineWeight()));
 
+    // Important: we need to draw each segment at one colour, then the next colour, etc., otherwise
+    // "lower" colours can overlap "higher" colours where segments meet.
+    // So we build an entire path that than gets repeatedly rendered.
+
+    var path = new Path2D.Double();
     for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
         v < grid.getSizeV(bounds.getSize());
         v += scaledMinorRadius) {
@@ -196,15 +212,14 @@ public class GridRenderer {
         var translateX = isHorizontal ? v : u + offsetU;
         var translateY = isHorizontal ? u + offsetU : v;
 
-        g.translate(translateX, translateY);
-
-        drawGridShape(zoneScale, grid.getSize(), gridColours, g, scaledHex);
-
-        // Undo the translation.
-        g.translate(-translateX, -translateY);
+        var shape =
+            scaledHex.createTransformedShape(
+                AffineTransform.getTranslateInstance(translateX, translateY));
+        path.append(shape, false);
       }
     }
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntiAlias);
+
+    drawGridShape(zoneScale, grid.getSize(), gridColours, g, path);
   }
 
   private Path2D createHexHalfShape(
