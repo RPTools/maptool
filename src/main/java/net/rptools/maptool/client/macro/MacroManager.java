@@ -385,8 +385,7 @@ public class MacroManager {
     } catch (Exception e) {
       MapTool.addLocalMessage(
           I18N.getText("macromanager.couldNotExecute", command, e.getMessage()));
-      log.warn("Exception executing command: " + command);
-      log.warn(e.getStackTrace());
+      log.warn("Exception executing command: " + command, e);
       return;
     }
 

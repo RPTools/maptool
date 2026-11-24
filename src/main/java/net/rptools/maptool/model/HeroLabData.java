@@ -201,8 +201,7 @@ public class HeroLabData {
       byteIn.close();
       in.close();
     } catch (ClassNotFoundException | IOException e) {
-      log.error("ERROR: Attempting to read Asset ID: {}", heroLabStatblockAssetID);
-      log.error(e.getStackTrace());
+      log.error("Error while reading Asset ID: {}", heroLabStatblockAssetID, e);
     }
 
     return statBlocks;
@@ -232,7 +231,7 @@ public class HeroLabData {
         byteOut.close();
       }
     } catch (IOException e) {
-      log.error(e.getStackTrace());
+      log.error("Error while writing stat blocks", e);
     }
   }
 
@@ -506,7 +505,7 @@ public class HeroLabData {
     try {
       ImageIO.write(image, "png", baos);
     } catch (IOException e) {
-      log.error(e.getStackTrace());
+      log.error("Error while wrigin image", e);
     }
 
     Asset imageAsset = Asset.createImageAsset(imageName, baos.toByteArray());
