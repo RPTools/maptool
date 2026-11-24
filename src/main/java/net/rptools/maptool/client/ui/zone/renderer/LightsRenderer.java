@@ -22,6 +22,7 @@ import java.awt.geom.Area;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.DrawableLight;
 import net.rptools.maptool.client.ui.zone.LightingComposite;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -110,6 +111,9 @@ public class LightsRenderer {
       Composite lightBlending,
       Color backgroundFill) {
     var timer = CodeTimer.get();
+
+    renderHelper.drawInWorldSpace(worldG);
+    SwingUtil.useAntiAliasing(worldG);
 
     var visibleArea = zoneView.getVisibility(view).visibleArea();
 

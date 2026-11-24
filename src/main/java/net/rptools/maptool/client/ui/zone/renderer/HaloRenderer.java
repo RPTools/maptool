@@ -23,6 +23,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
@@ -926,6 +927,8 @@ public class HaloRenderer {
       double haloScaleFactor) {
     var timer = CodeTimer.get();
     timer.start("HaloRenderer-paintHaloPart");
+    renderHelper.drawInWorldSpace(g2d);
+    SwingUtil.useAntiAliasing(g2d);
 
     // region 1. determine the haloPart colors including alpha
     timer.start("HaloRenderer-paintHaloPart:color");

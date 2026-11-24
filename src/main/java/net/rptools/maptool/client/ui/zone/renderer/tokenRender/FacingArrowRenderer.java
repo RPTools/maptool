@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel.TokenPosition;
 import net.rptools.maptool.client.ui.zone.renderer.RenderHelper;
 import net.rptools.maptool.model.Token.TokenShape;
@@ -104,6 +105,9 @@ public class FacingArrowRenderer {
   private void paintArrowWorld(
       Graphics2D tokenG, int facing, TokenShape tokenShape, Rectangle2D footprintBounds) {
     var timer = CodeTimer.get();
+    renderHelper.drawInWorldSpace(tokenG);
+    SwingUtil.useAntiAliasing(tokenG);
+
     timer.start("FacingArrowRenderer-paintArrow");
     try {
       final var isIsometric = zone.getGrid().getType().isIsometric();

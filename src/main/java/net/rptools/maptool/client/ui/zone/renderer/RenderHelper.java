@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.function.Consumer;
 import net.rptools.lib.CodeTimer;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.zone.BufferedImagePool;
 
@@ -57,13 +56,8 @@ public class RenderHelper {
     return new RenderHelper(renderer, tempBufferPool, timerPrefix);
   }
 
-  private void doRender(Graphics2D g, Consumer<Graphics2D> render) {
+  public void drawInWorldSpace(Graphics2D g) {
     var timer = CodeTimer.get();
-
-    timer.start("%s-useAA", timerPrefix);
-    SwingUtil.useAntiAliasing(g);
-    timer.stop("%s-useAA", timerPrefix);
-
     timer.start("%s-setTransform", timerPrefix);
     Scale scale = renderer.getViewModel().getZoneScale();
     AffineTransform af = new AffineTransform();
@@ -71,6 +65,10 @@ public class RenderHelper {
     af.scale(scale.getScale(), scale.getScale());
     g.setTransform(af);
     timer.stop("%s-setTransform", timerPrefix);
+  }
+
+  private void doRender(Graphics2D g, Consumer<Graphics2D> render) {
+    var timer = CodeTimer.get();
 
     timer.start("%s-render", timerPrefix);
     render.accept(g);
@@ -83,10 +81,8 @@ public class RenderHelper {
     g = (Graphics2D) g.create();
     timer.stop("%s-createContext", timerPrefix);
     try {
-      timer.start("%s-doRender", timerPrefix);
       doRender(g, render);
     } finally {
-      timer.stop("%s-doRender", timerPrefix);
       timer.start("%s-disposeContext", timerPrefix);
       g.dispose();
       timer.stop("%s-disposeContext", timerPrefix);

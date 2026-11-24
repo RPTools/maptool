@@ -18,6 +18,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 
@@ -50,6 +51,8 @@ public class DarknessRenderer {
   }
 
   private void renderWorld(Graphics2D worldG, Area darkness) {
+    SwingUtil.useAntiAliasing(worldG);
+    renderHelper.drawInWorldSpace(worldG);
     worldG.setComposite(AlphaComposite.Src);
     worldG.setPaint(Color.black);
     worldG.fill(darkness);
