@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.server;
 
@@ -236,7 +236,15 @@ public class MapToolServer {
             releaseClientConnection(conn);
           } else {
             log.debug("About to add new client");
-            addRemoteConnection(conn, player);
+            try {
+              addRemoteConnection(conn, player);
+            } catch (RuntimeException e) {
+              // An exception thrown here would only complete the future returned by whenComplete,
+              // which nothing reads: the player would stay connected without the campaign, and
+              // nothing would be logged.
+              log.error("Could not add {} to the session", player.getName(), e);
+              releaseClientConnection(conn);
+            }
           }
         });
     // Make sure the client is allowed

@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.clientserver.simple.connection;
 
@@ -40,7 +40,6 @@ public class DirectConnection extends AbstractConnection {
   }
 
   private final AtomicBoolean sharedClosedFlag;
-  private final String id;
   private final BlockingQueue<byte[]> writeQueue;
   private final ReceiveThread receiveThread;
 
@@ -49,8 +48,8 @@ public class DirectConnection extends AbstractConnection {
       String id,
       BlockingQueue<byte[]> writeQueue,
       BlockingQueue<byte[]> readQueue) {
+    super(id);
     this.sharedClosedFlag = sharedClosedFlag;
-    this.id = id;
     this.writeQueue = writeQueue;
     this.receiveThread = new ReceiveThread(readQueue);
   }
@@ -87,11 +86,6 @@ public class DirectConnection extends AbstractConnection {
   @Override
   public boolean isAlive() {
     return !sharedClosedFlag.get();
-  }
-
-  @Override
-  public String getId() {
-    return id;
   }
 
   @Override

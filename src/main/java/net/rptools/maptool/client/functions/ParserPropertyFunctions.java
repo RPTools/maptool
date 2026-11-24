@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -87,7 +87,7 @@ public class ParserPropertyFunctions extends AbstractFunction {
       MapToolMacroContext mc = mtlParser.getContext();
       mco.addProperty("stackSize", mtlParser.getContextStackSize());
       mco.addProperty("name", mc.getName());
-      mco.addProperty("source", mc.getSource().getLocation());
+      mco.addProperty("source", mc.getSource().getCallableLocation());
       mco.addProperty("trusted", mc.isTrusted());
       if (mc.getMacroButtonIndex() >= 0) {
         mco.addProperty("buttonIndex", mc.getMacroButtonIndex());

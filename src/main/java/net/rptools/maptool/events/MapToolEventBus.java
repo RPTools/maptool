@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.events;
 
@@ -25,7 +25,16 @@ public class MapToolEventBus {
   /**
    * Returns the main MapTool {@link EventBus}.
    *
-   * @return the main Maptool {@link EventBus}.
+   * @return the main MapTool {@link EventBus}.
+   */
+  public static EventBus get() {
+    return mainEventBus;
+  }
+
+  /**
+   * Returns the main MapTool {@link EventBus}.
+   *
+   * @return the main MapTool {@link EventBus}.
    */
   public EventBus getMainEventBus() {
     return mainEventBus;

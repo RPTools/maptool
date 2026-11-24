@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.library.addon;
 
@@ -360,6 +360,13 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoForUriPath(
+      String macroPath) {
+    // For add-ons, the path and the macro name are the same.
+    return getMTScriptMacroInfo(macroPath);
+  }
+
+  @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
     var macro = mtsFunctionAssetMap.get(MTSCRIPT_PUBLIC_DIR + macroName);
     if (macro == null) {
@@ -377,9 +384,19 @@ public class AddOnLibrary implements Library {
     return getMacroInfo(macroName, macro);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>The paths are sorted. {@code pathAssetMap} is an immutable {@code Map.copyOf}, whose
+   * iteration order changes every time MapTool starts, and add-ons commonly load their scripts in
+   * the order {@code library.getContents()} lists them; in an unpredictable order, a script that
+   * uses a function another one defines works on some starts and fails on others.
+   */
   @Override
   public CompletableFuture<List<String>> getAllFiles() {
-    return CompletableFuture.completedFuture(new ArrayList<>(pathAssetMap.keySet()));
+    var files = new ArrayList<>(pathAssetMap.keySet());
+    Collections.sort(files);
+    return CompletableFuture.completedFuture(files);
   }
 
   @Override
@@ -651,7 +668,7 @@ public class AddOnLibrary implements Library {
     if (SwingUtilities.isEventDispatchThread()) {
       var resolver = new MapToolVariableResolver(null);
       try {
-        MapTool.getParser().runMacro(resolver, null, name + "@lib:" + namespace, "");
+        MapTool.getParser().runMacro(resolver, name + "@lib:" + namespace, "", true);
       } catch (ParserException e) {
         throw new CompletionException(e);
       }
@@ -660,7 +677,7 @@ public class AddOnLibrary implements Library {
           () -> {
             var resolver = new MapToolVariableResolver(null);
             try {
-              MapTool.getParser().runMacro(resolver, null, name + "@lib:" + namespace, "");
+              MapTool.getParser().runMacro(resolver, name + "@lib:" + namespace, "", true);
             } catch (ParserException e) {
               throw new CompletionException(e);
             }

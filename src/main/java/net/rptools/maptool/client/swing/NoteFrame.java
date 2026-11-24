@@ -9,14 +9,15 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -24,11 +25,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.text.JTextComponent;
 import net.rptools.maptool.language.I18N;
 
 public class NoteFrame extends JFrame {
-  private JTextComponent noteArea;
+  private JTextArea noteArea;
   private JButton clearButton;
   private JButton closeButton;
 
@@ -43,10 +43,12 @@ public class NoteFrame extends JFrame {
     add(BorderLayout.SOUTH, createButtonBar());
   }
 
-  private JTextComponent getNoteArea() {
+  private JTextArea getNoteArea() {
     if (noteArea == null) {
       noteArea = new JTextArea();
       noteArea.setBorder(BorderFactory.createLineBorder(Color.black));
+      noteArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, noteArea.getFont().getSize()));
+      noteArea.setEditable(false);
     }
     return noteArea;
   }
@@ -78,7 +80,8 @@ public class NoteFrame extends JFrame {
   }
 
   public synchronized void addText(String text) {
-    getNoteArea().setText(getNoteArea().getText() + text + "\n");
+    getNoteArea().append(text);
+    getNoteArea().append("\n");
     getNoteArea().setCaretPosition(getNoteArea().getText().length());
   }
 }

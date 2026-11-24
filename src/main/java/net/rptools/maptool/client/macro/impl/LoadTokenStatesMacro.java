@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.macro.impl;
 
@@ -23,6 +23,7 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
@@ -45,6 +46,11 @@ public class LoadTokenStatesMacro implements Macro {
    */
   @SuppressWarnings("unchecked")
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+    if (!MapTool.getPlayer().isGM()) {
+      MapTool.addLocalMessage(I18N.getText("slash.mustBeGM", "loadtokenstates"));
+      return;
+    }
+
     // Was the token states file passed?
     File aliasFile = null;
     if (macro.length() > 0) {
@@ -72,8 +78,13 @@ public class LoadTokenStatesMacro implements Macro {
       List<BooleanTokenOverlay> overlays = (List<BooleanTokenOverlay>) decoder.readObject();
       decoder.close();
       for (BooleanTokenOverlay overlay : overlays) {
+        MapToolUtil.uploadAssetIds(overlay.getAssetIds());
         MapTool.getCampaign().getTokenStatesMap().put(overlay.getName(), overlay);
       } // endfor
+      // Token states are campaign properties, and the code above changes only this client's
+      // copy. Send them to the server, as the Campaign Properties dialog does, so that the
+      // server's campaign and the other players get the new states.
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       MapTool.addLocalMessage(I18N.getText("loadtokenstates.loaded", overlays.size()));
     } catch (FileNotFoundException e) {
       MapTool.addLocalMessage(

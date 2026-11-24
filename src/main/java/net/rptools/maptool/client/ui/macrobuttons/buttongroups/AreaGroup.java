@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.macrobuttons.buttongroups;
 
@@ -145,7 +145,9 @@ public class AreaGroup extends AbstractButtonGroup {
   public void mouseReleased(MouseEvent event) {
     Token token = getToken();
     if (SwingUtilities.isRightMouseButton(event)) {
-      if ("CampaignPanel".equals(getPanelClass()) && !MapTool.getPlayer().isGM()) {
+      if (!MapTool.getPlayer().isGM()
+          && ("CampaignPanel".equals(getPanelClass())
+              || MapTool.getServerPolicy().isTokenContextLocked())) {
         return;
       }
       // open button group menu

@@ -9,12 +9,11 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.preferencesdialog;
 
-import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -31,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -55,7 +55,7 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.UserJvmOptions;
@@ -156,6 +156,10 @@ public class PreferencesDialog extends AbeillePanel {
   /** JComboBox variable used to display vision type options. */
   private final JComboBox<Zone.VisionType> visionTypeCombo = getComboBox("visionTypeCombo");
 
+  /** JComboBox variable used to display show coordinate options. */
+  private final JComboBox<Zone.ShowCoordinates> showCoordinatesCombo =
+      getComboBox("showCoordinatesCombo");
+
   /** JComboBox variable used to display map sorting options. */
   private final JComboBox<AppPreferences.MapSortType> mapSortType = getComboBox("mapSortTypeCombo");
 
@@ -252,6 +256,13 @@ public class PreferencesDialog extends AbeillePanel {
   /** Checkbox for if macro link details should be suppressed in tooltips. */
   private final JCheckBox suppressToolTipsMacroLinks = getCheckBox("suppressToolTipsMacroLinks");
 
+  /** ColorWell for the facing arrow border colour. */
+  private final ColorWell facingArrowBorderColour =
+      (ColorWell) getComponent("facingArrowBorderColour");
+
+  /** ColorWell for the facing arrow colour. */
+  private final ColorWell facingArrowColour = (ColorWell) getComponent("facingArrowColour");
+
   /** ColorWell for the completed trusted path output foreground color. */
   private final ColorWell trustedOutputForeground =
       (ColorWell) getComponent("trustedOuputForeground");
@@ -336,6 +347,10 @@ public class PreferencesDialog extends AbeillePanel {
   /** Text field for the default username when not logged into a server. */
   private final JTextField defaultUsername = getTextField("defaultUsername");
 
+  private final JComboBox<Locale> languageSelection = getComboBox("locale");
+
+  private @Nullable Locale originalLocale = null;
+
   /** Checkbox for if non-player characters should be hidden when creating a new map. */
   private final JCheckBox hideNPCs = getCheckBox("hideNPCs");
 
@@ -418,10 +433,6 @@ public class PreferencesDialog extends AbeillePanel {
   /** Checkbox for if the JVM should initialize AWT. */
   private final JCheckBox jvmInitAwtCheckbox = getCheckBox("jvmInitAwt");
 
-  /** Combo box for selecting the language override for JAM messages. */
-  private final JComboBox<String> jamLanguageOverrideComboBox =
-      getComboBox("jamLanguageOverrideComboBox");
-
   /** Label for displaying startup information. */
   private final JTextField cfgFilePath = getTextField("cfgFilePath");
 
@@ -454,6 +465,30 @@ public class PreferencesDialog extends AbeillePanel {
   /** ColorWell for displaying the non-visibility token label background color. */
   private final ColorWell nonVisTokenLabelBG = (ColorWell) getComponent("nonVisTokenLabelBG");
 
+  /** ColorWell for displaying the drawing label foreground color. */
+  private final ColorWell drawingDrawableLabelForegroundColorWell =
+      (ColorWell) getComponent("drawingDrawableLabelForegroundColorWell");
+
+  /** ColorWell for displaying the drawing label background color. */
+  private final ColorWell drawingDrawableLabelBackgroundColorWell =
+      (ColorWell) getComponent("drawingDrawableLabelBackgroundColorWell");
+
+  /** ColorWell for displaying the drawing label border color. */
+  private final ColorWell drawingDrawableLabelBorderColorWell =
+      (ColorWell) getComponent("drawingDrawableLabelBorderColorWell");
+
+  /** ColorWell for displaying the template label foreground color. */
+  private final ColorWell templateDrawableLabelForegroundColorWell =
+      (ColorWell) getComponent("templateDrawableLabelForegroundColorWell");
+
+  /** ColorWell for displaying the template label background color. */
+  private final ColorWell templateDrawableLabelBackgroundColorWell =
+      (ColorWell) getComponent("templateDrawableLabelBackgroundColorWell");
+
+  /** ColorWell for displaying the template label border color. */
+  private final ColorWell templateDrawableLabelBorderColorWell =
+      (ColorWell) getComponent("templateDrawableLabelBorderColorWell");
+
   /** Spinner for setting the token label font size. */
   private final JSpinner labelFontSizeSpinner = getSpinner("labelFontSizeSpinner");
 
@@ -479,6 +514,9 @@ public class PreferencesDialog extends AbeillePanel {
 
   // ** Checkbox for loading the most recently used campaign on startup */
   private final JCheckBox loadMRUcheckbox = getCheckBox("loadMRU");
+
+  // ** Checkbox for loading the most recently used campaign on startup */
+  private final JCheckBox checkUpdatesCheckbox = getCheckBox("checkUpdatesAtStartup");
 
   /** status bar scrolling checkbox */
   private final JCheckBox statusScrollEnable = getCheckBox("statusScrollEnable");
@@ -510,11 +548,12 @@ public class PreferencesDialog extends AbeillePanel {
    * Each item in the array consists of a grid type and its corresponding localized display name.
    */
   private static final LocalizedComboItem[] defaultGridTypeComboItems = {
-    new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
-    new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),
-    new LocalizedComboItem(GridFactory.HEX_VERT, "Preferences.combo.maps.grid.hexVert"),
-    new LocalizedComboItem(GridFactory.ISOMETRIC, "Preferences.combo.maps.grid.isometric"),
-    new LocalizedComboItem(GridFactory.NONE, "MapPropertiesDialog.image.nogrid")
+    new LocalizedComboItem(GridType.Square.toString(), "Preferences.combo.maps.grid.square"),
+    new LocalizedComboItem(
+        GridType.HexHorizontal.toString(), "Preferences.combo.maps.grid.hexHori"),
+    new LocalizedComboItem(GridType.HexVertical.toString(), "Preferences.combo.maps.grid.hexVert"),
+    new LocalizedComboItem(GridType.Isometric.toString(), "Preferences.combo.maps.grid.isometric"),
+    new LocalizedComboItem(GridType.None.toString(), "MapPropertiesDialog.image.nogrid")
   };
 
   /**
@@ -619,6 +658,11 @@ public class PreferencesDialog extends AbeillePanel {
                     "PreferencesDialog.themeChangeWarning",
                     "PreferencesDialog.themeChangeWarningTitle",
                     JOptionPane.WARNING_MESSAGE);
+              } else if (originalLocale != AppPreferences.locale.get()) {
+                MapTool.showMessage(
+                    "PreferencesDialog.language.changeWarning",
+                    "PreferencesDialog.language.changeWarningTitle",
+                    JOptionPane.WARNING_MESSAGE);
               }
             })
         .setContent(this);
@@ -670,6 +714,16 @@ public class PreferencesDialog extends AbeillePanel {
     nonVisTokenLabelFG.setColor(AppPreferences.nonVisibleTokenMapLabelForeground.get());
     nonVisTokenLabelBG.setColor(AppPreferences.nonVisibleTokenMapLabelBackground.get());
     nonVisTokenLabelBorderColor.setColor(AppPreferences.nonVisibleTokenMapLabelBorder.get());
+    drawingDrawableLabelForegroundColorWell.setColor(
+        AppPreferences.drawingMapLabelForegroundColor.get());
+    drawingDrawableLabelBackgroundColorWell.setColor(
+        AppPreferences.drawingMapLabelBackgroundColor.get());
+    drawingDrawableLabelBorderColorWell.setColor(AppPreferences.drawingMapLabelBorderColor.get());
+    templateDrawableLabelForegroundColorWell.setColor(
+        AppPreferences.templateMapLabelForegroundColor.get());
+    templateDrawableLabelBackgroundColorWell.setColor(
+        AppPreferences.templateMapLabelBackgroundColor.get());
+    templateDrawableLabelBorderColorWell.setColor(AppPreferences.templateMapLabelBorderColor.get());
 
     labelFontSizeSpinner.setValue(AppPreferences.mapLabelFontSize.get());
     labelBorderWidthSpinner.setValue(AppPreferences.mapLabelBorderWidth.get());
@@ -738,6 +792,10 @@ public class PreferencesDialog extends AbeillePanel {
             pcTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
             npcTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
             nonVisTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
+            drawingDrawableLabelBorderColorWell.setVisible(
+                true); // Disabling a color well does not work
+            templateDrawableLabelBorderColorWell.setVisible(
+                true); // Disabling a color well does not work
             labelBorderWidthSpinner.setEnabled(true);
             labelBorderArcSpinner.setEnabled(true);
             AppPreferences.mapLabelShowBorder.set(true);
@@ -745,6 +803,10 @@ public class PreferencesDialog extends AbeillePanel {
             pcTokenLabelBorderColor.setVisible(false); // Disabling a color well does not work
             npcTokenLabelBorderColor.setVisible(false); // Disabling a color well does not work
             nonVisTokenLabelBorderColor.setVisible(false); // Disabling a color well does not  work
+            drawingDrawableLabelBorderColorWell.setVisible(
+                false); // Disabling a color well does not work
+            templateDrawableLabelBorderColorWell.setVisible(
+                false); // Disabling a color well does not work
             labelBorderWidthSpinner.setEnabled(false);
             labelBorderArcSpinner.setEnabled(false);
             AppPreferences.mapLabelShowBorder.set(false);
@@ -757,12 +819,16 @@ public class PreferencesDialog extends AbeillePanel {
       pcTokenLabelBorderColor.setVisible(true);
       npcTokenLabelBorderColor.setVisible(true);
       nonVisTokenLabelBorderColor.setVisible(true);
+      drawingDrawableLabelBorderColorWell.setVisible(true);
+      templateDrawableLabelBorderColorWell.setVisible(true);
       labelBorderWidthSpinner.setEnabled(true);
       labelBorderArcSpinner.setEnabled(true);
     } else {
       pcTokenLabelBorderColor.setVisible(false);
       npcTokenLabelBorderColor.setVisible(false);
       nonVisTokenLabelBorderColor.setVisible(false);
+      drawingDrawableLabelBorderColorWell.setVisible(false);
+      templateDrawableLabelBorderColorWell.setVisible(false);
       labelBorderWidthSpinner.setEnabled(false);
       labelBorderArcSpinner.setEnabled(false);
     }
@@ -824,9 +890,39 @@ public class PreferencesDialog extends AbeillePanel {
       configFileWarningPanel.setVisible(false);
     }
 
-    DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
-    languageModel.addAll(getLanguages());
-    jamLanguageOverrideComboBox.setModel(languageModel);
+    {
+      var locales = new ArrayList<>(UserJvmOptions.getLocales());
+      locales.sort(Comparator.comparing(Locale::getDisplayName));
+      locales.addFirst(null);
+
+      DefaultComboBoxModel<Locale> localeModel = new DefaultComboBoxModel<>();
+      localeModel.addAll(locales);
+      languageSelection.setModel(localeModel);
+      languageSelection.setSelectedIndex(0);
+
+      languageSelection.setRenderer(
+          new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+              super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+              if (value == null) {
+                setText(I18N.getString("PreferencesDialog.language.systemDefault"));
+              }
+              if (value instanceof Locale locale) {
+                setText(locale.getDisplayName());
+              }
+              return this;
+            }
+          });
+
+      languageSelection.addItemListener(
+          e -> {
+            var index = languageSelection.getSelectedIndex();
+            var locale = index < 0 ? null : localeModel.getElementAt(index);
+            SwingUtilities.invokeLater(() -> AppPreferences.locale.set(locale));
+          });
+    }
 
     setInitialState();
 
@@ -878,6 +974,16 @@ public class PreferencesDialog extends AbeillePanel {
                 return StringUtil.parseInteger(value);
               }
             });
+
+    facingArrowColour.addActionListener(
+        e -> {
+          AppPreferences.facingArrowBGColour.set(facingArrowColour.getColor());
+        });
+
+    facingArrowBorderColour.addActionListener(
+        e -> {
+          AppPreferences.facingArrowBorderColour.set(facingArrowBorderColour.getColor());
+        });
 
     chatNotificationColor.addActionListener(
         e -> {
@@ -994,6 +1100,8 @@ public class PreferencesDialog extends AbeillePanel {
 
     loadMRUcheckbox.addActionListener(
         e -> AppPreferences.loadMruCampaignAtStart.set(loadMRUcheckbox.isSelected()));
+    checkUpdatesCheckbox.addActionListener(
+        e -> AppPreferences.skipAutoUpdate.set(!checkUpdatesCheckbox.isSelected()));
     allowExternalMacroAccessCheckBox.addActionListener(
         e ->
             AppPreferences.allowExternalMacroAccess.set(
@@ -1249,6 +1357,42 @@ public class PreferencesDialog extends AbeillePanel {
           AppPreferences.nonVisibleTokenMapLabelForeground.set(nonVisTokenLabelFG.getColor());
         });
 
+    drawingDrawableLabelBackgroundColorWell.addActionListener(
+        e -> {
+          AppPreferences.drawingMapLabelBackgroundColor.set(
+              drawingDrawableLabelBackgroundColorWell.getColor());
+        });
+
+    drawingDrawableLabelForegroundColorWell.addActionListener(
+        e -> {
+          AppPreferences.drawingMapLabelForegroundColor.set(
+              drawingDrawableLabelForegroundColorWell.getColor());
+        });
+
+    drawingDrawableLabelBorderColorWell.addActionListener(
+        e -> {
+          AppPreferences.drawingMapLabelBorderColor.set(
+              drawingDrawableLabelBorderColorWell.getColor());
+        });
+
+    templateDrawableLabelBackgroundColorWell.addActionListener(
+        e -> {
+          AppPreferences.templateMapLabelBackgroundColor.set(
+              templateDrawableLabelBackgroundColorWell.getColor());
+        });
+
+    templateDrawableLabelForegroundColorWell.addActionListener(
+        e -> {
+          AppPreferences.templateMapLabelForegroundColor.set(
+              templateDrawableLabelForegroundColorWell.getColor());
+        });
+
+    templateDrawableLabelBorderColorWell.addActionListener(
+        e -> {
+          AppPreferences.templateMapLabelBorderColor.set(
+              templateDrawableLabelBorderColorWell.getColor());
+        });
+
     labelFontSizeSpinner.addChangeListener(
         new ChangeListenerProxy() {
           @Override
@@ -1410,14 +1554,6 @@ public class PreferencesDialog extends AbeillePanel {
           jvmValuesChanged = true;
         });
 
-    jamLanguageOverrideComboBox.addItemListener(
-        e -> {
-          setJvmOption(
-              JVM_OPTION.LOCALE_LANGUAGE,
-              Objects.requireNonNull(jamLanguageOverrideComboBox.getSelectedItem()).toString());
-          jvmValuesChanged = true;
-        });
-
     chatNotificationShowBackground.addActionListener(
         e ->
             AppPreferences.chatNotificationBackground.set(
@@ -1464,6 +1600,13 @@ public class PreferencesDialog extends AbeillePanel {
         e ->
             AppPreferences.defaultVisionType.set(
                 (Zone.VisionType) visionTypeCombo.getSelectedItem()));
+
+    showCoordinatesCombo.setModel(new DefaultComboBoxModel<>(Zone.ShowCoordinates.values()));
+    showCoordinatesCombo.setSelectedItem(AppPreferences.defaultShowCoordinates.get());
+    showCoordinatesCombo.addItemListener(
+        e ->
+            AppPreferences.defaultShowCoordinates.set(
+                (Zone.ShowCoordinates) showCoordinatesCombo.getSelectedItem()));
 
     mapSortType.setModel(new DefaultComboBoxModel<>(AppPreferences.MapSortType.values()));
     mapSortType.setSelectedItem(AppPreferences.mapSortType.get());
@@ -1577,8 +1720,10 @@ public class PreferencesDialog extends AbeillePanel {
     fillSelectionCheckBox.setSelected(AppPreferences.fillSelectionBox.get());
     frameRateCapTextField.setText(Integer.toString(AppPreferences.frameRateCap.get()));
     defaultUsername.setText(AppPreferences.defaultUserName.get());
+    languageSelection.setSelectedItem(originalLocale = AppPreferences.locale.get());
     autoSaveSpinner.setValue(AppPreferences.autoSaveIncrement.get());
     loadMRUcheckbox.setSelected(AppPreferences.loadMruCampaignAtStart.get());
+    checkUpdatesCheckbox.setSelected(!AppPreferences.skipAutoUpdate.get());
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.newMapsHaveFow.get());
     tokensPopupWarningWhenDeletedCheckBox.setSelected(AppPreferences.tokensWarnWhenDeleted.get());
     tokensStartSnapToGridCheckBox.setSelected(AppPreferences.tokensStartSnapToGrid.get());
@@ -1597,6 +1742,8 @@ public class PreferencesDialog extends AbeillePanel {
     showStatSheetModifierCheckBox.setSelected(
         AppPreferences.showStatSheetRequiresModifierKey.get());
     forceFacingArrowCheckBox.setSelected(AppPreferences.forceFacingArrow.get());
+    facingArrowColour.setColor(AppPreferences.facingArrowBGColour.get());
+    facingArrowBorderColour.setColor(AppPreferences.facingArrowBorderColour.get());
     backgroundsStartSnapToGridCheckBox.setSelected(AppPreferences.backgroundsStartSnapToGrid.get());
     defaultGridSizeTextField.setText(Integer.toString(AppPreferences.defaultGridSize.get()));
     // Localizes units per cell, using the proper separator. Fixes #507.
@@ -1663,7 +1810,16 @@ public class PreferencesDialog extends AbeillePanel {
 
     // get JVM User Defaults/User override preferences
     if (!UserJvmOptions.loadAppCfg()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(I18N.getString("Label.startup")), false);
+      var startupTabTitle = I18N.getString("Label.startup");
+      var startupTabIndex = tabbedPane.indexOfTab(startupTabTitle);
+      if (startupTabIndex < 0) {
+        log.error(
+            "Unable to disable the startup tab: could not find a tab with the title {} (locale = {})",
+            startupTabTitle,
+            Locale.getDefault().getDisplayName());
+      } else {
+        tabbedPane.setEnabledAt(startupTabIndex, false);
+      }
     } else {
       try {
 
@@ -1676,9 +1832,6 @@ public class PreferencesDialog extends AbeillePanel {
         jvmOpenGLCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
         jvmInitAwtCheckbox.setSelected(
             UserJvmOptions.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
-
-        jamLanguageOverrideComboBox.setSelectedItem(
-            UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
       } catch (Exception e) {
         log.error("Unable to retrieve JVM user options!", e);
       }

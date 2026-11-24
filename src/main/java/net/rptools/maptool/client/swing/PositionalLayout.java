@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.swing;
 
@@ -20,9 +20,6 @@ import java.awt.Dimension;
 import java.awt.LayoutManager2;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 /** */
 public class PositionalLayout implements LayoutManager2 {
@@ -168,34 +165,5 @@ public class PositionalLayout implements LayoutManager2 {
   public void removeLayoutComponent(Component comp) {
 
     compPositionMap.remove(comp);
-  }
-
-  public static void main(String[] args) {
-
-    JFrame frame = new JFrame();
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    JPanel panel = new PositionalPanel();
-
-    panel.add(createButton("NW"), Position.NW);
-    panel.add(createButton("N"), Position.N);
-    panel.add(createButton("NE"), Position.NE);
-    panel.add(createButton("W"), Position.W);
-    panel.add(createButton("E"), Position.E);
-    panel.add(createButton("SW"), Position.SW);
-    panel.add(createButton("S"), Position.S);
-    panel.add(createButton("SE"), Position.SE);
-    panel.add(createButton("CENTER"), Position.CENTER);
-
-    frame.setContentPane(panel);
-
-    frame.setSize(200, 200);
-    frame.setVisible(true);
-  }
-
-  private static JButton createButton(String label) {
-    JButton button = new JButton(label);
-    button.setSize(button.getMinimumSize());
-
-    return button;
   }
 }

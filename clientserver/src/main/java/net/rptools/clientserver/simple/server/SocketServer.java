@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.clientserver.simple.server;
 
@@ -124,7 +124,10 @@ public final class SocketServer extends AbstractServer implements Server {
 
           String id = nextClientId(s);
           SocketConnection conn = new SocketConnection(id, s);
+          // Only start reading once the observers have added their message handlers. A client
+          // sends its first message as soon as it connects, and one read before then is lost.
           server.fireClientConnect(conn);
+          conn.open();
         } catch (IOException e) {
           if (!suppressErrors) {
             log.error(e.getMessage(), e);

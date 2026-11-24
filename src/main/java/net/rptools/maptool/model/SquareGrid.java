@@ -9,47 +9,33 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.SquareGridDto;
 
-public class SquareGrid extends Grid {
+public final class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
   private static final Dimension CELL_OFFSET = new Dimension(0, 0);
   private static final BufferedImage pathHighlight =
@@ -79,74 +65,8 @@ public class SquareGrid extends Grid {
       };
 
   @Override
-  protected List<TokenFootprint> createFootprints() {
-    return List.of(
-        new TokenFootprint(
-            new GUID("7F000101CD65152A010000002A000101"),
-            "Fine",
-            I18N.getString("TokenFootprint.name.fine"),
-            false,
-            0.5),
-        new TokenFootprint(
-            new GUID("7F000101CD65152A020000002A000101"),
-            "Diminutive",
-            I18N.getString("TokenFootprint.name.diminutive"),
-            false,
-            0.5),
-        new TokenFootprint(
-            new GUID("7F000101CE65152A030000002A000100"),
-            "Tiny",
-            I18N.getString("TokenFootprint.name.tiny"),
-            false,
-            0.5),
-        new TokenFootprint(
-            new GUID("7F000101CE65152A040000002A000100"),
-            "Small",
-            I18N.getString("TokenFootprint.name.small"),
-            false,
-            0.75),
-        new TokenFootprint(
-            new GUID("7F000101CF65152A050000002A000101"),
-            "Medium",
-            I18N.getString("TokenFootprint.name.medium"),
-            true,
-            1.0),
-        new TokenFootprint(
-            new GUID("7F000101D065152A060000002A000100"),
-            "Large",
-            I18N.getString("TokenFootprint.name.large"),
-            squareFootprintPoints(2)),
-        new TokenFootprint(
-            new GUID("7F000101D065152A070000002A000100"),
-            "Huge",
-            I18N.getString("TokenFootprint.name.huge"),
-            squareFootprintPoints(3)),
-        new TokenFootprint(
-            new GUID("7F000101D165152A080000002A000101"),
-            "Gargantuan",
-            I18N.getString("TokenFootprint.name.gargantuan"),
-            squareFootprintPoints(4)),
-        new TokenFootprint(
-            new GUID("7F000101E165152A090000002A000101"),
-            "Colossal",
-            I18N.getString("TokenFootprint.name.colossal"),
-            squareFootprintPoints(6)));
-  }
-
-  private static Point[] squareFootprintPoints(int size) {
-    Point[] pa = new Point[size * size - 1];
-
-    int indx = 0;
-    for (int y = 0; y < size; y++) {
-      for (int x = 0; x < size; x++) {
-        if (y == 0 && x == 0) {
-          continue;
-        }
-        pa[indx] = new Point(x, y);
-        indx++;
-      }
-    }
-    return pa;
+  public GridType getType() {
+    return GridType.Square;
   }
 
   @Override
@@ -221,69 +141,6 @@ public class SquareGrid extends Grid {
 
     int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
     return stepsFromBase * step + base;
-  }
-
-  @Override
-  public void drawCoordinatesOverlay(Graphics2D g, ZoneRenderer renderer) {
-    Object oldAA = SwingUtil.useAntiAliasing(g);
-
-    Font oldFont = g.getFont();
-    g.setFont(g.getFont().deriveFont(20f).deriveFont(Font.BOLD));
-    FontMetrics fm = g.getFontMetrics();
-
-    double cellSize = renderer.getScaledGridSize();
-    CellPoint topLeft = convert(new ScreenPoint(0, 0).convertToZone(renderer));
-    ScreenPoint sp = ScreenPoint.fromZonePoint(renderer, convert(topLeft));
-
-    Dimension size = renderer.getSize();
-
-    int startX = SwingUtilities.computeStringWidth(fm, "MMM") + 10;
-
-    double x = sp.x + cellSize / 2; // Start at middle of the cell that's on screen
-    int nextAvailableSpace = -1;
-    while (x < size.width) {
-      String coord = Integer.toString(topLeft.x);
-
-      int strWidth = SwingUtilities.computeStringWidth(fm, coord);
-      int strX = (int) x - strWidth / 2;
-
-      if (x > startX && strX > nextAvailableSpace) {
-        g.setColor(Color.black);
-        g.drawString(coord, strX - 1, fm.getHeight() - 1);
-        g.drawString(coord, strX + 1, fm.getHeight() - 1);
-        g.drawString(coord, strX - 1, fm.getHeight() + 1);
-        g.drawString(coord, strX + 1, fm.getHeight() + 1);
-        g.setColor(Color.orange);
-        g.drawString(coord, strX, fm.getHeight());
-
-        nextAvailableSpace = strX + strWidth + 10;
-      }
-      x += cellSize;
-      topLeft.x++;
-    }
-    double y = sp.y + cellSize / 2; // Start at middle of the cell that's on screen
-    nextAvailableSpace = -1;
-    while (y < size.height) {
-      String coord = decimalToAlphaCoord(topLeft.y);
-
-      int strY = (int) y + fm.getAscent() / 2;
-
-      if (y > fm.getHeight() && strY > nextAvailableSpace) {
-        g.setColor(Color.black);
-        g.drawString(coord, 10 - 1, strY - 1);
-        g.drawString(coord, 10 + 1, strY - 1);
-        g.drawString(coord, 10 - 1, strY + 1);
-        g.drawString(coord, 10 + 1, strY + 1);
-        g.setColor(Color.yellow);
-        g.drawString(coord, 10, strY);
-
-        nextAvailableSpace = strY + fm.getAscent() / 2 + 10;
-      }
-      y += cellSize;
-      topLeft.y++;
-    }
-    g.setFont(oldFont);
-    SwingUtil.restoreAntiAliasing(g, oldAA);
   }
 
   @Override
@@ -377,41 +234,6 @@ public class SquareGrid extends Grid {
   @Override
   public GridCapabilities getCapabilities() {
     return CAPABILITIES;
-  }
-
-  @Override
-  public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    double scale = renderer.getScale();
-    double gridSize = getSize() * scale;
-
-    g.setColor(new Color(getZone().getGridColor()));
-
-    int offX = (int) (renderer.getViewOffsetX() % gridSize + getOffsetX() * scale);
-    int offY = (int) (renderer.getViewOffsetY() % gridSize + getOffsetY() * scale);
-
-    int startCol = (int) ((int) (bounds.x / gridSize) * gridSize);
-    int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
-    Path2D path = new Path2D.Double();
-    for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
-      path.append(
-          new Line2D.Double(
-              bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY)),
-          false);
-    }
-    for (double col = startCol; col < bounds.x + bounds.width + gridSize; col += gridSize) {
-      path.append(
-          new Line2D.Double(
-              (int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height),
-          false);
-    }
-    GridRenderer.drawGridShape(g, path);
-  }
-
-  public ZonePoint getCenterPoint(CellPoint cellPoint) {
-    ZonePoint zp = convert(cellPoint);
-    zp.x += (int) (getCellWidth() / 2d);
-    zp.y += (int) (getCellHeight() / 2d);
-    return zp;
   }
 
   public static String decimalToAlphaCoord(int value) {

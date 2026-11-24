@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.server;
 
@@ -359,6 +359,7 @@ public class ServerHandshake implements Handshake<Player>, MessageHandler {
 
     if (!MapTool.isDevelopment() && !MapTool.getVersion().equals(clientInitMsg.getVersion())) {
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.WRONG_VERSION);
+      return;
     }
 
     playerPublicKeyMD5 = new MD5Key(clientInitMsg.getPublicKeyMd5());

@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.macro.impl;
 
@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
@@ -78,7 +79,7 @@ public class SetTokenPropertyMacro implements Macro {
     for (Token token : selectedTokenSet) {
       for (String command : commands) {
         try {
-          MapTool.getParser().parseExpression(token, command, false);
+          MapTool.getParser().parseExpression(new MapToolVariableResolver(token), command, false);
         } catch (ParserException e) {
           MapTool.addLocalMessage(I18N.getText("msg.error.evaluatingExpr", e.getMessage()));
           break;

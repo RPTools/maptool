@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -28,7 +28,7 @@ public class StrListFunctionsTest {
   private String delim = ",";
 
   private List<Object> toParms(Object... parms) {
-    ArrayList result = new ArrayList<Object>();
+    List<Object> result = new ArrayList<>();
     for (Object arg : parms) {
       if (arg instanceof Integer) arg = new BigDecimal((Integer) arg);
       result.add(arg);

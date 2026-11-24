@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
@@ -21,6 +21,8 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -50,7 +52,7 @@ public class AppUtil {
 
   private static Logger log;
 
-  private static File dataDirPath;
+  private static Path dataDirPath;
   private static String packagerCfgFileName =
       getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
           ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
@@ -66,12 +68,12 @@ public class AppUtil {
   }
 
   /**
-   * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
+   * Returns an absolute path to the user's home directory.
    *
-   * @return the users home directory as a File object
+   * @return the user's home directory absolute path
    */
-  private static File getUserHome() {
-    return new File(System.getProperty("user.home"));
+  private static Path getUserHome() {
+    return Paths.get(System.getProperty("user.home")).toAbsolutePath();
   }
 
   /**
@@ -88,29 +90,28 @@ public class AppUtil {
    * @see AppUtil#getAppHome
    */
   public static File getAppHome(String subdir) {
-    File path = getDataDir();
+    Path path = getDataDir();
     if (!StringUtils.isEmpty(subdir)) {
-      path = new File(path.getAbsolutePath(), subdir);
+      path = path.resolve(subdir).toAbsolutePath();
     }
     // Now check for characters known to cause problems. See getDataDir() for details.
-    if (path.getAbsolutePath().matches("!")) {
-      throw new RuntimeException(I18N.getText("msg.error.unusableDir", path.getAbsolutePath()));
+    if (path.toString().matches("!")) {
+      throw new RuntimeException(I18N.getText("msg.error.unusableDir", path));
     }
 
-    if (!path.exists()) {
-      path.mkdirs();
-      // Now check our work
-      if (!path.exists()) {
-        RuntimeException re =
-            new RuntimeException(
-                I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log != null) {
-          log.info("msg.error.unableToCreateDataDir", re);
-        }
-        throw re;
+    // Ensure the path exists in the file system.
+    try {
+      Files.createDirectories(path);
+    } catch (IOException e) {
+      RuntimeException re =
+          new RuntimeException(I18N.getText("msg.error.unableToCreateDataDir", path));
+      if (log != null) {
+        log.info("msg.error.unableToCreateDataDir", re);
       }
+      throw re;
     }
-    return path;
+
+    return path.toFile();
   }
 
   /** Set the state back to uninitialized */
@@ -119,27 +120,39 @@ public class AppUtil {
     dataDirPath = null;
   }
 
-  /** Determine the actual directory to store data files, derived from the environment */
-  // Package protected for testing
-  static File getDataDir() {
+  /**
+   * Determine the actual directory to store data files, derived from the environment
+   *
+   * @return The absolute path to the selected data directory.
+   */
+  private static Path getDataDir() {
     if (dataDirPath == null) {
-      String path = System.getProperty(DATADIR_PROPERTY_NAME);
-      if (StringUtils.isEmpty(path)) {
-        path = DEFAULT_DATADIR_NAME;
+      var dataDirProperty = System.getProperty(DATADIR_PROPERTY_NAME);
+
+      // If the data directory is not provided, that indicates a test run or other development run
+      // that didn't go through normal application startup. So make a local directory for MT data.
+      Path path =
+          StringUtils.isEmpty(dataDirProperty)
+              ? Paths.get(System.getProperty("user.dir"))
+                  .toAbsolutePath()
+                  .resolve(Paths.get("run", "data"))
+              : Paths.get(dataDirProperty);
+
+      if (!path.isAbsolute()) {
+        // Resolve relative paths against the user's home directory.
+        path = getUserHome().resolve(path);
       }
-      if (!path.contains("/") && !path.contains("\\")) {
-        path = getUserHome() + "/" + path;
-      }
+
       // Now we need to check for characters that are known to cause problems in
       // path names. We want to allow the local platform to make this decision, but
       // the built-in "jar://" URL uses the "!" as a separator between the archive name
       // and the archive member. :( Right now we're only checking for that one character
       // but the list may need to be expanded in the future.
-      if (path.matches("!")) {
+      if (path.toString().matches("!")) {
         throw new RuntimeException(I18N.getText("msg.error.unusableDataDir", path));
       }
 
-      dataDirPath = new File(path);
+      dataDirPath = path;
     }
     return dataDirPath;
   }
@@ -357,10 +370,13 @@ public class AppUtil {
       final var visitor =
           new SimpleFileVisitor<Path>() {
             public long totalSize = 0;
+            // Hard links share a file key, so only count them once.
+            private final Set<Object> seenFileKeys = new HashSet<>();
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-              if (!attrs.isSymbolicLink()) {
+              Object fileKey = attrs.fileKey();
+              if (!attrs.isSymbolicLink() && (fileKey == null || seenFileKeys.add(fileKey))) {
                 totalSize += attrs.size();
               }
               return FileVisitResult.CONTINUE;

@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -30,7 +30,6 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.AssetResolver;
@@ -383,13 +382,14 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
         token.setSnapToScale(false);
       } else {
-        for (TokenFootprint footprint : grid.getFootprints()) {
-          if (footprint.getName().equalsIgnoreCase(size)) {
-            token.setFootprint(grid, footprint);
-            token.setSnapToScale(true);
-            break;
-          }
-        }
+        grid.getType()
+            .getFootprints()
+            .getEntryByName(size)
+            .ifPresent(
+                entry -> {
+                  token.setFootprintId(grid.getType(), entry.getKey());
+                  token.setSnapToScale(true);
+                });
       }
     }
 

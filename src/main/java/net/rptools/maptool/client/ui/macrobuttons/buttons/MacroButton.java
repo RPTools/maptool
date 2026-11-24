@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.macrobuttons.buttons;
 
@@ -204,6 +204,9 @@ public class MacroButton extends JButton implements MouseListener {
         properties.executeMacro();
       }
     } else if (SwingUtilities.isRightMouseButton(event)) {
+      if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isTokenContextLocked()) {
+        return;
+      }
       if (getPanelClass().equals("GlobalPanel")) {
         new MacroButtonPopupMenu(this, panelClass, false).show(this, event.getX(), event.getY());
       } else if (getPanelClass().equals("CampaignPanel")) {

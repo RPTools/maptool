@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -37,6 +37,7 @@ import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -389,6 +390,11 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.MBL;
     }
 
+    /*
+     * Note: this is different from FunctionUtil#getTokenFromParam() since we don't require a
+     * trusted context when provided a token ID.
+     * See bug [#6253](https://github.com/RPTools/maptool/issues/6253)
+     */
     if (parameters.size() == 1) {
       token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
       if (token == null) {
@@ -422,8 +428,6 @@ public class Topology_Functions extends AbstractFunction {
   private int childEvaluateSetTokenTopology(
       VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    int results = -1;
-    Token token = null;
 
     Zone.TopologyType topologyType;
     if (functionName.equalsIgnoreCase("setTokenVBL")) {
@@ -469,17 +473,9 @@ public class Topology_Functions extends AbstractFunction {
               functionName));
     }
 
-    if (parameters.size() == 2) {
-      token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
-    } else if (parameters.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
-      token = res.getTokenInContext();
-    }
-    if (token == null) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.noImpersonated", functionName));
-    }
+    Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, -1);
 
+    int results = -1;
     Area tokenTopology = new Area();
     for (int i = 0; i < topologyArray.size(); i++) {
       JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
@@ -554,7 +550,11 @@ public class Topology_Functions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
 
-    // make sure only to check the last parameter as token if it is not the BigDecimal for delete
+    /*
+     * Note: this is different from FunctionUtil#getTokenFromParam(...) as we don't have a fixed
+     * position for the token ID, and because a given parameter could indicate a delete flag instead
+     * of a token ID. So we customize the logic here, despite largely being similar.
+     */
     if (parameters.size() >= 2
         && (!(parameters.get(parameters.size() - 1) instanceof BigDecimal))) {
       token = FindTokenFunctions.findToken(parameters.get(parameters.size() - 1).toString(), null);
@@ -595,7 +595,7 @@ public class Topology_Functions extends AbstractFunction {
 
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     if (topologyFromToken) {
-      var newMapTopology = token.getTransformedMaskTopology(topologyType);
+      var newMapTopology = token.getTransformedMaskTopology(zone, topologyType);
       if (newMapTopology != null) {
         MapTool.serverCommand().updateMaskTopology(zone, newMapTopology, false, topologyType);
       }

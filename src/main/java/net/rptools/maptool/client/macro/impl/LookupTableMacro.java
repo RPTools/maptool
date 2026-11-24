@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.macro.impl;
 
@@ -36,7 +36,7 @@ public class LookupTableMacro extends AbstractMacro {
     StringBuilder sb = new StringBuilder();
 
     if (macro.trim().length() == 0) {
-      MapTool.addLocalMessage("lookuptable.specifyTable");
+      MapTool.addLocalMessage(I18N.getText("lookuptable.specifyTable"));
       return;
     }
     List<String> words = StringUtil.splitNextWord(macro);
@@ -74,7 +74,7 @@ public class LookupTableMacro extends AbstractMacro {
         return;
       }
       sb.append("Table ").append(tableName).append(" (");
-      sb.append(MapTool.getFrame().getCommandPanel().getIdentity());
+      sb.append(MapTool.getClient().getImpersonation().getIdentity());
       sb.append("): ");
 
       if (result.getImageId() != null) {
@@ -90,7 +90,8 @@ public class LookupTableMacro extends AbstractMacro {
       }
       MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
     } catch (ParserException pe) {
-      MapTool.addLocalMessage("lookuptable.couldNotPerform" + pe.getMessage());
+      MapTool.addLocalMessage(
+          I18N.getText("lookuptable.couldNotPerform", tableName) + " " + pe.getMessage());
     }
   }
 }

@@ -9,17 +9,13 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.tool;
 
 import com.google.common.collect.Iterables;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -98,13 +94,22 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   }
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-    if (walker != null) {
-      renderer.renderPath(g, walker.getPath(), renderer.getZone().getGrid().getDefaultFootprint());
-      ScreenPoint sp = walker.getLastPoint().convertToScreen(renderer);
+    var zone = renderer.getZone();
 
-      int y = (int) sp.y - 10;
-      int x = (int) sp.x + (int) (renderer.getScaledGridSize() / 2);
-      GraphicsUtil.drawBoxedString(g, Double.toString(walker.getDistance()), x, y);
+    if (walker != null) {
+      renderer.renderPath(
+          g, walker.getPath(), zone.getGrid().getType().getFootprints().getDefault());
+
+      // distance label position to be below the last cell in the path and justified centrally
+      Rectangle lastCellPointBounds = zone.getGrid().getBounds(walker.getLastPoint());
+      ZonePoint zp =
+          new ZonePoint(
+              (int) lastCellPointBounds.getCenterX(), (int) lastCellPointBounds.getMaxY());
+      ScreenPoint sp =
+          ScreenPoint.fromZonePointRnd(renderer.getViewModel().getZoneScale(), zp.x, zp.y);
+
+      GraphicsUtil.drawBoxedString(
+          g, Double.toString(walker.getDistance()), (int) sp.x, (int) sp.y + 10);
     } else if (gridlessPath != null) {
       // distance
       double c = 0;
@@ -112,21 +117,21 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       ZonePoint lastZP = null;
       for (ZonePoint zp :
           Iterables.concat(gridlessPath.getCellPath(), List.of(currentGridlessPoint))) {
-        var sp = ScreenPoint.fromZonePoint(renderer, zp.x, zp.y);
+        var sp = renderer.getViewModel().getZoneScale().toScreenSpace(zp.x, zp.y);
         if (lastZP == null) {
           path2D.moveTo(sp.x, sp.y);
         } else {
           path2D.lineTo(sp.x, sp.y);
-          int a = lastZP.x - zp.x;
-          int b = lastZP.y - zp.y;
-          c += Math.sqrt(a * a + b * b);
+          double a = (double) lastZP.x - zp.x;
+          double b = (double) lastZP.y - zp.y;
+          c += Math.hypot(a, b);
         }
         lastZP = zp;
       }
       assert lastZP != null : "Our non-empty iterable was empty!";
 
-      c /= renderer.getZone().getGrid().getSize();
-      c *= renderer.getZone().getUnitsPerCell();
+      c /= zone.getGrid().getSize();
+      c *= zone.getUnitsPerCell();
 
       Object oldAA = SwingUtil.useAntiAliasing(g);
       try {
@@ -134,8 +139,11 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
         g.draw(path2D);
 
         String distance = NumberFormat.getInstance().format(c);
-        ScreenPoint sp = ScreenPoint.fromZonePoint(renderer, lastZP.x, lastZP.y);
-        GraphicsUtil.drawBoxedString(g, distance, (int) sp.x, (int) sp.y - 20);
+        ScreenPoint sp = renderer.getViewModel().getZoneScale().toScreenSpace(lastZP.x, lastZP.y);
+
+        // distance label position to be below measure tool cursor and left justified
+        GraphicsUtil.drawBoxedString(g, distance, (int) sp.x, (int) sp.y + 20, SwingUtilities.LEFT);
+
       } finally {
         SwingUtil.restoreAntiAliasing(g, oldAA);
       }
@@ -156,7 +164,9 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
                   renderer
                       .getZone()
                       .getGrid()
-                      .convert(new ScreenPoint(mouseX, mouseY).convertToZone(renderer));
+                      .convert(
+                          new ScreenPoint(mouseX, mouseY)
+                              .convertToZone(renderer.getViewModel().getZoneScale()));
               walker.toggleWaypoint(cp);
             } else if (gridlessPath != null) {
               gridlessPath.appendWaypoint(currentGridlessPoint);
@@ -177,7 +187,9 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
         walker = renderer.getZone().getGrid().createZoneWalker();
         walker.addWaypoints(cellPoint, cellPoint);
       } else {
-        currentGridlessPoint = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+        currentGridlessPoint =
+            new ScreenPoint(e.getX(), e.getY())
+                .convertToZone(renderer.getViewModel().getZoneScale());
         gridlessPath = new Path<>();
         gridlessPath.appendWaypoint(currentGridlessPoint);
       }
@@ -216,7 +228,9 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
         CellPoint cellPoint = renderer.getCellAt(new ScreenPoint(e.getX(), e.getY()));
         walker.replaceLastWaypoint(cellPoint);
       } else if (gridlessPath != null) {
-        currentGridlessPoint = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+        currentGridlessPoint =
+            new ScreenPoint(e.getX(), e.getY())
+                .convertToZone(renderer.getViewModel().getZoneScale());
       }
       renderer.repaint();
     }

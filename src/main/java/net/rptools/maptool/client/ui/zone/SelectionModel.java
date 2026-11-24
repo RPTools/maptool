@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.zone;
 
@@ -21,13 +21,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.events.MTEvent;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 
 /** Models the current and historical selections for a ZoneRenderer. */
 public class SelectionModel {
-  public record SelectionChanged(Zone zone) {}
+  public record SelectionChanged(Zone zone) implements MTEvent {}
 
   /** The zone in which the selections are made. */
   private final Zone zone;

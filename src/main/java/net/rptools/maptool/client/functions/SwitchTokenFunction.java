@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -19,7 +19,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -48,13 +48,8 @@ public class SwitchTokenFunction extends AbstractFunction {
           I18N.getText(
               "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
     }
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    Token token = zone.resolveToken(parameters.get(0).toString());
-    if (token == null) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
-    }
+
+    Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, -1);
     ((MapToolVariableResolver) resolver).setTokenIncontext(token);
     return "";
   }

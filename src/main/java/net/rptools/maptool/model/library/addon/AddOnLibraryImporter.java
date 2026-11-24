@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.library.addon;
 
@@ -248,9 +248,9 @@ public class AddOnLibraryImporter {
       String path = METADATA_DIR + entry.getName();
       try (InputStream inputStream = zip.getInputStream(entry)) {
         byte[] bytes = inputStream.readAllBytes();
-        MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
-        Asset asset =
-            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
+        var assetName = namespace + "/" + path;
+        MediaType mediaType = Asset.getMediaType(assetName, bytes);
+        Asset asset = Type.fromMediaType(mediaType, assetName).getFactory().apply(assetName, bytes);
         addAsset(asset);
         pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }
@@ -277,9 +277,9 @@ public class AddOnLibraryImporter {
       String path = entry.getName().substring(CONTENT_DIRECTORY.length());
       try (InputStream inputStream = zip.getInputStream(entry)) {
         byte[] bytes = inputStream.readAllBytes();
-        MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
-        Asset asset =
-            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
+        var assetName = namespace + "/" + path;
+        MediaType mediaType = Asset.getMediaType(assetName, bytes);
+        Asset asset = Type.fromMediaType(mediaType, assetName).getFactory().apply(assetName, bytes);
         addAsset(asset);
         pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }

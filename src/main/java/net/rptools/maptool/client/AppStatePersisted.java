@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
@@ -66,6 +66,9 @@ public class AppStatePersisted {
 
   /** Represents the key used to save the paint textures to the preferences. */
   private static final String KEY_SAVED_PAINT_TEXTURES = "savedTextures";
+
+  private static final String KEY_VBL_PEN_RADIUS = "vblPenRadius";
+  private static final int DEFAULT_VBL_PEN_RADIUS = 3;
 
   /** Will be null until read from preferences. */
   private static EnumSet<Zone.TopologyType> topologyTypes = null;
@@ -244,5 +247,13 @@ public class AppStatePersisted {
       }
     }
     return savedTextures;
+  }
+
+  public static int getVblPenRadius() {
+    return prefs.getInt(KEY_VBL_PEN_RADIUS, DEFAULT_VBL_PEN_RADIUS);
+  }
+
+  public static void setVblPenRadius(int radius) {
+    prefs.putInt(KEY_VBL_PEN_RADIUS, radius);
   }
 }

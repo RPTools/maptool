@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.library;
 
@@ -157,6 +157,14 @@ public interface Library {
   /**
    * Returns the information about MapTool Macro Script on this library.
    *
+   * @param macroPath The path to the macro, as used in lib: URIs.
+   * @return the information about the MapTool Macro Script.
+   */
+  CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoForUriPath(String macroPath);
+
+  /**
+   * Returns the information about MapTool Macro Script on this library.
+   *
    * @param macroName The name of the macro.
    * @return the information about the MapTool Macro Script.
    */
@@ -175,7 +183,7 @@ public interface Library {
   /**
    * Returns a list of the "files" within the library.
    *
-   * @return a list of the "files" within the library.
+   * @return a list of the "files" within the library, in the same order every time.
    */
   CompletableFuture<List<String>> getAllFiles();
 

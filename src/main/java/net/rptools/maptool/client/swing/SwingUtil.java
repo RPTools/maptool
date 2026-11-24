@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.swing;
 
@@ -106,6 +106,22 @@ public class SwingUtil {
    */
   public static boolean isShiftDown(int modifiers) {
     return (modifiers & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK;
+  }
+
+  public static boolean isAltDown(InputEvent e) {
+    return isAltDown(e.getModifiersEx());
+  }
+
+  /**
+   * Passed the event's extended modifiers this method returns <code>true</code> if the Alt key,
+   * Right Alt key or Alt-Graph key is down.
+   *
+   * @param modifiers as returned by {@link InputEvent#getModifiersEx()}
+   * @return <code>true</code> if Alt/Right-Alt/Alt-Graph key is down
+   */
+  public static boolean isAltDown(int modifiers) {
+    return (modifiers & InputEvent.ALT_DOWN_MASK) == InputEvent.ALT_DOWN_MASK
+        || (modifiers & InputEvent.ALT_GRAPH_DOWN_MASK) == InputEvent.ALT_GRAPH_DOWN_MASK;
   }
 
   /**

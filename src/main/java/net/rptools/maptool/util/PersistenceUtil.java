@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.util;
 
@@ -336,6 +336,7 @@ public class PersistenceUtil {
         String n = fixupZoneName(z.getName());
         z.setName(n);
         z.imported(); // Resets creation timestamp and init panel, among other things
+        MapTool.getFrame().setStatusMessage(I18N.getText("Zone.status.optimizing", z.getName()));
         z.optimize(); // Collapses overlaid or redundant drawables
 
         // Make sure the imported zone is as fresh as possible (new IDs all the way down).
@@ -407,7 +408,7 @@ public class PersistenceUtil {
             ZoneRenderer currentZoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
             if (currentZoneRenderer != null) {
               persistedCampaign.currentZoneId = currentZoneRenderer.getZone().getId();
-              persistedCampaign.currentView = currentZoneRenderer.getZoneScale();
+              persistedCampaign.currentView = currentZoneRenderer.getViewModel().getZoneScale();
             }
             // Save all assets in active use (consolidate duplicates between maps)
             saveTimer.start("Collect all assets");
@@ -577,10 +578,12 @@ public class PersistenceUtil {
         Set<MD5Key> allAssetIds = persistedCampaign.assetMap.keySet();
         loadAssets(allAssetIds, pakFile);
         for (Zone zone : persistedCampaign.campaign.getZones()) {
+          MapTool.getFrame()
+              .setStatusMessage(I18N.getText("Zone.status.optimizing", zone.getName()));
           zone.optimize();
         }
 
-        new CampaignManager().clearCampaignData();
+        new CampaignManager().replaceCampaignData();
         loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
 

@@ -9,15 +9,18 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.token;
 
 import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
 import java.util.Comparator;
+import java.util.List;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.proto.TokenOverlayDto;
@@ -56,7 +59,7 @@ public abstract class AbstractTokenOverlay implements Cloneable {
   /** Flag indicating that this token overlay is displayed to the owner. */
   private boolean showOwner;
 
-  /** Flag indicating that this token overlay is displayed to the everybody else. */
+  /** Flag indicating that this token overlay is displayed to everybody else. */
   private boolean showOthers;
 
   /*---------------------------------------------------------------------------------------------
@@ -82,6 +85,17 @@ public abstract class AbstractTokenOverlay implements Cloneable {
   protected AbstractTokenOverlay(String aName) {
     assert aName != null : "A name is required but null was passed.";
     name = aName;
+  }
+
+  protected AbstractTokenOverlay(AbstractTokenOverlay other) {
+    this.name = other.name;
+    this.order = other.order;
+    this.group = other.group;
+    this.mouseover = other.mouseover;
+    this.opacity = other.opacity;
+    this.showGM = other.showGM;
+    this.showOwner = other.showOwner;
+    this.showOthers = other.showOthers;
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -238,13 +252,23 @@ public abstract class AbstractTokenOverlay implements Cloneable {
    *     clip also has to take into account the edge of the window. If you draw based on the clip it
    *     will be off for partial token painting.
    * @param value The value for the token state.
+   * @param observer An image observer to notify as images become available. Used to support
+   *     non-blocking rendering for image-based overlays.
    */
-  public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value);
+  public abstract void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, Object value, ImageObserver observer);
 
   /**
    * @see java.lang.Object#clone()
    */
   public abstract Object clone();
+
+  /**
+   * @return The keys for all assets required by the overlay.
+   */
+  public List<MD5Key> getAssetIds() {
+    return List.of();
+  }
 
   protected void fillFrom(TokenOverlayDto dto) {
     name = dto.getName();

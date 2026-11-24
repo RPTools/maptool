@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -95,7 +95,6 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   public Object evaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    MapToolVariableResolver newResolver;
     JsonArray jarr = new JsonArray();
 
     for (Object obj : parameters) {
@@ -116,20 +115,12 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     String output;
     FunctionDefinition funcDef = userDefinedFunctions.get(functionName);
 
-    if (funcDef.newVariableContext) {
-      newResolver =
-          new MapToolVariableResolver(((MapToolVariableResolver) resolver).getTokenInContext());
-    } else {
-      newResolver = (MapToolVariableResolver) resolver;
-    }
-
     try {
       currentFunction.push(functionName);
       output =
           MapTool.getParser()
               .runMacro(
                   (MapToolVariableResolver) resolver,
-                  newResolver.getTokenInContext(),
                   funcDef.macroName,
                   macroArgs,
                   funcDef.newVariableContext);

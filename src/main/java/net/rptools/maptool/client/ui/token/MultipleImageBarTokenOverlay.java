@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.token;
 
@@ -20,7 +20,9 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
@@ -38,11 +40,6 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
   /** ID of the base image displayed in the overlay. */
   private MD5Key[] assetIds;
 
-  /** Needed for serialization */
-  public MultipleImageBarTokenOverlay() {
-    this(DEFAULT_STATE_NAME, null);
-  }
-
   /**
    * Create the complete image overlay.
    *
@@ -54,9 +51,16 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     assetIds = theAssetIds;
   }
 
-  /**
-   * @see AbstractTokenOverlay#clone()
-   */
+  @Override
+  public int getIncrements() {
+    return assetIds.length;
+  }
+
+  @Override
+  public void setIncrements(int increments) {
+    // Forbid manually setting our increment count.
+  }
+
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new MultipleImageBarTokenOverlay(getName(), assetIds);
@@ -64,7 +68,6 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     overlay.setGroup(getGroup());
     overlay.setMouseover(isMouseover());
     overlay.setOpacity(getOpacity());
-    overlay.setIncrements(getIncrements());
     overlay.setSide(getSide());
     overlay.setShowGM(isShowGM());
     overlay.setShowOwner(isShowOwner());
@@ -72,16 +75,12 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     return overlay;
   }
 
-  /**
-   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle, double)
-   */
   @Override
-  public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
-    int incr = findIncrement(value);
-
-    // Get the images
-    BufferedImage image = ImageManager.getImageAndWait(assetIds[incr]);
+  public void paintOverlay(
+      Graphics2D g, Token token, Rectangle bounds, double value, ImageObserver observer) {
+    // Get the image
+    var assetId = getAssetForValue(value);
+    BufferedImage image = ImageManager.getImage(assetId, observer);
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension(image.getWidth(), image.getHeight());
@@ -107,34 +106,31 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /**
-   * @return Getter for bottomAssetId
-   */
-  public MD5Key[] getAssetIds() {
-    return assetIds;
+  public MD5Key getAssetForValue(double value) {
+    return assetIds[findIncrement(value, assetIds.length)];
+  }
+
+  @Override
+  public List<MD5Key> getAssetIds() {
+    return List.of(assetIds);
   }
 
   /**
    * @param theAssetIds Setter for bottomAssetId
    */
-  public void setAssetIds(MD5Key[] theAssetIds) {
-    this.assetIds = theAssetIds;
+  public void setAssetIds(List<MD5Key> theAssetIds) {
+    this.assetIds = theAssetIds.toArray(MD5Key[]::new);
   }
 
-  public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
-    var bar = new MultipleImageBarTokenOverlay();
-    bar.fillFrom(dto.getCommon());
-    bar.assetIds =
-        dto.getAssetIdsList().stream().map(a -> new MD5Key(a)).toArray(size -> new MD5Key[size]);
-    bar.setIncrements(bar.assetIds.length);
-    return bar;
+  protected static BarTokenOverlay fromDtoImpl(BarTokenOverlayDto dto) {
+    return new MultipleImageBarTokenOverlay(
+        DEFAULT_STATE_NAME, dto.getAssetIdsList().stream().map(MD5Key::new).toArray(MD5Key[]::new));
   }
 
-  public BarTokenOverlayDto toDto() {
-    var dto = BarTokenOverlayDto.newBuilder().setCommon(getCommonDto());
-    setSideDto(dto);
-    dto.addAllAssetIds(
-        Arrays.asList(assetIds).stream().map(a -> a.toString()).collect(Collectors.toList()));
-    return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.MULTIPLE_IMAGE).build();
+  @Override
+  protected BarTokenOverlayDto.Builder toDtoImpl() {
+    return super.toDtoImpl()
+        .setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.MULTIPLE_IMAGE)
+        .addAllAssetIds(Arrays.stream(assetIds).map(MD5Key::toString).collect(Collectors.toList()));
   }
 }

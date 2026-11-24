@@ -9,19 +9,96 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.lookuptable;
 
-import java.awt.*;
 import javax.swing.*;
+import net.rptools.maptool.model.LookupTable;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 public class EditLookupTablePanelView {
 
   private JPanel mainPanel;
+  private JTextField tableName;
+  private JComboBox<String> tableGroup;
+  private JTextField defaultTableRoll;
+  private JCheckBox isVisible;
+  private JCheckBox allowLookup;
+  private JTable definitionTable;
+  private JLabel tableImagePlaceholder;
+  private JCheckBox pickOnce;
+  private JButton resetPicks;
+  private JLabel isVisibleIcon;
+  private JLabel allowLookupIcon;
+  private JLabel pickOnceIcon;
+  private RSyntaxTextArea tableMetadata;
+  private RTextScrollPane tableMetadataScrollPane;
+  private JComboBox<LookupTable.SupportedMetadataType> tableMetadataType;
 
   public JComponent getRootComponent() {
     return mainPanel;
+  }
+
+  public JTextField getTableName() {
+    return tableName;
+  }
+
+  public JComboBox<String> getTableGroup() {
+    return tableGroup;
+  }
+
+  public JTextField getDefaultTableRoll() {
+    return defaultTableRoll;
+  }
+
+  public JCheckBox getIsVisible() {
+    return isVisible;
+  }
+
+  public JCheckBox getAllowLookup() {
+    return allowLookup;
+  }
+
+  public JTable getDefinitionTable() {
+    return definitionTable;
+  }
+
+  public JLabel getTableImagePlaceholder() {
+    return tableImagePlaceholder;
+  }
+
+  public JCheckBox getPickOnce() {
+    return pickOnce;
+  }
+
+  public JButton getResetPicks() {
+    return resetPicks;
+  }
+
+  public JLabel getIsVisibleIcon() {
+    return isVisibleIcon;
+  }
+
+  public JLabel getAllowLookupIcon() {
+    return allowLookupIcon;
+  }
+
+  public JLabel getPickOnceIcon() {
+    return pickOnceIcon;
+  }
+
+  public RSyntaxTextArea getTableMetadata() {
+    return tableMetadata;
+  }
+
+  public RTextScrollPane getTableMetadataScrollPane() {
+    return tableMetadataScrollPane;
+  }
+
+  public JComboBox<LookupTable.SupportedMetadataType> getTableMetadataType() {
+    return tableMetadataType;
   }
 }

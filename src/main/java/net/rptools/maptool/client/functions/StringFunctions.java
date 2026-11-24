@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -18,8 +18,7 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.IllegalFormatConversionException;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -31,7 +30,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
 public class StringFunctions extends AbstractFunction {
@@ -65,6 +63,7 @@ public class StringFunctions extends AbstractFunction {
         "getGroupStart",
         "getGroupEnd",
         "getGroupCount",
+        "getGroupNames",
         "encode",
         "decode",
         "startsWith",
@@ -283,10 +282,7 @@ public class StringFunctions extends AbstractFunction {
       String str = parameters.get(0).toString().trim();
       // isParsable() returns false for leading + so stripping
       // off the first one. Any extras will return false.
-      if (str.length() > 1 && str.charAt(0) == '+') {
-        str = str.substring(1);
-      }
-      if (NumberUtils.isParsable(str)) {
+      if (isNumber(str)) {
         return BigDecimal.ONE;
       } else {
         return BigDecimal.ZERO;
@@ -308,6 +304,16 @@ public class StringFunctions extends AbstractFunction {
       }
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0)).append(".groupCount");
+      return resolver.getVariable(sb.toString());
+    }
+    if (functionName.equalsIgnoreCase("getGroupNames")) {
+      if (parameters.size() < 1) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+      }
+      StringBuilder sb = new StringBuilder();
+      sb.append("match.").append(parameters.get(0)).append(".groupNames");
       return resolver.getVariable(sb.toString());
     }
     if (functionName.startsWith("getGroup")) {
@@ -394,6 +400,45 @@ public class StringFunctions extends AbstractFunction {
     }
     // should never happen
     throw new ParserException(functionName + "(): Unknown function.");
+  }
+
+  private boolean isNumber(@Nonnull String str) {
+    if (str.isEmpty()) {
+      return false;
+    }
+
+    if (str.charAt(str.length() - 1) == '.') {
+      // Number can't end with '.'
+      return false;
+    }
+
+    // Skip any leading sign.
+    var startIndex =
+        switch (str.charAt(0)) {
+          case '+', '-' -> 1;
+          default -> 0;
+        };
+
+    if (str.length() <= startIndex) {
+      // Empty after the sign. Not a number.
+      return false;
+    }
+
+    boolean decimalPointAlreadyFound = false;
+    for (var i = startIndex; i < str.length(); ++i) {
+      var charAt = str.charAt(i);
+
+      if (charAt == '.') {
+        if (decimalPointAlreadyFound) {
+          return false;
+        }
+        decimalPointAlreadyFound = true;
+      } else if (!Character.isDigit(charAt)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -635,12 +680,19 @@ public class StringFunctions extends AbstractFunction {
    * @param pattern The pattern to match.
    * @return The number of matches that were found
    * @throws ParserException
-   *     <p>Variables that are set in the variable resolver. match.groupCount = The number of
-   *     capture groups in the pattern. {matchNo} is a sequence used to differentiate different
-   *     calls to strfind match.{matchNo}.matchCount = The number of matches found.
-   *     match.{matchNo}.m{M}.group{G} = The matching string for Match {M} and Group number {G}.
-   *     match.{matchNo}.m{M}.group{G}.start = The start of Group number {G} in Match Number {M}
-   *     match.{matchNo}.m{M}.group{G}.end = The end of Group number {G} in Match Number {M}
+   *     <p><hr>Variables that are set in the variable resolver:
+   *     <ul>
+   *       <li>match.groupCount = The number of capture groups in the pattern.
+   *       <li>match.groupNames = A Json array of named capture groups in the order they were
+   *           defined.
+   *       <li>{matchNo} is a sequence used to differentiate different calls to strfind
+   *       <li>match.{matchNo}.matchCount = The number of matches found.
+   *       <li>match.{matchNo}.m{M}.group{G} = The matching string for Match {M} and Group
+   *           number/name {G}.
+   *       <li>match.{matchNo}.m{M}.group{G}.start = The start of Group number/name {G} in Match
+   *           Number {M}
+   *       <li>match.{matchNo}.m{M}.group{G}.end = The end of Group number/name {G} in Match Number
+   *           {M}
    */
   public BigDecimal stringFind(VariableResolver resolver, String str, String pattern)
       throws ParserException {
@@ -650,19 +702,35 @@ public class StringFunctions extends AbstractFunction {
 
     int matchId = nextMatchNo();
     resolver.setVariable("match." + matchId + ".groupCount", m.groupCount());
+    resolver.setVariable("match." + matchId + ".groupNames", m.namedGroups());
+
+    // create a reversed map to make subsequent lookups easier
+    Map<Integer, String> groupIndexToName = new HashMap<>();
+    p.namedGroups().forEach((name, index) -> groupIndexToName.put(index, name));
+
+    String baseKey = "";
     while (m.find()) {
       found++;
-      for (int i = 1; i < m.groupCount() + 1; i++) {
-        resolver.setVariable(
-            "match." + matchId + ".m" + found + ".group" + i, m.group(i) == null ? "" : m.group(i));
-        resolver.setVariable(
-            "match." + matchId + ".m" + found + ".group" + i + ".start", m.start(i));
-        resolver.setVariable("match." + matchId + ".m" + found + ".group" + i + ".end", m.end(i));
+      for (int i = 1; i <= m.groupCount(); i++) {
+        String value = m.group(i) == null ? "" : m.group(i);
+        // by group index
+        baseKey = String.format("match.%s.m%d.group%d", matchId, found, i);
+        resolver.setVariable(baseKey, value);
+        resolver.setVariable(baseKey + ".start", m.start(i));
+        resolver.setVariable(baseKey + ".end", m.end(i));
+        // by group name
+        String groupName = groupIndexToName.get(i);
+        if (groupName != null) {
+          baseKey = String.format("match.%s.m%d.group%s", matchId, found, groupName);
+          resolver.setVariable(baseKey, value);
+          resolver.setVariable(baseKey + ".start", m.start(i));
+          resolver.setVariable(baseKey + ".end", m.end(i));
+        }
       }
-      resolver.setVariable(
-          "match." + matchId + ".m" + found + ".group0", m.group() == null ? "" : m.group());
-      resolver.setVariable("match." + matchId + ".m" + found + ".group0.start", m.start());
-      resolver.setVariable("match." + matchId + ".m" + found + ".group0.end", m.end());
+      baseKey = String.format("match.%s.m%d.group0", matchId, found);
+      resolver.setVariable(baseKey, m.group() == null ? "" : m.group());
+      resolver.setVariable(baseKey + ".start", m.start());
+      resolver.setVariable(baseKey + ".end", m.end());
     }
     resolver.setVariable("match." + matchId + ".matchCount", found);
     return BigDecimal.valueOf(matchId);

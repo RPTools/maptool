@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -22,6 +22,7 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughSubscriptExtensio
 import com.vladsch.flexmark.ext.gfm.strikethrough.SubscriptExtension;
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
 import com.vladsch.flexmark.ext.ins.InsExtension;
+import com.vladsch.flexmark.ext.macros.MacrosExtension;
 import com.vladsch.flexmark.ext.superscript.SuperscriptExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.ext.toc.TocExtension;
@@ -63,6 +64,7 @@ public class MarkDownFunctions extends AbstractFunction {
     ATTRIBUTES("ATTRIBUTES", AttributesExtension.create()),
     DEFINITION("DEFINITION", DefinitionExtension.create()),
     INS("INS", InsExtension.create()),
+    MACROS("MACROS", MacrosExtension.create()),
     STRIKETHROUGH("STRIKETHROUGH", StrikethroughExtension.create()),
     STRIKETHROUGHSUBSCRIPT("STRIKETHROUGHSUBSCRIPT", StrikethroughSubscriptExtension.create()),
     SUBSCRIPT("SUBSCRIPT", SubscriptExtension.create()),

@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
@@ -70,7 +70,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               TokenBarFunction.getInstance(),
               TokenCopyDeleteFunctions.getInstance(),
               TokenGMNameFunction.getInstance(),
-              TokenHaloFunction.getInstance(),
+              TokenHaloFunctions.getInstance(),
               TokenImage.getInstance(),
               TokenInitFunction.getInstance(),
               TokenInitHoldFunction.getInstance(),
@@ -98,6 +98,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               DrawingSetterFunctions.getInstance(),
               DrawingMiscFunctions.getInstance(),
               ShapeFunctions.getInstance(),
+              TemplateFunctions.getInstance(),
               ExportDataFunctions.getInstance(),
               RESTfulFunctions.getInstance(),
               HeroLabFunctions.getInstance(),

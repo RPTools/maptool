@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.tool;
 
@@ -170,7 +170,7 @@ public abstract class DefaultTool extends Tool
    * @param x the x coordinate of the drag start
    * @param y the y coordinate of the drag start
    */
-  public void setDragStart(int x, int y) {
+  private void setDragStart(int x, int y) {
     mapDragStart = new Point(x, y);
   }
 
@@ -225,12 +225,12 @@ public abstract class DefaultTool extends Tool
     mouseY = e.getY();
 
     CellPoint cp =
-        getZone().getGrid().convert(new ScreenPoint(mouseX, mouseY).convertToZone(renderer));
-    if (cp != null) {
-      MapTool.getFrame().getCoordinateStatusBar().update(cp.x, cp.y);
-    } else {
-      MapTool.getFrame().getCoordinateStatusBar().clear();
-    }
+        getZone()
+            .getGrid()
+            .convert(
+                new ScreenPoint(mouseX, mouseY)
+                    .convertToZone(renderer.getViewModel().getZoneScale()));
+    MapTool.getFrame().getCoordinateStatusBar().update(cp);
   }
 
   @Override
@@ -238,11 +238,8 @@ public abstract class DefaultTool extends Tool
     int mX = e.getX();
     int mY = e.getY();
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mX, mY));
-    if (cellUnderMouse != null) {
-      MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
-    } else {
-      MapTool.getFrame().getCoordinateStatusBar().clear();
-    }
+    MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse);
+
     // MAP MOVEMENT
     // Sometimes the mousePressed() event can come after the first mouseDragged() event when the
     // right button is pressed. So check that we are actually intending to drag the map.
@@ -255,7 +252,9 @@ public abstract class DefaultTool extends Tool
       }
 
       setDragStart(mX, mY);
-      renderer.moveViewBy(mapDX, mapDY);
+
+      var viewModel = renderer.getViewModel();
+      viewModel.setZoneScale(viewModel.getZoneScale().translated(mapDX, mapDY));
     }
   }
 
@@ -314,11 +313,30 @@ public abstract class DefaultTool extends Tool
     if (!AppState.isZoomLocked()) {
       boolean direction = e.getWheelRotation() < 0;
       direction = isKeyDown('z') == direction;
-      if (direction) {
-        renderer.zoomOut(e.getX(), e.getY());
+
+      var scale = renderer.getViewModel().getZoneScale();
+
+      if (!e.isControlDown()) {
+        if (direction) {
+          scale = scale.zoomedOut(e.getX(), e.getY());
+        } else {
+          scale = scale.zoomedIn(e.getX(), e.getY());
+        }
+      } else if (!e.isAltDown()) {
+        if (direction) {
+          scale = scale.zoomedOutFine(e.getX(), e.getY());
+        } else {
+          scale = scale.zoomedInFine(e.getX(), e.getY());
+        }
       } else {
-        renderer.zoomIn(e.getX(), e.getY());
+        if (direction) {
+          scale = scale.zoomedOutUltrafine(e.getX(), e.getY());
+        } else {
+          scale = scale.zoomedInUltrafine(e.getX(), e.getY());
+        }
       }
+
+      renderer.getViewModel().setZoneScale(scale);
       renderer.maybeForcePlayersView();
     }
   }

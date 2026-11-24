@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="16" height="12" viewBox="0 0 16 12" version="1.1" id="svg15" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+  <defs id="Icon_Colours">
+    <linearGradient id="OBJECTS_BLACK_TEXT">
+      <stop style="stop-color:#231F20;stop-opacity:1" offset="0" id="stop1" />
+    </linearGradient>
+    <linearGradient id="OBJECTS_RED_STATUS">
+      <stop style="stop-color:#E05555;stop-opacity:1" offset="0" id="stop2" />
+    </linearGradient>
+    <linearGradient id="OBJECTS_RED">
+      <stop style="stop-color:#F26522;stop-opacity:1" offset="0" id="stop3" />
+    </linearGradient>
+    <linearGradient id="OBJECTS_PINK">
+      <stop style="stop-color:#F98B9E;stop-opacity:1" offset="0" id="stop4" />
+    </linearGradient>
+    <linearGradient id="OBJECTS_PURPLE">
+      <stop style="stop-color:#B99BF8;stop-opacity:1" offset="0" id="stop5" />
+    </linearGradient>
+    <linearGradient id="OBJECTS_YELLOW">
+      <stop style="stop-color:#F4AF3D;stop-opacity:1" offset="0" id="stop6" />
+    </linearGradient>
+    <linearGradient id="OBJECTS_GREEN">
+      <stop style="stop-color:#62B543;stop-opacity:1" offset="0" id="stop7" />
+    </linearGradient>
+    <linearGradient id="OBJECTS_BLUE">
+      <stop style="stop-color:#40B6E0;stop-opacity:1" offset="0" id="stop8" />
+    </linearGradient>
+    <linearGradient id="OBJECTS_GREY">
+      <stop style="stop-color:#9AA7B0;stop-opacity:1" offset="0" id="stop9" />
+    </linearGradient>
+    <linearGradient id="ACTIONS_RED">
+      <stop style="stop-color:#DB5860;stop-opacity:1" offset="0" id="stop10" />
+    </linearGradient>
+    <linearGradient id="ACTIONS_YELLOW">
+      <stop style="stop-color:#EDA200;stop-opacity:1" offset="0" id="stop11" />
+    </linearGradient>
+    <linearGradient id="ACTIONS_GREEN">
+      <stop style="stop-color:#59A869;stop-opacity:1" offset="0" id="stop12" />
+    </linearGradient>
+    <linearGradient id="ACTIONS_BLUE">
+      <stop style="stop-color:#389FD6;stop-opacity:1" offset="0" id="stop13" />
+    </linearGradient>
+    <linearGradient id="ACTIONS_GREY">
+      <stop style="stop-color:#6e6e6e;stop-opacity:1" offset="0" id="stop14" />
+    </linearGradient>
+    <linearGradient id="ACTIONS_GREYINLINE">
+      <stop style="stop-color:#7F8B91;stop-opacity:1" offset="0" id="stop15" />
+    </linearGradient>
+    <linearGradient xlink:href="#ACTIONS_BLUE" id="linearGradient18" gradientUnits="userSpaceOnUse" x1="1.1697" y1="8.0208" x2="11.05" y2="8.0208" gradientTransform="matrix(0,-1,-1,0,16,12)" />
+  </defs>
+  <path id="triangle" style="fill:url(#linearGradient18);fill-rule:evenodd;stroke-linecap:square;stroke-miterlimit:0" d="M 15,11 L 8,1 L 1,11 Z" />
+</svg>

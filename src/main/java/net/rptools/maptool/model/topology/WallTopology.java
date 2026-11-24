@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.topology;
 
@@ -369,11 +369,11 @@ public final class WallTopology implements Topology {
 
     var firstIsForeign = !graph.containsVertex(first.id());
     if (firstIsForeign) {
-      throw new RuntimeException("Unable unable vertices: first vertex does not exist!");
+      throw new RuntimeException("Unable to merge vertices: first vertex does not exist!");
     }
     var secondIsForeign = !graph.containsVertex(second.id());
     if (secondIsForeign) {
-      throw new RuntimeException("Unable unable vertices: second vertex does not exist!");
+      throw new RuntimeException("Unable to merge vertices: second vertex does not exist!");
     }
 
     if (first.equals(second)) {
@@ -513,7 +513,7 @@ public final class WallTopology implements Topology {
     for (var vertex : this.verticesById.values()) {
       builder.addVertices(
           VertexDto.newBuilder()
-              .setId(vertex.id().toString())
+              .setId(vertex.id().toDto())
               .setPosition(
                   DoublePointDto.newBuilder()
                       .setX(vertex.position().getX())
@@ -528,7 +528,7 @@ public final class WallTopology implements Topology {
   public static WallTopology fromDto(WallTopologyDto dto) {
     var topology = new WallTopology();
     for (var vertexDto : dto.getVerticesList()) {
-      Vertex vertex = new Vertex(new GUID(vertexDto.getId()));
+      Vertex vertex = new Vertex(GUID.fromDto(vertexDto.getId()));
       try {
         topology.addVertexImpl(vertex);
       } catch (GraphException e) {

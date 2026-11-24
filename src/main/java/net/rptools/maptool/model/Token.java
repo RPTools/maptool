@@ -9,16 +9,11 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import java.awt.Color;
@@ -28,13 +23,11 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Transparency;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,15 +36,11 @@ import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
-import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
@@ -103,10 +92,6 @@ public class Token implements Cloneable {
   /** The stat sheet properties for the token. */
   @Nullable private StatSheetProperties statSheet;
 
-  /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
-  private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
-      new Gson().getAdapter(JsonObject.class);
-
   public boolean getAllowURIAccess() {
     if (allowURIAccess && !isLibToken()) {
       allowURIAccess = false;
@@ -131,37 +116,37 @@ public class Token implements Cloneable {
   }
 
   public enum TokenShape {
-    TOP_DOWN(),
-    CIRCLE(),
-    SQUARE(),
-    FIGURE();
+    TOP_DOWN("Token.TokenShape.TOP_DOWN"),
+    CIRCLE("Token.TokenShape.CIRCLE"),
+    SQUARE("Token.TokenShape.SQUARE"),
+    FIGURE("Token.TokenShape.FIGURE");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    TokenShape() {
-      displayName = I18N.getString("Token.TokenShape." + name());
+    TokenShape(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
   /** Type of character: PC or NPC. */
   public enum Type {
-    PC(),
-    NPC();
+    PC("Token.Type.PC"),
+    NPC("Token.Type.NPC");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    Type() {
-      displayName = I18N.getString("Token.Type." + name());
+    Type(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -222,7 +207,10 @@ public class Token implements Cloneable {
     flipY,
     flipIso,
     setSpeechName,
-    removeFacing
+    removeFacing,
+    clearHalos,
+    removeHalo,
+    addHalo,
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -296,21 +284,26 @@ public class Token implements Cloneable {
 
   /** Terrain Modifier Operations */
   public enum TerrainModifierOperation {
-    NONE(), // Default, no terrain modifications to pathfinding cost
-    MULTIPLY(), // All tokens with this type are added together and multiplied against the Cell cost
-    ADD(), // All tokens with this type are added together and added to the cell cost
-    BLOCK(), // Movement through tokens with this type are blocked just as if they had MBL
-    FREE(); // Any cell with a token of this type in it has ALL movement costs removed
+    /** Default, no terrain modifications to pathfinding cost */
+    NONE("Token.TerrainModifierOperation.NONE"),
+    /** All tokens with this type are added together and multiplied against the Cell cost */
+    MULTIPLY("Token.TerrainModifierOperation.MULTIPLY"),
+    /** All tokens with this type are added together and added to the cell cost */
+    ADD("Token.TerrainModifierOperation.ADD"),
+    /** Movement through tokens with this type are blocked just as if they had MBL */
+    BLOCK("Token.TerrainModifierOperation.BLOCK"),
+    /** Any cell with a token of this type in it has ALL movement costs removed */
+    FREE("Token.TerrainModifierOperation.FREE");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    TerrainModifierOperation() {
-      displayName = I18N.getString("Token.TerrainModifierOperation." + name());
+    TerrainModifierOperation(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -335,6 +328,9 @@ public class Token implements Cloneable {
    * <p>The elements should be unique, i.e., no two should reference the same light source.
    */
   private List<AttachedLightSource> lightSourceList = new ArrayList<>();
+
+  /** All halos attached to the token. */
+  private LinkedHashSet<GUID> haloIdSet = new LinkedHashSet<>();
 
   private String sightType;
   private boolean hasSight;
@@ -471,6 +467,10 @@ public class Token implements Cloneable {
     uniqueLightSources.putAll(token.uniqueLightSources);
     lightSourceList.addAll(token.lightSourceList);
 
+    if (token.haloIdSet != null) {
+      haloIdSet.addAll(token.haloIdSet);
+    }
+
     state.putAll(token.state);
     getPropertyMap().clear();
     getPropertyMap().putAll(token.propertyMapCI);
@@ -603,11 +603,6 @@ public class Token implements Cloneable {
     } else {
       return height;
     }
-  }
-
-  public boolean isMarker() {
-    return getLayer().isMarkerLayer()
-        && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
   }
 
   public String getPropertyType() {
@@ -991,6 +986,83 @@ public class Token implements Cloneable {
     return Collections.unmodifiableList(lightSourceList);
   }
 
+  public void addHalo(GUID haloId) {
+    haloIdSet.add(haloId);
+  }
+
+  public void removeGMOnlyHalos(Campaign campaign) {
+    CategorizedHalos ch = campaign.getCategorizedHalos();
+    Iterator<GUID> i = haloIdSet.iterator();
+    while (i.hasNext()) {
+      Halo halo = ch.getHalo(i.next());
+      if (halo != null) {
+        if (halo.isGMOnly()) {
+          i.remove();
+        }
+      }
+    }
+  }
+
+  public void removeOwnerOnlyHalos(Campaign campaign) {
+    CategorizedHalos ch = campaign.getCategorizedHalos();
+    Iterator<GUID> i = haloIdSet.iterator();
+    while (i.hasNext()) {
+      Halo halo = ch.getHalo(i.next());
+      if (halo != null) {
+        if (halo.isOwnerOnly()) {
+          i.remove();
+        }
+      }
+    }
+  }
+
+  public boolean hasHalos() {
+    return !haloIdSet.isEmpty();
+  }
+
+  public boolean hasGMOnlyHalos(Campaign campaign) {
+    CategorizedHalos ch = campaign.getCategorizedHalos();
+    for (GUID id : haloIdSet) {
+      Halo halo = ch.getHalo(id);
+      if (halo != null) {
+        if (halo.isGMOnly()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public boolean hasOwnerOnlyHalos(Campaign campaign) {
+    CategorizedHalos ch = campaign.getCategorizedHalos();
+    for (GUID id : haloIdSet) {
+      Halo halo = ch.getHalo(id);
+      if (halo != null) {
+        if (halo.isOwnerOnly()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public void removeHalo(GUID haloId) {
+    haloIdSet.remove(haloId);
+  }
+
+  /** Clear the list of halos */
+  public void clearHalos() {
+    haloIdSet.clear();
+  }
+
+  public boolean hasHalo(GUID id) {
+    return haloIdSet.contains(id);
+  }
+
+  public Set<GUID> getHalos() {
+    return Collections.unmodifiableSet(haloIdSet);
+  }
+
   public synchronized void addOwner(String playerId) {
     ownerType = OWNER_TYPE_LIST;
     ownerList.add(playerId);
@@ -1135,22 +1207,53 @@ public class Token implements Cloneable {
     return assetId;
   }
 
-  public MD5Key getTokenImageAssetId() {
-    if (!getHasImageTable() || !hasFacing() || getImageTableName() == null)
-      return getImageAssetId();
-
-    LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(getImageTableName());
-    if (lookupTable == null) return getImageAssetId();
-
-    try {
-      LookupTable.LookupEntry result = lookupTable.getLookup(String.valueOf(getFacing()));
-      if (result != null) return result.getImageId();
-
-    } catch (ParserException p) {
-      /* do nothing  */
+  /**
+   * Looks up the token's facing in the token's image table.
+   *
+   * <p>If the token does not have an image table, or does not have its facing set, or otherwise
+   * cannot find an image ID from the lookup table, this method return {@code null}.
+   *
+   * @return The image ID from the image table, or {@code null} if none can be found.
+   */
+  private @Nullable MD5Key lookupImageTableByFacing() {
+    if (!getHasImageTable() || !hasFacing() || getImageTableName() == null) {
+      return null;
     }
 
-    return getImageAssetId();
+    LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(getImageTableName());
+    if (lookupTable == null) {
+      return null;
+    }
+
+    LookupTable.LookupEntry result;
+    try {
+      result = lookupTable.getLookup(String.valueOf(getFacing()));
+    } catch (ParserException p) {
+      return null;
+    }
+    if (result == null) {
+      return null;
+    }
+
+    MD5Key imageId = result.getImageId();
+    if (imageId == null) {
+      return null;
+    }
+
+    return imageId;
+  }
+
+  /**
+   * Looks up the token's facing in the token's image table.
+   *
+   * <p>If the token does not have an image table, or does not have its facing set, or otherwise
+   * cannot find an image ID from the lookup table, this method returns same result as {@link
+   * #getImageAssetId()}.
+   *
+   * @return The image ID from the image table.
+   */
+  public MD5Key getTokenImageAssetId() {
+    return Objects.requireNonNullElseGet(lookupImageTableByFacing(), this::getImageAssetId);
   }
 
   /**
@@ -1339,9 +1442,10 @@ public class Token implements Cloneable {
    * Return the area of the token for the requested type of topology.
    *
    * @param topologyType The type of topology to return.
-   * @return the current topology of the token.
+   * @return the current topology of the token, or {@code null} if the token does not have topology
+   *     of type {@code topologyType}.
    */
-  public Area getMaskTopology(Zone.TopologyType topologyType) {
+  public @Nullable Area getMaskTopology(Zone.TopologyType topologyType) {
     return switch (topologyType) {
       case WALL_VBL -> vbl;
       case HILL_VBL -> hillVbl;
@@ -1354,11 +1458,13 @@ public class Token implements Cloneable {
   /**
    * Transform the token's topology according to the token's scale, position, rotation and flipping.
    *
+   * @param zone The zone in which the token resides.
    * @param topologyType The type of topology to transform.
-   * @return the transformed topology for the token
+   * @return the transformed topology for the token, or {@code null} if the token does not have
+   *     topology of type {@code topologyType}.
    */
-  public Area getTransformedMaskTopology(Zone.TopologyType topologyType) {
-    return getTransformedMaskTopology(getMaskTopology(topologyType));
+  public @Nullable Area getTransformedMaskTopology(Zone zone, Zone.TopologyType topologyType) {
+    return getTransformedMaskTopology(zone, getMaskTopology(topologyType));
   }
 
   /**
@@ -1416,73 +1522,17 @@ public class Token implements Cloneable {
    * @author Jamz
    * @since 1.4.1.5
    */
-  public Area getTransformedMaskTopology(Area areaToTransform) {
+  public Area getTransformedMaskTopology(Zone zone, Area areaToTransform) {
     if (areaToTransform == null) {
       return null;
     }
 
-    Rectangle footprintBounds = getBounds(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+    Rectangle footprintBounds = getFootprintBounds(zone);
     Dimension imgSize = new Dimension(getWidth(), getHeight());
-    AwtUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
-    // Lets account for ISO images
-    double iso_ho = 0;
-    if (getShape() == TokenShape.FIGURE) {
-      double th = getHeight() * (double) footprintBounds.width / getWidth();
-      iso_ho = footprintBounds.height - th;
-      footprintBounds =
-          new Rectangle(
-              footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
-    }
+    var imageTransform = TokenUtil.getRenderTransform(zone, this, imgSize, footprintBounds);
 
-    // Lets figure in offset if image is not free size/native size aka snapToScale
-    int offsetx = 0;
-    int offsety = 0;
-    if (isSnapToScale()) {
-      offsetx =
-          imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 : 0;
-      offsety =
-          imgSize.height < footprintBounds.height
-              ? (footprintBounds.height - imgSize.height) / 2
-              : 0;
-    }
-    double tx = footprintBounds.x + offsetx;
-    double ty = footprintBounds.y + offsety + iso_ho;
-
-    // Apply the coordinate translation
-    AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
-
-    double scalerX = isSnapToScale() ? ((double) imgSize.width) / getWidth() : scaleX;
-    double scalerY = isSnapToScale() ? ((double) imgSize.height) / getHeight() : scaleY;
-
-    // Apply the rotation transformation...
-    if (getShape() == Token.TokenShape.TOP_DOWN && hasFacing()) {
-      // Find the center x,y coords of the rectangle
-      double rx = getWidth() / 2.0 * scalerX - getAnchor().getX();
-      double ry = getHeight() / 2.0 * scalerY - getAnchor().getY();
-
-      atArea.concatenate(
-          AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-    }
-    // Apply the scale transformation
-    atArea.concatenate(AffineTransform.getScaleInstance(scalerX, scalerY));
-
-    // Lets account for flipped images...
-    if (isFlippedX) {
-      atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
-      atArea.concatenate(AffineTransform.getTranslateInstance(-getWidth(), 0));
-    }
-
-    if (isFlippedY) {
-      atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
-      atArea.concatenate(AffineTransform.getTranslateInstance(0, -getHeight()));
-    }
-
-    if (getIsFlippedIso()) {
-      return new Area(atArea.createTransformedShape(IsometricGrid.isoArea(areaToTransform)));
-    }
-
-    return new Area(atArea.createTransformedShape(areaToTransform));
+    return new Area(imageTransform.createTransformedShape(areaToTransform));
   }
 
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
@@ -1497,7 +1547,7 @@ public class Token implements Cloneable {
     return name;
   }
 
-  public Rectangle getBounds(Zone zone) {
+  public Rectangle getFootprintBounds(Zone zone) {
     Grid grid = zone.getGrid();
     TokenFootprint footprint = getFootprint(grid);
     Rectangle footprintBounds =
@@ -1510,7 +1560,7 @@ public class Token implements Cloneable {
     if (!isSnapToScale()) {
       w = getWidth() * scaleX;
       h = getHeight() * scaleY;
-      if (grid.isIsometric() && getShape() == Token.TokenShape.FIGURE) {
+      if (grid.getType().isIsometric() && getShape() == Token.TokenShape.FIGURE) {
         // Native size figure tokens need to follow iso rules
         h = (w / 2);
       }
@@ -1535,6 +1585,48 @@ public class Token implements Cloneable {
     return footprintBounds;
   }
 
+  public Rectangle getImageBounds(Zone zone) {
+    Grid grid = zone.getGrid();
+    TokenFootprint footprint = getFootprint(grid);
+    Rectangle footprintBounds =
+        footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
+
+    double w;
+    double h;
+
+    // Sizing
+    if (!isSnapToScale()) {
+      w = getWidth() * scaleX;
+      h = getHeight() * scaleY;
+      if (grid.getType().isIsometric() && getShape() == Token.TokenShape.FIGURE) {
+        // Native size figure tokens need to follow iso rules
+        h = (w / 2);
+      }
+    } else {
+      w = footprintBounds.width * footprint.getScale() * sizeScale;
+      h = footprintBounds.height * footprint.getScale() * sizeScale;
+    }
+    // Positioning
+    if (!isSnapToGrid()) {
+      footprintBounds.x = getX();
+      footprintBounds.y = getY();
+    } else {
+      if (getLayer().isSnapToGridAtCenter()) {
+        // Center it on the footprint
+        footprintBounds.x -= (int) ((w - footprintBounds.width) / 2d);
+        footprintBounds.y -= (int) ((h - footprintBounds.height) / 2d);
+      }
+    }
+    footprintBounds.width = (int) w; // perhaps make this a double
+    footprintBounds.height = (int) h;
+
+    // Offset
+    footprintBounds.x += anchorX;
+    footprintBounds.y += anchorY;
+
+    return footprintBounds;
+  }
+
   /**
    * Return the drag anchor of the token.
    *
@@ -1555,7 +1647,7 @@ public class Token implements Cloneable {
         dragAnchorY = getY() + (int) centerOffset.y;
       } else {
         // Anchor at the layout center.
-        Rectangle tokenBounds = getBounds(zone);
+        Rectangle tokenBounds = getFootprintBounds(zone);
         dragAnchorX = tokenBounds.x + tokenBounds.width / 2 - anchorX;
         dragAnchorY = tokenBounds.y + tokenBounds.height / 2 - anchorY;
       }
@@ -1580,23 +1672,6 @@ public class Token implements Cloneable {
 
     setX(newDragAnchorPosition.x - offsetX);
     setY(newDragAnchorPosition.y - offsetY);
-  }
-
-  /**
-   * Like {@link #getDragAnchor(Zone)}, but assume the token is in cell {@code cellPoint}.
-   *
-   * @param zone The zone that the token lives in.
-   * @param cellPoint The cell in which the token should pretend to be located.
-   * @return The drag anchor the token would have if located at {@code cellPoint}.
-   */
-  public ZonePoint getDragAnchorAsIfLocatedInCell(Zone zone, CellPoint cellPoint) {
-    ZonePoint anchor = getDragAnchor(zone);
-    ZonePoint nearestGridCellVertex = zone.getGrid().convert(zone.getGrid().convert(anchor));
-    ZonePoint targetCellVertex = zone.getGrid().convert(cellPoint);
-
-    return new ZonePoint(
-        targetCellVertex.x + (anchor.x - nearestGridCellVertex.x),
-        targetCellVertex.y + (anchor.y - nearestGridCellVertex.y));
   }
 
   /**
@@ -1644,7 +1719,7 @@ public class Token implements Cloneable {
    */
   private Point2D.Double getSnapToUnsnapOffset(Zone zone) {
     double offsetX, offsetY;
-    Rectangle tokenBounds = getBounds(zone);
+    Rectangle tokenBounds = getFootprintBounds(zone);
     Grid grid = zone.getGrid();
     if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().isSnapToGridAtCenter()) {
       if (!getLayer().isSnapToGridAtCenter() || isSnapToScale()) {
@@ -1663,7 +1738,7 @@ public class Token implements Cloneable {
 
         offsetX = footprintOffsetX / 2.0 - cellOffset.width * cellsX;
         offsetY = footprintOffsetY / 2.0 - cellOffset.height * cellsY;
-        if (grid.isHex() && "large".equalsIgnoreCase(footprint.getName())) {
+        if (grid.getType().isHex() && "large".equalsIgnoreCase(footprint.getName())) {
           // Merudo: not sure why this special case is needed.
           offsetX = offsetX - Math.min(grid.getCellWidth(), grid.getCellHeight()) / 2;
           offsetY = offsetY - Math.min(grid.getCellWidth(), grid.getCellHeight()) / 2;
@@ -1693,6 +1768,16 @@ public class Token implements Cloneable {
     this.sightType = sightType;
   }
 
+  private String getSizeMapKey(GridType type) {
+    return switch (type) {
+      case Square -> SquareGrid.class.getName();
+      case Isometric -> IsometricGrid.class.getName();
+      case HexVertical -> HexGridVertical.class.getName();
+      case HexHorizontal -> HexGridHorizontal.class.getName();
+      case None -> GridlessGrid.class.getName();
+    };
+  }
+
   /**
    * Calculate the foot print of a grid
    *
@@ -1700,19 +1785,30 @@ public class Token implements Cloneable {
    * @return Returns the size.
    */
   public TokenFootprint getFootprint(Grid grid) {
-    return grid.getFootprint(getSizeMap().get(grid.getClass().getName()));
+    return grid.getType().getFootprints().get(getFootprintId(grid.getType()));
   }
 
-  public TokenFootprint setFootprint(Grid grid, TokenFootprint footprint) {
-    return grid.getFootprint(getSizeMap().put(grid.getClass().getName(), footprint.getId()));
+  /**
+   * Finds the ID of the footprint of the token on the given grid type.
+   *
+   * @param gridType the type of grid to get footprint of
+   * @return Returns the size.
+   */
+  public GUID getFootprintId(GridType gridType) {
+    return sizeMap.getOrDefault(getSizeMapKey(gridType), gridType.getFootprints().getDefaultId());
+  }
+
+  public void setFootprintId(GridType gridType, GUID footprintId) {
+    sizeMap.put(getSizeMapKey(gridType), footprintId);
   }
 
   public Set<CellPoint> getOccupiedCells(Grid grid) {
-    return getFootprint(grid).getOccupiedCells(grid.convert(new ZonePoint(getX(), getY())));
-  }
-
-  private Map<String, GUID> getSizeMap() {
-    return sizeMap;
+    var gridType = grid.getType();
+    return gridType
+        .getFootprints()
+        .get(getFootprintId(gridType))
+        .getOccupiedCells(
+            grid.convert(new ZonePoint(getX(), getY())), gridType.getOffsetTranslator());
   }
 
   public boolean isSnapToGrid() {
@@ -1814,96 +1910,6 @@ public class Token implements Cloneable {
     }
 
     return null;
-  }
-
-  /**
-   * Evaluate the provided expression with the resolver
-   *
-   * @param resolver the variable resolver to parse code inside the property
-   * @param key the key of the value
-   * @param val An expression to evaluate
-   * @return The evaluated value
-   */
-  @Nonnull
-  public Object evaluateProperty(
-      @Nullable MapToolVariableResolver resolver, @Nonnull String key, @Nonnull Object val) {
-    if (val.toString().trim().startsWith("{")) {
-      /*
-       * The normal Gson evaluator was too lenient in identifying JSON objects, so we had to move
-       * that lower (see #1560). But we would really like to avoid the performance cost of
-       * attempting to parse anything that actually is a proper JSON, so let's try a stricter
-       * evaluation process here first (see #2396).
-       */
-      try {
-        try (JsonReader reader = new JsonReader(new StringReader(val.toString()))) {
-          JsonObject result = strictGsonObjectAdapter.read(reader);
-          // in case of a situation like {"a": 1}{"b": 2}, the above would have stopped at the first
-          // complete object.  This next line will throw an exception on finding another top-level
-          // object, allowing us to move on with other evaluation.
-          reader.hasNext();
-          if (result.isJsonObject()) {
-            return result;
-          }
-        }
-      } catch (IOException e) {
-        // deliberately ignored - continue parsing
-      }
-    }
-    // try to convert it to a JSON array. Fixes #2057.
-    if (val.toString().trim().startsWith("[")) {
-      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-      if (json.isJsonArray()) {
-        return json;
-      }
-    }
-    try {
-      log.debug(
-          "Evaluating property: '{}' for token {} ({})----------------------------------------------------------------------------------",
-          key,
-          getName(),
-          getId());
-      val = MapTool.getParser().parseLine(resolver, this, val.toString());
-    } catch (ParserException pe) {
-      log.debug("Ignoring Parse Exception, continuing to evaluate {}", key);
-      val = val.toString();
-    }
-    if (val == null) {
-      return "";
-    }
-    // Finally we try convert it to a JSON object. Fixes #1560.
-    if (val.toString().trim().startsWith("{")) {
-      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-      if (json.isJsonObject()) {
-        return json;
-      }
-    }
-
-    return val;
-  }
-
-  @Nonnull
-  public Object getEvaluatedProperty(@Nonnull String key) {
-    return getEvaluatedProperty(null, key);
-  }
-
-  /**
-   * Returns the evaluated property corresponding to the key.
-   *
-   * @param resolver the variable resolver to parse code inside the property
-   * @param key the key of the value
-   * @return the value
-   */
-  @Nonnull
-  public Object getEvaluatedProperty(
-      @Nullable MapToolVariableResolver resolver, @Nonnull String key) {
-    Object val = getProperty(key);
-    if (val == null) {
-      val = getPropertyDefault(key);
-    }
-    if (val == null) {
-      return "";
-    }
-    return evaluateProperty(resolver, key, val);
   }
 
   /**
@@ -2600,6 +2606,9 @@ public class Token implements Cloneable {
       }
     }
 
+    if (haloIdSet == null) {
+      haloIdSet = new LinkedHashSet<>();
+    }
     if (macroPropertiesMap == null) {
       macroPropertiesMap = new HashMap<>();
     }
@@ -2764,9 +2773,9 @@ public class Token implements Cloneable {
         break;
       case setFootprint:
         setSnapToScale(true);
-        setFootprint(
-            Grid.fromDto(parameters.get(0).getGrid()),
-            TokenFootprint.fromDto(parameters.get(1).getTokenFootPrint()));
+        setFootprintId(
+            GridType.fromDto(parameters.get(0).getGridType()),
+            GUID.fromDto(parameters.get(1).getFootprintId()));
         break;
       case setProperty:
         setProperty(parameters.get(0).getStringValue(), parameters.get(1).getStringValue());
@@ -2926,6 +2935,15 @@ public class Token implements Cloneable {
         lightChanged = true;
         addLightSource(GUID.valueOf(parameters.get(0).getLightSourceId()));
         break;
+      case clearHalos:
+        clearHalos();
+        break;
+      case removeHalo:
+        removeHalo(GUID.valueOf(parameters.get(0).getHaloId()));
+        break;
+      case addHalo:
+        addHalo(GUID.valueOf(parameters.get(0).getHaloId()));
+        break;
       case setHasSight:
         if (hasLightSources()) {
           lightChanged = true;
@@ -2981,7 +2999,7 @@ public class Token implements Cloneable {
 
   public static Token fromDto(TokenDto dto) {
     var token = new Token();
-    token.id = GUID.valueOf(dto.getId());
+    token.id = GUID.fromDto(dto.getId());
     token.beingImpersonated = dto.getBeingImpersonated();
     token.exposedAreaGUID = GUID.valueOf(dto.getExposedAreaGuid());
     var assetMap = dto.getImageAssetMapMap();
@@ -3057,6 +3075,7 @@ public class Token implements Cloneable {
         dto.getLightSourcesList().stream()
             .map(AttachedLightSource::fromDto)
             .collect(Collectors.toList()));
+    dto.getHaloGuidsList().stream().forEach(id -> token.haloIdSet.add(new GUID(id)));
     token.sightType = dto.hasSightType() ? dto.getSightType().getValue() : null;
     token.hasSight = dto.getHasSight();
     token.hasImageTable = dto.getHasImageTable();
@@ -3096,7 +3115,7 @@ public class Token implements Cloneable {
 
   public TokenDto toDto() {
     var dto = TokenDto.newBuilder();
-    dto.setId(id.toString());
+    dto.setId(id.toDto());
     dto.setBeingImpersonated(beingImpersonated);
     dto.setExposedAreaGuid(exposedAreaGUID.toString());
     for (var key : imageAssetMap.keySet()) {
@@ -3186,6 +3205,7 @@ public class Token implements Cloneable {
         uniqueLightSources.values().stream().map(LightSource::toDto).collect(Collectors.toList()));
     dto.addAllLightSources(
         lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
+    dto.addAllHaloGuids(haloIdSet.stream().map(GUID::toString).collect(Collectors.toList()));
     if (sightType != null) {
       dto.setSightType(StringValue.of(sightType));
     }

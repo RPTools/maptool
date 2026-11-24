@@ -9,12 +9,13 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.macro.impl;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 
 public abstract class AbstractRollMacro extends AbstractMacro {
@@ -22,7 +23,8 @@ public abstract class AbstractRollMacro extends AbstractMacro {
   protected String roll(String roll) {
 
     try {
-      String text = roll + " => " + MapTool.getParser().expandRoll(roll);
+      String text =
+          roll + " => " + MapTool.getParser().expandRoll(new MapToolVariableResolver(null), roll);
 
       return text;
     } catch (Exception e) {

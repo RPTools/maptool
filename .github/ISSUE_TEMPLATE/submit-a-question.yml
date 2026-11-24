@@ -6,10 +6,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        *This should NOT be used for general questions on use of MapTool*
-        For user support, please post your question on the Forums: http://forums.rptools.net
-        Or on our Discord channel: [Invite Link](https://discord.gg/2FCwhZ9)
-        Or on Reddit: [r/MapTool](https://www.reddit.com/r/MapTool/)
+        > [!IMPORTANT]
+        > *This should NOT be used for general questions on use of MapTool*
+        >
+        > For user support, please post your question in one of these places:
+        > - [RPTools.net forums](https://forums.rptools.net)
+        > - [MapTool Discord server](https://discord.gg/dZy7HeYYVY)
+        > - [r/MapTool subreddit](https://www.reddit.com/r/MapTool/)
   - type: textarea
     attributes:
       label: Your Question

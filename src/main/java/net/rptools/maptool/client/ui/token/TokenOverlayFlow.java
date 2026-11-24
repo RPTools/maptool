@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.token;
 
@@ -99,7 +99,7 @@ public class TokenOverlayFlow {
    * @param state The state being rendered.
    * @return The bounds used to paint the state.
    */
-  public Rectangle2D getStateBounds2D(Rectangle bounds, Token token, String state) {
+  public Rectangle2D getStateBounds2D(Rectangle2D bounds, Token token, String state) {
 
     // Find the list of states already drawn on the token
     List<String> states = savedStates.computeIfAbsent(token.getId(), k -> new LinkedList<String>());
@@ -148,10 +148,10 @@ public class TokenOverlayFlow {
 
     // Build the rectangle from the passed bounds
     return new Rectangle2D.Double(
-        offsets[col] * bounds.width + bounds.x,
-        offsets[row] * bounds.height + bounds.y,
-        size * bounds.width,
-        size * bounds.height);
+        offsets[col] * bounds.getWidth() + bounds.getMinX(),
+        offsets[row] * bounds.getHeight() + bounds.getMinY(),
+        size * bounds.getWidth(),
+        size * bounds.getHeight());
   }
 
   /**

@@ -9,18 +9,19 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.Locale;
 import java.util.prefs.Preferences;
 import net.rptools.lib.image.RenderQuality;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.preferences.Preference;
@@ -30,12 +31,23 @@ import net.rptools.maptool.util.preferences.PreferenceStore;
 public class AppPreferences {
   private static final PreferenceStore store =
       new PreferenceStore(Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs"));
-  private static final boolean PRINT_KEYS_MISSING_I18N_ON_STARTUP =
-      false; // for finding pesky wabbitses
+
+  /** For finding pesky wabbitses */
+  private static final boolean PRINT_KEYS_MISSING_I18N_ON_STARTUP = false;
 
   public static PreferenceStore getAppPreferenceStore() {
     return store;
   }
+
+  public static final Preference<Locale> locale =
+      store.define(
+          "localeOverride",
+          "Preferences.label.localeOverride",
+          "Preferences.label.localeOverride.tooltip",
+          Locale.class,
+          null,
+          string -> string == null ? null : Locale.forLanguageTag(string),
+          locale -> locale == null ? null : locale.toLanguageTag());
 
   public static final Preference<Boolean> fillSelectionBox =
       store.defineBoolean(
@@ -357,6 +369,15 @@ public class AppPreferences {
           .setLabel("Preferences.label.maps.light")
           .setTooltip("Preferences.label.maps.light.tooltip");
 
+  public static final Preference<Zone.ShowCoordinates> defaultShowCoordinates =
+      store
+          .defineEnum(
+              Zone.ShowCoordinates.class,
+              "defaultShowCoordinates",
+              Zone.ShowCoordinates.SHOW_COORDS_TO_ALL)
+          .setLabel("Preferences.label.maps.showCoordinates")
+          .setTooltip("Preferences.label.maps.showCoordinates.tooltip");
+
   public static final Preference<MapSortType> mapSortType =
       store
           .defineEnum(MapSortType.class, "sortByGMName", MapSortType.GMNAME)
@@ -482,6 +503,44 @@ public class AppPreferences {
               "nonVisMapLabelBorderColor", nonVisibleTokenMapLabelForeground.getDefault(), true)
           .setLabel("Preferences.label.access.tokenLabel.nonVisBorderColor");
 
+  /** The background color to use for drawing labels. */
+  public static final Preference<Color> drawingMapLabelBackgroundColor =
+      store
+          .defineColor("drawingMapLabelBackgroundColor", Color.YELLOW, true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.drawingBackground.tooltip");
+
+  /** The foreground color to use for drawing labels. */
+  public static final Preference<Color> drawingMapLabelForegroundColor =
+      store
+          .defineColor("drawingMapLabelForegroundColor", Color.BLACK, true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.drawingForeground.tooltip");
+
+  /** The border color to use for drawing labels. */
+  public static final Preference<Color> drawingMapLabelBorderColor =
+      store
+          .defineColor(
+              "drawingMapLabelBorderColor", drawingMapLabelForegroundColor.getDefault(), true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.drawingBorder.tooltip");
+
+  /** The background color to use for template labels. */
+  public static final Preference<Color> templateMapLabelBackgroundColor =
+      store
+          .defineColor("templateMapLabelBackgroundColor", Color.RED, true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.templateBackground.tooltip");
+
+  /** The foreground color to use for template labels. */
+  public static final Preference<Color> templateMapLabelForegroundColor =
+      store
+          .defineColor("templateMapLabelForegroundColor", Color.WHITE, true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.templateForeground.tooltip");
+
+  /** The border color to use for template labels. */
+  public static final Preference<Color> templateMapLabelBorderColor =
+      store
+          .defineColor(
+              "templateMapLabelBorderColor", templateMapLabelForegroundColor.getDefault(), true)
+          .setTooltip("Preferences.colorwell.access.drawableLabel.templateBorder.tooltip");
+
   /** The font size to use for token map labels. */
   public static final Preference.Numeric<Integer> mapLabelFontSize =
       (Preference.Numeric<Integer>)
@@ -584,7 +643,7 @@ public class AppPreferences {
 
   public static final Preference<String> defaultGridType =
       store
-          .defineString("defaultGridType", GridFactory.SQUARE)
+          .defineString("defaultGridType", GridType.Square.toString())
           .setLabel("Preferences.label.maps.grid")
           .setTooltip("Preferences.label.maps.grid.tooltip");
 
@@ -608,6 +667,15 @@ public class AppPreferences {
           "Preferences.label.tokens.portrait.mouse",
           "Preferences.label.tokens.portrait.mouse.tooltip",
           true);
+  public static final Preference<Color> facingArrowBGColour =
+      store
+          .defineColor("facingArrowBGColour", Color.yellow, false)
+          .setLabel("Preferences.label.tokens.arrow.background");
+
+  public static final Preference<Color> facingArrowBorderColour =
+      store
+          .defineColor("facingArrowBorderColour", Color.darkGray, false)
+          .setLabel("Preferences.label.tokens.arrow.border");
 
   public static final Preference<Boolean> forceFacingArrow =
       store.defineBoolean(
@@ -626,7 +694,7 @@ public class AppPreferences {
   public static final Preference<String> defaultUserName =
       store
           .defineString(
-              "defaultUsername", I18N.getString("Preferences.client.default.username.value"))
+              "defaultUsername", () -> I18N.getString("Preferences.client.default.username.value"))
           .setLabel("Preferences.label.client.default.username")
           .setTooltip("Preferences.label.client.default.username.tooltip");
 
@@ -704,6 +772,9 @@ public class AppPreferences {
           "Preferences.label.loadMRU",
           "Preferences.label.loadMRU.tooltip",
           false);
+
+  public static final Preference<Boolean> initiativePanelShowsInfoInTitle =
+      store.defineBoolean("initShowTitleInfo", true);
 
   public static final Preference<Boolean> initiativePanelShowsTokenImage =
       store.defineBoolean("initShowTokens", true);
@@ -804,18 +875,18 @@ public class AppPreferences {
   // Based off vision type enum in Zone.java, this could easily get tossed somewhere else if
   // preferred.
   public enum MapSortType {
-    DISPLAYNAME(),
-    GMNAME();
+    DISPLAYNAME("mapSortType.DISPLAYNAME"),
+    GMNAME("mapSortType.GMNAME");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    MapSortType() {
-      displayName = I18N.getString("mapSortType." + name());
+    MapSortType(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -824,15 +895,15 @@ public class AppPreferences {
     Masks("uvttLosImportType.masks"),
     Prompt("uvttLosImportType.prompt");
 
-    private final String displayName;
+    private final String displayNameKey;
 
     UvttLosImportType(String key) {
-      displayName = I18N.getString(key);
+      displayNameKey = key;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 

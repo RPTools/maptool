@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.macrobuttons.buttongroups;
 
@@ -437,8 +437,10 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                 MacroButtonPrefs.saveMacroButtonsAtNextIndex(toAdd);
               } else if ("CampaignPanel".equals(panelClass)) {
                 MapTool.getCampaign().addMacroButtonPropertiesAtNextIndex(toAdd, false);
+                MapTool.publishCampaignMacros(false);
               } else if ("GmPanel".equals(panelClass)) {
                 MapTool.getCampaign().addMacroButtonPropertiesAtNextIndex(toAdd, true);
+                MapTool.publishCampaignMacros(true);
               }
             }
 
@@ -784,6 +786,9 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
             || panelClass.equals("GlobalPanel")
             || panelClass.equals("GmPanel")) {
           areaGroup.getPanel().renameMacroGroup(macroGroup, newMacroGroupName);
+          if (!panelClass.equals("GlobalPanel")) {
+            MapTool.publishCampaignMacros(panelClass.equals("GmPanel"));
+          }
         } else if (tokenId != null) {
           getToken().renameMacroGroup(macroGroup, newMacroGroupName);
         }

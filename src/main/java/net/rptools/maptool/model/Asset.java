@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
@@ -44,12 +44,13 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.server.proto.AssetDto;
 import net.rptools.maptool.server.proto.AssetDtoType;
+import net.rptools.maptool.util.HandlebarsUtil;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.exception.TikaException;
+import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
+import org.apache.tika.parser.ParseContext;
 
 /** Asset used in the campaign. */
 public final class Asset {
@@ -61,6 +62,8 @@ public final class Asset {
     IMAGE(false, "", Asset::createImageAsset), // extension is determined from format.
     /** The {@code Asset} is an audio file. */
     AUDIO(false, "", Asset::createAudioAsset), // extension is determined from format.
+    /** The {@code Asset} is a Handlebars template. */
+    HANDLEBARS(true, "hbs", Asset::createHandlebarsAsset),
     /** The {@code Asset} is an HTML string. */
     HTML(true, "html", Asset::createHTMLAsset),
     /** The {@code Asset} is some generic data. */
@@ -161,7 +164,12 @@ public final class Asset {
         case "image" -> Type.IMAGE;
         case "text" ->
             switch (subType) {
-              case "html" -> Type.HTML;
+              case "html" -> {
+                if (HandlebarsUtil.isAssetFileHandlebars(filename)) {
+                  yield Type.HANDLEBARS;
+                }
+                yield Type.HTML;
+              }
               case "markdown", "x-web-markdown" -> Type.MARKDOWN;
               case "javascript" -> Type.JAVASCRIPT;
               case "css" -> Type.CSS;
@@ -417,6 +425,18 @@ public final class Asset {
     MediaType mediaType = getMediaType(name, data);
     var factory = Type.fromMediaType(mediaType, file.getPath()).getFactory();
     return factory.apply(name, data);
+  }
+
+  /**
+   * Creates a Handlebars {@code Asset}.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param data The data for the {@code Asset}.
+   * @return the Handlebars {@code Asset}.
+   */
+  public static Asset createHandlebarsAsset(String name, byte[] data) {
+    return new Asset(
+        null, name, data, Type.HANDLEBARS, Type.HANDLEBARS.getDefaultExtension(), false);
   }
 
   /**
@@ -763,21 +783,15 @@ public final class Asset {
   private static MediaType getMediaType(String filename, TikaInputStream tis) throws IOException {
     Metadata metadata = new Metadata();
     metadata.set(RESOURCE_NAME_KEY, filename);
-    try {
-      TikaConfig tika = new TikaConfig();
-      MediaType mediaType = tika.getDetector().detect(tis, metadata);
 
-      /* Workaround for Tika seeing Javascript files as Matlab scripts */
-      if ("text/x-matlab".equals(mediaType.toString())) {
-        String ext = FilenameUtils.getExtension(filename);
-        if ("js".equals(ext) || "javascript".equals(ext))
-          mediaType = new MediaType("text", "javascript");
-      }
-      return mediaType;
-
-    } catch (TikaException e) {
-      throw new IOException(e);
+    MediaType mediaType = new Tika().getDetector().detect(tis, metadata, new ParseContext());
+    /* Workaround for Tika seeing Javascript files as Matlab scripts */
+    if ("text/x-matlab".equals(mediaType.toString())) {
+      String ext = FilenameUtils.getExtension(filename);
+      if ("js".equals(ext) || "javascript".equals(ext))
+        mediaType = new MediaType("text", "javascript");
     }
+    return mediaType;
   }
 
   /**
@@ -813,6 +827,26 @@ public final class Asset {
    */
   public static MediaType getMediaType(URL url) throws IOException {
     return getMediaType(url.getFile(), TikaInputStream.get(url));
+  }
+
+  /**
+   * Returns the detected {@link MediaType} for this {@code Asset}.
+   *
+   * @return the {@link MediaType} of the {@code Asset}.
+   */
+  public MediaType getMediaType() {
+    try {
+      String filename = name;
+      if (filename != null
+          && extension != null
+          && !extension.isEmpty()
+          && !filename.endsWith("." + extension)) {
+        filename = filename + "." + extension;
+      }
+      return getMediaType(filename != null ? filename : "", data != null ? data : new byte[0]);
+    } catch (IOException e) {
+      return MediaType.OCTET_STREAM;
+    }
   }
 
   /**

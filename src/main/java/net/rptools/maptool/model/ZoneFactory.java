@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
@@ -83,8 +83,9 @@ public class ZoneFactory {
     zone.setUnitsPerCell(AppPreferences.defaultUnitsPerCell.get());
     zone.setTokenVisionDistance(AppPreferences.defaultVisionDistance.get());
     zone.setVisionType(AppPreferences.defaultVisionType.get());
+    zone.setShowCoordinates(AppPreferences.defaultShowCoordinates.get());
 
-    zone.setGrid(GridFactory.createGrid(AppPreferences.defaultGridType.get()));
+    zone.setGrid(GridFactory.createGrid(GridType.fromString(AppPreferences.defaultGridType.get())));
     zone.setGridColor(AppPreferences.defaultGridColor.get().getRGB());
     zone.getGrid().setSize(AppPreferences.defaultGridSize.get());
     zone.getGrid().setOffset(0, 0);

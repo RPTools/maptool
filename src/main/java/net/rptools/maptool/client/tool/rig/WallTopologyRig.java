@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.tool.rig;
 
@@ -85,7 +85,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
     return results;
   }
 
-  public List<WallTopologyRig.MovableWall> getWallsWithin(Rectangle2D bounds) {
+  public List<WallTopologyRig.MovableWall> getWallsIntersecting(Rectangle2D bounds) {
     var envelope =
         new Envelope(
             bounds.getMinX(), bounds.getMaxX(),
@@ -102,6 +102,30 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
                       GeometryUtil.point2DToCoordinate(movableWall.getFrom().getPosition()),
                       GeometryUtil.point2DToCoordinate(movableWall.getTo().getPosition()));
               if (wallEnvelope.intersects(envelope)) {
+                results.add(movableWall);
+              }
+            });
+    results.sort(Comparator.comparingInt(wall -> walls.getZIndex(wall.getSource())));
+    return results;
+  }
+
+  public List<WallTopologyRig.MovableWall> getWallsWithin(Rectangle2D bounds) {
+    var envelope =
+        new Envelope(
+            bounds.getMinX(), bounds.getMaxX(),
+            bounds.getMinY(), bounds.getMaxY());
+
+    var results = new ArrayList<WallTopologyRig.MovableWall>();
+    walls
+        .getWalls()
+        .forEach(
+            wall -> {
+              var movableWall = new WallTopologyRig.MovableWall(this, walls, wall);
+              var wallEnvelope =
+                  new Envelope(
+                      GeometryUtil.point2DToCoordinate(movableWall.getFrom().getPosition()),
+                      GeometryUtil.point2DToCoordinate(movableWall.getTo().getPosition()));
+              if (envelope.covers(wallEnvelope)) {
                 results.add(movableWall);
               }
             });
@@ -159,7 +183,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
             point.getY() - selectDistance,
             2 * selectDistance,
             2 * selectDistance);
-    var candidateWalls = getWallsWithin(bounds);
+    var candidateWalls = getWallsIntersecting(bounds);
 
     // Reverse so we pick the highest-z-index candidate.
     for (var wall : candidateWalls.reversed()) {

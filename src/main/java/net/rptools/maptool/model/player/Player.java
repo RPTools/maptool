@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.player;
 
@@ -25,22 +25,18 @@ import net.rptools.maptool.server.proto.PlayerDto;
 public class Player {
 
   public enum Role {
-    PLAYER(),
-    GM();
+    PLAYER("userTerm.Player"),
+    GM("userTerm.GM");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    Role() {
-      if (name().equals("GM")) {
-        displayName = I18N.getString("userTerm.GM");
-      } else {
-        displayName = I18N.getString("userTerm.Player");
-      }
+    Role(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 

@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -132,6 +131,15 @@ public class InitiativeList implements Serializable {
    *-------------------------------------------------------------------------------------------*/
 
   /**
+   * @return the token initiative that has the initiative, or null if none does. Unlike {@link
+   *     #getTokenInitiative(int)}, "none" is not an error: it is the state of a new or emptied
+   *     list.
+   */
+  private TokenInitiative currentInitiative() {
+    return getCurrent() < 0 ? null : getTokenInitiative(getCurrent());
+  }
+
+  /**
    * Get the token initiative data at the passed index. Allows the other state to be set.
    *
    * @param index Index of the token initiative data needed.
@@ -175,7 +183,7 @@ public class InitiativeList implements Serializable {
   public TokenInitiative insertToken(int index, Token token) {
     startUnitOfWork();
     TokenInitiative currentInitiative =
-        getTokenInitiative(getCurrent()); // Save the currently selected initiative
+        currentInitiative(); // Save the currently selected initiative
     if (index == -1) {
       index = tokens.size();
     }
@@ -235,7 +243,7 @@ public class InitiativeList implements Serializable {
     // clear current
     startUnitOfWork();
     TokenInitiative currentInitiative =
-        getTokenInitiative(getCurrent()); // Save the currently selected initiative
+        currentInitiative(); // Save the currently selected initiative
     int currentInitIndex = indexOf(currentInitiative);
     if (currentInitIndex == index) {
       if (tokens.size() == 1) {
@@ -495,7 +503,7 @@ public class InitiativeList implements Serializable {
   public void sort(boolean ascendingOrder) {
     startUnitOfWork();
     TokenInitiative currentInitiative =
-        getTokenInitiative(getCurrent()); // Save the currently selected initiative
+        currentInitiative(); // Save the currently selected initiative
 
     Collections.sort(tokens, new TokenInitiativeDescComparator());
     if (ascendingOrder) {
@@ -540,8 +548,7 @@ public class InitiativeList implements Serializable {
 
     // Save the current position, the token moves but the initiative does not.
     TokenInitiative newInitiative = null;
-    TokenInitiative currentInitiative =
-        getTokenInitiative(getCurrent()); // Save the current initiative
+    TokenInitiative currentInitiative = currentInitiative(); // Save the current initiative
     if (oldIndex == current) {
       newInitiative = getTokenInitiative(oldIndex != 0 ? oldIndex - 1 : 1);
       current = (oldIndex != 0 ? oldIndex - 1 : 1);
@@ -719,7 +726,8 @@ public class InitiativeList implements Serializable {
                 libraryNamespace,
                 argStr,
                 null,
-                Collections.emptyMap());
+                Collections.emptyMap(),
+                false);
           } catch (InterruptedException | ExecutionException e) {
             // Should not be possible
             throw new AssertionError("Error retrieving library namespace");
@@ -821,15 +829,6 @@ public class InitiativeList implements Serializable {
     /** Optional state that can be displayed in the initiative panel. */
     private String state;
 
-    /** Save off the icon so that it can be displayed as needed. */
-    private transient Icon displayIcon;
-
-    /**
-     * Need to remember whether the displayIcon was shaded (to indicate a hidden token) so we can
-     * update when needed
-     */
-    private transient boolean tokenVisibleWhenIconUpdated = false;
-
     /*---------------------------------------------------------------------------------------------
      * Constructors
      *-------------------------------------------------------------------------------------------*/
@@ -910,43 +909,6 @@ public class InitiativeList implements Serializable {
       state = aState;
       getPCS().fireIndexedPropertyChange(TOKENS_PROP, tokens.indexOf(this), old, aState);
       finishUnitOfWork(this);
-    }
-
-    /**
-     * @return Getter for displayIcon
-     */
-    public Icon getDisplayIcon() {
-      return displayIcon;
-    }
-
-    /**
-     * NOTE: Be sure to also call {@link#setTokenVisibleWhenIconUpdated(boolean)}
-     *
-     * @param displayIcon Setter for the displayIcon to set.
-     */
-    public void setDisplayIcon(Icon displayIcon) {
-      this.displayIcon = displayIcon;
-    }
-
-    /**
-     * Checks whether the cached icon for this {@link TokenInitiative} was generated with the alpha
-     * shading - indicating whether the token was visible when the icon was last refreshed.
-     *
-     * @return true if the token was visible (and the icon was therefore opaque), false otherwise
-     */
-    public boolean wasTokenVisibleWhenIconUpdated() {
-      return tokenVisibleWhenIconUpdated;
-    }
-
-    /**
-     * Remember whether the generated icon was shaded (to indicate a non-visible token), so it can
-     * be refreshed if needed.
-     *
-     * @param tokenVisibleWhenIconUpdated true to indicate that the token was visible, false
-     *     otherwise
-     */
-    public void setTokenVisibleWhenIconUpdated(boolean tokenVisibleWhenIconUpdated) {
-      this.tokenVisibleWhenIconUpdated = tokenVisibleWhenIconUpdated;
     }
 
     /**
@@ -1069,5 +1031,9 @@ public class InitiativeList implements Serializable {
 
       return comparison;
     }
+  }
+
+  public TokenInitiativeDescComparator getComparator() {
+    return new TokenInitiativeDescComparator();
   }
 }

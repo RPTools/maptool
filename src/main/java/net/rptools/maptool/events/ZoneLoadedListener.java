@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.events;
 
@@ -38,6 +38,7 @@ public class ZoneLoadedListener {
   @Subscribe
   public void OnChangedMap(ZoneLoaded event) {
     ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+    MapTool.getFrame().getCoordinateStatusBar().reset();
     try {
       var libs = new LibraryManager().getLegacyEventTargets(ON_CHANGE_MAP_CALLBACK).get();
       if (libs.isEmpty()) {
@@ -51,7 +52,8 @@ public class ZoneLoadedListener {
               libraryNamespace,
               currentZR.getZone().getId().toString(),
               null,
-              Collections.emptyMap());
+              Collections.emptyMap(),
+              false);
         } catch (InterruptedException | ExecutionException e) {
           LOGGER.error(I18N.getText("library.error.notFound"), e);
           throw new AssertionError("Error retrieving library namespace");

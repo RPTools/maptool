@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -141,9 +141,7 @@ public class TestFunctions extends AbstractFunction {
             new MapToolMacroContext(
                 TEST_CONTEXT_NAME, MapTool.getParser().getContext().getSource(), true);
         try {
-          String ret =
-              MapTool.getParser()
-                  .parseLine(resolver, resolver.getTokenInContext(), mbp.getCommand(), context);
+          String ret = MapTool.getParser().parseLine(resolver, mbp.getCommand(), context);
         } catch (Exception e) {
           failures++;
           messages.add(e.getMessage());

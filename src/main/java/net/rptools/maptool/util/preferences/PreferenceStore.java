@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.util.preferences;
 
@@ -19,8 +19,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.prefs.Preferences;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /** A wrapper around {@link Preferences} that adds strong typing and a host of other features. */
 public class PreferenceStore {
@@ -82,6 +85,10 @@ public class PreferenceStore {
   }
 
   public Preference<String> defineString(String key, String defaultValue) {
+    return defineString(key, () -> defaultValue);
+  }
+
+  public Preference<String> defineString(String key, Supplier<String> defaultValue) {
     return register(
         new BasicPreference<>(
             prefs, key, null, null, defaultValue, new PreferenceType.StringType()));
@@ -102,5 +109,23 @@ public class PreferenceStore {
     return register(
         new BasicPreference<>(
             prefs, key, null, null, defaultValue, new PreferenceType.ColorType(hasAlpha)));
+  }
+
+  public <T> Preference<T> define(
+      String key,
+      String labelKey,
+      String tooltipKey,
+      Class<T> type,
+      T defaultValue,
+      Function<@NonNull String, @Nullable T> load,
+      Function<@Nullable T, @NonNull String> store) {
+    return register(
+        new BasicPreference<>(
+            prefs,
+            key,
+            labelKey,
+            tooltipKey,
+            defaultValue,
+            new PreferenceType.AnyType<>(type, load, store)));
   }
 }

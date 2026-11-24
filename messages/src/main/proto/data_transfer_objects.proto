@@ -6,6 +6,7 @@ option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto";
 option java_outer_classname = "DataTranferObjectProtos";
 
+import "common.proto";
 import "drawing_dto.proto";
 import "google/protobuf/wrappers.proto";
 /*
@@ -31,10 +32,11 @@ message ServerPolicyDto {
   bool vbl_blocks_move = 15;
   bool hide_map_select_ui = 16;
   bool lock_player_library = 17;
+  bool is_token_context_locked = 18;
 }
 
 message CampaignDto {
-  string id = 1;
+  GuidDto id = 1;
   string name = 2;
   google.protobuf.BoolValue has_used_fog_toolbar = 3;
   CampaignPropertiesDto properties = 4;
@@ -56,6 +58,9 @@ message LookupTableDto {
   bool visible = 5;
   bool allow_lookup = 6;
   bool pick_once = 7;
+  google.protobuf.StringValue group = 8;
+  google.protobuf.StringValue metadata = 9;
+  google.protobuf.StringValue metadata_type = 10;
 }
 
 message LookupEntryDto {
@@ -73,7 +78,7 @@ message LightSourceDto {
   }
   repeated LightDto lights = 1;
   google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue id = 3;
+  optional GuidDto id = 3;
   LightTypeDto type = 4;
   bool scale_with_token = 5;
   bool ignores_VBL = 6;
@@ -98,6 +103,58 @@ message LightDto {
   bool is_gm = 7;
   bool owner_only = 8;
   int32 lumens = 9;
+}
+
+message HaloDto {
+  GuidDto id = 1;
+  string name = 2;
+  bool gm_only = 3;
+  bool owner_only = 4;
+  bool inner = 5;
+  bool facing_with_token = 6;
+  bool flip_with_token = 7;
+  bool scale_with_token = 8;
+  repeated HaloPartDto halo_parts = 9;
+}
+
+message HaloPartDto {
+  enum HaloShapeTypeDto {
+    CIRCLE = 0;
+    ARC = 1;
+    CHORD = 2;
+    PIE = 3;
+    TRIANGLE = 4;
+    SQUARE = 5;
+    POLYGON = 6;
+    STAR = 7;
+    GRID = 8;
+    FOOTPRINT = 9;
+    TOKEN = 10;
+    OUTLINE = 11;
+    MBL = 12;
+    VBLCOVER = 13;
+    VBLHILL = 14;
+    VBLPIT = 15;
+    VBLWALL = 16;
+  }
+  DrawablePaintDto paint = 1;
+  HaloShapeTypeDto halo_shape_type = 2;
+  google.protobuf.Int32Value width = 3;
+  repeated float dashed_pattern = 4;
+  bool fill = 5;
+  bool flip_horizontal = 6;
+  bool flip_vertical = 7;
+  double angle = 8;
+  double offset = 9;
+  double rotate = 10;
+  double scale_x = 11;
+  double scale_y = 12;
+  int32 vertices = 13;
+  int32 mini = 14;
+  int32 mini_start = 15;
+  int32 mini_stop = 16;
+  double mini_rotate = 17;
+  double mini_spin = 18;
 }
 
 message LocationDto {
@@ -134,6 +191,7 @@ message CampaignPropertiesDto {
   repeated SightTypeDto sight_types = 13;
   map<string, StatSheetPropertiesDto> token_type_stat_sheet = 14;
   google.protobuf.StringValue default_token_property_type = 15;
+  map<string, HaloListDto> halos = 16;
 }
 
 message SightTypeDto {
@@ -151,11 +209,11 @@ message SightTypeDto {
 message TokenPropertyDto {
   string name = 1;
   google.protobuf.StringValue short_name = 2;
-  bool high_priority = 3;
-  bool owner_only = 4;
-  bool gm_only = 5;
-  google.protobuf.StringValue default_value = 6;
-  google.protobuf.StringValue display_name = 7;
+  google.protobuf.StringValue default_value = 3;
+  google.protobuf.StringValue display_name = 4;
+  string stat_sheet_view_permission = 5;
+  string editor_view_permission = 6;
+  string editor_edit_permission = 7;
 }
 
 message TokenOverlayDto {
@@ -201,30 +259,68 @@ enum QuadrantDto {
 }
 
 message BooleanTokenOverlayDto {
-  enum BooleanTokenOverlayTypeDto {
+  TokenOverlayDto common = 1;
+  oneof child_type {
+    ShapeTokenOverlayDto shape = 2;
+    FlowShapeTokenOverlayDto flow_shape = 3;
+    ColorDotTokenOverlayDto color_dot = 4;
+    ImageTokenOverlayDto image = 5;
+    CornerImageTokenOverlayDto corner_image = 6;
+    FlowImageTokenOverlayDto flow_image = 7;
+    ShadedTokenOverlayDto shaded = 8;
+  }
+}
+
+message ShapeTokenOverlayDto {
+  enum TypeTag {
     X = 0;
     YIELD = 1;
     O = 2;
-    COLOR_DOT = 3;
-    DIAMOND = 4;
-    TRIANGLE = 5;
-    CROSS = 6;
-    FLOW_COLOR_DOT = 7;
-    FLOW_DIAMOND = 8;
-    FLOW_COLOR_SQUARE = 9;
-    FLOW_YIELD = 10;
-    SHADED = 11;
-    IMAGE = 12;
-    FLOW_IMAGE = 13;
-    CORNER_IMAGE = 14;
+    DIAMOND = 3;
+    TRIANGLE = 4;
+    CROSS = 5;
   }
-  TokenOverlayDto common = 1;
-  int32 color = 2;
-  StrokeDto stroke = 3;
-  QuadrantDto quadrant = 4;
-  int32 grid_size = 5;
-  string asset_id = 6;
-  BooleanTokenOverlayTypeDto type = 7;
+
+  int32 color = 1;
+  float stroke_width = 2;
+  TypeTag type = 3;
+}
+
+message FlowShapeTokenOverlayDto {
+  enum TypeTag {
+    DOT = 0;
+    SQUARE = 1;
+    DIAMOND = 2;
+    TRIANGLE = 3;
+    YIELD = 4;
+  }
+
+  int32 color = 1;
+  int32 grid_size = 2;
+  TypeTag type = 3;
+}
+
+message ColorDotTokenOverlayDto {
+  int32 color = 1;
+  QuadrantDto quadrant = 2;
+}
+
+message ImageTokenOverlayDto {
+  string asset_id = 1;
+}
+
+message CornerImageTokenOverlayDto {
+  string asset_id = 1;
+  QuadrantDto quadrant = 2;
+}
+
+message FlowImageTokenOverlayDto {
+  string asset_id = 1;
+  int32 gridSize = 2;
+}
+
+message ShadedTokenOverlayDto {
+  int32 color = 1;
 }
 
 message StrokeDto {
@@ -251,6 +347,9 @@ message LightSourceListDto {
   repeated LightSourceDto light_sources = 1;
 }
 
+message HaloListDto {
+  repeated HaloDto halos = 1;
+}
 
 enum WalkerMetricDto {
   NO_DIAGONALS = 0;
@@ -294,7 +393,7 @@ message TokenDto {
     SQUARE = 2;
     FIGURE = 3;
   }
-  string id = 1;
+  GuidDto id = 1;
   bool being_impersonated = 2;
   string exposed_area_guid = 3;
   map<string, string> image_asset_map = 4;
@@ -366,6 +465,7 @@ message TokenDto {
   string notes_type = 68;
   string gm_notes_type = 69;
   StatSheetPropertiesDto stat_sheet_properties = 70;
+  repeated string halo_guids = 73;
 }
 
 message PathDto {
@@ -490,7 +590,7 @@ message AssetDto {
 }
 
 message LabelDto {
-  string id = 1;
+  GuidDto id = 1;
   string label = 2;
   int32 x = 3;
   int32 y = 4;
@@ -529,8 +629,13 @@ message ZoneDto {
     CELL_UNIT = 1;
     INTEGER = 2;
   }
+  enum ShowCoordinatesDto {
+    SHOW_COORDS_TO_ALL = 0;
+    SHOW_COORDS_TO_GM_ONLY = 1;
+    SHOW_COORDS_TO_NONE = 2;
+  }
   int64 creation_time = 1;
-  string id = 2;
+  GuidDto id = 2;
   GridDto grid = 3;
   int32 grid_color = 4;
   float image_scale_x = 5;
@@ -555,8 +660,6 @@ message ZoneDto {
   DrawablePaintDto background_paint = 26;
   google.protobuf.StringValue map_asset = 27;
   IntPointDto boardPosition = 28;
-  bool draw_board = 29;
-  bool boardChanged = 30;
   string name = 31;
   google.protobuf.StringValue player_alias = 32;
   bool is_visible = 33;
@@ -565,6 +668,7 @@ message ZoneDto {
   TokenSelectionDto token_selection = 36;
   int32 height = 37;
   int32 width = 38;
+  ShowCoordinatesDto show_coordinates = 40;
 }
 
 message InitiativeListDto {
@@ -658,6 +762,9 @@ enum TokenUpdateDto {
     flipIso = 55;
     setSpeechName = 56;
     removeFacing = 57;
+    clearHalos = 58;
+    removeHalo = 59;
+    addHalo = 60;
 }
 
 message AssetTransferHeaderDto {
@@ -682,9 +789,11 @@ message TokenPropertyValueDto {
     LightSourceDto light_source = 7;
     AreaDto area = 8;
     StringListDto string_values = 9;
-    GridDto grid = 10;
-    TokenFootPrintDto token_foot_print = 11;
+    GridTypeDto grid_type = 10;
+    GuidDto footprint_id = 11;
     string topology_type = 12;
+    string halo_id = 13;
+    HaloDto halo = 14;
   }
 }
 
@@ -703,15 +812,6 @@ message TransferableAddOnLibraryDto {
   string namespace = 1;
   string version = 2;
   string asset_key = 3;
-}
-
-message TokenFootPrintDto {
-  string id = 1;
-  string name = 2;
-  string localizedName = 3;
-  bool is_default = 4;
-  double scale = 5;
-  repeated IntPointDto cell_set = 6;
 }
 
 // region WallTopology graph
@@ -735,7 +835,7 @@ enum TopologyDirectionModifier {
 }
 
 message VertexDto {
-  string id = 1;
+  GuidDto id = 1;
   DoublePointDto position = 2;
 }
 

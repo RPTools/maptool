@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.zone.renderer;
 
@@ -38,14 +38,14 @@ public class VisionOverlayRenderer {
   private final ZoneView zoneView;
 
   public VisionOverlayRenderer(RenderHelper renderHelper, Zone zone, ZoneView zoneView) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("VisionOverlayRenderer");
     this.zone = zone;
     this.zoneView = zoneView;
   }
 
   public void render(Graphics2D g, PlayerView view, Token tokenUnderMouse) {
     var timer = CodeTimer.get();
-    timer.start("renderVisionOverlay");
+    timer.start("VisionOverlayRenderer-renderVisionOverlay");
     try {
       if (tokenUnderMouse == null) {
         return;
@@ -62,7 +62,7 @@ public class VisionOverlayRenderer {
 
       this.renderHelper.render(g, worldG -> renderWorld(worldG, view, tokenUnderMouse));
     } finally {
-      timer.stop("renderVisionOverlay");
+      timer.stop("VisionOverlayRenderer-renderVisionOverlay");
     }
   }
 
@@ -77,7 +77,7 @@ public class VisionOverlayRenderer {
     }
     if (zone.hasFog()) {
       currentTokenVisionArea = new Area(currentTokenVisionArea);
-      currentTokenVisionArea.intersect(zoneView.getExposedArea(tokenView));
+      currentTokenVisionArea.intersect(zoneView.getVisibility(tokenView).exposedArea());
     }
 
     // Keep the line a consistent thickness

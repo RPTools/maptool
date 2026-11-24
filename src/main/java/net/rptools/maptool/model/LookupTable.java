@@ -9,24 +9,26 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
 import com.google.protobuf.StringValue;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.dicelib.expression.Result;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.LookupEntryDto;
 import net.rptools.maptool.server.proto.LookupTableDto;
 import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.parser.ParserException;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 public class LookupTable {
 
@@ -34,6 +36,7 @@ public class LookupTable {
 
   private @Nonnull List<LookupEntry> entryList = new ArrayList<>();
   private @Nullable String name;
+  private @Nullable String group;
   private @Nullable String defaultRoll;
   private @Nullable MD5Key tableImage;
   private @Nonnull Boolean visible = true;
@@ -41,6 +44,8 @@ public class LookupTable {
   // Flags a table as Pick Once, i.e. each entry can only be chosen once before the
   // table must be reset().
   private @Nonnull Boolean pickOnce = false;
+  private @Nullable String metadata;
+  private @Nullable String metadataType;
 
   public static final String NO_PICKS_LEFT = "NO_PICKS_LEFT";
 
@@ -48,15 +53,22 @@ public class LookupTable {
 
   public LookupTable(LookupTable table) {
     name = table.name;
+    group = table.group;
     defaultRoll = table.defaultRoll;
     tableImage = table.tableImage;
     pickOnce = table.pickOnce;
     visible = table.visible;
     allowLookup = table.allowLookup;
     entryList.addAll(table.entryList);
+    metadata = table.metadata;
+    metadataType = table.metadataType;
   }
 
-  public void setRoll(String roll) {
+  public String getRoll() {
+    return defaultRoll;
+  }
+
+  public void setRoll(@Nullable String roll) {
     defaultRoll = roll;
   }
 
@@ -64,16 +76,22 @@ public class LookupTable {
     entryList.clear();
   }
 
-  public void addEntry(int min, int max, String result, MD5Key imageId) {
-    entryList.add(new LookupEntry(min, max, result, imageId));
+  public LookupEntry addEntry(int min, int max, String result, MD5Key imageId) {
+    var newEntry = new LookupEntry(min, max, result, imageId);
+    entryList.add(newEntry);
+    return newEntry;
   }
 
-  public LookupEntry getLookup() throws ParserException {
-    return getLookup(null);
-  }
-
-  public String getRoll() {
-    return getDefaultRoll();
+  public String calculateRoll() {
+    if (getPickOnce()) {
+      var entryIndex = getRandomPickOnce();
+      if (entryIndex < 0) {
+        return NO_PICKS_LEFT;
+      }
+      return Integer.toString(entryIndex);
+    } else {
+      return getStandardDefaultRoll();
+    }
   }
 
   public void setName(String name) {
@@ -84,6 +102,72 @@ public class LookupTable {
     return name;
   }
 
+  public void setGroup(@Nullable String group) {
+    this.group = group;
+  }
+
+  public String getGroup() {
+    return group == null ? "" : group;
+  }
+
+  public void setMetadata(@Nullable String metadata) {
+    this.metadata = metadata;
+  }
+
+  public String getMetadata() {
+    return metadata == null ? "" : metadata;
+  }
+
+  public void setMetadataType(@Nullable String metadataType) {
+    this.metadataType = metadataType;
+  }
+
+  public @Nullable String getMetadataType() {
+    return metadataType == null ? SyntaxConstants.SYNTAX_STYLE_NONE : metadataType;
+  }
+
+  /**
+   * Finds the first entry that matches a given roll result.
+   *
+   * <p>This is useful for standard tables where each entry's range must be respected.
+   *
+   * @param rollResult The value to look up.
+   * @return The first entry whose range includes {@code rollResult}, or {@code null} if there is
+   *     none.
+   */
+  public @Nullable LookupEntry getEntryByRollResult(int rollResult) {
+    // For now this is a linear scan. In the future hopefully we can use some kind of accelerated
+    // search.
+    for (var entry : entryList.reversed()) {
+      if (entry.min <= rollResult && rollResult <= entry.max) {
+        return entry;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Looks up an entry by its index in the list of entries.
+   *
+   * <p>This is useful for pick once tables where, unlike standard tables, the ranges are not used
+   * to lookup entries.
+   *
+   * @param index The index of the entry to look up.
+   * @return The entry at index {@code index}, or {@code null} if the index is out of bounds.
+   */
+  public @Nullable LookupEntry getEntryByIndex(int index) {
+    if (index < 0 || index >= entryList.size()) {
+      return null;
+    }
+
+    return entryList.get(index);
+  }
+
+  public boolean deleteEntry(LookupEntry entry) {
+    return entryList.remove(entry);
+  }
+
   /**
    * Accepts a string containing a valid dice expression or integer which is evaluated and then the
    * matching entry in the table is returned.
@@ -92,85 +176,42 @@ public class LookupTable {
    * @return A LookupEntry matching the roll.
    * @throws ParserException if roll can't be parsed as integer or die expression
    */
-  public LookupEntry getLookup(String roll) throws ParserException {
-    LookupEntry entry;
-
-    if (roll == null) {
-      roll = getDefaultRoll();
-    }
-
-    if (roll.equals(NO_PICKS_LEFT)) {
-      entry = new LookupEntry(0, 0, NO_PICKS_LEFT, null);
-      return entry;
-    }
-
-    if (getPickOnce()) {
-      entry = getPickOnceLookup(roll);
-    } else {
-      entry = getStandardLookup(roll);
-    }
-
-    return entry;
+  public @Nullable LookupEntry getLookup(String roll) throws ParserException {
+    return getPickOnce() ? getPickOnceLookup(roll) : getStandardLookup(roll);
   }
 
-  /**
-   * Accepts a string containing a valid dice expression or integer which is evaluated and then the
-   * matching entry in the table is returned without filtering for picked entries.
-   *
-   * @param roll A string containing a dice expression or integer.
-   * @return A LookupEntry matching the roll.
-   */
-  public LookupEntry getLookupDirect(String roll) throws ParserException {
-    LookupEntry entry;
-
+  private @Nullable LookupEntry getStandardLookup(@Nullable String roll) throws ParserException {
     if (roll == null) {
-      return (null);
+      roll = getStandardDefaultRoll();
     }
 
-    entry = getStandardLookup(roll);
-
-    return entry;
-  }
-
-  private LookupEntry getStandardLookup(String roll) throws ParserException {
     int tableResult = 0;
-    LookupEntry retEntry = null;
-
     try {
       Result result = expressionParser.evaluate(roll);
       tableResult = Integer.parseInt(result.getValue().toString());
 
       tableResult = constrainRoll(tableResult);
 
-      for (LookupEntry entry : entryList) {
-        if (tableResult >= entry.min && tableResult <= entry.max) {
-          retEntry = entry;
-        }
-      }
-
+      return getEntryByRollResult(tableResult);
     } catch (NumberFormatException nfe) {
       throw new ParserException("Error lookup up value: " + tableResult);
     }
-
-    return retEntry;
   }
 
-  private LookupEntry getPickOnceLookup(String roll) throws ParserException {
+  private @Nonnull LookupEntry getPickOnceLookup(@Nullable String roll) throws ParserException {
+    int entryIndex;
     try {
-      int entryNum = Integer.parseInt(roll);
-
-      if (entryNum < entryList.size()) {
-        LookupEntry entry = entryList.get(entryNum);
-        entry.setPicked(true);
-        entryList.set(entryNum, entry);
-
-        return entry;
-      } else {
-        return new LookupEntry(0, 0, NO_PICKS_LEFT, null);
-      }
-
+      entryIndex = roll == null ? getRandomPickOnce() : Integer.parseInt(roll);
     } catch (NumberFormatException nfe) {
       throw new ParserException("Expected integer value for pick once table: " + roll);
+    }
+
+    var entry = getEntryByIndex(entryIndex);
+    if (entry == null) {
+      return new LookupEntry(0, 0, NO_PICKS_LEFT, null);
+    } else {
+      entry.setPicked(true);
+      return entry;
     }
   }
 
@@ -195,88 +236,56 @@ public class LookupTable {
     return val;
   }
 
-  private String getDefaultRoll() {
-    if (getPickOnce()) {
-      // For Pick Once tables this returns a random pick from those entries in the list that
-      // have not been picked.
-      List<LookupEntry> le = entryList;
-      LookupEntry entry;
-      int len = le.size();
-      List unpicked = new ArrayList<Integer>();
-      for (int i = 0; i < len; i++) {
-        entry = le.get(i);
-        if (!entry.picked) {
-          unpicked.add(i);
-        }
+  /**
+   * Gets a random entry index, for use with pick once tables.
+   *
+   * @return A random entry index, or {@code -1} if there are no picks left.
+   */
+  private int getRandomPickOnce() {
+    // For Pick Once tables this returns a random pick from those entries in the list that
+    // have not been picked.
+    List<LookupEntry> le = entryList;
+    LookupEntry entry;
+    int len = le.size();
+    List<Integer> unpicked = new ArrayList<Integer>();
+    for (int i = 0; i < len; i++) {
+      entry = le.get(i);
+      if (!entry.picked) {
+        unpicked.add(i);
       }
-      if (unpicked.isEmpty()) {
-        return (NO_PICKS_LEFT);
-      }
-      try {
-        Result result = expressionParser.evaluate("d" + unpicked.size());
-        int index = Integer.parseInt(result.getValue().toString()) - 1;
-        return unpicked.get(index).toString();
-      } catch (ParserException e) {
-        MapTool.showError("Error getting default roll for Pick Once table ", e);
-        return (NO_PICKS_LEFT);
-      }
-    } else {
-      if (defaultRoll != null && defaultRoll.length() > 0) {
-        return defaultRoll;
-      }
-
-      // Find the min and max range
-      Integer min = null;
-      Integer max = null;
-
-      for (LookupEntry entry : entryList) {
-        if (min == null || entry.min < min) {
-          min = entry.min;
-        }
-        if (max == null || entry.max > max) {
-          max = entry.max;
-        }
-      }
-
-      return min != null ? "d" + (max - min + 1) + (min - 1 != 0 ? "+" + (min - 1) : "") : "";
     }
+    if (unpicked.isEmpty()) {
+      return -1;
+    }
+
+    var index = ThreadLocalRandom.current().nextInt(unpicked.size());
+    return unpicked.get(index);
+  }
+
+  private String getStandardDefaultRoll() {
+    if (defaultRoll != null && !defaultRoll.isEmpty()) {
+      return defaultRoll;
+    }
+
+    if (entryList.isEmpty()) {
+      return "";
+    }
+
+    var first = entryList.getFirst();
+    int min = first.min;
+    int max = first.max;
+    for (LookupEntry entry : entryList.subList(1, entryList.size())) {
+      min = Math.min(min, entry.min);
+      max = Math.max(max, entry.max);
+    }
+    return "d" + (max - min + 1) + (min - 1 != 0 ? "+" + (min - 1) : "");
   }
 
   /** Sets the picked flag on each table entry to false. */
-  public void reset() {
-    List<LookupEntry> curList = entryList;
-    List<LookupEntry> newList = new ArrayList<>();
-    for (LookupEntry entry : curList) {
+  public void resetPicks() {
+    for (var entry : entryList) {
       entry.setPicked(false);
-      newList.add(entry);
     }
-    entryList = newList;
-  }
-
-  /**
-   * Reset the picked status of specific entries, allowing them to be picked again in this PickOnce
-   * table. Note that this uses the same indexing scheme as {@link #getPickOnceLookup(String)} -
-   * these entries are identified by list index (starting at 0), and NOT by any configured range.
-   *
-   * @param entriesToReset a list of strings representing the integer indices of entries to reset
-   * @throws NumberFormatException if any of the string entries cannot be successfully parsed as an
-   *     integer.
-   */
-  public void reset(List<String> entriesToReset) {
-    Set<Integer> indicesToReset =
-        entriesToReset.stream()
-            .map(Integer::parseInt)
-            .collect(Collectors.toCollection(HashSet::new));
-    List<LookupEntry> curList = entryList;
-    List<LookupEntry> newList = new ArrayList<>();
-    for (int i = 0; i < curList.size(); i++) {
-      LookupEntry entry = curList.get(i);
-      if (indicesToReset.contains(i)) {
-        entry.setPicked(false);
-      }
-      newList.add(entry);
-    }
-    entryList = newList;
   }
 
   /**
@@ -293,7 +302,7 @@ public class LookupTable {
    *
    * @return MD5Key
    */
-  public MD5Key getTableImage() {
+  public @Nullable MD5Key getTableImage() {
     return tableImage;
   }
 
@@ -302,21 +311,16 @@ public class LookupTable {
    *
    * @param tableImage The MD5Key (Asset ID) for the image.
    */
-  public void setTableImage(MD5Key tableImage) {
+  public void setTableImage(@Nullable MD5Key tableImage) {
     this.tableImage = tableImage;
   }
 
   /**
    * Gets whether a table is flagged as Pick Once or not.
    *
-   * @return Boolean - true if table is Pick Once
+   * @return {@code true} if table is Pick Once
    */
   public boolean getPickOnce() {
-    // Older tables won't have it set.
-    if (pickOnce == null) {
-      pickOnce = false;
-    }
-
     return pickOnce;
   }
 
@@ -328,7 +332,7 @@ public class LookupTable {
    */
   public void setPickOnce(boolean pickOnce) {
     this.pickOnce = pickOnce;
-    this.reset();
+    this.resetPicks();
   }
 
   /**
@@ -379,7 +383,7 @@ public class LookupTable {
      */
     @Deprecated private @Nullable String result;
 
-    public LookupEntry(int min, int max, String value, MD5Key imageId) {
+    public LookupEntry(int min, int max, @Nullable String value, @Nullable MD5Key imageId) {
       this.min = min;
       this.max = max;
       this.value = value;
@@ -400,8 +404,12 @@ public class LookupTable {
       return this;
     }
 
-    public MD5Key getImageId() {
+    public @Nullable MD5Key getImageId() {
       return imageId;
+    }
+
+    public void setImageId(@Nullable MD5Key imageId) {
+      this.imageId = imageId;
     }
 
     public void setPicked(boolean b) {
@@ -420,8 +428,12 @@ public class LookupTable {
       return min;
     }
 
-    public String getValue() {
+    public @Nullable String getValue() {
       return value;
+    }
+
+    public void setValue(@Nullable String value) {
+      this.value = value;
     }
 
     public static LookupEntry fromDto(LookupEntryDto dto) {
@@ -456,7 +468,7 @@ public class LookupTable {
     if (getTableImage() != null) {
       assetSet.add(getTableImage());
     }
-    for (LookupEntry entry : getEntryList()) {
+    for (LookupEntry entry : entryList) {
       if (entry.getImageId() != null) {
         assetSet.add(entry.getImageId());
       }
@@ -523,9 +535,106 @@ public class LookupTable {
     return this;
   }
 
+  /**
+   * Retrieves the number of table entries
+   *
+   * @return the number of tables entries
+   */
+  public int getEntryCount() {
+    return entryList.size();
+  }
+
+  /**
+   * Returns the number of entries that have an image assigned.
+   *
+   * @return count of entries with a non-null imageId
+   */
+  public long getEntryImageCount() {
+    return entryList.stream().filter(entry -> entry.getImageId() != null).count();
+  }
+
+  /**
+   * Returns the number of entries that have a value assigned.
+   *
+   * @return count of entries with a non-null value
+   */
+  public long getEntryValueCount() {
+    return entryList.stream()
+        .filter(entry -> entry.getValue() != null && !entry.getValue().isEmpty())
+        .count();
+  }
+
+  /**
+   * Returns if the table has any metadata or not.
+   *
+   * @return true/false
+   */
+  public boolean hasMetadata() {
+    return metadata != null && !metadata.isBlank();
+  }
+
+  /**
+   * Enum is a central list of supported table metadata types used for:
+   *
+   * <ul>
+   *   <li>populating {@code EditLookupTablePanel}'s metadata type JComboBox
+   *   <li>validating the metadata type in {@code LookupTableFunction setTableMetadataType()}
+   */
+  public enum SupportedMetadataType {
+    NONE(SyntaxConstants.SYNTAX_STYLE_NONE),
+    CSV(SyntaxConstants.SYNTAX_STYLE_CSV),
+    HTML(SyntaxConstants.SYNTAX_STYLE_HTML),
+    JSON(SyntaxConstants.SYNTAX_STYLE_JSON),
+    MARKDOWN(SyntaxConstants.SYNTAX_STYLE_MARKDOWN),
+    XML(SyntaxConstants.SYNTAX_STYLE_XML);
+
+    private final String mimeType;
+
+    SupportedMetadataType(String mimeType) {
+      this.mimeType = mimeType;
+    }
+
+    public String getMimeType() {
+      return mimeType;
+    }
+
+    public String getDisplayName() {
+      return I18N.getText(mimeType);
+    }
+
+    @Override
+    public String toString() {
+      return mimeType;
+    }
+
+    /** Finds a matching enum by its exact MIME type string. */
+    public static SupportedMetadataType fromMimeType(String mimeType) {
+      if (mimeType == null) {
+        return null;
+      }
+      String cleanedMimeType = mimeType.toLowerCase().trim();
+      for (SupportedMetadataType style : values()) {
+        if (style.getMimeType().equals(cleanedMimeType)) {
+          return style;
+        }
+      }
+      return null;
+    }
+
+    /** Generates a comma-separated list of supported enum MIME types, useful for error feedback. */
+    public static String getSupportedMimeTypeStringList() {
+      StringJoiner joiner = new StringJoiner(", ");
+      for (SupportedMetadataType type : values()) {
+        joiner.add(type.getMimeType());
+      }
+      return joiner.toString();
+    }
+  }
+
   public static LookupTable fromDto(LookupTableDto dto) {
     var table = new LookupTable();
     table.name = dto.hasName() ? dto.getName().getValue() : null;
+    table.group = dto.hasGroup() ? dto.getGroup().getValue() : null;
     table.entryList =
         dto.getEntriesList().stream().map(e -> LookupEntry.fromDto(e)).collect(Collectors.toList());
     table.defaultRoll = dto.hasDefaultRoll() ? dto.getDefaultRoll().getValue() : null;
@@ -533,6 +642,8 @@ public class LookupTable {
     table.setVisible(dto.getVisible());
     table.setAllowLookup(dto.getAllowLookup());
     table.setPickOnce(dto.getPickOnce());
+    table.metadata = dto.hasMetadata() ? dto.getMetadata().getValue() : null;
+    table.metadataType = dto.hasMetadataType() ? dto.getMetadataType().getValue() : null;
     return table;
   }
 
@@ -541,6 +652,9 @@ public class LookupTable {
     dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
     if (name != null) {
       dto.setName(StringValue.of(name));
+    }
+    if (group != null) {
+      dto.setGroup(StringValue.of(group));
     }
     if (defaultRoll != null) {
       dto.setDefaultRoll(StringValue.of(defaultRoll));
@@ -551,6 +665,12 @@ public class LookupTable {
     dto.setVisible(visible);
     dto.setAllowLookup(allowLookup);
     dto.setPickOnce(pickOnce);
+    if (metadata != null) {
+      dto.setName(StringValue.of(metadata));
+    }
+    if (metadataType != null) {
+      dto.setName(StringValue.of(metadataType));
+    }
     return dto.build();
   }
 }

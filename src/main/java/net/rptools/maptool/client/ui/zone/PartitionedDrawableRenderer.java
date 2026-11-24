@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.zone;
 
@@ -270,9 +270,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
       }
       timer.stop("createChunk:CreateChunk");
 
-      if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /*
-																 * handle legacy pens, besides, it doesn't make sense to have a non visible pen
-																 */) {
+      if (pen.getOpacity() != 1) {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
       }
 

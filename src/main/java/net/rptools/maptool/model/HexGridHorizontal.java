@@ -9,33 +9,29 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.GeneralPath;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarHorizHexEuclideanWalker;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
 /*
  * @formatter:off
@@ -47,74 +43,12 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  *
  * @formatter:on
  */
-public class HexGridHorizontal extends HexGrid {
-  private static final OffsetTranslator OFFSET_TRANSLATOR =
-      (originPoint, offsetPoint) -> {
-        if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
-          offsetPoint.x++;
-        }
-      };
-
+public final class HexGridHorizontal extends HexGrid {
   private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   @Override
-  public boolean isHexHorizontal() {
-    return true;
-  }
-
-  @Override
-  protected List<TokenFootprint> createFootprints() {
-    // Horizontal Hex Grid - Flipped x <> y from Vert grid
-    return List.of(
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560100000040A8090C"), "1/6", false, .408),
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560200000040A8090C"), "1/4", false, .500),
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560300000040A8090C"), "1/3", false, .577),
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560400000040A8090C"), "1/2", false, .707),
-        new TokenFootprint(new GUID("C0A80F0E0CB9FB560500000040A8090C"), "2/3", false, .816),
-        new TokenFootprint(
-            new GUID("7F00010109655C380100000038000101"),
-            "Medium",
-            I18N.getString("TokenFootprint.name.medium"),
-            true,
-            1.0),
-        new TokenFootprint(
-            new GUID("7F00010109655C380200000038000101"),
-            "Large",
-            I18N.getString("TokenFootprint.name.large"),
-            new Point(1, 0),
-            new Point(0, 1)),
-        new TokenFootprint(
-            new GUID("7F00010109655C380300000038000101"),
-            "Huge",
-            I18N.getString("TokenFootprint.name.huge"),
-            new Point(0, 1),
-            new Point(1, 0),
-            new Point(-1, 0),
-            new Point(-1, -1),
-            new Point(0, -1),
-            new Point(-1, 1)),
-        new TokenFootprint(
-            new GUID("C0A80F464BAAC1B10900000080800A42"),
-            "Humongous",
-            I18N.getString("TokenFootprint.name.humongous"),
-            new Point(-1, -2),
-            new Point(0, -2),
-            new Point(1, -2),
-            new Point(-2, -1),
-            new Point(-1, -1),
-            new Point(0, -1),
-            new Point(1, -1),
-            new Point(-2, 0),
-            new Point(-1, 0),
-            new Point(1, 0),
-            new Point(2, 0),
-            new Point(-2, 1),
-            new Point(-1, 1),
-            new Point(0, 1),
-            new Point(1, 1),
-            new Point(-1, 2),
-            new Point(0, 2),
-            new Point(1, 2)));
+  public GridType getType() {
+    return GridType.HexHorizontal;
   }
 
   @Override
@@ -247,28 +181,23 @@ public class HexGridHorizontal extends HexGrid {
   }
 
   @Override
-  protected void setGridDrawTranslation(Graphics2D g, double U, double V) {
-    g.translate(V, U);
+  public double getSizeV(Dimension2D size) {
+    return size.getWidth();
   }
 
   @Override
-  public double getRendererSizeV(ZoneRenderer renderer) {
-    return renderer.getSize().getWidth();
+  public double getSizeU(Dimension2D size) {
+    return size.getHeight();
   }
 
   @Override
-  public double getRendererSizeU(ZoneRenderer renderer) {
-    return renderer.getSize().getHeight();
+  public int getOffV(Scale scale) {
+    return (int) (scale.getOffsetX() + getOffsetX() * scale.getScale());
   }
 
   @Override
-  public int getOffV(ZoneRenderer renderer) {
-    return (int) (renderer.getViewOffsetX() + getOffsetX() * renderer.getScale());
-  }
-
-  @Override
-  public int getOffU(ZoneRenderer renderer) {
-    return (int) (renderer.getViewOffsetY() + getOffsetY() * renderer.getScale());
+  public int getOffU(Scale scale) {
+    return (int) (scale.getOffsetY() + getOffsetY() * scale.getScale());
   }
 
   @Override
@@ -291,11 +220,6 @@ public class HexGridHorizontal extends HexGrid {
   public ZonePoint convert(CellPoint cp) {
     ZonePoint zp = convertCP(cp.y, cp.x);
     return new ZonePoint(zp.y, zp.x);
-  }
-
-  @Override
-  protected OffsetTranslator getOffsetTranslator() {
-    return OFFSET_TRANSLATOR;
   }
 
   /** Returns the cell centre as well as nearest vertex */

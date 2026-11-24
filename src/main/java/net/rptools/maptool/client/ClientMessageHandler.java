@@ -9,11 +9,12 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
@@ -48,11 +49,13 @@ import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Label;
+import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.ShowCoordinates;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -173,6 +176,9 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_PLAYER_STATUS_MSG -> handle(msg.getUpdatePlayerStatusMsg());
         case SET_WALL_TOPOLOGY_MSG -> handle(msg.getSetWallTopologyMsg());
         case UPDATE_WALL_DATA_MSG -> handle(msg.getUpdateWallDataMsg());
+        case UPDATE_LOOKUP_TABLE_MSG -> handle(msg.getUpdateLookupTableMsg());
+        case DELETE_LOOKUP_TABLE_MSG -> handle(msg.getDeleteLookupTableMsg());
+        case SET_SHOW_COORDINATES_MSG -> handle(msg.getSetShowCoordinatesMsg());
         default -> log.warn(msgType + "not handled.");
       }
       log.debug(id + " handled: " + msgType);
@@ -285,7 +291,7 @@ public class ClientMessageHandler implements MessageHandler {
           ip.setInitUseReverseSort(properties.isInitiativeUseReverseSort());
           ip.setInitPanelButtonsDisabled(properties.isInitiativePanelButtonsDisabled());
           ip.updateView();
-          MapTool.getFrame().getLookupTablePanel().updateView();
+          MapTool.getFrame().getLookupTablePanel().refreshStructure();
         });
   }
 
@@ -475,14 +481,14 @@ public class ClientMessageHandler implements MessageHandler {
   }
 
   private void handle(RemoveAllAddOnLibrariesMsg msg) {
-    new LibraryManager().deregisterAddOnLibraries();
+    new LibraryManager().deregisterAddOnLibrariesLocally();
   }
 
   private void handle(RemoveAddOnLibraryMsg msg) {
     var remLibraryManager = new LibraryManager();
     var removedNamespaces = msg.getNamespacesList();
     for (String namespace : removedNamespaces) {
-      remLibraryManager.deregisterAddOnLibrary(namespace);
+      remLibraryManager.deregisterAddOnLibraryLocally(namespace);
     }
   }
 
@@ -498,7 +504,7 @@ public class ClientMessageHandler implements MessageHandler {
             Asset asset = AssetManager.getAsset(a);
             try {
               var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-              new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+              new LibraryManager().reregisterAddOnLibraryLocally(addOnLibrary);
             } catch (IOException e) {
               SwingUtilities.invokeLater(
                   () ->
@@ -670,10 +676,11 @@ public class ClientMessageHandler implements MessageHandler {
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
           var zone = client.getCampaign().getZone(zoneGUID);
-
-          Point boardXY = Mapper.map(msg.getPoint());
-          var assetId = new MD5Key(msg.getAssetId());
-          zone.setBoard(boardXY, assetId);
+          if (zone != null) {
+            Point boardXY = Mapper.map(msg.getPoint());
+            var assetId = new MD5Key(msg.getAssetId());
+            zone.setBoard(assetId, boardXY, (float) msg.getScaleX(), (float) msg.getScaleY());
+          }
         });
   }
 
@@ -917,12 +924,11 @@ public class ClientMessageHandler implements MessageHandler {
           if (renderer == null) {
             return;
           }
-          if (AppPreferences.fitGmView.get()) {
-            renderer.enforceView(x, y, scale, gmWidth, gmHeight);
-          } else {
-            renderer.setScale(scale);
-            renderer.centerOn(new ZonePoint(x, y));
-          }
+          renderer.enforceView(
+              x,
+              y,
+              scale,
+              AppPreferences.fitGmView.get() ? new Dimension(gmWidth, gmHeight) : null);
         });
   }
 
@@ -1091,6 +1097,38 @@ public class ClientMessageHandler implements MessageHandler {
           var wall = Wall.fromDto(updateWallDataMsg.getWall());
 
           zone.updateWall(wall);
+        });
+  }
+
+  private void handle(PutLookupTableMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var table = LookupTable.fromDto(msg.getTable());
+          client.getCampaign().getLookupTableMap().put(table.getName(), table);
+          MapTool.getFrame().getLookupTablePanel().refreshStructure();
+        });
+  }
+
+  private void handle(DeleteLookupTableMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          client.getCampaign().getLookupTableMap().remove(msg.getTableName());
+          MapTool.getFrame().getLookupTablePanel().refreshStructure();
+        });
+  }
+
+  private void handle(SetShowCoordinatesMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          ShowCoordinates showCoordinates =
+              ShowCoordinates.valueOf(msg.getShowCoordinates().name());
+          var zone = client.getCampaign().getZone(zoneGUID);
+          if (zone != null) {
+            zone.setShowCoordinates(showCoordinates);
+            MapTool.getFrame().getCoordinateStatusBar().reset();
+            MapTool.getFrame().refresh();
+          }
         });
   }
 }

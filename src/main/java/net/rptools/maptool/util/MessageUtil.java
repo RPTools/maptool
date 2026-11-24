@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.util;
 
@@ -24,6 +24,7 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeColor;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 
 public class MessageUtil {
 
@@ -72,7 +73,7 @@ public class MessageUtil {
 
   public static String getFormattedEmote(String msg, Token token) {
     String identity =
-        token == null ? MapTool.getFrame().getCommandPanel().getIdentity() : token.getName();
+        token == null ? MapTool.getClient().getImpersonation().getIdentity() : token.getName();
     msg = applyChatColor(identity + " " + msg);
 
     return "<div class='emote'>" + getAvatarMessage(msg, token, identity) + "</div>";
@@ -80,7 +81,7 @@ public class MessageUtil {
 
   public static String getFormattedEmotePossessive(String msg, Token token) {
     String identity =
-        token == null ? MapTool.getFrame().getCommandPanel().getIdentity() : token.getName();
+        token == null ? MapTool.getClient().getImpersonation().getIdentity() : token.getName();
     identity += identity.endsWith("s") ? "' " : "'s ";
     msg = applyChatColor(identity + msg);
 
@@ -90,7 +91,7 @@ public class MessageUtil {
   public static String getFormattedSay(
       String msg, Token token, boolean isTrusted, String macroName, String macroSource) {
     String identity =
-        token == null ? MapTool.getFrame().getCommandPanel().getIdentity() : token.getName();
+        token == null ? MapTool.getClient().getImpersonation().getIdentity() : token.getName();
     msg = getPrefix(identity + ":", isTrusted, macroName, macroSource) + " " + applyChatColor(msg);
 
     return "<div class='say'>" + getAvatarMessage(msg, token, identity) + "</div>";
@@ -139,11 +140,17 @@ public class MessageUtil {
     sb.append("<table class='ava-msg'><tr valign='top'>");
 
     if (AppPreferences.showAvatarInChat.get()) {
-      if (token == null && MapTool.getFrame().getCommandPanel().isImpersonating()) {
-        GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-        if (guid != null)
-          token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
-        else token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokenByName(identity);
+      if (token == null && MapTool.getClient().getImpersonation().isImpersonating()) {
+        GUID guid = MapTool.getClient().getImpersonation().getIdentityGUID();
+        // With no map open there is no token to take the avatar from.
+        Zone zone = MapTool.getClient().getCurrentZone();
+        if (zone == null) {
+          token = null;
+        } else if (guid != null) {
+          token = zone.getToken(guid);
+        } else {
+          token = zone.getTokenByName(identity);
+        }
       }
       sb.append("<td class='avatar'>");
       if (token != null) {

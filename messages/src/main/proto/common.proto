@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto";
+option java_outer_classname = "CommonProtos";
+
+message GuidDto {
+  uint64 high = 1;
+  uint64 low = 2;
+}

@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.drawing;
 
@@ -101,7 +101,7 @@ public class DrawablesGroup extends AbstractDrawing {
   @Override
   public DrawableDto toDto() {
     var dto = DrawablesGroupDto.newBuilder();
-    dto.setId(getId().toString()).setLayer(getLayer().name());
+    dto.setId(getId().toDto()).setLayer(getLayer().name());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
@@ -110,7 +110,7 @@ public class DrawablesGroup extends AbstractDrawing {
   }
 
   public static DrawablesGroup fromDto(DrawablesGroupDto dto) {
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var elements = new ArrayList<DrawnElement>();
     var elementDtos = dto.getDrawnElementsList();
     elementDtos.forEach(e -> elements.add(DrawnElement.fromDto(e)));

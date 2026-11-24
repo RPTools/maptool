@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.swing;
 
@@ -70,7 +70,7 @@ public class MapToolEventQueue extends EventQueue {
       jta.setWrapStyleWord(true);
       jta.setMargin(new Insets(5, 10, 10, 10));
       optionPane.setDetails(jta);
-      displayPopup();
+      displayPopup(optionPane);
       reportToSentryIO(soe);
     } catch (Throwable t) {
       log.error(t, t);
@@ -78,7 +78,7 @@ public class MapToolEventQueue extends EventQueue {
       optionPane.setTitle(I18N.getString("MapToolEventQueue.unexpectedError")); // $NON-NLS-1$
       optionPane.setDetails(toString(t));
       try {
-        displayPopup();
+        displayPopup(optionPane);
         reportToSentryIO(t);
       } catch (Throwable thrown) {
         // Displaying the error message using the JideOptionPane has just failed. Fallback to
@@ -109,11 +109,9 @@ public class MapToolEventQueue extends EventQueue {
     return optionPane;
   }
 
-  private static void displayPopup() {
+  private static void displayPopup(JideOptionPane optionPane) {
     optionPane.setDetailsVisible(true);
-    JDialog dialog =
-        optionPane.createDialog(
-            MapTool.getFrame(), I18N.getString("MapToolEventQueue.warning.title")); // $NON-NLS-1$
+    JDialog dialog = optionPane.createDialog(MapTool.getFrame(), optionPane.getTitle().toString());
     dialog.setResizable(true);
     dialog.pack();
     dialog.setVisible(true);
@@ -176,12 +174,12 @@ public class MapToolEventQueue extends EventQueue {
     try {
       var loc = macroLocationFactory.createSentryIoLoggingLocation();
       MapToolMacroContext sentryContext = new MapToolMacroContext(command, loc, true);
-      MapTool.getParser().enterContext(sentryContext);
-      campaign =
-          getInfoFunction
-              .getInstance()
-              .childEvaluate(null, null, null, Collections.singletonList(command));
-      MapTool.getParser().exitContext();
+      try (var ignored = MapTool.getParser().enterContext(sentryContext)) {
+        campaign =
+            getInfoFunction
+                .getInstance()
+                .childEvaluate(null, null, null, Collections.singletonList(command));
+      }
     } catch (ParserException e) {
       campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();
     }

@@ -16,6 +16,7 @@ plugins {
     id "java"
 
     alias(libs.plugins.git.version)
+    alias(libs.plugins.osdetector)
     alias(libs.plugins.javafx)
     alias(libs.plugins.jpackage.runtime)
     alias(libs.plugins.shadow)
@@ -36,80 +37,127 @@ defaultTasks 'clean', 'build'
 // Custom properties
 def appSemVer = ""
 ext {
-    // Allow packagers to build from the source code tarball, which doesn't
-    // have '.git'
-    revisionFull = project.findProperty('gitCommit')
-    revision = revisionFull ? revisionFull.substring(0, 10) : ''
-    tagVersion = project.findProperty('gitTag')
-    environment = 'Production'
-    sentryDSN = sentry_production_dsn
-
-    if (!project.hasProperty('noGit')) {
-        // Get tag and commit info from Git to use for version numbering
-        def details = versionDetails()
-
-        revision = details.gitHash
-        revisionFull = details.gitHashFull
-        // Do not count as production if changes (committed or otherwise) have been made to the tree
-        // since the tag. And if the tag is a nightly tag, give it the special "Nightly" environment
-        // instead of counting it the same as a production release.
-        if (!details.isCleanTag) {
-            tagVersion = 'SNAPSHOT-' + revision
-            project.description = "SNAPSHOT-" + revision
-            environment = "Development"
-            sentryDSN = sentry_development_dsn
-        }
-        else if (details.lastTag.startsWith('nightly')) {
-            tagVersion = 'NIGHTLY-' + revision
-            project.description = "NIGHTLY-" + revision
-            environment = "Nightly"
-            sentryDSN = sentry_production_dsn
-        }
-        else {
-            tagVersion = details.lastTag
-            environment = "Production"
-            sentryDSN = sentry_production_dsn
-        }
+    // region Get information from git.
+    if (project.hasProperty('noGit')) {
+        // Read everything from project properties instead of git itself.
+        // This allows packages to build from the source code tarball which doesn't have `/.git/`.
+        def gitHash = project.findProperty('gitCommit')
+        gitDetails = [
+                gitHashFull: gitHash ?: '',
+                gitHash: gitHash ? gitHash.substring(0, 10) : '',
+                isCleanTag: gitHash ? true : false,
+                lastTag: project.findProperty('gitTag'),
+        ]
     }
+    else {
+        // Read from git proper. This will fail if not in a git repo.
+        gitDetails = versionDetails()
+    }
+    // endregion
 
-    // This will strip anything other than core semver from the tag
-    // e.g. "1.7.2-rc.1" becomes "1.7.2"
-    def foundTags = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
+    // Will be overwritten for clean semantic version tags.
+    appSemVer = defaultVersion
 
-    // If no semver exists, like in dev environment use a defaultVersion from gradle.properties
-    if (foundTags.isEmpty()) {
-        appSemVer = defaultVersion
-    } else {
-        appSemVer = foundTags[0]
-        developerRelease = ""
+    // Do not count as production if changes (committed or otherwise) have been made to the tree
+    // since the tag. And if the tag is a nightly tag, give it the special "Nightly" environment
+    // instead of counting it the same as a production release.
+    if (!gitDetails.isCleanTag) {
+        // Dev build. Ignore any provided tag since it isn't meaningful.
+        tagVersion = 'SNAPSHOT-' + gitDetails.gitHash
+        project.description = "SNAPSHOT-" + gitDetails.gitHash
+        environment = "Development"
+        sentryDSN = sentry_development_dsn
+    }
+    else if (gitDetails.lastTag.startsWith('nightly')) {
+        tagVersion = gitDetails.lastTag;
+        project.description = "NIGHTLY-" + gitDetails.gitHash
+        environment = "Nightly"
+        sentryDSN = sentry_production_dsn
+    }
+    else {
+        tagVersion = gitDetails.lastTag;
+
+        // This will strip anything other than core semver from the tag
+        // e.g. "1.7.2-rc.1" becomes "1.7.2"
+        def foundTags = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
+        if (!foundTags.isEmpty()) {
+            appSemVer = foundTags[0]
+            developerRelease = ""
+        }
+
+        environment = "Production"
+        sentryDSN = sentry_production_dsn
     }
 
     // vendor, tagVersion, appSemVer, and DSN's defaults are set in gradle.properties
     println 'Configuring for ' + project.name + developerRelease + " " + tagVersion + " by " + vendor
     println "AppVersion: " + appSemVer
 
-    // vendor, tagVersion, appSemVer, and DSNs defaults are set in gradle.properties
-    println "OS Detected: " + osdetector.os
+    println "OS Detected: '${osdetector.os}' on '${osdetector.arch}'"
+
+    // region Alternate, human-friendly names for platforms (OS & architecture)
+    // Not to be used for detection, but can be used for inclusion in artifact names and such.
+    // Platform-specific architecture names. Used for human-readable stuff, not platform detection.
+    brandedOs = osdetector.os
+    brandedArch = osdetector.arch
+    if (osdetector.os == 'osx') {
+        brandedOs = 'macos'
+        if (osdetector.arch == 'aarch_64') {
+            brandedArch = 'apple-silicon'
+        }
+        else if (osdetector.arch == 'x86_64') {
+            brandedArch = 'intel'
+        }
+    }
+    else {
+        if (osdetector.arch == 'aarch_64') {
+            brandedArch = 'aarch64'
+        }
+        else if (osdetector.arch == 'x86_64') {
+            brandedArch = 'x86_64'
+        }
+    }
+    // endregion
 }
 
+def modulesToOpen = [
+        'java.desktop/java.awt',
+        'java.desktop/java.awt.geom',
+        'java.desktop/sun.awt.geom',
+        'java.base/java.util',
+        'javafx.web/javafx.scene.web',
+        'javafx.web/com.sun.webkit',
+        'javafx.web/com.sun.webkit.dom',
+        'java.base/java.lang',
+        'java.desktop/sun.awt',
+        'java.desktop/sun.java2d',
+        'java.desktop/javax.swing',
+        'java.desktop/sun.awt.shell',
+        'java.desktop/com.sun.java.swing.plaf.windows'
+]
+def jarManifestAttributes = [
+        'Implementation-Title': project.name + developerRelease,
+        'Implementation-Version': tagVersion,
+        'Implementation-Vendor': vendor,
+        'Git-Commit': gitDetails.gitHash,
+        'Git-Commit-SHA': gitDetails.gitHashFull,
+        'Built-By': System.getProperty('user.name'),
+        'Built-Date': new Date(),
+        'Built-JDK': System.getProperty('java.version'),
+        'Source-Compatibility': project.java.sourceCompatibility,
+        'Target-Compatibility': project.java.targetCompatibility,
+        'Main-Class': project.application.mainClass,
+        'Add-Opens': modulesToOpen.join(' '),
+]
 def javaArgs = [
-        "-Xss8M", "-Dsun.java2d.d3d=false", "-Dfile.encoding=UTF-8",
-        "-Dpolyglot.engine.WarnInterpreterOnly=false",
-        "-Djava.util.Arrays.useLegacyMergeSort=true",
-        "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
-        "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
-        "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-        "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
-        "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED","--add-opens=java.base/java.lang=ALL-UNNAMED",
-        "--add-opens=java.desktop/sun.awt=ALL-UNNAMED", "--add-opens=java.desktop/sun.java2d=ALL-UNNAMED",
-        "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-        "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
+        "-Xss8M",
+] + modulesToOpen.collect { '--add-opens=' + it + '=ALL-UNNAMED' }
 
 // Used by gradle assemble & run tasks
 application {
     mainClass = 'net.rptools.maptool.client.LaunchInstructions'
     applicationDefaultJvmArgs = javaArgs + ["-DRUN_FROM_IDE=true", "-Dsentry.environment=Development"]
-    if (osdetector.os.is('osx')) {
+    if (osdetector.os == 'osx') {
         applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
     }
 }
@@ -137,7 +185,6 @@ javafx {
 }
 
 run {
-    args = ['-v=' + appSemVer]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
 
@@ -150,6 +197,8 @@ compileJava.configure {
     // Keep the uninstrumented .class files out of the final destination directory. Otherwise we
     // might instrument the same file twice, resulting in duplicate methods.
     destinationDirectory = file("${layout.buildDirectory.get()}/classes/java/main-uninstrumented")
+    options.compilerArgs << '-Alog4j.graalvm.groupId=net.rptools'
+    options.compilerArgs << '-Alog4j.graalvm.artifactId=maptool'
 }
 
 def instrumentForms = tasks.register('instrumentForms', Sync) {
@@ -184,7 +233,7 @@ classes.configure {
 }
 
 
-if (osdetector.os.is('linux')) {
+if (osdetector.os == 'linux') {
     def generateDesktop = tasks.register('generateDesktop', Copy) {
         from 'package/linux/launcher.desktop'
         into 'package/linux/'
@@ -268,10 +317,11 @@ runtime {
                 '--file-associations', 'package/associations.properties'
         ]
 
-        if (osdetector.os.is('windows')) {
+        targetPlatformName = "${osdetector.os}-${osdetector.arch}"
+
+        if (osdetector.os == 'windows') {
             def winUpgradeUUID = "74d934b9-5fb5-433e-aca4-c6f14bd9aa6b"
             println "Setting Windows installer options with upgrade uuid = " + winUpgradeUUID
-            targetPlatformName = "win"
             resourceDir = file('package/windows')
             imageOptions += ['--icon', 'package/windows/' + project.name + developerRelease + '.ico']
             installerOptions += [
@@ -281,27 +331,37 @@ runtime {
                     '--win-menu-group', vendor,
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
-            targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.zip')
+
+            if (osdetector.arch == 'x86_64') {
+                targetPlatform('windows-x86_64') {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.zip')
+                }
             }
         }
 
-        if (osdetector.os.is('osx')) {
+        if (osdetector.os == 'osx') {
             println "Setting MacOS installer options"
-            targetPlatformName = "mac"
+
             imageOptions += ['--icon', 'package/macosx/' + project.name + developerRelease + '.icns']
             installerOptions += [
                     '--mac-package-name', project.name + developerRelease
             ]
-            targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz')
-                jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
+            jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
+
+            if (osdetector.arch == 'aarch_64') {
+                targetPlatform("osx-aarch_64") {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.1_12.tar.gz')
+                }
+            }
+            else if (osdetector.arch == 'x86_64') {
+                targetPlatform("osx-x86_64") {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz')
+                }
             }
         }
 
-        if (osdetector.os.is('linux')) {
+        if (osdetector.os == 'linux') {
             println "Setting Linux installer options"
-            targetPlatformName = "linux"
             resourceDir = file('package/linux')
             imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
             installerOptions += [
@@ -320,11 +380,50 @@ runtime {
                         '--linux-rpm-license-type', 'AGPLv3'
                 ]
             }
-            targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_linux_hotspot_21.0.1_12.tar.gz')
+
+            if (osdetector.arch == 'aarch_64') {
+                targetPlatform('linux-aarch_64') {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.1_12.tar.gz')
+                }
+            }
+            else if (osdetector.arch == 'x86_64') {
+                targetPlatform('linux-x86_64') {
+                    jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_linux_hotspot_21.0.1_12.tar.gz')
+                }
             }
         }
     }
+}
+
+tasks.register('renameInstaller', Copy) {
+    // Renames the files from jpackage to include the platform details.
+
+    println "Output dir: ${jpackageImage.jpackageData.installerOutputDir}"
+    from "${jpackageImage.jpackageData.installerOutputDir}"
+    // Workflow code will look for release artifacts under /renamed
+    into "${jpackageImage.jpackageData.installerOutputDir}/renamed"
+
+    include '*'
+    exclude '*/*'
+    includeEmptyDirs = false
+
+    rename { String fileName ->
+        {
+            fileName = fileName.replaceFirst("(?i)^(${project.name})", "\$1-${brandedOs}")
+            // Particularly for nightly builds, replace the default version with something nicer for
+            // humans.
+            fileName = fileName.replaceFirst("${appSemVer}", "${tagVersion}")
+
+            // Insert platform details to distinguish apple builds, since they aren't by default.
+            if (osdetector.os == 'osx') {
+                fileName = fileName.replaceAll('([.][^.]*)$', "-${brandedArch}\$1");
+            }
+            return fileName
+        }
+    }
+}
+tasks.named('jpackage') {
+    finalizedBy('renameInstaller')
 }
 
 def zipJpackageImage = tasks.register('zipJpackageImage', Zip) {
@@ -334,13 +433,14 @@ def zipJpackageImage = tasks.register('zipJpackageImage', Zip) {
     dependsOn tasks.jpackage
 
     def extension = ''
-    if (osdetector.os.is('osx')) {
+    if (osdetector.os == 'osx') {
         extension = '.app'
     }
 
     from "${jpackageImage.jpackageData.imageOutputDirOrDefault}${File.separator}${jpackageImage.jpackageData.imageNameOrDefault}${extension}"
-    destinationDirectory = jpackageImage.jpackageData.installerOutputDir
-    archiveFileName = project.name + "-" + appSemVer + "-" + jpackageImage.jpackageData.targetPlatformName + "${extension}.zip"
+    // Workflow code will look for release artifacts under /renamed
+    destinationDirectory = file("${jpackageImage.jpackageData.installerOutputDir}/renamed")
+    archiveFileName = "${project.name}-${brandedOs}-${tagVersion}-${brandedArch}${extension}.zip"
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -350,6 +450,7 @@ dependencies {
     implementation project(':clientserver')
     implementation project(':messages')
 
+    annotationProcessor(libs.log4j.core)
     implementation(libs.bundles.log4j)
     implementation(libs.slf4j.simple)
     implementation(libs.apache.commons.logging)
@@ -360,11 +461,9 @@ dependencies {
     implementation(libs.okhttp)
 
     implementation(libs.bundles.imageio)
-    implementation(libs.batik)
+    implementation(libs.bundles.batik)
     implementation(libs.bundles.pdfbox)
-    implementation(libs.bcmail)
     implementation(libs.bundles.jai.imageio)
-    implementation(libs.webp.imageio)
 
     implementation(libs.bundles.jide) // Currently hosted on nerps.net/repo
     implementation(libs.fifesoft.rsyntaxtexxtarea)
@@ -373,7 +472,6 @@ dependencies {
     implementation(libs.fifesoft.languagesupport)
     implementation(libs.bundles.flatlaf)
     implementation(libs.tinylaf.nocp)
-    implementation(libs.jsvg)
 
     implementation(libs.bundles.handlebars)
 
@@ -384,17 +482,11 @@ dependencies {
     implementation(libs.apache.commons.cli)
     implementation(libs.apache.commons.lang)
     implementation(libs.apache.commons.beanutils)
-    implementation(libs.apache.commons.jxpath)
     implementation(libs.apache.tika)
 
     implementation(libs.gson)
 
-    // region json-smart <2.5.2 is subject to DoS, but json-path has not updated yet. Force it to.
-    implementation(libs.jsonpath) {
-        exclude group: 'net.minidev', module: 'json-smart'
-    }
-    implementation("net.minidev:json-smart:2.5.2")
-    // endregion
+    implementation(libs.jsonpath)
 
     implementation(libs.jsoup)
     implementation(libs.jcabi.xml)
@@ -419,11 +511,6 @@ dependencies {
     implementation(libs.rptools.maptool.addons)
     implementation(libs.rptools.dice.roller)
     implementation(libs.noiselib)
-
-    // libgdx
-    implementation(libs.bundles.gdx)
-    implementation(variantOf(libs.gdx.platform) { classifier('natives-desktop')})
-    implementation(variantOf(libs.gdx.freetype.platform) { classifier('natives-desktop')})
 }
 
 processResources {
@@ -446,23 +533,13 @@ shadowJar {
     mergeServiceFiles()
 
     archiveBaseName = project.name + '-' + tagVersion
-    destinationDirectory = file("$rootDir/releases")
+    destinationDirectory = file("$rootDir/releases/renamed")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     archiveClassifier = null
 
     manifest {
-        attributes 'Implementation-Title': project.name + developerRelease,
-                'Implementation-Version': tagVersion,
-                'Implementation-Vendor': vendor,
-                'Git-Commit': revision,
-                'Git-Commit-SHA': revisionFull,
-                'Built-By': System.getProperty('user.name'),
-                'Built-Date': new Date(),
-                'Built-JDK': System.getProperty('java.version'),
-                'Source-Compatibility': project.java.sourceCompatibility,
-                'Target-Compatibility': project.java.targetCompatibility,
-                'Main-Class': project.application.mainClass,
-                'Multi-Release': true
+        attributes jarManifestAttributes
+        attributes 'Multi-Release': true
     }
 
     exclude 'module-info.class' //This is to make sure maptool doesn't become a module by including module-info of dependencies. Probably needs to be fixed before we go to jdk 11+
@@ -470,24 +547,7 @@ shadowJar {
 
 jar {
     manifest {
-        attributes 'Implementation-Title': project.name + developerRelease,
-                'Implementation-Version': tagVersion,
-                'Implementation-Vendor': vendor,
-                'Git-Commit': revision,
-                'Git-Commit-SHA': revisionFull,
-                'Built-By': System.getProperty('user.name'),
-                'Built-Date': new Date(),
-                'Built-JDK': System.getProperty('java.version'),
-                'Source-Compatibility': project.java.sourceCompatibility,
-                'Target-Compatibility': project.java.targetCompatibility,
-                'Main-Class': project.application.mainClass
-    }
-}
-
-// For logging Git Commit during CI
-task displayGitInfo {
-    doLast {
-        println 'Git-Commit-SHA: ' + revisionFull
+        attributes jarManifestAttributes
     }
 }
 
@@ -507,4 +567,14 @@ javadoc {
 
 task createWrapper(type: Wrapper) {
     gradleVersion = '8.2.1'
+}
+
+tasks.withType(Test).configureEach {
+    testLogging {
+        events "failed", "skipped"
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showExceptions true
+        showCauses true
+        showStackTraces true
+    }
 }

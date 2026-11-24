@@ -3,7 +3,7 @@
   <grid id="ab115" binding="mainPanel" layout-manager="GridLayoutManager" row-count="4" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="521" height="438"/>
+      <xy x="10" y="10" width="600" height="482"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -216,17 +216,6 @@
                   <name value="METHOD_IMAGE_WRITER"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="ExportScreenshot.method.iw"/>
                   <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ExportScreenshot.method.iw.tooltip"/>
-                </properties>
-              </component>
-              <component id="da68b" class="javax.swing.JRadioButton">
-                <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Background Thread"/>
-                  <name value="METHOD_BACKGROUND"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="ExportScreenshot.method.bg"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ExportScreenshot.method.bg.tooltip"/>
                 </properties>
               </component>
               <component id="bacb0" class="javax.swing.JLabel">

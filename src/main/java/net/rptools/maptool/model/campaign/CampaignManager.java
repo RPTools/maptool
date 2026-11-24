@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.campaign;
 
@@ -29,15 +29,35 @@ import net.rptools.maptool.model.library.LibraryManager;
 public class CampaignManager {
 
   /**
-   * Clears campaign data that is not stored in the {@link Campaign} object. This is called when a
-   * campaign is about to be loaded, sent from the server, or a new campaign is created.
+   * Clears campaign data that is not stored in the {@link Campaign} object, and tells the server to
+   * remove the campaign's add-on libraries.
+   *
+   * <p>Use this when the campaign in a running game is being replaced, such as by opening a
+   * campaign or starting a new one. The new campaign publishes the add-on libraries it brings, but
+   * without this the server and the other players would keep the old campaign's.
+   */
+  public void replaceCampaignData() {
+    clearCampaignData();
+    new LibraryManager().deregisterAddOnLibraries();
+  }
+
+  /**
+   * Clears campaign data that is not stored in the {@link Campaign} object, in this client only.
+   * This is called when a campaign is sent from the server, and when leaving a server.
+   *
+   * @see #replaceCampaignData()
    */
   public void clearCampaignData() {
-    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
+    // Campaign state is cleared before the UI that displays it. If a panel throws, the
+    // libraries, script contexts and data stores of the outgoing campaign have already been
+    // released rather than leaking into the campaign about to be loaded.
     JSScriptEngine.resetContexts();
     new LibraryManager().deregisterAllLibraries();
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
     UserDefinedMacroFunctions.getInstance().clearUserDefinedFunctions();
     MacroManager.removeCampaignAliases();
+
+    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
+    MapTool.getFrame().getLookupTablePanel().reset();
   }
 }

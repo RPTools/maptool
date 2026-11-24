@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.macro;
 
@@ -89,7 +89,7 @@ class MacroLocationFactoryTest {
   void testCreateUriLocation() throws URISyntaxException {
     MacroLocation location =
         factory.createUriLocation("lib://test/macro/m2", new URI("lib://lib-test.net/macros/m1"));
-    assertEquals("/macro/m2", location.getName());
+    assertEquals("macro/m2", location.getName());
     assertEquals(MacroLocation.MacroSource.uri, location.getSource());
     assertEquals("test", location.getLocation());
     assertNotNull(location.getUri());
@@ -110,7 +110,7 @@ class MacroLocationFactoryTest {
   void testCreateRelativeUriLocationRelative() throws URISyntaxException {
     MacroLocation location =
         factory.createUriLocation("relative/path", new URI("lib://test-lib.net/macros/m1"));
-    assertEquals("/macros/relative/path", location.getName());
+    assertEquals("macros/relative/path", location.getName());
     assertEquals(MacroLocation.MacroSource.uri, location.getSource());
     assertEquals("test-lib.net", location.getLocation());
     assertNotNull(location.getUri());

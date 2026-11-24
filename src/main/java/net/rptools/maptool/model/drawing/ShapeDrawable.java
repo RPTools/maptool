@@ -9,11 +9,13 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.protobuf.StringValue;
 import java.awt.*;
 import java.awt.Rectangle;
@@ -129,7 +131,7 @@ public class ShapeDrawable extends AbstractDrawing {
     var shape = Mapper.map(getShape());
     var dto =
         ShapeDrawableDto.newBuilder()
-            .setId(getId().toString())
+            .setId(getId().toDto())
             .setLayer(getLayer().name())
             .setShape(shape)
             .setUseAntiAliasing(getUseAntiAliasing());
@@ -141,7 +143,7 @@ public class ShapeDrawable extends AbstractDrawing {
 
   public static ShapeDrawable fromDto(ShapeDrawableDto dto) {
     var shape = Mapper.map(dto.getShape());
-    var id = GUID.valueOf(dto.getId());
+    var id = GUID.fromDto(dto.getId());
     var drawable = new ShapeDrawable(id, shape, dto.getUseAntiAliasing());
     if (dto.hasName()) {
       drawable.setName(dto.getName().getValue());
@@ -178,15 +180,85 @@ public class ShapeDrawable extends AbstractDrawing {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(super.toString());
-    sb.append("antiAliasing=").append(getUseAntiAliasing()).append(";");
-    sb.append("shapeType=").append(getShapeTypeName()).append(";");
-    sb.append("bounds=\"");
-    sb.append("x=").append(getBounds().x).append(";");
-    sb.append("y=").append(getBounds().y).append(";");
-    sb.append("width=").append(getBounds().width).append(";");
-    sb.append("height=").append(getBounds().height).append("\";");
-    return sb.toString();
+    return super.toString()
+        + "antiAliasing="
+        + getUseAntiAliasing()
+        + ";"
+        + "shapeType="
+        + getShapeTypeName()
+        + ";"
+        + "x="
+        + getBounds().x
+        + ";"
+        + "y="
+        + getBounds().y
+        + ";"
+        + "width="
+        + getBounds().width
+        + ";"
+        + "height="
+        + getBounds().height
+        + ";"
+        + "bounds=\""
+        + "x="
+        + getBounds().x
+        + ";"
+        + "y="
+        + getBounds().y
+        + ";"
+        + "width="
+        + getBounds().width
+        + ";"
+        + "height="
+        + getBounds().height
+        + "\"";
+  }
+
+  public String toNonLocalisedString() {
+    return super.toNonLocalisedString()
+        + "antiAliasing="
+        + getUseAntiAliasing()
+        + ";"
+        + "shapeType="
+        + getShapeTypeName()
+        + ";"
+        + "x="
+        + getBounds().x
+        + ";"
+        + "y="
+        + getBounds().y
+        + ";"
+        + "width="
+        + getBounds().width
+        + ";"
+        + "height="
+        + getBounds().height
+        + ";"
+        + "bounds=\""
+        + "x="
+        + getBounds().x
+        + ";"
+        + "y="
+        + getBounds().y
+        + ";"
+        + "width="
+        + getBounds().width
+        + ";"
+        + "height="
+        + getBounds().height
+        + "\"";
+  }
+
+  @Override
+  public JsonObject toJson() {
+    JsonObject jo = super.toJson();
+    jo.add("antiAliasing", new JsonPrimitive(getUseAntiAliasing()));
+    jo.add("shapeType", new JsonPrimitive(getShapeTypeName()));
+    jo.add("x", new JsonPrimitive(getBounds().x));
+    jo.add("y", new JsonPrimitive(getBounds().y));
+    jo.add("width", new JsonPrimitive(getBounds().width));
+    jo.add("height", new JsonPrimitive(getBounds().height));
+    return jo;
   }
 
   private void restoreAA(Graphics2D g, Object oldAA) {

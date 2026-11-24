@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.tool.drawing;
 
@@ -92,7 +92,8 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
     for (var element : drawableList) {
       var drawable = element.getDrawable();
       var id = drawable.getId();
-      ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+      ZonePoint pos =
+          new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer.getViewModel().getZoneScale());
       if (drawable.getBounds(zone).contains(pos.x, pos.y)) {
         if (!selectedDrawings.contains(id)) selectedDrawings.add(id);
         else selectedDrawings.remove(id);
@@ -119,9 +120,10 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
     var box = element.getDrawable().getBounds(getZone());
     var pen = element.getPen();
 
-    var scale = renderer.getScale();
+    var zoneScale = renderer.getViewModel().getZoneScale();
+    var scale = zoneScale.getScale();
 
-    var screenPoint = ScreenPoint.fromZonePoint(renderer, box.x, box.y);
+    var screenPoint = zoneScale.toScreenSpace(box.x, box.y);
 
     var x = (int) (screenPoint.x - pen.getThickness() * scale / 2);
     var y = (int) (screenPoint.y - pen.getThickness() * scale / 2);

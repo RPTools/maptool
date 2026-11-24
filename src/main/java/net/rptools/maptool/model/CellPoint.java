@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
@@ -70,14 +70,15 @@ public final class CellPoint extends AbstractPoint {
    *     point.
    */
   public ScreenPoint convertToScreen(ZoneRenderer renderer) {
-    double scale = renderer.getScale();
+    var zoneScale = renderer.getViewModel().getZoneScale();
+    double scale = zoneScale.getScale();
     Zone zone = renderer.getZone();
 
     Grid grid = zone.getGrid();
     ZonePoint zp = grid.convert(this);
 
-    int sx = renderer.getViewOffsetX() + (int) (zp.x * scale);
-    int sy = renderer.getViewOffsetY() + (int) (zp.y * scale);
+    int sx = zoneScale.getOffsetX() + (int) (zp.x * scale);
+    int sy = zoneScale.getOffsetY() + (int) (zp.y * scale);
 
     return new ScreenPoint(sx, sy);
   }

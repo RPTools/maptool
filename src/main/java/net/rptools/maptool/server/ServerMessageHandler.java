@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.server;
 
@@ -267,7 +267,18 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getUpdateWallDataMsg());
           sendToClients(id, msg);
         }
-
+        case UPDATE_LOOKUP_TABLE_MSG -> {
+          handle(msg.getUpdateLookupTableMsg());
+          sendToClients(id, msg);
+        }
+        case DELETE_LOOKUP_TABLE_MSG -> {
+          handle(msg.getDeleteLookupTableMsg());
+          sendToClients(id, msg);
+        }
+        case SET_SHOW_COORDINATES_MSG -> {
+          handle(msg.getSetShowCoordinatesMsg());
+          sendToClients(id, msg);
+        }
         default -> log.warn(msgType + " not handled.");
       }
       log.debug("from " + id + " handled: " + msgType);
@@ -742,6 +753,34 @@ public class ServerMessageHandler implements MessageHandler {
           var wall = Wall.fromDto(updateWallDataMsg.getWall());
 
           zone.updateWall(wall);
+        });
+  }
+
+  private void handle(PutLookupTableMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var table = LookupTable.fromDto(msg.getTable());
+          server.getCampaign().getLookupTableMap().put(table.getName(), table);
+        });
+  }
+
+  private void handle(DeleteLookupTableMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          server.getCampaign().getLookupTableMap().remove(msg.getTableName());
+        });
+  }
+
+  private void handle(SetShowCoordinatesMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          Zone.ShowCoordinates showCoordinates =
+              Zone.ShowCoordinates.valueOf(msg.getShowCoordinates().name());
+          var zone = server.getCampaign().getZone(zoneGUID);
+          if (zone != null) {
+            zone.setShowCoordinates(showCoordinates);
+          }
         });
   }
 

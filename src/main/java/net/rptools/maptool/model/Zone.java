@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.model;
 
@@ -87,47 +87,47 @@ public class Zone {
 
   /** The vision type (OFF, DAY, NIGHT). */
   public enum VisionType {
-    OFF(),
-    DAY(),
-    NIGHT();
+    OFF("visionType.OFF"),
+    DAY("visionType.DAY"),
+    NIGHT("visionType.NIGHT");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    VisionType() {
-      displayName = I18N.getString("visionType." + name());
+    VisionType(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
   /** How lights should be rendered into the zone. */
   public enum LightingStyle {
     /** Lights are to be rendered as part of the map's environment, approximation illumination. */
-    ENVIRONMENTAL(),
+    ENVIRONMENTAL("lightingStyle.ENVIRONMENTAL"),
     /** Lights are to be alpha-composited on top of the map. */
-    OVERTOP();
+    OVERTOP("lightingStyle.OVERTOP");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    LightingStyle() {
-      displayName = I18N.getString("lightingStyle." + name());
+    LightingStyle(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
   public enum Layer {
-    TOKEN(),
-    GM(),
-    OBJECT(),
-    BACKGROUND();
+    TOKEN("layer.token"),
+    GM("layer.gm"),
+    OBJECT("layer.object"),
+    BACKGROUND("layer.background");
 
     /**
      * Gets the layer that players should be on by default.
@@ -168,15 +168,15 @@ public class Zone {
       return valueOf(name);
     }
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    Layer() {
-      displayName = I18N.getString("layer." + name().toLowerCase());
+    Layer(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
 
     /**
@@ -288,19 +288,19 @@ public class Zone {
 
   /** Control how A* Pathfinding distances is rounded off due to terrain costs */
   public enum AStarRoundingOptions {
-    NONE(),
-    CELL_UNIT(),
-    INTEGER();
+    NONE("Zone.AStarRoundingOptions.NONE"),
+    CELL_UNIT("Zone.AStarRoundingOptions.CELL_UNIT"),
+    INTEGER("Zone.AStarRoundingOptions.INTEGER");
 
-    private final String displayName;
+    private final String displayNameKey;
 
-    AStarRoundingOptions() {
-      displayName = I18N.getString("Zone.AStarRoundingOptions." + name());
+    AStarRoundingOptions(String displayNameKey) {
+      this.displayNameKey = displayNameKey;
     }
 
     @Override
     public String toString() {
-      return displayName;
+      return I18N.getString(displayNameKey);
     }
   }
 
@@ -310,6 +310,77 @@ public class Zone {
     PIT_VBL,
     COVER_VBL,
     MBL;
+  }
+
+  /**
+   * Enum for who can be shown grid coordinates on this zone.
+   *
+   * <p>Note: This enum's names may seem verbose but necessary to avoid {@code .proto} generation
+   * clashes with other enum names under {@code ZoneDto}'s other descendant enum Dtos.
+   */
+  public enum ShowCoordinates {
+    SHOW_COORDS_TO_ALL("all"),
+    SHOW_COORDS_TO_GM_ONLY("gm_only"),
+    SHOW_COORDS_TO_NONE("none");
+
+    /**
+     * standardised shorthand for use in related MTScript function parameters, given the verbose
+     * enum names
+     */
+    private final String option;
+
+    /** used for labels within related UI components (e.g. comboboxes) */
+    private final String displayName;
+
+    ShowCoordinates(String option) {
+      this.option = option;
+      this.displayName = I18N.getString("Zone.ShowCoordinates." + name());
+    }
+
+    public String getOption() {
+      return option;
+    }
+
+    /**
+     * Get the enum value from the option.
+     *
+     * @param option the option
+     * @return an Optional containing the enum value if found, or empty
+     */
+    public static Optional<ShowCoordinates> fromOption(String option) {
+      return Arrays.stream(values())
+          .filter(value -> value.option.equalsIgnoreCase(option))
+          .findFirst();
+    }
+
+    /**
+     * Evaluation of whether map coordinates should be shown or not based on the enum and {@link
+     * Player.Role}.
+     *
+     * @param role the player role
+     * @return true (i.e. show) / false (i.e. do not show)
+     */
+    public boolean shouldShow(Player.Role role) {
+      return switch (this) {
+        case SHOW_COORDS_TO_ALL -> true;
+        case SHOW_COORDS_TO_GM_ONLY -> Player.Role.GM == role;
+        case SHOW_COORDS_TO_NONE -> false;
+      };
+    }
+
+    /**
+     * List valid options, used in error reporting and resolution guidance.
+     *
+     * @return a list of valid options
+     */
+    public static List<String> validOptions() {
+      return Arrays.stream(values()).map(ShowCoordinates::getOption).toList();
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
@@ -400,8 +471,16 @@ public class Zone {
   private DrawablePaint backgroundPaint;
   private MD5Key mapAsset;
   private Point boardPosition = new Point(0, 0);
-  private boolean drawBoard = true;
-  private boolean boardChanged = false;
+
+  /**
+   * @deprecated This is a rendering concern and so has been removed from the model.
+   */
+  @Deprecated private boolean drawBoard = true;
+
+  /**
+   * @deprecated This is a rendering concern and so has been removed from the model.
+   */
+  @Deprecated private boolean boardChanged = false;
 
   // Lee: adding extra property to determine FoW exposure method
   // Jamz: Changed to transient to allow backwards compatibility of campaign
@@ -418,6 +497,8 @@ public class Zone {
   private LightingStyle lightingStyle = LightingStyle.OVERTOP;
 
   private TokenSelection tokenSelection = TokenSelection.ALL;
+
+  private ShowCoordinates showCoordinates = ShowCoordinates.SHOW_COORDS_TO_ALL;
 
   // These are transitionary properties, very soon the width and height won't matter
   private int height;
@@ -445,11 +526,6 @@ public class Zone {
 
   public MD5Key getBackgroundAsset() {
     return ((DrawableTexturePaint) getBackgroundPaint()).getAssetId();
-  }
-
-  public void setMapAsset(MD5Key id) {
-    mapAsset = id;
-    boardChanged = true;
   }
 
   public void setTokenVisionDistance(int units) {
@@ -487,6 +563,14 @@ public class Zone {
 
   public void setFogPaint(DrawablePaint paint) {
     fogPaint = paint;
+  }
+
+  public ShowCoordinates getShowCoordinates() {
+    return showCoordinates;
+  }
+
+  public void setShowCoordinates(ShowCoordinates showCoordinates) {
+    this.showCoordinates = showCoordinates;
   }
 
   /**
@@ -537,10 +621,6 @@ public class Zone {
     }
   }
 
-  public MD5Key getMapAssetId() {
-    return mapAsset;
-  }
-
   public DrawablePaint getBackgroundPaint() {
     return backgroundPaint;
   }
@@ -579,6 +659,7 @@ public class Zone {
     fogPaint = zone.fogPaint;
     visionType = zone.visionType;
     lightingStyle = zone.lightingStyle;
+    showCoordinates = zone.showCoordinates;
 
     undo = new UndoPerZone(this); // Undo/redo manager isn't copied
     setName(zone.getName());
@@ -628,8 +709,6 @@ public class Zone {
         Token old = zone.tokenMap.get(oldGUID);
         Token token = new Token(old, keepIds); // keep old ids at server start
         if (old.getExposedAreaGUID() != null) {
-          GUID guid = new GUID();
-          token.setExposedAreaGUID(guid);
           // Update the TEA on the new map, since we have the Token object available...
           ExposedAreaMetaData eamd = zone.getExposedAreaMetaData(old.getExposedAreaGUID());
           if (eamd != null) {
@@ -742,37 +821,28 @@ public class Zone {
     gridColor = color;
   }
 
-  /**
-   * Board pseudo-object. Not making full object since this will change when new layer model is
-   * created
-   *
-   * @return has the board changed?
-   */
-  public boolean isBoardChanged() {
-    return boardChanged;
+  // region Map image
+
+  private void boardChanged() {
+    new MapToolEventBus()
+        .getMainEventBus()
+        .post(new BoardChanged(this, mapAsset, boardPosition, imageScaleX, imageScaleY));
   }
 
-  public void setBoardChanged(boolean set) {
-    boardChanged = set;
+  public void setBoard(MD5Key asset, Point position, float scaleX, float scaleY) {
+    mapAsset = asset;
+    boardPosition.setLocation(position);
+    this.imageScaleX = scaleX;
+    this.imageScaleY = scaleY;
+    boardChanged();
   }
 
-  public void setBoard(Point position) {
-    boardPosition.x = position.x;
-    boardPosition.y = position.y;
-    setBoardChanged(true);
-    new MapToolEventBus().getMainEventBus().post(new BoardChanged(this, mapAsset, boardPosition));
+  public MD5Key getMapAssetId() {
+    return mapAsset;
   }
 
-  public void setBoard(int newX, int newY) {
-    boardPosition.x = newX;
-    boardPosition.y = newY;
-    setBoardChanged(true);
-    new MapToolEventBus().getMainEventBus().post(new BoardChanged(this, mapAsset, boardPosition));
-  }
-
-  public void setBoard(Point position, MD5Key asset) {
-    this.setMapAsset(asset);
-    this.setBoard(position);
+  public void setMapAssetId(MD5Key id) {
+    setBoard(id, boardPosition, imageScaleX, imageScaleY);
   }
 
   public int getBoardX() {
@@ -783,33 +853,23 @@ public class Zone {
     return boardPosition.y;
   }
 
-  public boolean drawBoard() {
-    return drawBoard;
+  public void setBoardPosition(Point position) {
+    setBoard(mapAsset, position, imageScaleX, imageScaleY);
   }
-
-  public void setDrawBoard(boolean draw) {
-    drawBoard = draw;
-  }
-
-  //
-  // Misc Scale methods
-  //
 
   public float getImageScaleX() {
     return imageScaleX;
   }
 
-  public void setImageScaleX(float imageScaleX) {
-    this.imageScaleX = imageScaleX;
+  public void setImageScale(float scaleX, float scaleY) {
+    setBoard(mapAsset, boardPosition, scaleX, scaleY);
   }
 
   public float getImageScaleY() {
     return imageScaleY;
   }
 
-  public void setImageScaleY(float imageScaleY) {
-    this.imageScaleY = imageScaleY;
-  }
+  // endregion
 
   //
   // Fog
@@ -902,7 +962,7 @@ public class Zone {
     }
 
     // Token is visible, and there is fog
-    Rectangle tokenSize = token.getBounds(this);
+    Rectangle tokenSize = token.getFootprintBounds(this);
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
     if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
@@ -937,7 +997,7 @@ public class Zone {
       return false;
     }
     // Token is visible, and there is fog
-    Rectangle tokenSize = token.getBounds(this);
+    Rectangle tokenSize = token.getFootprintBounds(this);
     Area tokenFootprint = getGrid().getTokenCellArea(tokenSize);
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
@@ -1064,7 +1124,7 @@ public class Zone {
           continue;
         }
 
-        var tokenArea = token.getTransformedMaskTopology(type);
+        var tokenArea = token.getTransformedMaskTopology(this, type);
         if (tokenArea != null) {
           topologies.add(tokenArea);
         }
@@ -1162,11 +1222,13 @@ public class Zone {
           exposedAreaMeta.put(tea, meta);
         }
         meta.addToExposedAreaHistory(area);
-        ZoneRenderer zr = MapTool.getFrame().getZoneRenderer(this.getId());
-        if (zr != null) // Could be null if the AutoSaveManager is saving the campaign by copying
-        // Zones, but not
-        // ZoneRenderers
-        {
+        // The renderer is absent when this zone is not currently displayed -- for example while
+        // the AutoSaveManager copies Zones without their ZoneRenderers -- and the frame itself is
+        // absent when there is no UI. Exposing fog is model work either way, so neither is a
+        // reason to fail; there is simply no view to flush.
+        MapToolFrame frame = MapTool.getFrame();
+        ZoneRenderer zr = frame == null ? null : frame.getZoneRenderer(this.getId());
+        if (zr != null) {
           zr.getZoneView().flush();
         }
         putToken(tok);
@@ -1316,7 +1378,7 @@ public class Zone {
    * @param view holds whether or not tokens are selected
    * @return the exposed area
    */
-  public Area getExposedArea(PlayerView view) {
+  public @Nonnull Area getExposedArea(PlayerView view) {
     Area combined = new Area(exposedArea);
 
     // Don't need to worry about StrictTokenOwnership since the PlayerView only contains tokens we
@@ -1416,6 +1478,7 @@ public class Zone {
     final var elementList = drawablesByLayer.get(drawnElement.getDrawable().getLayer());
     for (DrawnElement de : elementList) {
       if (de.getDrawable().getId().equals(drawnElement.getDrawable().getId())) {
+        de.setDrawable(drawnElement.getDrawable());
         de.setPen(new Pen(pen));
         break;
       }
@@ -1677,7 +1740,7 @@ public class Zone {
 
   private DrawnElement findDrawnElement(List<DrawnElement> list, GUID id) {
     for (DrawnElement de : list) {
-      if (de.getDrawable().getId() == id) {
+      if (de.getDrawable().getId().equals(id)) {
         return de;
       }
       if (de.getDrawable() instanceof DrawablesGroup) {
@@ -1970,7 +2033,9 @@ public class Zone {
   private int getFigureZOrder(Token t) {
 
     Rectangle b1 =
-        t.isSnapToScale() ? t.getFootprint(getGrid()).getBounds(getGrid()) : t.getBounds(getZone());
+        t.isSnapToScale()
+            ? t.getFootprint(getGrid()).getBounds(getGrid())
+            : t.getFootprintBounds(getZone());
     /*
      * This is an awful approximation of centre of token footprint. The bounding box (b1 & b2) are
      * usually centred on token x & y So token y + bounding y give you the bottom of the box Then
@@ -2005,7 +2070,6 @@ public class Zone {
 
   public void optimize() {
     log.debug("Optimizing Map " + getName());
-    MapTool.getFrame().setStatusMessage(I18N.getText("Zone.status.optimizing", getName()));
     collapseDrawables();
   }
 
@@ -2046,7 +2110,7 @@ public class Zone {
         continue;
       }
       // Are we possibly covering something up?
-      if (drawn.getPen().isEraser() && (drawn.getPen().getBackgroundMode() == Pen.MODE_SOLID)) {
+      if (drawn.getPen().isEraser() && (drawn.getPen().getBackgroundPaint() != null)) {
         area.add(drawnArea);
         eraserCount++;
         continue;
@@ -2084,11 +2148,6 @@ public class Zone {
       exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
     }
     // 1.3b70 -> 1.3b71
-    // These two variables were added
-    if (drawBoard == false) {
-      // this should check the file version, not the value
-      drawBoard = true;
-    }
     if (boardPosition == null) {
       boardPosition = new Point(0, 0);
     }
@@ -2151,6 +2210,10 @@ public class Zone {
 
     if (tokenSelection == null) {
       tokenSelection = TokenSelection.ALL;
+    }
+
+    if (showCoordinates == null) {
+      showCoordinates = ShowCoordinates.SHOW_COORDS_TO_ALL;
     }
 
     if (drawables == null) {
@@ -2239,7 +2302,7 @@ public class Zone {
   public static Zone fromDto(ZoneDto dto) {
     var zone = new Zone();
     zone.creationTime = dto.getCreationTime();
-    zone.id = GUID.valueOf(dto.getId());
+    zone.id = GUID.fromDto(dto.getId());
     zone.grid = Grid.fromDto(dto.getGrid());
     zone.grid.setZone(zone);
     zone.gridColor = dto.getGridColor();
@@ -2286,14 +2349,13 @@ public class Zone {
     zone.mapAsset = dto.hasMapAsset() ? new MD5Key(dto.getMapAsset().getValue()) : null;
     zone.boardPosition.x = dto.getBoardPosition().getX();
     zone.boardPosition.y = dto.getBoardPosition().getY();
-    zone.drawBoard = dto.getDrawBoard();
-    zone.boardChanged = dto.getBoardChanged();
     zone.name = dto.getName();
     zone.playerAlias = dto.hasPlayerAlias() ? dto.getPlayerAlias().getValue() : null;
     zone.isVisible = dto.getIsVisible();
     zone.visionType = VisionType.valueOf(dto.getVisionType().name());
     zone.lightingStyle = LightingStyle.valueOf(dto.getLightingStyle().name());
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
+    zone.showCoordinates = ShowCoordinates.valueOf(dto.getShowCoordinates().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
 
@@ -2307,7 +2369,7 @@ public class Zone {
       dto.setPlayerAlias(StringValue.of(playerAlias));
     }
     dto.setCreationTime(creationTime);
-    dto.setId(id.toString());
+    dto.setId(id.toDto());
     dto.setGrid(grid.toDto());
     dto.setGridColor(gridColor);
     dto.setImageScaleX(imageScaleX);
@@ -2352,12 +2414,11 @@ public class Zone {
       dto.setMapAsset(StringValue.of(mapAsset.toString()));
     }
     dto.setBoardPosition(Mapper.map(boardPosition));
-    dto.setDrawBoard(drawBoard);
-    dto.setBoardChanged(boardChanged);
     dto.setIsVisible(isVisible);
     dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
     dto.setLightingStyle(ZoneDto.LightingStyleDto.valueOf(lightingStyle.name()));
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
+    dto.setShowCoordinates(ZoneDto.ShowCoordinatesDto.valueOf(showCoordinates.name()));
     dto.setHeight(height);
     dto.setWidth(width);
     return dto.build();

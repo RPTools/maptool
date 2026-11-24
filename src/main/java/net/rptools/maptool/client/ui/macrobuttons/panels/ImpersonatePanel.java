@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
@@ -127,7 +127,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
 
   @Override
   public void clear() {
-    removeAll();
+    removeAllButtons();
     MapTool.getFrame()
         .getFrame(MTFrame.IMPERSONATED)
         .setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS));

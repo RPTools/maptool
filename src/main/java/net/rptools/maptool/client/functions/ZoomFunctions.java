@@ -9,16 +9,18 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonObject;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.List;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
@@ -49,12 +51,15 @@ public class ZoomFunctions extends AbstractFunction {
       throws ParserException {
     if ("getZoom".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 0);
-      return Double.valueOf(MapTool.getFrame().getCurrentZoneRenderer().getScale()).toString();
+      var viewModel = MapTool.getFrame().getCurrentZoneRenderer().getViewModel();
+      return Double.valueOf(viewModel.getZoneScale().getScale()).toString();
     }
     if ("setZoom".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-      Double zoom = FunctionUtil.paramAsDouble(functionName, args, 0, true);
-      MapTool.getFrame().getCurrentZoneRenderer().setScale(zoom);
+      double zoom = FunctionUtil.paramAsDouble(functionName, args, 0, true);
+      var renderer = MapTool.getFrame().getCurrentZoneRenderer();
+      var viewModel = renderer.getViewModel();
+      viewModel.setZoneScale(viewModel.getZoneScale().withCenteredScale(zoom, renderer.getSize()));
       return "";
     }
     if ("getViewArea".equalsIgnoreCase(functionName)) {
@@ -103,14 +108,15 @@ public class ZoomFunctions extends AbstractFunction {
   private static Object getViewArea(boolean pixels, String delim) {
     ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
 
-    int offsetX = zoneRenderer.getViewOffsetX() * -1;
-    int offsetY = zoneRenderer.getViewOffsetY() * -1;
     int width = zoneRenderer.getWidth();
     int height = zoneRenderer.getHeight();
 
     // convert zoomed pixels to true pixels
-    ZonePoint topLeft = convertToZone(zoneRenderer, offsetX, offsetY);
-    ZonePoint bottomRight = convertToZone(zoneRenderer, offsetX + width, offsetY + height);
+
+    ZonePoint topLeft =
+        new ScreenPoint(0, 0).convertToZone(zoneRenderer.getViewModel().getZoneScale());
+    ZonePoint bottomRight =
+        new ScreenPoint(width, height).convertToZone(zoneRenderer.getViewModel().getZoneScale());
 
     if (pixels) {
       if ("json".equalsIgnoreCase(delim)) {
@@ -128,21 +134,6 @@ public class ZoomFunctions extends AbstractFunction {
         return createBoundsAsStringProps(delim, z1.x, z1.y, z2.x, z2.y);
       }
     }
-  }
-
-  /**
-   * Returns zonePoint from x and y pixel coordinates, and from the scale of the renderer
-   *
-   * @param renderer the renderer of the zone
-   * @param x the x coordinate
-   * @param y the y coordinate
-   * @return ZonePoint of the coordinates
-   */
-  public static ZonePoint convertToZone(ZoneRenderer renderer, double x, double y) {
-    double scale = renderer.getScale();
-    double zX = (int) Math.floor(x / scale);
-    double zY = (int) Math.floor(y / scale);
-    return new ZonePoint((int) zX, (int) zY);
   }
 
   private static Object createBoundsAsStringProps(
@@ -190,7 +181,7 @@ public class ZoomFunctions extends AbstractFunction {
     int height = y2 - y1;
     int centreX = x1 + (width / 2);
     int centreY = y1 + (height / 2);
-    zoneRenderer.enforceView(centreX, centreY, 1, width, height);
+    zoneRenderer.enforceView(centreX, centreY, 1, new Dimension(width, height));
     // if requested, set all players to map and match view
     if (allPlayers && MapTool.getParser().isMacroTrusted()) {
       MapTool.serverCommand().enforceZone(zoneRenderer.getZone().getId());
@@ -209,14 +200,13 @@ public class ZoomFunctions extends AbstractFunction {
   private static Object getViewCenter(boolean pixels, String delim) {
     ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
 
-    int offsetX = zoneRenderer.getViewOffsetX() * -1;
     int width = zoneRenderer.getWidth();
-
-    int offsetY = zoneRenderer.getViewOffsetY() * -1;
     int height = zoneRenderer.getHeight();
 
-    ZonePoint topLeft = convertToZone(zoneRenderer, offsetX, offsetY);
-    ZonePoint bottomRight = convertToZone(zoneRenderer, offsetX + width, offsetY + height);
+    ZonePoint topLeft =
+        new ScreenPoint(0, 0).convertToZone(zoneRenderer.getViewModel().getZoneScale());
+    ZonePoint bottomRight =
+        new ScreenPoint(width, height).convertToZone(zoneRenderer.getViewModel().getZoneScale());
 
     int centerX = (topLeft.x + bottomRight.x) / 2;
     int centerY = (topLeft.y + bottomRight.y) / 2;

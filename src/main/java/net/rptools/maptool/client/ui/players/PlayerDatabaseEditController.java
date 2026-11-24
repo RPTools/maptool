@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.players;
 
@@ -58,10 +58,10 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
   private final Set<SwingJavaFXDialogEventHandler> eventHandlers = ConcurrentHashMap.newKeySet();
 
   /** The localised name for GMs. */
-  private final String GM_ROLE_NAME = I18N.getText("userTerm.GM");
+  private final String GM_ROLE_NAME = Role.GM.toString();
 
   /** The localised name for Players. */
-  private final String PLAYER_ROLE_NAME = I18N.getText("userTerm.Player");
+  private final String PLAYER_ROLE_NAME = Role.PLAYER.toString();
 
   /** The localised name for public key. */
   private final String AUTH_PUB_KEY_NAME = I18N.getText("playerDB.dialog.publicKey");

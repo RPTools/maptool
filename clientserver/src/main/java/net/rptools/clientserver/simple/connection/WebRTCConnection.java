@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.clientserver.simple.connection;
 
@@ -18,9 +18,11 @@ import com.google.gson.Gson;
 import dev.onvoid.webrtc.*;
 import dev.onvoid.webrtc.media.MediaStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.clientserver.simple.webrtc.*;
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +41,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
   private final RTCDataChannelObserver rtcDataChannelObserver = new RTCDataChannelObserverImpl();
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
   private final String serverName;
-  private final String id;
   private final Gson gson = new Gson();
   private final Listener listener;
   private WebSocketClient signalingClient;
@@ -57,7 +58,7 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
   // used from client side
   public WebRTCConnection(String id, String serverName, Listener listener) {
-    this.id = id;
+    super(id);
     this.serverName = serverName;
     this.listener = listener;
     init();
@@ -65,7 +66,7 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
   // this is used from the server side
   public WebRTCConnection(OfferMessageDto message, WebRTCServer webRTCServer) {
-    this.id = message.source;
+    super(message.source);
     this.server = webRTCServer;
     this.serverName = server.getName();
     this.listener = () -> {};
@@ -226,11 +227,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
   }
 
   @Override
-  public String getId() {
-    return id;
-  }
-
-  @Override
   public void open() throws IOException {
     startSignaling();
   }
@@ -381,20 +377,9 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
         int chunkSize = 16 * 1024;
 
         while (buffer.remaining() > 0) {
-          var amountToSend = Math.min(buffer.remaining(), chunkSize);
-          ByteBuffer part = buffer;
+          ByteBuffer part =
+              buffer.slice(buffer.position(), Math.min(buffer.remaining(), chunkSize));
 
-          if (amountToSend != buffer.capacity()) {
-            // we need to allocation a new ByteBuffer because send calls ByteBuffer.array()
-            // which would return
-            // the whole byte[] and not only the slice. But the lib doesn't use
-            // ByteBuffer.arrayOffset().
-            var slice = buffer.slice(buffer.position(), amountToSend);
-            part = ByteBuffer.allocate(amountToSend);
-            part.put(slice);
-          }
-
-          buffer.position(buffer.position() + amountToSend);
           try {
             localDataChannel.send(new RTCDataChannelBuffer(part, true));
           } catch (Exception e) {
@@ -403,6 +388,8 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
             return;
           }
           log.debug(prefix() + " sent " + part.capacity() + " bytes");
+
+          buffer.position(buffer.position() + part.capacity());
         }
       }
 
@@ -473,11 +460,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
               + event.getPort()
               + " text: "
               + event.getErrorText());
-    }
-
-    @Override
-    public void onIceCandidatesRemoved(RTCIceCandidate[] candidates) {
-      log.info(prefix() + "PeerConnection.onIceCandidatesRemoved");
     }
 
     @Override
@@ -569,8 +551,52 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
       var message = readMessage(channelBuffer.data);
       if (message != null) {
-        dispatchCompressedMessage(message);
+        try {
+          dispatchCompressedMessage(message);
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
       }
+    }
+
+    private ByteBuffer messageBuffer = null;
+
+    private byte[] readMessage(ByteBuffer part) {
+      if (messageBuffer == null) {
+        int length = part.getInt();
+        notifyListeners(
+            ActivityListener.Direction.Inbound, ActivityListener.State.Start, length, 0);
+
+        if (part.remaining() == length) {
+          var ret = new byte[length];
+          part.get(ret);
+          notifyListeners(
+              ActivityListener.Direction.Inbound, ActivityListener.State.Complete, length, length);
+          return ret;
+        }
+
+        messageBuffer = ByteBuffer.allocate(length);
+      }
+
+      messageBuffer.put(part);
+      notifyListeners(
+          ActivityListener.Direction.Inbound,
+          ActivityListener.State.Progress,
+          messageBuffer.capacity(),
+          messageBuffer.position());
+
+      if (messageBuffer.capacity() == messageBuffer.position()) {
+        notifyListeners(
+            ActivityListener.Direction.Inbound,
+            ActivityListener.State.Complete,
+            messageBuffer.capacity(),
+            messageBuffer.capacity());
+        var ret = messageBuffer.array();
+        messageBuffer = null;
+        return ret;
+      }
+
+      return null;
     }
   }
 }

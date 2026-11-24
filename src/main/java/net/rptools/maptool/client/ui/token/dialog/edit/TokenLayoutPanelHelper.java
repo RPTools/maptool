@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.token.dialog.edit;
 
@@ -107,7 +107,7 @@ class TokenLayoutPanelHelper {
   private static final UIDefaults UI_DEFAULTS = UIManager.getDefaults();
   private static final double DEFAULT_FONT_SIZE = UI_DEFAULTS.getFont("defaultFont").getSize2D();
   protected Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-  private boolean noGrid = GridFactory.getGridType(grid).equals(GridFactory.NONE);
+  private boolean noGrid = grid.getType().isNone();
   private int gridSize = grid.getSize();
   private double cellHeight = grid.getCellHeight();
   private double cellWidth = grid.getCellWidth();
@@ -123,7 +123,7 @@ class TokenLayoutPanelHelper {
   AbeillePanel<?> parent;
   private JRootPane parentRoot;
   private final TokenLayoutRenderPanel renderPanel;
-  private JComboBox<?> sizeCombo;
+  private JComboBox<EditTokenDialog.FootprintRecord> sizeCombo;
   private JSpinner anchorXSpinner, anchorYSpinner, scaleSpinner, zoomSpinner;
   private JSlider anchorXSlider, anchorYSlider, scaleSlider, zoomSlider;
   private AbstractButton okButton;
@@ -163,8 +163,10 @@ class TokenLayoutPanelHelper {
     return flippedYCB;
   }
 
-  private JComboBox<?> getSizeCombo() {
-    if (sizeCombo == null) sizeCombo = (JComboBox<?>) parent.getComponent("size");
+  private JComboBox<EditTokenDialog.FootprintRecord> getSizeCombo() {
+    if (sizeCombo == null) {
+      sizeCombo = (JComboBox<EditTokenDialog.FootprintRecord>) parent.getComponent("size");
+    }
     return sizeCombo;
   }
 
@@ -349,12 +351,8 @@ class TokenLayoutPanelHelper {
         @Override
         public void itemStateChanged(ItemEvent e) {
           if (mirrorToken != null) {
-            final var selected = getSizeCombo().getSelectedItem();
-            if (selected instanceof TokenFootprint tmpFP) {
-              setFootprint(tmpFP);
-            } else {
-              setFootprint(null);
-            }
+            var selected = getSizeCombo().getItemAt(getSizeCombo().getSelectedIndex());
+            setFootprint(selected.footprint());
           }
         }
       };
@@ -387,8 +385,8 @@ class TokenLayoutPanelHelper {
 
   protected void setToken(Token token, boolean useDefaults) {
     grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-    boolean isoGrid = grid.isIsometric();
-    noGrid = GridFactory.getGridType(grid).equals(GridFactory.NONE);
+    boolean isoGrid = grid.getType().isIsometric();
+    noGrid = grid.getType().isNone();
     renderBits = new RenderBits();
     gridSize = grid.getSize();
     cellHeight = grid.getCellHeight();
@@ -403,13 +401,12 @@ class TokenLayoutPanelHelper {
       mirrorToken.setAnchor(0, 0);
     }
 
-    if (mirrorToken.getFootprint(grid) != getSizeCombo().getSelectedItem()) {
-      var selected = getSizeCombo().getSelectedItem();
-      switch (selected) {
-        case TokenFootprint tmpFP ->
-            mirrorToken.setFootprint(grid, grid.getFootprint(tmpFP.getId()));
-        case null, default -> mirrorToken.setSnapToScale(false);
-      }
+    var sizeCombo = getSizeCombo();
+    var selected = sizeCombo.getItemAt(sizeCombo.getSelectedIndex());
+    if (selected.id() == null) {
+      mirrorToken.setSnapToScale(false);
+    } else {
+      mirrorToken.setFootprintId(grid.getType(), selected.id());
     }
 
     isIsoFigure =
@@ -486,7 +483,9 @@ class TokenLayoutPanelHelper {
     setCentredFootprintBounds();
 
     Set<CellPoint> occupiedCells =
-        footprint == null ? Collections.emptySet() : footprint.getOccupiedCells(ORIGIN);
+        footprint == null
+            ? Collections.emptySet()
+            : footprint.getOccupiedCells(ORIGIN, grid.getType().getOffsetTranslator());
     Rectangle2D aggregateBounds = new Rectangle2D.Double();
     cellCentres = new ArrayList<>(occupiedCells.size());
     for (CellPoint cp : occupiedCells) {
@@ -855,8 +854,7 @@ class TokenLayoutPanelHelper {
     }
 
     private Shape createGridShape(boolean trueSize) {
-      return Grid.createGridShape(
-          GridFactory.getGridType(grid), (trueSize ? grid.getSize() : grid.getSize() - 8));
+      return grid.getType().createGridShape(trueSize ? grid.getSize() : grid.getSize() - 8);
     }
 
     /** Itty bitty cross to show the dead-centre of the footprint */

@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.walker.astar;
 
@@ -235,7 +235,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
       var view = zoneRenderer.getPlayerView();
       newFowExposedArea =
-          zone.hasFog() && !view.isGMView() ? zoneView.getExposedArea(view) : new Area();
+          zone.hasFog() && !view.isGMView()
+              ? zoneView.getVisibility(view).exposedArea()
+              : new Area();
     }
 
     if (!Objects.equals(newFowExposedArea, fowExposedArea)) {
@@ -457,7 +459,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           continue;
         }
 
-        Set<CellPoint> occupiedCells = footprint.getOccupiedCells(node.position);
+        Set<CellPoint> occupiedCells =
+            footprint.getOccupiedCells(
+                node.position, zone.getGrid().getType().getOffsetTranslator());
         for (CellPoint cellPoint : occupiedCells) {
           // Check whether moving the occupied cell to its new location would be prohibited by VBL.
           var cellNeighbor =
@@ -550,7 +554,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
   private boolean tokenFootprintIntersectsVBL(CellPoint position) {
     var points =
-        footprint.getOccupiedCells(position).stream()
+        footprint
+            .getOccupiedCells(position, zone.getGrid().getType().getOffsetTranslator())
+            .stream()
             .map(
                 cellPoint -> {
                   var bounds = zone.getGrid().getBounds(cellPoint);

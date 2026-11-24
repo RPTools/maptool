@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
@@ -34,6 +34,26 @@ public class HTMLActionEvent {
      */
     String getNewTitle() {
       return newTitle;
+    }
+  }
+
+  /** Action event for changing the icon of the container via a source path. */
+  public static class ChangeIconActionEvent extends ActionEvent {
+
+    private final String newIconRef;
+
+    ChangeIconActionEvent(Object source, String iconRef) {
+      super(source, 0, "changeIcon");
+      newIconRef = iconRef;
+    }
+
+    /**
+     * Gets the new icon href.
+     *
+     * @return the new icon href.
+     */
+    public String getNewIconRef() {
+      return newIconRef;
     }
   }
 

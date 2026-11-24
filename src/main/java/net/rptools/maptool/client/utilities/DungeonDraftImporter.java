@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.utilities;
 
@@ -44,7 +44,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.ShapeType;
@@ -183,7 +183,7 @@ public class DungeonDraftImporter {
         MapPropertiesDialog.createMapPropertiesImportDialog(MapTool.getFrame());
     dialog.setZone(zone);
     dialog.forcePixelsPerCell(pixelsPerCell);
-    dialog.forceGridType(GridFactory.SQUARE);
+    dialog.forceGridType(GridType.Square);
     dialog.forceMap(asset);
     dialog.setVisible(true);
     if (dialog.getStatus() != MapPropertiesDialog.Status.OK) {

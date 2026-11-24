@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -48,6 +48,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.EventMacroUtil;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -173,31 +174,26 @@ public class TokenMoveFunctions extends AbstractFunction {
       }
       Path<?> path = tokenInContext.getLastPath();
       List<Map<String, Integer>> returnPoints = new ArrayList<Map<String, Integer>>();
-      Token target;
 
-      if ((parameters.size() == 1) || parameters.size() == 2) {
-        String targetToken = (String) parameters.get(0);
-        String jsonPath = parameters.size() == 2 ? parameters.get(1).toString() : "";
-        target = zone.resolveToken(targetToken);
-        if (target == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.unknownToken", functionName, targetToken));
-        }
-        List<Map<String, Integer>> pathPoints = null;
-        if (jsonPath != null && !jsonPath.equals("")) {
-          returnPoints = crossedToken(zone, tokenInContext, target, jsonPath);
-        } else {
-          pathPoints = getLastPathList(path, true);
-          returnPoints = crossedToken(zone, tokenInContext, target, pathPoints);
-        }
-        JsonArray retVal = pathPointsToJSONArray(returnPoints);
-        returnPoints = null;
-        return retVal;
-      } else {
+      if (parameters.size() < 1 || parameters.size() > 2) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
       }
+
+      Token target = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, -1);
+
+      String jsonPath = parameters.size() == 2 ? parameters.get(1).toString() : "";
+      List<Map<String, Integer>> pathPoints = null;
+      if (jsonPath != null && !jsonPath.equals("")) {
+        returnPoints = crossedToken(zone, tokenInContext, target, jsonPath);
+      } else {
+        pathPoints = getLastPathList(path, true);
+        returnPoints = crossedToken(zone, tokenInContext, target, pathPoints);
+      }
+      JsonArray retVal = pathPointsToJSONArray(returnPoints);
+      returnPoints = null;
+      return retVal;
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
@@ -267,7 +263,7 @@ public class TokenMoveFunctions extends AbstractFunction {
                 .getFootprint(grid)
                 .getBounds(grid, grid.convert(new ZonePoint(entry.get("x"), entry.get("y"))));
       } else {
-        originalArea = tokenInContext.getBounds(zone);
+        originalArea = tokenInContext.getImageBounds(zone);
       }
       Rectangle2D oa = originalArea.getBounds2D();
       if (targetArea.contains(oa) || targetArea.intersects(oa)) {
@@ -300,7 +296,7 @@ public class TokenMoveFunctions extends AbstractFunction {
      * if-else sequence...
      */
     Grid grid = zone.getGrid();
-    Rectangle targetArea = target.getBounds(zone);
+    Rectangle targetArea = target.getImageBounds(zone);
 
     if (pathPoints == null) {
       return returnPoints;
@@ -326,7 +322,7 @@ public class TokenMoveFunctions extends AbstractFunction {
       Map<String, Integer> firstPoint = new HashMap<String, Integer>(),
           secondPoint = new HashMap<String, Integer>();
       for (Map<String, Integer> entry : pathPoints) {
-        Rectangle tokenArea = tokenInContext.getBounds(zone);
+        Rectangle tokenArea = tokenInContext.getImageBounds(zone);
         Point currentPoint = new Point(entry.get("x"), entry.get("y"));
         if (ctr > 0) {
           if (targetArea.intersectsLine(new Line2D.Double(previousPoint, currentPoint))

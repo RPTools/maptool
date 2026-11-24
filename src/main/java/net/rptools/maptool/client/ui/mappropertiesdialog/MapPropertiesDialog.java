@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.mappropertiesdialog;
 
@@ -42,6 +42,7 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.GridlessGrid;
 import net.rptools.maptool.model.HexGridHorizontal;
 import net.rptools.maptool.model.HexGridVertical;
@@ -112,17 +113,13 @@ public class MapPropertiesDialog extends JDialog {
     getMapButton().setEnabled(false);
   }
 
-  public void forceGridType(String gridType) {
-    if (GridFactory.isHexVertical(gridType)) {
-      getHexVerticalRadio().setSelected(true);
-    } else if (GridFactory.isHexHorizontal(gridType)) {
-      getHexHorizontalRadio().setSelected(true);
-    } else if (GridFactory.isIsometric(gridType)) {
-      getIsometricRadio().setSelected(true);
-    } else if (GridFactory.isSquare(gridType)) {
-      getSquareRadio().setSelected(true);
-    } else {
-      getNoGridRadio().setSelected(true);
+  public void forceGridType(GridType gridType) {
+    switch (gridType) {
+      case Square -> getSquareRadio().setSelected(true);
+      case Isometric -> getIsometricRadio().setSelected(true);
+      case HexVertical -> getHexVerticalRadio().setSelected(true);
+      case HexHorizontal -> getHexHorizontalRadio().setSelected(true);
+      case None -> getNoGridRadio().setSelected(true);
     }
     getHexVerticalRadio().setEnabled(false);
     getHexHorizontalRadio().setEnabled(false);
@@ -161,6 +158,7 @@ public class MapPropertiesDialog extends JDialog {
     initVisionTypeCombo();
     initLightingStyleCombo();
     initAStarRoundingOptionsComboBox();
+    initShowCoordinatesComboBox();
 
     initIsometricRadio();
     initHexHoriRadio();
@@ -282,6 +280,10 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getComboBox("aStarRoundingOptionsComboBox");
   }
 
+  public JComboBox getShowCoordinatesComboBox() {
+    return formPanel.getComboBox("showCoordinatesComboBox");
+  }
+
   public void setZone(Zone zone) {
     this.zone = zone;
     copyZoneToUI();
@@ -304,6 +306,7 @@ public class MapPropertiesDialog extends JDialog {
     getVisionTypeCombo().setSelectedItem(zone.getVisionType());
     getLightingStyleCombo().setSelectedItem(zone.getLightingStyle());
     getAStarRoundingOptionsComboBox().setSelectedItem(zone.getAStarRounding());
+    getShowCoordinatesComboBox().setSelectedItem(zone.getShowCoordinates());
     getIsLandingMapCheckBox().setSelected(zone.getId().equals(campaign.getLandingMapId()));
 
     gridOffsetX = zone.getGrid().getOffsetX();
@@ -328,44 +331,54 @@ public class MapPropertiesDialog extends JDialog {
     zone.setLightingStyle((Zone.LightingStyle) getLightingStyleCombo().getSelectedItem());
     zone.setAStarRounding(
         (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
+    zone.setShowCoordinates((Zone.ShowCoordinates) getShowCoordinatesComboBox().getSelectedItem());
 
     zone.setFogPaint(fogPaint);
     zone.setBackgroundPaint(backgroundPaint);
-    zone.setMapAsset(mapAsset != null ? mapAsset.getMD5Key() : null);
+    zone.setMapAssetId(mapAsset != null ? mapAsset.getMD5Key() : null);
 
+    // The server command sets the landing map on this client's campaign and tells the server,
+    // which holds its own copy of the campaign. A new map need not have reached the server yet:
+    // the server stores the ID as given.
     var campaign = MapTool.getClient().getCampaign();
     if (getIsLandingMapCheckBox().isSelected()) {
-      campaign.setLandingMapId(zone.getId());
+      MapTool.serverCommand().setLandingMap(zone.getId());
     } else if (zone.getId().equals(campaign.getLandingMapId())) {
       // This zone was the landing map but got toggled off.
-      campaign.setLandingMapId(null);
+      MapTool.serverCommand().setLandingMap(null);
     }
   }
 
   private void initIsometricRadio() {
-    getIsometricRadio().setSelected(GridFactory.isIsometric(AppPreferences.defaultGridType.get()));
+    getIsometricRadio()
+        .setSelected(
+            GridType.fromString(AppPreferences.defaultGridType.get()) == GridType.Isometric);
     getIsometricIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_ISOMETRIC));
   }
 
   private void initHexHoriRadio() {
     getHexHorizontalRadio()
-        .setSelected(GridFactory.isHexHorizontal(AppPreferences.defaultGridType.get()));
+        .setSelected(
+            GridType.fromString(AppPreferences.defaultGridType.get()) == GridType.HexHorizontal);
     getHexHorizontalIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_HEX_HORIZONTAL));
   }
 
   private void initHexVertRadio() {
     getHexVerticalRadio()
-        .setSelected(GridFactory.isHexVertical(AppPreferences.defaultGridType.get()));
+        .setSelected(
+            GridType.fromString(AppPreferences.defaultGridType.get()) == GridType.HexVertical);
     getHexVerticalIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_HEX_VERTICAL));
   }
 
   private void initSquareRadio() {
-    getSquareRadio().setSelected(GridFactory.isSquare(AppPreferences.defaultGridType.get()));
+    getSquareRadio()
+        .setSelected(GridType.fromString(AppPreferences.defaultGridType.get()) == GridType.Square);
     getSquareIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_SQUARE));
   }
 
   private void initNoGridRadio() {
-    getNoGridRadio().setSelected(GridFactory.isNone(AppPreferences.defaultGridType.get()));
+    getNoGridRadio()
+        .setSelected(GridType.fromString(AppPreferences.defaultGridType.get()) == GridType.None);
     getNoGridIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_NONE));
   }
 
@@ -549,6 +562,15 @@ public class MapPropertiesDialog extends JDialog {
         .setModel(new DefaultComboBoxModel<>(Zone.AStarRoundingOptions.values()));
   }
 
+  private void initShowCoordinatesComboBox() {
+    DefaultComboBoxModel<Zone.ShowCoordinates> model = new DefaultComboBoxModel<>();
+    for (Zone.ShowCoordinates sc : Zone.ShowCoordinates.values()) {
+      model.addElement(sc);
+    }
+    model.setSelectedItem(AppPreferences.defaultShowCoordinates.get());
+    getShowCoordinatesComboBox().setModel(model);
+  }
+
   private void initLightingStyleCombo() {
     DefaultComboBoxModel<Zone.LightingStyle> model = new DefaultComboBoxModel<>();
     for (Zone.LightingStyle vt : Zone.LightingStyle.values()) {
@@ -573,19 +595,19 @@ public class MapPropertiesDialog extends JDialog {
   private Grid createZoneGrid() {
     Grid grid = null;
     if (getHexHorizontalRadio().isSelected()) {
-      grid = GridFactory.createGrid(GridFactory.HEX_HORI);
+      grid = GridFactory.createGrid(GridType.HexHorizontal);
     }
     if (getHexVerticalRadio().isSelected()) {
-      grid = GridFactory.createGrid(GridFactory.HEX_VERT);
+      grid = GridFactory.createGrid(GridType.HexVertical);
     }
     if (getSquareRadio().isSelected()) {
-      grid = GridFactory.createGrid(GridFactory.SQUARE);
+      grid = GridFactory.createGrid(GridType.Square);
     }
     if (getIsometricRadio().isSelected()) {
-      grid = GridFactory.createGrid(GridFactory.ISOMETRIC);
+      grid = GridFactory.createGrid(GridType.Isometric);
     }
     if (getNoGridRadio().isSelected()) {
-      grid = GridFactory.createGrid(GridFactory.NONE);
+      grid = GridFactory.createGrid(GridType.None);
     }
     grid.setSize(StringUtil.parseInteger(getPixelsPerCellTextField().getText(), grid.getSize()));
 

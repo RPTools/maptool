@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.functions;
 
@@ -32,12 +32,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.GridType;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.gamedata.MTScriptDataConversion;
@@ -263,7 +264,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("getSize")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      return getSize(token);
+      Zone zone = token.getZoneRenderer().getZone();
+      return getSize(zone, token);
     }
 
     /*
@@ -272,14 +274,15 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("setSize")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-
-      return setSize(token, parameters.get(0).toString());
+      Zone zone = token.getZoneRenderer().getZone();
+      return setSize(zone, token, parameters.get(0).toString());
     }
 
     if (functionName.equalsIgnoreCase("resetSize")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      resetSize(token);
+      Zone zone = token.getZoneRenderer().getZone();
+      resetSize(zone, token);
 
       return "";
     }
@@ -368,7 +371,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("getProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      Object val = token.getEvaluatedProperty(parameters.get(0).toString());
+      Object val =
+          new MapToolVariableResolver(token)
+              .getEvaluatedTokenProperty(parameters.get(0).toString());
 
       if (val instanceof String) {
         // try to convert to a number
@@ -508,19 +513,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("getLibProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String propertyName = parameters.get(0).toString();
-      String location;
-      if (parameters.size() > 1) {
-        location = parameters.get(1).toString();
-      } else {
-        location = MapTool.getParser().getMacroSource().getLocation();
-      }
 
-      String libName;
-      if (location.toLowerCase().startsWith("lib:")) {
-        libName = location.substring(4);
-      } else {
-        libName = location;
-      }
+      String libName = findLibNamespaceFromParams(parameters, 1, false);
 
       try {
         var library =
@@ -550,20 +544,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
       String property = parameters.get(0).toString();
       Object value = parameters.get(1);
-
-      String location;
-      if (parameters.size() > 2) {
-        location = parameters.get(2).toString();
-      } else {
-        location = MapTool.getParser().getMacroSource().getLocation();
-      }
-
-      String libName;
-      if (location.toLowerCase().startsWith("lib:")) {
-        libName = location.substring(4);
-      } else {
-        libName = location;
-      }
+      String libName = findLibNamespaceFromParams(parameters, 2, false);
 
       var library =
           new LibraryManager()
@@ -589,22 +570,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      */
     if (functionName.equalsIgnoreCase("getLibPropertyNames")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
-      String location;
-      if (parameters.size() > 0) {
-        location = parameters.get(0).toString();
-        if (location.equals("*") || location.equalsIgnoreCase("this")) {
-          location = MapTool.getParser().getMacroSource().getLocation();
-        }
-      } else {
-        location = MapTool.getParser().getMacroSource().getLocation();
-      }
-
-      String libName;
-      if (location.toLowerCase().startsWith("lib:")) {
-        libName = location.substring(4);
-      } else {
-        libName = location;
-      }
+      String libName = findLibNamespaceFromParams(parameters, 0, true);
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
       return getMatchingLibProperties(libName, delim, ".*", functionName);
     }
@@ -614,23 +580,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
      */
     if (functionName.equalsIgnoreCase("getMatchingLibProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-      String location;
       String pattern = parameters.get(0).toString();
-      if (parameters.size() > 1) {
-        location = parameters.get(1).toString();
-        if (location.equals("*") || location.equalsIgnoreCase("this")) {
-          location = MapTool.getParser().getMacroSource().getLocation();
-        }
-      } else {
-        location = MapTool.getParser().getMacroSource().getLocation();
-      }
-
-      String libName;
-      if (location.toLowerCase().startsWith("lib:")) {
-        libName = location.substring(4);
-      } else {
-        libName = location;
-      }
+      String libName = findLibNamespaceFromParams(parameters, 1, true);
 
       String delim = parameters.size() > 2 ? parameters.get(2).toString() : ",";
       return getMatchingLibProperties(libName, delim, pattern, functionName);
@@ -833,7 +784,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Zone zone = zoneR.getZone();
 
       // Get the pixel width or height of a given token
-      Rectangle tokenBounds = token.getBounds(zone);
+      Rectangle tokenBounds = token.getImageBounds(zone);
 
       if (functionName.equalsIgnoreCase("getTokenWidth")) {
         return BigDecimal.valueOf(tokenBounds.width);
@@ -857,7 +808,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Zone zone = zoneR.getZone();
 
       double magnitude = getBigDecimalFromParam(functionName, parameters, 0).doubleValue();
-      Rectangle tokenBounds = token.getBounds(zone);
+      Rectangle tokenBounds = token.getImageBounds(zone);
 
       double oldWidth = tokenBounds.width;
       double oldHeight = tokenBounds.height;
@@ -1060,41 +1011,37 @@ public class TokenPropertyFunctions extends AbstractFunction {
   /**
    * Gets the size of the token.
    *
+   * @param zone The zone the token belongs to.
    * @param token The token to get the size of.
    * @return the size of the token.
    */
-  private String getSize(Token token) {
-    Grid grid = token.getZoneRenderer().getZone().getGrid();
-    if (token.isSnapToScale()) {
-      for (TokenFootprint footprint : grid.getFootprints()) {
-        if (token.getFootprint(grid) == footprint) {
-          return footprint.getName();
-        }
-      }
-    }
-    return "";
+  private String getSize(Zone zone, Token token) {
+    GridType gridType = zone.getGrid().getType();
+    return token.isSnapToScale()
+        ? gridType.getFootprints().get(token.getFootprintId(gridType)).getName()
+        : "";
   }
 
   /**
    * Sets the size of the token.
    *
+   * @param zone The zone the token belongs to.
    * @param token The token to set the size of.
    * @param size The size to set the token to.
    * @return The new size of the token.
    * @throws ParserException if the size specified is an invalid size.
    */
-  private String setSize(Token token, String size) throws ParserException {
+  private String setSize(Zone zone, Token token, String size) throws ParserException {
     if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToScale, false);
-      return getSize(token);
+      return "";
     }
-    Grid grid = token.getZoneRenderer().getZone().getGrid();
-    for (TokenFootprint footprint : grid.getFootprints()) {
-      if (footprint.getName().equalsIgnoreCase(size)) {
-        MapTool.serverCommand()
-            .updateTokenProperty(token, Token.Update.setFootprint, grid, footprint);
-        return getSize(token);
-      }
+
+    GridType gridType = zone.getGrid().getType();
+    var entry = gridType.getFootprints().getEntryByName(size);
+    if (entry.isPresent()) {
+      MapTool.serverCommand().setTokenFootprint(zone, token, gridType, entry.get().getKey());
+      return entry.get().getValue().getName();
     }
     throw new ParserException(
         I18N.getText("macro.function.tokenProperty.invalidSize", "setSize", size));
@@ -1103,12 +1050,13 @@ public class TokenPropertyFunctions extends AbstractFunction {
   /**
    * Resets the size of the token.
    *
+   * @param zone The zone the token belongs to.
    * @param token The token to reset the size of.
    */
-  private void resetSize(Token token) {
-    Grid grid = token.getZoneRenderer().getZone().getGrid();
-    TokenFootprint footprint = grid.getDefaultFootprint();
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFootprint, grid, footprint);
+  private void resetSize(Zone zone, Token token) {
+    GridType gridType = zone.getGrid().getType();
+    GUID footprintId = gridType.getFootprints().getDefaultId();
+    MapTool.serverCommand().setTokenFootprint(zone, token, gridType, footprintId);
   }
 
   /**
@@ -1337,5 +1285,19 @@ public class TokenPropertyFunctions extends AbstractFunction {
           I18N.getText(
               "macro.function.general.argumentTypeN", functionName, index, param.toString()));
     }
+  }
+
+  private String findLibNamespaceFromParams(
+      List<Object> parameters, int libIndex, boolean allowWildcards) {
+    if (parameters.size() <= libIndex) {
+      return MapTool.getParser().getMacroSource().getLocation();
+    }
+
+    var location = parameters.get(libIndex).toString();
+    if (allowWildcards && (location.equals("*") || location.equalsIgnoreCase("this"))) {
+      return MapTool.getParser().getMacroSource().getLocation();
+    }
+
+    return location.toLowerCase().startsWith("lib:") ? location.substring(4) : location;
   }
 }

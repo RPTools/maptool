@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.zone.renderer;
 
@@ -31,7 +31,7 @@ public class SelectionRenderer {
   private final ZoneView zoneView;
 
   public SelectionRenderer(RenderHelper renderHelper, ZoneViewModel viewModel, ZoneView zoneView) {
-    this.renderHelper = renderHelper;
+    this.renderHelper = renderHelper.withTimerPrefix("SelectionRenderer");
     this.viewModel = viewModel;
     this.zoneView = zoneView;
   }

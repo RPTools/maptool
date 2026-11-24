@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
@@ -22,10 +22,17 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.swing.table.*;
 import net.rptools.maptool.language.I18N;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class CampaignPropertiesDialogTest {
+  @BeforeAll
+  public static void register() {
+    com.jidesoft.utils.Lm.verifyLicense(
+        "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
+  }
 
   @Test
   public void importPredefinedButton() throws InterruptedException, InvocationTargetException {
@@ -71,7 +78,6 @@ public class CampaignPropertiesDialogTest {
               new CampaignPropertiesDialog() {
                 @Override
                 protected File[] getPredefinedPropertyFiles(File propertyDir) {
-
                   return new File[] {new File(one), new File(two)};
                 }
               };

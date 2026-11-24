@@ -9,13 +9,17 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -27,12 +31,26 @@ public class LaunchInstructions {
           + "MapTool will launch anyway, but it is recommended that you increase the maximum memory allocated or don't set a limit.</body></html>";
 
   static {
+    var defaultProperties = new Properties();
+    defaultProperties.put("sun.java2d.d3d", "false");
+    defaultProperties.put("sun.java2d.opengl", "false");
+    defaultProperties.put("polyglot.engine.WarnInterpreterOnly", "false");
+    defaultProperties.put("java.util.Arrays.useLegacyMergeSort", "true");
+    // This sets up log4j to capture logging from Java logging manager
+    defaultProperties.put("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+    defaultProperties.put(AppUtil.DATADIR_PROPERTY_NAME, ".maptool-rptools");
+
+    for (var entry : defaultProperties.entrySet()) {
+      var key = entry.getKey().toString();
+
+      // Allow the user to provide an alternative value.
+      if (System.getProperty(key) == null) {
+        System.setProperty(key, entry.getValue().toString());
+      }
+    }
+
     // This will inject additional data tags in log4j2 which will be picked up by Sentry.io
     System.setProperty("log4j2.isThreadContextMapInheritable", "true");
-    // This sets up log4j to capture logging from Java logging manager
-    if (System.getProperty("java.util.logging.manager") == null) {
-      System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
-    }
     ThreadContext.put("OS", System.getProperty("os.name"));
   }
 
@@ -54,11 +72,18 @@ public class LaunchInstructions {
         JOptionPane.showMessageDialog(new JFrame(), msg, "Usage", JOptionPane.INFORMATION_MESSAGE);
       }
 
-      MapTool.main(args);
-
-      if (!MapTool.isDevelopment()) {
-        AppUpdate.gitHubReleases();
+      // Set the locale. Needs to be very early so nothing (including I18N) gets initialized first.
+      {
+        // AppPreferences can override the system locale. If no override present, use the system
+        // locale.
+        var systemLocale = Locale.getDefault();
+        var selectedLocale = Objects.requireNonNullElse(AppPreferences.locale.get(), systemLocale);
+        Locale.setDefault(selectedLocale);
+        // In case I18N already got initialized, update it.
+        I18N.setLocale(selectedLocale);
       }
+
+      MapTool.main(args);
     } catch (Throwable e) {
       // IMPORTANT: don't move this logger init to class-level because we need AppUtil.initLogging()
       // to run before any loggers are initialized. Yes, it's brittle, but c'est la vie.

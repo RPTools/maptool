@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui.zone;
 
@@ -51,7 +51,9 @@ public class PointerOverlay implements ZoneOverlay {
     for (PointerPair p : pointerList) {
       if (p.pointer.getZoneGUID().equals(zone.getId())) {
         ZonePoint zPoint = new ZonePoint(p.pointer.getX(), p.pointer.getY());
-        ScreenPoint sPoint = ScreenPoint.fromZonePointRnd(renderer, zPoint.x, zPoint.y);
+        ScreenPoint sPoint =
+            ScreenPoint.fromZonePointRnd(
+                renderer.getViewModel().getZoneScale(), zPoint.x, zPoint.y);
 
         int offX = 0;
         int offY = 0;

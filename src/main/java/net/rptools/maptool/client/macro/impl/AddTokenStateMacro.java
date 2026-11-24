@@ -9,8 +9,8 @@
  *
  * You should have received a copy of the GNU Affero General Public
  * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * <https://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <https://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.macro.impl;
 
@@ -74,6 +74,11 @@ public class AddTokenStateMacro implements Macro {
    * @see net.rptools.maptool.client.macro.Macro#execute execute(java.lang.String)
    */
   public void execute(MacroContext context, String aMacro, MapToolMacroContext executionContext) {
+    if (!MapTool.getPlayer().isGM()) {
+      MapTool.addLocalMessage(I18N.getText("slash.mustBeGM", "addtokenstate"));
+      return;
+    }
+
     // Split the command line into an array and get the tokens
     String[] tokens = aMacro.split("\\s");
     if (tokens.length < 2) {
@@ -118,7 +123,13 @@ public class AddTokenStateMacro implements Macro {
       MapTool.addLocalMessage(e.getMessage());
       return;
     }
+    MapToolUtil.uploadAssetIds(tokenOverlay.getAssetIds());
     MapTool.getCampaign().getTokenStatesMap().put(tokenOverlay.getName(), tokenOverlay);
+    // Token states are campaign properties, and the code above changes only this client's copy.
+    // Send them to the server, as the Campaign Properties dialog does, so that the server's
+    // campaign and the other players get the new state.
+    MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+
     MapTool.addLocalMessage(I18N.getText("addtokenstate.added", tokenOverlay.getName()));
   }
 
