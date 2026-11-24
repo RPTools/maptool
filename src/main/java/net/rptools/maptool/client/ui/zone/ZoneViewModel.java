@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 import net.rptools.lib.CollectionUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.StringUtil;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -71,7 +72,6 @@ public class ZoneViewModel {
   public record TokenPosition(Token token, Rectangle2D footprintBounds, Area transformedBounds) {
     public static TokenPosition fromToken(Token token, Zone zone) {
       Rectangle2D footprintBounds = token.getFootprintBounds(zone);
-
       final Area transformedBounds = new Area(footprintBounds);
       if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
         // facing defaults to down or -90 degrees
@@ -82,6 +82,10 @@ public class ZoneViewModel {
                 Math.toRadians(token.getFacingInDegrees()), centerX, centerY);
 
         transformedBounds.transform(at);
+        if (AppPreferences.selectMarqueeAlignToImage.get()) {
+          transformedBounds.transform(
+              AffineTransform.getTranslateInstance(token.getAnchorX(), token.getAnchorY()));
+        }
       }
 
       return new TokenPosition(token, footprintBounds, transformedBounds);
