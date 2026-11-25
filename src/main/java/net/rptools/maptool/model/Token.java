@@ -14,20 +14,14 @@
  */
 package net.rptools.maptool.model;
 
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Transparency;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,8 +31,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -213,18 +205,33 @@ public class Token implements Cloneable {
     addHalo,
   }
 
-  public static final Comparator<Token> NAME_COMPARATOR =
-      (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName());
+  /**
+   * @deprecated No longer used. Needed only for deserialization since the {@code null} key
+   *     represented the token image.
+   * @see #image
+   */
+  @Deprecated private final Map<String, MD5Key> imageAssetMap = new HashMap<>();
 
-  private final Map<String, MD5Key> imageAssetMap = new HashMap<>();
-  private String currentImageAsset;
+  /**
+   * @deprecated No longer used. Needed only to make sure deserialization doesn't fail.
+   */
+  @Deprecated private String currentImageAsset;
 
   private int x;
   private int y;
   private int z;
   private Integer facing = null;
-  private int lastX;
-  private int lastY;
+
+  /**
+   * @deprecated No longer used. Needed only to make sure deserialization doesn't fail.
+   */
+  @Deprecated private int lastX;
+
+  /**
+   * @deprecated No longer used. Needed only to make sure deserialization doesn't fail.
+   */
+  @Deprecated private int lastY;
+
   private Path<? extends AbstractPoint> lastPath;
 
   private int anchorX;
@@ -317,6 +324,7 @@ public class Token implements Cloneable {
   private boolean isFlippedY;
   private Boolean isFlippedIso = false;
 
+  private MD5Key image;
   private MD5Key charsheetImage;
   private MD5Key portraitImage;
 
@@ -366,7 +374,13 @@ public class Token implements Cloneable {
 
   private CaseInsensitiveHashMap<Object> propertyMapCI = new CaseInsensitiveHashMap<>();
 
-  private Map<String, String> macroMap;
+  /**
+   * @deprecated No longer used. Needed only for deserialization since the contents need to be
+   *     loaded into the new representation.
+   * @see #macroPropertiesMap
+   */
+  @Deprecated private Map<String, String> macroMap;
+
   private Map<Integer, MacroButtonProperties> macroPropertiesMap = new HashMap<>();
 
   private Map<String, String> speechMap = new HashMap<>();
@@ -395,7 +409,6 @@ public class Token implements Cloneable {
    */
   public Token(Token token) {
     this(token.name, token.getImageAssetId());
-    currentImageAsset = token.currentImageAsset;
 
     x = token.x;
     y = token.y;
@@ -445,6 +458,7 @@ public class Token implements Cloneable {
 
     visionOverlayColor = token.visionOverlayColor;
 
+    image = token.image;
     charsheetImage = token.charsheetImage;
     portraitImage = token.portraitImage;
     sightType = token.sightType;
@@ -479,13 +493,7 @@ public class Token implements Cloneable {
         (key, value) ->
             macroPropertiesMap.put(key, new MacroButtonProperties(this, key, value, false)));
 
-    // convert old-style macros
-    if (token.macroMap != null) {
-      macroMap = new HashMap<>(token.macroMap);
-      loadOldMacros();
-    }
     speechMap.putAll(token.speechMap);
-    imageAssetMap.putAll(token.imageAssetMap);
     sizeMap.putAll(token.sizeMap);
 
     exposedAreaGUID = token.exposedAreaGUID;
@@ -504,14 +512,7 @@ public class Token implements Cloneable {
 
   public Token(String name, MD5Key assetId) {
     this.name = name;
-
-    // NULL key is the default
-    imageAssetMap.put(null, assetId);
-
-    // convert old-style macros
-    if (macroMap != null) {
-      loadOldMacros();
-    }
+    image = assetId;
 
     propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
   }
@@ -532,23 +533,9 @@ public class Token implements Cloneable {
     // hasSight?
     // height?
     lastPath = null;
-    lastX = lastY = 0;
     // lightSourceList?
-    macroMap = null;
     ownerList.clear();
-    /**
-     * Lee: why shouldn't propertyType be set to what the framework uses? In case of multiple
-     * propertyType, give a choice; or incorporate in the Campaign Properties window a marker for
-     * what is default for new tokens.
-     */
     propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
-
-    /**
-     * Jamz: Like propertyType, why shouldn't sight be kept if it matches exists? Many creatures
-     * with DarkVision get reset and it makes it painful. I'm turning off this reset for now. If
-     * there are complaints/reasons, maybe the Import Dialog needs to be expanded to include
-     * checkboxes for these items...
-     */
 
     // Try and silently catch any errors if there is an issue with sightType...
     try {
@@ -1200,11 +1187,7 @@ public class Token implements Cloneable {
   }
 
   public MD5Key getImageAssetId() {
-    MD5Key assetId = imageAssetMap.get(currentImageAsset);
-    if (assetId == null) {
-      assetId = imageAssetMap.get(null); // default image
-    }
-    return assetId;
+    return image;
   }
 
   /**
@@ -1235,12 +1218,7 @@ public class Token implements Cloneable {
       return null;
     }
 
-    MD5Key imageId = result.getImageId();
-    if (imageId == null) {
-      return null;
-    }
-
-    return imageId;
+    return result.getImageId();
   }
 
   /**
@@ -1259,23 +1237,19 @@ public class Token implements Cloneable {
   /**
    * Store the token image, and set the native Width and Height.
    *
-   * @param name the name of the image.
    * @param assetId the asset MD5Key.
    */
-  public void setImageAsset(String name, MD5Key assetId) {
-    imageAssetMap.put(name, assetId);
+  public void setImageAsset(MD5Key assetId) {
+    image = assetId;
 
     BufferedImage image = ImageManager.getImageAndWait(assetId);
     setWidth(image.getWidth(null));
     setHeight(image.getHeight(null));
   }
 
-  public void setImageAsset(String name) {
-    currentImageAsset = name;
-  }
-
   public Set<MD5Key> getAllImageAssets() {
-    Set<MD5Key> assetSet = new HashSet<>(imageAssetMap.values());
+    Set<MD5Key> assetSet = new HashSet<>();
+    assetSet.add(image);
     assetSet.add(charsheetImage);
     assetSet.add(portraitImage);
 
@@ -1336,25 +1310,15 @@ public class Token implements Cloneable {
   }
 
   public void setX(int x) {
-    lastX = this.x;
     this.x = x;
   }
 
   public void setY(int y) {
-    lastY = this.y;
     this.y = y;
   }
 
   public void setLastPath(Path<? extends AbstractPoint> path) {
     lastPath = path;
-  }
-
-  public int getLastY() {
-    return lastY;
-  }
-
-  public int getLastX() {
-    return lastX;
   }
 
   public Path<? extends AbstractPoint> getLastPath() {
@@ -1830,7 +1794,7 @@ public class Token implements Cloneable {
   }
 
   public List<String> getSetStates() {
-    List<String> setStates = new ArrayList<String>();
+    List<String> setStates = new ArrayList<>();
     for (Map.Entry<String, Object> entry : state.entrySet()) {
       if (entry.getValue() instanceof Boolean) {
         if ((Boolean) entry.getValue()) {
@@ -1930,22 +1894,6 @@ public class Token implements Cloneable {
     return propertyMapCI;
   }
 
-  private void loadOldMacros() {
-    if (macroMap == null) {
-      return;
-    }
-    MacroButtonProperties prop;
-    for (var macro : macroMap.entrySet()) {
-      prop = new MacroButtonProperties(getMacroNextIndex());
-      prop.setLabel(macro.getKey());
-      prop.setCommand(macro.getValue());
-      prop.setApplyToTokens(true);
-      macroPropertiesMap.put(prop.getIndex(), prop);
-    }
-    macroMap = null;
-    log.debug("Token.loadOldMacros() set up {} new macros.", macroPropertiesMap.size());
-  }
-
   public int getMacroNextIndex() {
     Set<Integer> indexSet = macroPropertiesMap.keySet();
     int maxIndex = 0;
@@ -1964,9 +1912,6 @@ public class Token implements Cloneable {
    * @return the map
    */
   public Map<Integer, MacroButtonProperties> getMacroPropertiesMap(boolean secure) {
-    if (macroMap != null) {
-      loadOldMacros();
-    }
     if (secure && !AppUtil.playerOwns(this)) {
       return new HashMap<>(); // blank map
     } else {
@@ -2012,12 +1957,12 @@ public class Token implements Cloneable {
    * @param newMacroList the macro list to add
    * @param clearOld whether the old macros at other indexes should be removed
    */
-  public void saveMacroList(List<MacroButtonProperties> newMacroList, boolean clearOld) {
+  private void saveMacroList(List<MacroButtonProperties> newMacroList, boolean clearOld) {
     if (clearOld) {
       macroPropertiesMap.clear();
     }
     for (MacroButtonProperties macro : newMacroList) {
-      if (macro.getLabel().trim().length() == 0 || macro.getCommand().trim().length() == 0) {
+      if (macro.getLabel().isBlank() || macro.getCommand().isBlank()) {
         continue;
       }
       macroPropertiesMap.put(macro.getIndex(), macro);
@@ -2052,10 +1997,6 @@ public class Token implements Cloneable {
     return list;
   }
 
-  public boolean hasMacros(boolean secure) {
-    return !getMacroPropertiesMap(secure).isEmpty();
-  }
-
   public void setSpeechMap(Map<String, String> map) {
     getSpeechMap().clear();
     getSpeechMap().putAll(map);
@@ -2075,15 +2016,6 @@ public class Token implements Cloneable {
 
   private Map<String, String> getSpeechMap() {
     return speechMap;
-  }
-
-  /**
-   * Get a set containing the names of all set properties on this token.
-   *
-   * @return The set of state property names that have a value associated with them.
-   */
-  public Set<String> getStatePropertyNames() {
-    return state.keySet();
   }
 
   /**
@@ -2271,185 +2203,10 @@ public class Token implements Cloneable {
   }
 
   /**
-   * Convert the token into a hash map. This is used to ship all of the properties for the token to
-   * other apps that do need access to the <code>Token</code> class.
-   *
-   * @return A map containing the properties of the token.
-   */
-  public TokenTransferData toTransferData() {
-    TokenTransferData td = new TokenTransferData();
-    td.setName(name);
-    td.setPlayers(ownerList);
-    td.setVisible(isVisible);
-    td.setLocation(new Point(x, y));
-    td.setFacing(facing);
-
-    // Set the properties
-    td.put(TokenTransferData.ID, id.toString());
-    td.put(TokenTransferData.ASSET_ID, imageAssetMap.get(null));
-    td.put(TokenTransferData.Z, z);
-    td.put(TokenTransferData.SNAP_TO_SCALE, snapToScale);
-    td.put(TokenTransferData.WIDTH, scaleX);
-    td.put(TokenTransferData.HEIGHT, scaleY);
-    td.put(TokenTransferData.SNAP_TO_GRID, snapToGrid);
-    td.put(TokenTransferData.OWNER_TYPE, ownerType);
-    td.put(TokenTransferData.VISIBLE_OWNER_ONLY, visibleOnlyToOwner);
-    td.put(TokenTransferData.TOKEN_TYPE, tokenShape);
-    td.put(TokenTransferData.NOTES, notes);
-    td.put(TokenTransferData.GM_NOTES, gmNotes);
-    td.put(TokenTransferData.GM_NAME, gmName);
-
-    // Put all of the serializable state into the map
-    for (String key : getStatePropertyNames()) {
-      Object value = getState(key);
-      if (value instanceof Serializable) {
-        td.put(key, value);
-      }
-    }
-    td.putAll(state);
-
-    // Create the image from the asset and add it to the map
-    Image image = ImageManager.getImageAndWait(imageAssetMap.get(null));
-    if (image != null) {
-      td.setToken(new ImageIcon(image)); // Image icon makes it serializable.
-    }
-    return td;
-  }
-
-  /**
-   * Constructor to create a new token from a transfer object containing its property values. This
-   * is used to read in a new token from other apps that don't have access to the <code>Token</code>
-   * class.
-   *
-   * @param td Read the values from this transfer object.
-   */
-  public Token(TokenTransferData td) {
-    if (td.getLocation() != null) {
-      x = td.getLocation().x;
-      y = td.getLocation().y;
-    }
-    snapToScale = getBoolean(td, TokenTransferData.SNAP_TO_SCALE, true);
-    scaleX = getInt(td, TokenTransferData.WIDTH, 1);
-    scaleY = getInt(td, TokenTransferData.HEIGHT, 1);
-    snapToGrid = getBoolean(td, TokenTransferData.SNAP_TO_GRID, true);
-    isVisible = td.isVisible();
-    visibleOnlyToOwner = getBoolean(td, TokenTransferData.VISIBLE_OWNER_ONLY, false);
-    name = td.getName();
-    ownerList.addAll(td.getPlayers());
-    ownerType =
-        getInt(
-            td,
-            TokenTransferData.OWNER_TYPE,
-            ownerList.isEmpty() ? OWNER_TYPE_ALL : OWNER_TYPE_LIST);
-    tokenShape = (String) td.get(TokenTransferData.TOKEN_TYPE);
-    facing = td.getFacing();
-    notes = (String) td.get(TokenTransferData.NOTES);
-    gmNotes = (String) td.get(TokenTransferData.GM_NOTES);
-    gmName = (String) td.get(TokenTransferData.GM_NAME);
-
-    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
-
-    // Get the image and portrait for the token
-    Asset asset = createAssetFromIcon(td.getToken());
-    if (asset != null) {
-      imageAssetMap.put(null, asset.getMD5Key());
-    }
-    asset = createAssetFromIcon((ImageIcon) td.get(TokenTransferData.PORTRAIT));
-    if (asset != null) {
-      portraitImage = asset.getMD5Key();
-    }
-
-    // Get the macros
-    @SuppressWarnings("unchecked")
-    Map<String, Object> macros = (Map<String, Object>) td.get(TokenTransferData.MACROS);
-    macroMap = new HashMap<>();
-    for (var entry : macros.entrySet()) {
-      String macroName = entry.getKey();
-      Object macro = entry.getValue();
-      if (macro instanceof String) {
-        macroMap.put(macroName, (String) macro);
-      } else if (macro instanceof Map) {
-        @SuppressWarnings("unchecked")
-        MacroButtonProperties mbp = new MacroButtonProperties(this, (Map<String, String>) macro);
-        getMacroPropertiesMap(false).put(mbp.getIndex(), mbp);
-      } // endif
-    } // endfor
-    loadOldMacros();
-
-    // Get all of the non maptool specific state
-    for (String key : td.keySet()) {
-      if (key.startsWith(TokenTransferData.MAPTOOL)) {
-        continue;
-      }
-      setProperty(key, td.get(key));
-    } // endfor
-  }
-
-  private Asset createAssetFromIcon(ImageIcon icon) {
-    if (icon == null) {
-      return null;
-    }
-
-    // Make sure there is a buffered image for it
-    Image image = icon.getImage();
-    if (!(image instanceof BufferedImage)) {
-      image =
-          new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), Transparency.TRANSLUCENT);
-      Graphics2D g = ((BufferedImage) image).createGraphics();
-      icon.paintIcon(null, g, 0, 0);
-    }
-    // Create the asset
-    Asset asset = null;
-    try {
-      asset = Asset.createImageAsset(name, ImageUtil.imageToBytes((BufferedImage) image));
-      if (!AssetManager.hasAsset(asset)) {
-        AssetManager.putAsset(asset);
-      }
-    } catch (IOException e) {
-      log.error("Error while creating asset", e);
-    }
-    return asset;
-  }
-
-  /**
-   * Get an integer value from the map or return the default value
-   *
-   * @param map Get the value from this map
-   * @param propName The name of the property being read.
-   * @param defaultValue The value for the property if it is not set in the map.
-   * @return The value for the passed property
-   */
-  private static int getInt(Map<String, Object> map, String propName, int defaultValue) {
-    Integer integer = (Integer) map.get(propName);
-    if (integer == null) {
-      return defaultValue;
-    }
-    return integer;
-  }
-
-  /**
-   * Get a boolean value from the map or return the default value
-   *
-   * @param map Get the value from this map
-   * @param propName The name of the property being read.
-   * @param defaultValue The value for the property if it is not set in the map.
-   * @return The value for the passed property
-   */
-  private static boolean getBoolean(
-      Map<String, Object> map, String propName, boolean defaultValue) {
-    Boolean bool = (Boolean) map.get(propName);
-    if (bool == null) {
-      return defaultValue;
-    }
-    return bool;
-  }
-
-  /**
    * Get the list of initiatives for the token
    *
    * @return The List of initiative
    */
-  @SuppressWarnings("unchecked")
   public List<InitiativeList.TokenInitiative> getInitiatives() {
     Zone zone = getZoneRenderer().getZone();
     List<Integer> list = zone.getInitiativeList().indexOf(this);
@@ -2551,7 +2308,13 @@ public class Token implements Cloneable {
         return Integer.compare(o1.z, o2.z);
       };
 
+  @SuppressWarnings("ConstantConditions")
   protected Object readResolve() {
+    if (image == null) {
+      image = imageAssetMap.get(null);
+      imageAssetMap.clear();
+    }
+
     // FJE: If the propertyMap field has something in it, it could be:
     // a pre-1.3b66 token that contains a HashMap<?,?>, or
     // a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
@@ -2571,7 +2334,7 @@ public class Token implements Cloneable {
     }
 
     // Fix for pre 1.11.3 campaigns and token size issues
-    if (sizeMap != null && sizeMap.size() > 0) {
+    if (sizeMap != null && !sizeMap.isEmpty()) {
       Map<Object, GUID> oldSizeMap = new HashMap<>(sizeMap);
       sizeMap.clear();
       for (var entry : oldSizeMap.entrySet()) {
@@ -2658,7 +2421,19 @@ public class Token implements Cloneable {
     if (tokenOpacity == null) {
       tokenOpacity = 1.f;
     }
-    tokenOpacity = Math.max(0.f, Math.min(tokenOpacity, 1.f));
+    tokenOpacity = Math.clamp(tokenOpacity, 0.f, 1.f);
+
+    if (macroMap != null) {
+      // convert old-style macros
+      for (var macro : macroMap.entrySet()) {
+        var prop = new MacroButtonProperties(getMacroNextIndex());
+        prop.setLabel(macro.getKey());
+        prop.setCommand(macro.getValue());
+        prop.setApplyToTokens(true);
+        macroPropertiesMap.put(prop.getIndex(), prop);
+      }
+      macroMap = null;
+    }
 
     return this;
   }
@@ -2896,9 +2671,7 @@ public class Token implements Cloneable {
           break;
         }
       case setImageAsset:
-        setImageAsset(
-            parameters.get(0).hasStringValue() ? parameters.get(0).getStringValue() : null,
-            new MD5Key(parameters.get(1).getStringValue()));
+        setImageAsset(new MD5Key(parameters.get(0).getStringValue()));
         panelLookChanged = true;
         break;
       case setPortraitImage:
@@ -3001,17 +2774,8 @@ public class Token implements Cloneable {
     var token = new Token();
     token.id = GUID.fromDto(dto.getId());
     token.beingImpersonated = dto.getBeingImpersonated();
-    token.exposedAreaGUID = GUID.valueOf(dto.getExposedAreaGuid());
-    var assetMap = dto.getImageAssetMapMap();
-    for (var key : assetMap.keySet()) {
-      var nullKey = key.equals("") ? null : key;
-      token.imageAssetMap.put(nullKey, new MD5Key(assetMap.get(key)));
-    }
-    token.currentImageAsset =
-        dto.hasCurrentImageAsset() ? dto.getCurrentImageAsset().getValue() : null;
-    token.lastX = dto.getLastX();
+    token.exposedAreaGUID = GUID.fromDto(dto.getExposedAreaGuid());
     token.x = dto.getX();
-    token.lastY = dto.getLastY();
     token.y = dto.getY();
     token.z = dto.getZ();
     token.lastPath = dto.hasLastPath() ? Path.fromDto(dto.getLastPath()) : null;
@@ -3029,7 +2793,7 @@ public class Token implements Cloneable {
     token.isFlippedX = dto.getIsFlippedX();
     token.isFlippedY = dto.getIsFlippedY();
     token.isFlippedIso = dto.getIsFlippedIso();
-    token.facing = dto.hasFacing() ? dto.getFacing().getValue() : null;
+    token.facing = dto.hasFacing() ? dto.getFacing() : null;
 
     dto.getSizeMapMap().forEach((k, v) -> token.sizeMap.put(k, GUID.valueOf(v)));
     token.snapToGrid = dto.getSnapToGrid();
@@ -3050,9 +2814,9 @@ public class Token implements Cloneable {
     token.tokenType = dto.getTokenType();
     token.layer = dto.getLayer();
     token.propertyType = dto.getPropertyType();
-    token.haloColorValue = dto.hasHaloColor() ? dto.getHaloColor().getValue() : null;
+    token.haloColorValue = dto.hasHaloColor() ? dto.getHaloColor() : null;
     token.visionOverlayColorValue =
-        dto.hasVisionOverlayColor() ? dto.getVisionOverlayColor().getValue() : null;
+        dto.hasVisionOverlayColor() ? dto.getVisionOverlayColor() : null;
     token.tokenOpacity = dto.getTokenOpacity();
     token.speechName = dto.getSpeechName();
     token.terrainModifier = dto.getTerrainModifier();
@@ -3061,29 +2825,26 @@ public class Token implements Cloneable {
     token.terrainModifiersIgnored.addAll(
         dto.getTerrainModifiersIgnoredList().stream()
             .map(m -> TerrainModifierOperation.valueOf(m.name()))
-            .collect(Collectors.toList()));
+            .toList());
 
-    token.charsheetImage =
-        dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage().getValue()) : null;
-    token.portraitImage =
-        dto.hasPortraitImage() ? new MD5Key(dto.getPortraitImage().getValue()) : null;
+    token.image = dto.hasImage() ? new MD5Key(dto.getImage()) : null;
+    token.charsheetImage = dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage()) : null;
+    token.portraitImage = dto.hasPortraitImage() ? new MD5Key(dto.getPortraitImage()) : null;
 
     dto.getUniqueLightSourcesList().stream()
         .map(LightSource::fromDto)
         .forEach(source -> token.uniqueLightSources.put(source.getId(), source));
     token.lightSourceList.addAll(
-        dto.getLightSourcesList().stream()
-            .map(AttachedLightSource::fromDto)
-            .collect(Collectors.toList()));
-    dto.getHaloGuidsList().stream().forEach(id -> token.haloIdSet.add(new GUID(id)));
-    token.sightType = dto.hasSightType() ? dto.getSightType().getValue() : null;
+        dto.getLightSourcesList().stream().map(AttachedLightSource::fromDto).toList());
+    dto.getHaloGuidsList().forEach(id -> token.haloIdSet.add(GUID.fromDto(id)));
+    token.sightType = dto.hasSightType() ? dto.getSightType() : null;
     token.hasSight = dto.getHasSight();
     token.hasImageTable = dto.getHasImageTable();
-    token.imageTableName = dto.hasImageTableName() ? dto.getImageTableName().getValue() : null;
-    token.label = dto.hasLabel() ? dto.getLabel().getValue() : null;
-    token.notes = dto.hasNotes() ? dto.getNotes().getValue() : "";
-    token.gmNotes = dto.hasGmNotes() ? dto.getGmNotes().getValue() : "";
-    token.gmName = dto.hasGmName() ? dto.getGmName().getValue() : "";
+    token.imageTableName = dto.hasImageTableName() ? dto.getImageTableName() : null;
+    token.label = dto.hasLabel() ? dto.getLabel() : null;
+    token.notes = dto.hasNotes() ? dto.getNotes() : "";
+    token.gmNotes = dto.hasGmNotes() ? dto.getGmNotes() : "";
+    token.gmName = dto.hasGmName() ? dto.getGmName() : "";
     token.notesType = dto.getNotesType();
     token.gmNotesType = dto.getGmNotesType();
 
@@ -3099,7 +2860,7 @@ public class Token implements Cloneable {
                 default -> log.warn("unknown state type:" + stateDto.getStateTypeCase());
               }
             });
-    dto.getPropertiesMap().forEach((k, v) -> token.propertyMapCI.put(k, v.equals("") ? null : v));
+    dto.getPropertiesMap().forEach((k, v) -> token.propertyMapCI.put(k, v.isEmpty() ? null : v));
     dto.getMacroPropertiesMap()
         .forEach(
             (key, value) ->
@@ -3117,21 +2878,12 @@ public class Token implements Cloneable {
     var dto = TokenDto.newBuilder();
     dto.setId(id.toDto());
     dto.setBeingImpersonated(beingImpersonated);
-    dto.setExposedAreaGuid(exposedAreaGUID.toString());
-    for (var key : imageAssetMap.keySet()) {
-      var notNullKey = key == null ? "" : key;
-      dto.putImageAssetMap(notNullKey, imageAssetMap.get(key).toString());
-    }
-    if (currentImageAsset != null) {
-      dto.setCurrentImageAsset(StringValue.of(currentImageAsset));
-    }
-    dto.setLastX(lastX);
+    dto.setExposedAreaGuid(exposedAreaGUID.toDto());
     dto.setX(x);
-    dto.setLastY(lastY);
     dto.setY(y);
     dto.setZ(z);
     if (facing != null) {
-      dto.setFacing(Int32Value.of(facing));
+      dto.setFacing(facing);
     }
     dto.setAnchorX(anchorX);
     dto.setAnchorY(anchorY);
@@ -3178,10 +2930,10 @@ public class Token implements Cloneable {
     dto.setPropertyType(propertyType);
 
     if (haloColorValue != null) {
-      dto.setHaloColor(Int32Value.of(haloColorValue));
+      dto.setHaloColor(haloColorValue);
     }
     if (visionOverlayColorValue != null) {
-      dto.setVisionOverlayColor(Int32Value.of(visionOverlayColorValue));
+      dto.setVisionOverlayColor(visionOverlayColorValue);
     }
     dto.setTokenOpacity(tokenOpacity);
     dto.setSpeechName(speechName);
@@ -3195,38 +2947,41 @@ public class Token implements Cloneable {
     dto.setIsFlippedX(isFlippedX);
     dto.setIsFlippedY(isFlippedY);
     dto.setIsFlippedIso(isFlippedIso);
+    if (image != null) {
+      dto.setImage(image.toString());
+    }
     if (charsheetImage != null) {
-      dto.setCharsheetImage(StringValue.of(charsheetImage.toString()));
+      dto.setCharsheetImage(charsheetImage.toString());
     }
     if (portraitImage != null) {
-      dto.setPortraitImage(StringValue.of(portraitImage.toString()));
+      dto.setPortraitImage(portraitImage.toString());
     }
     dto.addAllUniqueLightSources(
         uniqueLightSources.values().stream().map(LightSource::toDto).collect(Collectors.toList()));
     dto.addAllLightSources(
         lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
-    dto.addAllHaloGuids(haloIdSet.stream().map(GUID::toString).collect(Collectors.toList()));
+    dto.addAllHaloGuids(haloIdSet.stream().map(GUID::toDto).collect(Collectors.toList()));
     if (sightType != null) {
-      dto.setSightType(StringValue.of(sightType));
+      dto.setSightType(sightType);
     }
     dto.setHasSight(hasSight);
     dto.setHasImageTable(hasImageTable);
     if (imageTableName != null) {
-      dto.setImageTableName(StringValue.of(imageTableName));
+      dto.setImageTableName(imageTableName);
     }
     if (label != null) {
-      dto.setLabel(StringValue.of(label));
+      dto.setLabel(label);
     }
     if (notes != null) {
-      dto.setNotes(StringValue.of(notes));
+      dto.setNotes(notes);
     }
     dto.setNotesType(notesType);
     if (gmNotes != null) {
-      dto.setGmNotes(StringValue.of(gmNotes));
+      dto.setGmNotes(gmNotes);
     }
     dto.setGmNotesType(gmNotesType);
     if (gmName != null) {
-      dto.setGmName(StringValue.of(gmName));
+      dto.setGmName(gmName);
     }
     state.forEach(
         (key, state) -> {
@@ -3271,7 +3026,7 @@ public class Token implements Cloneable {
    *
    * @param statSheet the stat sheet properties for this token.
    */
-  public void setStatSheet(StatSheetProperties statSheet) {
+  public void setStatSheet(@Nullable StatSheetProperties statSheet) {
     this.statSheet = statSheet;
   }
 

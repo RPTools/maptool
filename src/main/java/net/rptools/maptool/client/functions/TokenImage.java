@@ -333,7 +333,7 @@ public class TokenImage extends AbstractFunction {
   private static void setImage(Token token, String assetName) throws ParserException {
     MD5Key md5key = getMD5Key(assetName, SET_IMAGE);
     MapTool.serverCommand()
-        .updateTokenProperty(token, Token.Update.setImageAsset, (String) null, md5key.toString());
+        .updateTokenProperty(token, Token.Update.setImageAsset, md5key.toString());
   }
 
   private static void setPortrait(Token token, String assetName) throws ParserException {

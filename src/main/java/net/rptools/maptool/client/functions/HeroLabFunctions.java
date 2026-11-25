@@ -136,7 +136,9 @@ public class HeroLabFunctions extends AbstractFunction {
 
         // Update the images
         MD5Key tokenAsset = heroLabData.getTokenImage();
-        if (tokenAsset != null) token.setImageAsset(null, tokenAsset);
+        if (tokenAsset != null) {
+          token.setImageAsset(tokenAsset);
+        }
 
         MD5Key portraitAsset = heroLabData.getPortraitImage();
         if (portraitAsset != null) token.setPortraitImage(portraitAsset);

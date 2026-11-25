@@ -75,12 +75,12 @@ public final class AttachedLightSource {
   }
 
   public static AttachedLightSource fromDto(AttachedLightSourceDto dto) {
-    return new AttachedLightSource(GUID.valueOf(dto.getLightSourceId()));
+    return new AttachedLightSource(GUID.fromDto(dto.getLightSourceId()));
   }
 
   public AttachedLightSourceDto toDto() {
     var dto = AttachedLightSourceDto.newBuilder();
-    dto.setLightSourceId(lightSourceId.toString());
+    dto.setLightSourceId(lightSourceId.toDto());
     return dto.build();
   }
 }
