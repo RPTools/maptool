@@ -21,6 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.model.Zone;
@@ -59,6 +60,9 @@ public class FogRenderer {
      */
 
     var timer = CodeTimer.get();
+
+    renderHelper.drawInWorldSpace(worldG);
+    SwingUtil.useAntiAliasing(worldG);
 
     var visibility = zoneView.getVisibility(view);
     Area softFogArea = visibility.softFogArea();

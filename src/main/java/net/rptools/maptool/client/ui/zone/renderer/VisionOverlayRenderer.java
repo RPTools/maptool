@@ -23,6 +23,7 @@ import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.model.Token;
@@ -67,6 +68,9 @@ public class VisionOverlayRenderer {
   }
 
   private void renderWorld(Graphics2D worldG, PlayerView view, Token token) {
+    renderHelper.drawInWorldSpace(worldG);
+    SwingUtil.useAntiAliasing(worldG);
+
     // The vision of the token is not necessarily related to the current view.
     final var tokenView = new PlayerView(view.getRole(), List.of(token));
 

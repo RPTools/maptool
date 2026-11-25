@@ -167,7 +167,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
             Zone.Layer.class, layer -> new PartitionedDrawableRenderer(zone));
 
     var renderHelper = new RenderHelper(this, tempBufferPool);
-    this.gridRenderer = new GridRenderer(this);
+    this.gridRenderer = new GridRenderer(renderHelper, this);
     this.haloRenderer = new HaloRenderer(renderHelper, MapTool.getCampaign(), zone);
     this.tokenRenderer = new TokenRenderer(renderHelper, zone);
     this.facingArrowRenderer = new FacingArrowRenderer(renderHelper, zone);
@@ -872,8 +872,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       renderDrawableOverlay(g2d, drawableRenderers.get(Layer.OBJECT), view, drawables);
       timer.stop("drawableObjects");
     }
-    timer.start("grid");
 
+    timer.start("grid");
     gridRenderer.renderGrid(g2d, view);
     timer.stop("grid");
 

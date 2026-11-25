@@ -20,6 +20,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import net.rptools.maptool.client.swing.SwingUtil;
 
 public class DebugRenderer {
   private final RenderHelper renderHelper;
@@ -36,6 +37,9 @@ public class DebugRenderer {
   }
 
   private void renderWorld(Graphics2D worldG, Iterable<Shape> shapes) {
+    renderHelper.drawInWorldSpace(worldG);
+    SwingUtil.useAntiAliasing(worldG);
+
     worldG.setComposite(AlphaComposite.SrcOver);
     // Keep the line a consistent thickness
     worldG.setStroke(new BasicStroke(1 / (float) worldG.getTransform().getScaleX()));

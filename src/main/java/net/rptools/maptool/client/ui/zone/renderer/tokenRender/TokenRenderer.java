@@ -18,6 +18,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel.TokenPosition;
 import net.rptools.maptool.client.ui.zone.renderer.RenderHelper;
 import net.rptools.maptool.model.*;
@@ -62,6 +63,9 @@ public class TokenRenderer {
   private void paintTokenImage(Graphics2D g2d, TokenPosition position, float opacity) {
     var token = position.token();
     var renderImage = getRenderImage(token);
+
+    renderHelper.drawInWorldSpace(g2d);
+    SwingUtil.useAntiAliasing(g2d);
 
     var imageTransform =
         TokenUtil.getRenderTransform(
