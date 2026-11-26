@@ -56,11 +56,11 @@ public class FacingArrowRenderer {
   private static final BasicStroke thinStroke = new BasicStroke(0.15f);
   private static final BasicStroke normalStroke = new BasicStroke(0.85f);
   private boolean useThinStroke = false;
+
   {
     AppPreferences.facingArrowBGColour.onChange(color -> fillColour = color);
     AppPreferences.facingArrowBorderColour.onChange(color -> borderColour = color);
   }
-
 
   public FacingArrowRenderer(RenderHelper renderHelper, Zone zone) {
     this.renderHelper = renderHelper.withTimerPrefix("FacingArrowRenderer");
@@ -100,10 +100,12 @@ public class FacingArrowRenderer {
     renderHelper.render(
         tokenG,
         worldG -> {
-          useThinStroke = position.token().getSizeScale() < 0.7 ||
-                  position.token().getFootprint(zone.getGrid()).getScale() < 0.7;
+          useThinStroke =
+              position.token().getSizeScale() < 0.7
+                  || position.token().getFootprint(zone.getGrid()).getScale() < 0.7;
           if (AppPreferences.selectMarqueeAlignToImage.get()) {
-            paintArrowWorld(worldG, token.getFacing(), tokenShape, position.token().getImageBounds(zone));
+            paintArrowWorld(
+                worldG, token.getFacing(), tokenShape, position.token().getImageBounds(zone));
           } else {
             paintArrowWorld(worldG, token.getFacing(), tokenShape, position.footprintBounds());
           }
