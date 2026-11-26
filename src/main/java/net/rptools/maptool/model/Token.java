@@ -1593,8 +1593,8 @@ public class Token implements Cloneable {
     double w = bounds.width * sizeScale * scaleX;
     double h = bounds.height * sizeScale * scaleY;
     // adjust location to anchor points and scale adjustments
-    double x = bounds.x + anchorX - (w - bounds.getWidth())/2d;
-    double y = bounds.y + anchorY - (h - bounds.getHeight())/2d;
+    double x = bounds.x + anchorX - (w - bounds.getWidth()) / 2d;
+    double y = bounds.y + anchorY - (h - bounds.getHeight()) / 2d;
     return new Rectangle2D.Double(x, y, w, h).getBounds();
   }
 
