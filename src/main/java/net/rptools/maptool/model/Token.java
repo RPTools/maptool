@@ -25,6 +25,7 @@ import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
@@ -1586,45 +1587,15 @@ public class Token implements Cloneable {
   }
 
   public Rectangle getImageBounds(Zone zone) {
-    Grid grid = zone.getGrid();
-    TokenFootprint footprint = getFootprint(grid);
-    Rectangle footprintBounds =
-        footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
-
-    double w;
-    double h;
-
-    // Sizing
-    if (!isSnapToScale()) {
-      w = getWidth() * scaleX;
-      h = getHeight() * scaleY;
-      if (grid.getType().isIsometric() && getShape() == Token.TokenShape.FIGURE) {
-        // Native size figure tokens need to follow iso rules
-        h = (w / 2);
-      }
-    } else {
-      w = footprintBounds.width * footprint.getScale() * sizeScale;
-      h = footprintBounds.height * footprint.getScale() * sizeScale;
-    }
-    // Positioning
-    if (!isSnapToGrid()) {
-      footprintBounds.x = getX();
-      footprintBounds.y = getY();
-    } else {
-      if (getLayer().isSnapToGridAtCenter()) {
-        // Center it on the footprint
-        footprintBounds.x -= (int) ((w - footprintBounds.width) / 2d);
-        footprintBounds.y -= (int) ((h - footprintBounds.height) / 2d);
-      }
-    }
-    footprintBounds.width = (int) w; // perhaps make this a double
-    footprintBounds.height = (int) h;
-
-    // Offset
-    footprintBounds.x += anchorX;
-    footprintBounds.y += anchorY;
-
-    return footprintBounds;
+    // start with the footprint bounds calculation
+    Rectangle bounds = getFootprintBounds(zone);
+    // multiply dimensions by scale values
+    double w = bounds.width * sizeScale * scaleX;
+    double h = bounds.height * sizeScale * scaleY;
+    // adjust location to anchor points and scale adjustments
+    double x = bounds.x + anchorX - (w - bounds.getWidth())/2d;
+    double y = bounds.y + anchorY - (h - bounds.getHeight())/2d;
+    return new Rectangle2D.Double(x, y, w, h).getBounds();
   }
 
   /**
