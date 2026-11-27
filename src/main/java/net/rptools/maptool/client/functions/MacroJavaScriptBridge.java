@@ -25,9 +25,10 @@ import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.JSArray;
-import net.rptools.maptool.client.script.javascript.JSContext;
 import net.rptools.maptool.client.script.javascript.JSObject;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine.ContextType;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine.JSContext;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -76,7 +77,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       FunctionUtil.checkNumberParam(functionName, args, 0, 0);
 
       JsonArray array = new JsonArray();
-      JSScriptEngine.getInstance().getContexts().stream()
+      JSScriptEngine.getInstance().getContexts(ContextType.Regular).stream()
           .sorted(Comparator.comparing(JSContext::name))
           .forEach(
               c -> {
@@ -90,7 +91,14 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       FunctionUtil.checkNumberParam(functionName, args, 1, 1);
 
       var contextName = args.get(0).toString();
-      JSScriptEngine.getInstance().removeContext(contextName, MapTool.getParser().isMacroTrusted());
+      var jsEngine = JSScriptEngine.getInstance();
+      var context = jsEngine.getContext(contextName, ContextType.Regular).orElse(null);
+      if (context != null) {
+        if (!MapTool.getParser().isMacroTrusted() && context.trusted()) {
+          throw new ParserException(I18N.getText("macro.function.general.noPermJS", context));
+        }
+        context.remove();
+      }
       return "removed";
     } else if ("js.createNS".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 2);
@@ -101,20 +109,39 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
               ? !BigDecimal.ZERO.equals(args.get(1))
               : MapTool.getParser().isMacroTrusted();
 
-      JSScriptEngine.getInstance()
-          .registerContext(contextName, MapTool.getParser().isMacroTrusted(), makeTrusted);
+      var trusted = MapTool.getParser().isMacroTrusted();
+      if (!trusted && makeTrusted) {
+        throw new ParserException("Cannot make a trusted JS context from an untrusted context");
+      }
+
+      var jsEngine = JSScriptEngine.getInstance();
+      if (trusted) {
+        // In trusted contexts, allow overwriting existing namespaces.
+        jsEngine.putContext(contextName, ContextType.Regular, true);
+      } else {
+        var newContext = jsEngine.createContextIfAbsent(contextName, ContextType.Regular, false);
+        if (newContext == null) {
+          throw new ParserException("Context " + contextName + " already exists");
+        }
+      }
+
       return "created";
     } else {
       /* js.evalURI(), js.evalNS(), js.eval() */
-      String contextName;
+      var trusted = MapTool.getParser().isMacroTrusted();
+      var engine = JSScriptEngine.getInstance();
+
+      JSContext context;
       String script;
       List<Object> rest;
       if ("js.evalURI".equalsIgnoreCase(functionName)) {
         FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
 
-        contextName = args.get(0).toString();
+        var contextName = args.get(0).toString();
         var urlString = args.get(1).toString();
         rest = args.subList(2, args.size());
+
+        context = engine.ensureContext(contextName, ContextType.Regular, trusted);
 
         // Look up the script in the named library.
         URL url;
@@ -144,16 +171,19 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       } else if ("js.evalNS".equalsIgnoreCase(functionName)) {
         FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
 
-        contextName = args.get(0).toString();
+        var contextName = args.get(0).toString();
         script = args.get(1).toString();
         rest = args.subList(2, args.size());
+
+        context = engine.ensureContext(contextName, ContextType.Regular, trusted);
       } else {
         /* js.eval() */
         FunctionUtil.checkNumberParam(functionName, args, 1, UNLIMITED_PARAMETERS);
 
-        contextName = null;
         script = args.get(0).toString();
         rest = args.subList(1, args.size());
+
+        context = engine.ensureContext("<anonymous>", ContextType.Anonymous, trusted);
       }
 
       List<Object> scriptArgs = new ArrayList<>();
@@ -161,10 +191,13 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
         scriptArgs.add(HostObjectToJavaScriptType(arg));
       }
 
+      if (!trusted && context.trusted()) {
+        throw new ParserException(I18N.getText("macro.function.general.noPermJS", context.name()));
+      }
+
       callingArgsStack.push(scriptArgs);
       try {
-        return JavaScriptToMTScriptType(
-            JSScriptEngine.getInstance().evalScript(contextName, script));
+        return JavaScriptToMTScriptType(context.eval(script));
       } catch (PolyglotException e) {
         throw toParserException(e);
       } finally {

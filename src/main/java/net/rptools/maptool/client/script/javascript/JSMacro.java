@@ -16,8 +16,8 @@ package net.rptools.maptool.client.script.javascript;
 
 import com.google.gson.*;
 import java.util.*;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.*;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine.JSAPIRegisteredMacro;
 import net.rptools.maptool.client.script.javascript.api.*;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -54,15 +54,14 @@ public class JSMacro extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
-    MapToolVariableResolver variableResolver = (MapToolVariableResolver) resolver;
-    Object[] aargs = args.toArray(new Object[0]);
     JSAPIRegisteredMacro macro = macros.get(functionName);
-    Object ret = JSScriptEngine.getInstance().applyFunction(macro, aargs);
+    var ret = macro.apply(args);
     if (ret != null) {
       if (ret instanceof Value val) {
-        return MacroJavaScriptBridge.getInstance().ValueToMTScriptType(val, new ArrayList());
+        return MacroJavaScriptBridge.getInstance().ValueToMTScriptType(val, new ArrayList<>());
       }
-      Object r = MacroJavaScriptBridge.getInstance().HostObjectToMTScriptType(ret, new ArrayList());
+      Object r =
+          MacroJavaScriptBridge.getInstance().HostObjectToMTScriptType(ret, new ArrayList<>());
       if (r instanceof List || r instanceof AbstractMap) {
         return gson.toJson(r);
       }

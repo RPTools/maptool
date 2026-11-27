@@ -47,8 +47,9 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
       throw new ParserException(I18N.getText("macro.function.general.reservedJS", macroName));
     }
     if (trusted) {
-      var context = JSScriptEngine.getInstance().getCurrentContext();
-      var newMacro = new JSAPIRegisteredMacro(macroName, callable, context);
+      var engine = JSScriptEngine.getInstance();
+      var context = engine.getCurrentContext();
+      var newMacro = engine.new JSAPIRegisteredMacro(macroName, callable, context);
       JSMacro.registerMacro("js." + macroName, newMacro);
     }
   }
