@@ -57,7 +57,7 @@ public class JSMacro extends AbstractFunction {
     MapToolVariableResolver variableResolver = (MapToolVariableResolver) resolver;
     Object[] aargs = args.toArray(new Object[0]);
     JSAPIRegisteredMacro macro = macros.get(functionName);
-    Object ret = JSScriptEngine.getJSScriptEngine().applyFunction(macro, aargs);
+    Object ret = JSScriptEngine.getInstance().applyFunction(macro, aargs);
     if (ret != null) {
       if (ret instanceof Value val) {
         return MacroJavaScriptBridge.getInstance().ValueToMTScriptType(val, new ArrayList());

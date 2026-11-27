@@ -51,7 +51,7 @@ public class CampaignManager {
     // Campaign state is cleared before the UI that displays it. If a panel throws, the
     // libraries, script contexts and data stores of the outgoing campaign have already been
     // released rather than leaking into the campaign about to be loaded.
-    JSScriptEngine.resetContexts();
+    JSScriptEngine.getInstance().resetContexts();
     new LibraryManager().deregisterAllLibraries();
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
     UserDefinedMacroFunctions.getInstance().clearUserDefinedFunctions();

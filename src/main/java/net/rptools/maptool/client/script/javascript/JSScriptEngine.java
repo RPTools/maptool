@@ -14,10 +14,9 @@
  */
 package net.rptools.maptool.client.script.javascript;
 
-import com.oracle.truffle.js.scriptengine.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
-import javax.script.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.client.script.javascript.api.*;
@@ -26,33 +25,29 @@ import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.*;
-import org.graalvm.polyglot.HostAccess.*;
 import org.reflections.Reflections;
 
 public class JSScriptEngine {
-
-  private static Context.Builder cbuilder;
-  private static final JSScriptEngine jsScriptEngine = new JSScriptEngine();
   private static final Logger log = LogManager.getLogger(JSScriptEngine.class);
-  private static final Map<String, JSContext> contexts = new HashMap<String, JSContext>();
-  private static final Map<String, JSContext> addOnContexts = new HashMap<String, JSContext>();
-  private static final Stack<JSContext> contextStack = new Stack<>();
+  private static final JSScriptEngine jsScriptEngine = new JSScriptEngine();
 
-  public static JSContext getCurrentContext() {
-    return contextStack.peek();
+  public static JSScriptEngine getInstance() {
+    return jsScriptEngine;
   }
 
-  public static boolean inTrustedContext() {
-    if (JSScriptEngine.contextStack.empty()) {
-      return false;
-    }
-    return JSScriptEngine.contextStack.peek().trusted();
-  }
+  private final HostAccess hostAccess;
+  private final Map<String, JSContext> contexts = new HashMap<>();
+  private final Map<String, JSContext> addOnContexts = new HashMap<>();
+  private final Stack<JSContext> contextStack = new Stack<>();
 
-  private void registerAPIObject(Value bindings, MapToolJSAPIInterface apiObj) {
-    MapToolJSAPIDefinition def = apiObj.getClass().getAnnotation(MapToolJSAPIDefinition.class);
-    bindings.putMember(def.javaScriptVariableName(), apiObj);
-  }
+  // region Cached API bindings to avoid redundant reflection.
+
+  private record ApiDefinition(
+      Class<? extends MapToolJSAPIInterface> type, MapToolJSAPIDefinition annotation) {}
+
+  private List<ApiDefinition> apiDefinitions = null;
+
+  // endregion
 
   private JSScriptEngine() {
     HostAccess.Builder habuilder = HostAccess.newBuilder();
@@ -62,15 +57,21 @@ public class JSScriptEngine {
     habuilder.allowMapAccess(true);
     habuilder.targetTypeMapping(
         Value.class, Object.class, (v) -> v.hasArrayElements(), (v) -> v.as(List.class));
-
-    HostAccess access = habuilder.build();
-
-    cbuilder = Context.newBuilder("js");
-    cbuilder.allowHostAccess(access);
-    cbuilder.option("js.ecmascript-version", "2021");
+    hostAccess = habuilder.build();
   }
 
-  public static JSContext registerContext(String name, boolean trusted, boolean makeTrusted)
+  public JSContext getCurrentContext() {
+    return contextStack.peek();
+  }
+
+  public boolean inTrustedContext() {
+    if (contextStack.empty()) {
+      return false;
+    }
+    return contextStack.peek().trusted();
+  }
+
+  public JSContext registerContext(String name, boolean trusted, boolean makeTrusted)
       throws ParserException {
     if (!trusted) {
       JSContext jc = contexts.get(name);
@@ -81,12 +82,12 @@ public class JSScriptEngine {
     if (!trusted && makeTrusted) {
       throw new ParserException("Cannot make a trusted JS context from an untrusted context");
     }
-    JSContext c = new JSContext(makeTrusted, jsScriptEngine.makeContext(), name);
+    JSContext c = new JSContext(makeTrusted, makeContext(), name);
     contexts.put(name, c);
     return c;
   }
 
-  public static void removeContext(String name, boolean trusted) throws ParserException {
+  public void removeContext(String name, boolean trusted) throws ParserException {
     if (trusted) {
       contexts.remove(name);
       return;
@@ -96,69 +97,110 @@ public class JSScriptEngine {
       throw new ParserException(I18N.getText("macro.function.general.noPermJS", name));
     }
     contexts.remove(name);
-    return;
   }
 
-  public static void resetContexts() {
+  public void resetContexts() {
     JSMacro.clear();
     contexts.clear();
     addOnContexts.clear();
   }
 
-  public static JSContext registerAddOnContext(String name) {
-    JSContext c = new JSContext(true, jsScriptEngine.makeContext(), name);
+  public JSContext registerAddOnContext(String name) {
+    JSContext c = new JSContext(true, makeContext(), name);
     addOnContexts.put(name, c);
     return c;
   }
 
-  public static void removeAddOnContext(String name) {
+  public void removeAddOnContext(String name) {
     addOnContexts.remove(name);
   }
 
-  public static boolean hasContext(String name) {
+  public boolean hasContext(String name) {
     return contexts.containsKey(name);
   }
 
-  public static boolean hasAddOnContext(String name) {
+  public boolean hasAddOnContext(String name) {
     return addOnContexts.containsKey(name);
   }
 
-  public static Set<JSContext> getContexts() {
-    return new HashSet<>(contexts.values());
+  public Collection<JSContext> getContexts() {
+    return List.copyOf(contexts.values());
   }
 
-  public Context makeContext() {
-    Context context = cbuilder.build();
+  private List<ApiDefinition> getApiDefinitions() {
+    if (apiDefinitions == null) {
+      Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
+      Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
+
+      var definitions = new ArrayList<ApiDefinition>();
+      for (Class<?> apiClass : annotated) {
+        Class<? extends MapToolJSAPIInterface> type;
+        try {
+          type = apiClass.asSubclass(MapToolJSAPIInterface.class);
+        } catch (ClassCastException e) {
+          log.error(
+              "Could not add API object {} as it does not implement {}",
+              apiClass.getName(),
+              MapToolJSAPIInterface.class.getName());
+          continue;
+        }
+
+        MapToolJSAPIDefinition annotation = type.getAnnotation(MapToolJSAPIDefinition.class);
+        if (annotation == null) {
+          log.error(
+              "Unexpected error: annotation {} not present on {}",
+              MapToolJSAPIDefinition.class.getName(),
+              type.getName());
+        }
+
+        definitions.add(new ApiDefinition(type, annotation));
+      }
+
+      // Make sure out list doesn't change in the future.
+      apiDefinitions = List.copyOf(definitions);
+    }
+    return apiDefinitions;
+  }
+
+  private Context makeContext() {
+    Context context =
+        Context.newBuilder("js")
+            .allowHostAccess(hostAccess)
+            .option("js.ecmascript-version", "2021")
+            .build();
     Value bindings = context.getBindings("js");
 
-    Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
-    Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
-
-    for (Class<?> apiClass : annotated) {
+    var apiDefinitions = getApiDefinitions();
+    for (var definition : apiDefinitions) {
+      MapToolJSAPIInterface apiObject;
       try {
-        if (MapToolJSAPIInterface.class.isAssignableFrom(apiClass)) {
-          registerAPIObject(bindings, (MapToolJSAPIInterface) apiClass.newInstance());
-        } else {
-          log.error("Could not add API object " + apiClass.getName() + " (missing interface)");
-        }
+        apiObject = definition.type().getDeclaredConstructor().newInstance();
+      } catch (InstantiationException
+          | IllegalAccessException
+          | InvocationTargetException
+          | NoSuchMethodException e) {
+        log.error(
+            "Could not instantiate API object of type {} using default constructor",
+            definition.type().getName());
+        continue;
+      }
+
+      try {
+        bindings.putMember(definition.annotation().javaScriptVariableName(), apiObject);
       } catch (Exception e) {
-        log.error("Could not add API object " + apiClass.getName(), e);
+        log.error("Could not bind API object of type {}", definition.type().getName(), e);
       }
     }
+
     return context;
   }
 
-  public static JSScriptEngine getJSScriptEngine() {
-    return jsScriptEngine;
-  }
-
-  public Value evalScript(String contextName, String script)
-      throws ScriptException, ParserException {
+  public Value evalScript(String contextName, String script) throws ParserException {
     return evalScript(contextName, script, MapTool.getParser().isMacroTrusted());
   }
 
   public Value evalScript(String contextName, String script, boolean trusted)
-      throws ScriptException, ParserException {
+      throws ParserException {
     if (contextName == null) {
       return evalAnonymous(script);
     }
@@ -171,13 +213,13 @@ public class JSScriptEngine {
   }
 
   public Value evalAddOnScript(String contextName, String script, boolean trusted)
-      throws ScriptException, ParserException {
+      throws ParserException {
     JSContext jc = addOnContexts.get(contextName);
     return evalScript(jc, script, trusted);
   }
 
-  public Value evalScript(JSContext context, String script, boolean trusted)
-      throws ScriptException, ParserException {
+  private Value evalScript(JSContext context, String script, boolean trusted)
+      throws ParserException {
 
     if (context.trusted() && !trusted) {
       throw new ParserException(I18N.getText("macro.function.general.noPermJS", context.name()));
@@ -203,7 +245,7 @@ public class JSScriptEngine {
     }
   }
 
-  public Value evalAnonymous(String script) throws ScriptException {
+  private Value evalAnonymous(String script) {
 
     StringBuilder wrapped = new StringBuilder();
     wrapped

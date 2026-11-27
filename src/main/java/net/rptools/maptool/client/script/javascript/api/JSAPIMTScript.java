@@ -38,7 +38,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   @HostAccess.Export
   public void registerMacro(String macroName, Function<Object, Object> callable)
       throws ParserException {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     if (macroName.equals("eval")
         || macroName.equals("evalNS")
         || macroName.equals("evalURI")
@@ -47,7 +47,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
       throw new ParserException(I18N.getText("macro.function.general.reservedJS", macroName));
     }
     if (trusted) {
-      var context = JSScriptEngine.getCurrentContext();
+      var context = JSScriptEngine.getInstance().getCurrentContext();
       var newMacro = new JSAPIRegisteredMacro(macroName, callable, context);
       JSMacro.registerMacro("js." + macroName, newMacro);
     }
@@ -106,7 +106,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
         new MapToolMacroContext(
             "<javascript>",
             MapTool.getParser().getContext().getSource(),
-            JSScriptEngine.inTrustedContext());
+            JSScriptEngine.getInstance().inTrustedContext());
     String ret = MapTool.getParser().parseLine(res, line, context);
     try {
       return new BigDecimal(ret);

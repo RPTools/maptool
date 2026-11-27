@@ -22,7 +22,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import javax.script.ScriptException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.JSArray;
@@ -39,7 +38,6 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.*;
 import org.graalvm.polyglot.*;
-import org.graalvm.polyglot.proxy.*;
 
 public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSpecialVariables {
   private static final String NOT_ENOUGH_PARAM =
@@ -78,7 +76,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       FunctionUtil.checkNumberParam(functionName, args, 0, 0);
 
       JsonArray array = new JsonArray();
-      JSScriptEngine.getContexts().stream()
+      JSScriptEngine.getInstance().getContexts().stream()
           .sorted(Comparator.comparing(JSContext::name))
           .forEach(
               c -> {
@@ -92,7 +90,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       FunctionUtil.checkNumberParam(functionName, args, 1, 1);
 
       var contextName = args.get(0).toString();
-      JSScriptEngine.removeContext(contextName, MapTool.getParser().isMacroTrusted());
+      JSScriptEngine.getInstance().removeContext(contextName, MapTool.getParser().isMacroTrusted());
       return "removed";
     } else if ("js.createNS".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 2);
@@ -103,8 +101,8 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
               ? !BigDecimal.ZERO.equals(args.get(1))
               : MapTool.getParser().isMacroTrusted();
 
-      JSScriptEngine.registerContext(
-          contextName, MapTool.getParser().isMacroTrusted(), makeTrusted);
+      JSScriptEngine.getInstance()
+          .registerContext(contextName, MapTool.getParser().isMacroTrusted(), makeTrusted);
       return "created";
     } else {
       /* js.evalURI(), js.evalNS(), js.eval() */
@@ -166,11 +164,9 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       callingArgsStack.push(scriptArgs);
       try {
         return JavaScriptToMTScriptType(
-            JSScriptEngine.getJSScriptEngine().evalScript(contextName, script));
+            JSScriptEngine.getInstance().evalScript(contextName, script));
       } catch (PolyglotException e) {
         throw toParserException(e);
-      } catch (ScriptException e) {
-        throw new ParserException(e);
       } finally {
         callingArgsStack.pop();
       }

@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import javax.script.ScriptException;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
@@ -463,8 +462,8 @@ public class AddOnLibrary implements Library {
   @Override
   public void cleanup() {
     // Remove any existing JavaScript context if it exists
-    if (JSScriptEngine.hasAddOnContext(jsContextName)) {
-      JSScriptEngine.removeAddOnContext(jsContextName);
+    if (JSScriptEngine.getInstance().getInstance().hasAddOnContext(jsContextName)) {
+      JSScriptEngine.getInstance().getInstance().removeAddOnContext(jsContextName);
     }
   }
 
@@ -617,11 +616,11 @@ public class AddOnLibrary implements Library {
                             .thenAccept(
                                 needInit -> {
                                   // First remove any existing JavaScript context if it exists
-                                  if (JSScriptEngine.hasAddOnContext(jsContextName)) {
-                                    JSScriptEngine.removeAddOnContext(jsContextName);
+                                  if (JSScriptEngine.getInstance().hasAddOnContext(jsContextName)) {
+                                    JSScriptEngine.getInstance().removeAddOnContext(jsContextName);
                                   }
                                   // Then create a new JavaScript context for the add-on library
-                                  JSScriptEngine.registerAddOnContext(jsContextName);
+                                  JSScriptEngine.getInstance().registerAddOnContext(jsContextName);
                                   if (needInit) {
                                     if (jsEventNameMap.containsKey(FIRST_INIT_EVENT)) {
                                       runJS(jsEventNameMap.get(FIRST_INIT_EVENT));
@@ -697,9 +696,9 @@ public class AddOnLibrary implements Library {
         .thenAccept(
             script -> {
               try {
-                JSScriptEngine.getJSScriptEngine()
+                JSScriptEngine.getInstance()
                     .evalScript(jsContextName, script.asAsset().getDataAsString(), true);
-              } catch (ParserException | ScriptException e) {
+              } catch (ParserException e) {
                 throw new RuntimeException(e);
               }
             })

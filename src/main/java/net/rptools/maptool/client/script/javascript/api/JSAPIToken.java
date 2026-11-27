@@ -49,7 +49,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String getNotes() {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       return token.getNotes();
@@ -59,7 +59,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setNotes(String notes) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       token.setNotes(notes);
@@ -69,7 +69,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String getName() {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       return token.getName();
@@ -79,7 +79,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setName(String name) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       token.setName(name);
@@ -89,7 +89,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public boolean hasSight() {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       return token.getHasSight();
@@ -99,7 +99,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setSight(boolean sight) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       token.setHasSight(sight);
@@ -108,7 +108,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String toString() {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       return "Token(id=" + token.getId() + ")";
@@ -123,7 +123,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String getRawProperty(String name) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       Object val = this.token.getProperty(name);
@@ -138,7 +138,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String getProperty(String name) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (!trusted && !token.isOwner(playerId)) {
       return null;
@@ -161,7 +161,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String getPropertyDefault(String name) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (!trusted && !token.isOwner(playerId)) {
       return null;
@@ -172,7 +172,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String getEvaluatedProperty(String name) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       Object val = new MapToolVariableResolver(token).getEvaluatedTokenProperty(name);
@@ -183,7 +183,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String getEvaluatedPropertyDefault(String name) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (!trusted && !token.isOwner(playerId)) {
       return null;
@@ -194,7 +194,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setProperty(String name, Object value) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setProperty(name, value.toString());
@@ -205,7 +205,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public boolean resetProperty(String name) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (!trusted && !token.isOwner(playerId)) {
       return false;
@@ -218,7 +218,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public int getX() throws ParserException {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       return this.token.getX();
@@ -228,7 +228,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public int getY() throws ParserException {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       return this.token.getY();
@@ -238,7 +238,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setX(int x) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setX(x);
@@ -248,7 +248,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setY(int y) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setY(y);
@@ -285,7 +285,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setState(String stateName, boolean aValue) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setState(stateName, aValue);
@@ -295,7 +295,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setAllStates(boolean aValue) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setAllStates(aValue);
@@ -317,7 +317,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   @HostAccess.Export
   public void setBar(String barName, double aValue) {
     BigDecimal value = BigDecimal.valueOf(aValue);
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setState(barName, value);
@@ -333,7 +333,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setBarVisible(String barName, boolean show) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setState(barName, show);
@@ -348,7 +348,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setPC() {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setType(Token.Type.PC);
@@ -363,7 +363,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setNPC() {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setType(Token.Type.NPC);
