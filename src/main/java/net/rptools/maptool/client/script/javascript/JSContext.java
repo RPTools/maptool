@@ -14,11 +14,6 @@
  */
 package net.rptools.maptool.client.script.javascript;
 
-import com.oracle.truffle.js.scriptengine.*;
-import java.util.*;
-import javax.script.*;
-import org.graalvm.polyglot.*;
-import org.graalvm.polyglot.HostAccess.*;
+import org.graalvm.polyglot.Context;
 
 public record JSContext(boolean trusted, Context context, String name) {}
-;

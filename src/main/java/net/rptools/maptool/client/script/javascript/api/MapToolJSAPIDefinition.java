@@ -18,13 +18,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-@Retention(RetentionPolicy.RUNTIME)
-@java.lang.annotation.Target(ElementType.TYPE)
 /**
  * Annotation that is used to tell the JavaScript engine the name of the variable that an object of
  * this class will be bound to to provide the API functionality. Only objects that need to have a
  * variable defined for them in the main scope need to have this annotation.
  */
+@Retention(RetentionPolicy.RUNTIME)
+@java.lang.annotation.Target(ElementType.TYPE)
 public @interface MapToolJSAPIDefinition {
   /**
    * The name of the variable that the object will be bound to in the JavaScript scope.

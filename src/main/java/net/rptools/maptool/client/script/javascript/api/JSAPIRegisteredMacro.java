@@ -14,24 +14,18 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
-import java.util.*;
 import java.util.function.Function;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.*;
-import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 
 public class JSAPIRegisteredMacro {
-  private MapToolVariableResolver variableResolver;
+  public final String name;
+  public final Function<Object, Object> callable;
+  public final JSContext context;
 
-  private Stack<List<Object>> callingArgsStack = new Stack<>();
-  public String name;
-  public Function callable;
-  public JSContext context;
-
-  public JSAPIRegisteredMacro(String macroname, Function callable) {
-    this.name = macroname;
+  public JSAPIRegisteredMacro(
+      String macroName, Function<Object, Object> callable, JSContext context) {
+    this.name = macroName;
     this.callable = callable;
-    this.context = JSScriptEngine.getCurrentContext();
-    JSMacro.registerMacro("js." + macroname, this);
+    this.context = context;
   }
 }
