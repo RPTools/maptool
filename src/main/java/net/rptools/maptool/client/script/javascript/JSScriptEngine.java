@@ -15,6 +15,8 @@
 package net.rptools.maptool.client.script.javascript;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
@@ -23,6 +25,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.client.script.javascript.api.*;
+import net.rptools.parser.Parser;
+import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
+import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.*;
@@ -37,6 +43,7 @@ public class JSScriptEngine {
   }
 
   private final HostAccess hostAccess;
+  private final Map<String, JSAPIRegisteredMacro> macros = new HashMap<>();
   private final Map<String, JSContext> contexts = new HashMap<>();
   private final Map<String, JSContext> addOnContexts = new HashMap<>();
   private final Stack<JSContext> contextStack = new Stack<>();
@@ -61,6 +68,16 @@ public class JSScriptEngine {
     hostAccess = habuilder.build();
   }
 
+  public JSAPIRegisteredMacro registerMacro(String name, Function<Object, Object> callable) {
+    var newMacro = new JSAPIRegisteredMacro(name, callable, getCurrentContext());
+    macros.put(name, newMacro);
+    return newMacro;
+  }
+
+  public Optional<JSAPIRegisteredMacro> getMacro(String name) {
+    return Optional.ofNullable(macros.get(name));
+  }
+
   private @Nullable Map<String, JSContext> getContextMap(ContextType type) {
     return switch (type) {
       case Anonymous -> null;
@@ -81,7 +98,7 @@ public class JSScriptEngine {
   }
 
   public void resetContexts() {
-    JSMacro.clear();
+    macros.clear();
     contexts.clear();
     addOnContexts.clear();
   }
@@ -300,7 +317,9 @@ public class JSScriptEngine {
     }
   }
 
-  public final class JSAPIRegisteredMacro {
+  public final class JSAPIRegisteredMacro extends AbstractFunction {
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
     private final String name;
     private final Function<Object, Object> callable;
     private final JSContext context;
@@ -312,7 +331,7 @@ public class JSScriptEngine {
       this.context = context;
     }
 
-    public Object apply(List<Object> args) {
+    private Object apply(List<Object> args) {
       contextStack.push(context);
       List<Object> modifiedArgs =
           Lists.transform(
@@ -322,6 +341,28 @@ public class JSScriptEngine {
       } finally {
         contextStack.pop();
       }
+    }
+
+    @Override
+    public Object childEvaluate(
+        Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
+        throws ParserException {
+      var ret = apply(parameters);
+      if (ret == null) {
+        return "";
+      }
+
+      var bridge = MacroJavaScriptBridge.getInstance();
+
+      if (ret instanceof Value val) {
+        return bridge.ValueToMTScriptType(val, new ArrayList<>());
+      }
+
+      Object r = bridge.HostObjectToMTScriptType(ret, new ArrayList<>());
+      if (r instanceof List || r instanceof AbstractMap) {
+        return gson.toJson(r);
+      }
+      return r;
     }
   }
 }

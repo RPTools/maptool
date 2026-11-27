@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.script.javascript.JSMacro;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.parser.Expression;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -167,14 +167,17 @@ public class MapToolExpressionParser extends ExpressionParser {
     public Function getFunction(String functionName) {
       // check javascript UDFs first.
       if (functionName.startsWith("js.") || functionName.startsWith("ujs.")) {
-        if (JSMacro.isFunctionDefined(functionName)) {
-          return JSMacro.getInstance();
+        var jsFunction = JSScriptEngine.getInstance().getMacro(functionName);
+        if (jsFunction.isPresent()) {
+          return jsFunction.get();
         }
       }
 
       // check user defined functions next
       UserDefinedMacroFunctions userFunctions = UserDefinedMacroFunctions.getInstance();
-      if (userFunctions.isFunctionDefined(functionName)) return userFunctions;
+      if (userFunctions.isFunctionDefined(functionName)) {
+        return userFunctions;
+      }
 
       // let parser do its thing
       return super.getFunction(functionName);
