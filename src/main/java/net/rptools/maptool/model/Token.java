@@ -21,6 +21,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.util.*;
@@ -1564,45 +1565,35 @@ public class Token implements Cloneable {
   }
 
   public Rectangle getImageBounds(Zone zone) {
-    Grid grid = zone.getGrid();
-    TokenFootprint footprint = getFootprint(grid);
-    Rectangle footprintBounds =
-        footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
+    // start with the footprint bounds calculation
+    Rectangle bounds = getFootprintBounds(zone);
 
-    double w;
-    double h;
+    // multiply dimensions by scale values
+    double scaledW = bounds.width * sizeScale * scaleX;
+    double scaledH = bounds.height * sizeScale * scaleY;
 
-    // Sizing
-    if (!isSnapToScale()) {
-      w = getWidth() * scaleX;
-      h = getHeight() * scaleY;
-      if (grid.getType().isIsometric() && getShape() == Token.TokenShape.FIGURE) {
-        // Native size figure tokens need to follow iso rules
-        h = (w / 2);
-      }
-    } else {
-      w = footprintBounds.width * footprint.getScale() * sizeScale;
-      h = footprintBounds.height * footprint.getScale() * sizeScale;
-    }
-    // Positioning
-    if (!isSnapToGrid()) {
-      footprintBounds.x = getX();
-      footprintBounds.y = getY();
-    } else {
-      if (getLayer().isSnapToGridAtCenter()) {
-        // Center it on the footprint
-        footprintBounds.x -= (int) ((w - footprintBounds.width) / 2d);
-        footprintBounds.y -= (int) ((h - footprintBounds.height) / 2d);
+    // adjust location to anchor points and scale adjustments
+    double x = bounds.x + anchorX - (scaledW - bounds.getWidth()) / 2d;
+    double y = bounds.y + anchorY - (scaledH - bounds.getHeight()) / 2d;
+
+    if (zone.getGrid().getType().isIsometric()) {
+      // iso grid is double width with weird flipping
+      if (getIsFlippedIso()) {
+        scaledW *= 2 / 3d;
+        scaledH *= 2 / 3d;
+        x += scaledW / 4d;
+        y += scaledH / 4d;
+      } else if (getShape() == Token.TokenShape.FIGURE) {
+        if (!isFlippedY()) {
+          y -= scaledH;
+        }
+        scaledH *= 2;
+      } else {
+        scaledW /= 2;
+        x += scaledW / 2;
       }
     }
-    footprintBounds.width = (int) w; // perhaps make this a double
-    footprintBounds.height = (int) h;
-
-    // Offset
-    footprintBounds.x += anchorX;
-    footprintBounds.y += anchorY;
-
-    return footprintBounds;
+    return new Rectangle2D.Double(x, y, scaledW, scaledH).getBounds();
   }
 
   /**

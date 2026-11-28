@@ -345,6 +345,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     /* OTHER */
     getShapeCombo().setSelectedItem(token.getShape());
     fillSizeCombo(token);
+    getTokenLayoutPanel().setToken(token); // order is important - do not move
     getSnapToGrid().setSelected(token.isSnapToGrid());
     getFlippedIso().setSelected(token.getIsFlippedIso());
     getFlippedX().setSelected(token.isFlippedX());
@@ -366,7 +367,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 : MapTool.getCampaign().getCampaignProperties().getDefaultSightType());
     getCharSheetPanel().setImageId(token.getCharsheetImage());
     getPortraitPanel().setImageId(token.getPortraitImage());
-    getTokenLayoutPanel().setToken(token);
     getImageTableCombo().setSelectedItem(token.getImageTableName());
     getTokenOpacitySlider()
         .setValue(new BigDecimal(token.getTokenOpacity()).multiply(new BigDecimal(100)).intValue());

@@ -14,12 +14,9 @@
  */
 package net.rptools.maptool.client.ui.zone.renderer;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Point2D;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.tool.drawing.ExposeTool;
 import net.rptools.maptool.client.ui.theme.Borders;
@@ -48,8 +45,14 @@ public class SelectionRenderer {
     var scale = this.viewModel.getZoneScale().getScale();
 
     var footprint = position.footprintBounds();
+    Point2D drawOffset =
+        AppPreferences.selectMarqueeAlignToImage.get()
+            ? token.getAnchor()
+            : new Point2D.Double(0d, 0d);
     ScreenPoint sp =
-        zoneScale.toScreenSpace(new Point2D.Double(footprint.getX(), footprint.getY()));
+        zoneScale.toScreenSpace(
+            new Point2D.Double(
+                footprint.getX() + drawOffset.getX(), footprint.getY() + drawOffset.getY()));
 
     final ImageBorder selectedBorder;
 

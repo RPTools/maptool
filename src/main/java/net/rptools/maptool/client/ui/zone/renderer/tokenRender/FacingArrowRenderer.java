@@ -53,6 +53,9 @@ public class FacingArrowRenderer {
   private final ArrayList<Color> figureFillColours = new ArrayList<>();
   private Color fillColour = AppPreferences.facingArrowBGColour.get();
   private Color borderColour = AppPreferences.facingArrowBorderColour.get();
+  private static final BasicStroke thinStroke = new BasicStroke(0.15f);
+  private static final BasicStroke normalStroke = new BasicStroke(0.85f);
+  private boolean useThinStroke = false;
 
   {
     AppPreferences.facingArrowBGColour.onChange(color -> fillColour = color);
@@ -96,8 +99,18 @@ public class FacingArrowRenderer {
     timer.start("FacingArrowRenderer-render");
     renderHelper.render(
         tokenG,
-        worldG ->
-            paintArrowWorld(worldG, token.getFacing(), tokenShape, position.footprintBounds()));
+        worldG -> {
+          useThinStroke =
+              position.token().getSizeScale() < 0.7
+                  || position.token().getFootprint(zone.getGrid()).getScale() < 0.7;
+          if (AppPreferences.selectMarqueeAlignToImage.get()
+              && position.token().getShape() != TokenShape.FIGURE) {
+            paintArrowWorld(
+                worldG, token.getFacing(), tokenShape, position.token().getImageBounds(zone));
+          } else {
+            paintArrowWorld(worldG, token.getFacing(), tokenShape, position.footprintBounds());
+          }
+        });
     timer.stop("FacingArrowRenderer-render");
   }
 
@@ -130,7 +143,7 @@ public class FacingArrowRenderer {
       timer.start("FacingArrowRenderer-draw");
       tokenG.setRenderingHints(ImageUtil.getRenderingHintsQuality());
       tokenG.setColor(borderColour);
-      tokenG.setStroke(new BasicStroke(0.85f));
+      tokenG.setStroke(useThinStroke ? thinStroke : normalStroke);
       tokenG.draw(facingArrow);
       timer.stop("FacingArrowRenderer-draw");
     } catch (Exception e) {
