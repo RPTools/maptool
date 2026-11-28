@@ -1589,13 +1589,33 @@ public class Token implements Cloneable {
   public Rectangle getImageBounds(Zone zone) {
     // start with the footprint bounds calculation
     Rectangle bounds = getFootprintBounds(zone);
+
     // multiply dimensions by scale values
-    double w = bounds.width * sizeScale * scaleX;
-    double h = bounds.height * sizeScale * scaleY;
+    double scaledW = bounds.width * sizeScale * scaleX;
+    double scaledH = bounds.height * sizeScale * scaleY;
+
     // adjust location to anchor points and scale adjustments
-    double x = bounds.x + anchorX - (w - bounds.getWidth()) / 2d;
-    double y = bounds.y + anchorY - (h - bounds.getHeight()) / 2d;
-    return new Rectangle2D.Double(x, y, w, h).getBounds();
+    double x = bounds.x + anchorX - (scaledW - bounds.getWidth()) / 2d;
+    double y = bounds.y + anchorY - (scaledH - bounds.getHeight()) / 2d;
+
+    if (zone.getGrid().getType().isIsometric()) {
+      // iso grid is double width with weird flipping
+      if (getIsFlippedIso()) {
+        scaledW *= 2 / 3d;
+        scaledH *= 2 / 3d;
+        x += scaledW / 4d;
+        y += scaledH / 4d;
+      } else if (getShape() == Token.TokenShape.FIGURE) {
+        if (!isFlippedY()) {
+          y -= scaledH;
+        }
+        scaledH *= 2;
+      } else {
+        scaledW /= 2;
+        x += scaledW / 2;
+      }
+    }
+    return new Rectangle2D.Double(x, y, scaledW, scaledH).getBounds();
   }
 
   /**
