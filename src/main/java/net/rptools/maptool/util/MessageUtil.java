@@ -15,6 +15,7 @@
 package net.rptools.maptool.util;
 
 import java.awt.Color;
+import java.util.List;
 import javax.swing.UIManager;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
@@ -25,6 +26,10 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 
 public class MessageUtil {
 
@@ -67,77 +72,114 @@ public class MessageUtil {
     }
   }
 
+  private static String stringify(Element element) {
+    var doc = new Document("");
+    doc.outputSettings().syntax(Document.OutputSettings.Syntax.html).prettyPrint(false);
+    doc.appendChild(element);
+    return element.outerHtml();
+  }
+
   public static String getFormattedEmit(String msg) {
-    return "<div class='emit'>" + msg + "</div>";
+    return stringify(new Element("div").text(msg));
   }
 
   public static String getFormattedEmote(String msg, Token token) {
     String identity =
         token == null ? MapTool.getClient().getImpersonation().getIdentity() : token.getName();
-    msg = applyChatColor(identity + " " + msg);
+    var colouredMsgHtml = applyChatColorHtml(identity + " " + msg);
 
-    return "<div class='emote'>" + getAvatarMessage(msg, token, identity) + "</div>";
+    return stringify(
+        new Element("div")
+            .addClass("emote")
+            .appendChild(getAvatarMessageHtml(List.of(colouredMsgHtml), token, identity)));
   }
 
   public static String getFormattedEmotePossessive(String msg, Token token) {
     String identity =
         token == null ? MapTool.getClient().getImpersonation().getIdentity() : token.getName();
     identity += identity.endsWith("s") ? "' " : "'s ";
-    msg = applyChatColor(identity + msg);
+    var colouredMsgHtml = applyChatColorHtml(identity + msg);
 
-    return "<div class='emote'>" + getAvatarMessage(msg, token, identity) + "</div>";
+    return stringify(
+        new Element("div")
+            .addClass("emote")
+            .appendChild(getAvatarMessageHtml(List.of(colouredMsgHtml), token, identity)));
   }
 
   public static String getFormattedSay(
       String msg, Token token, boolean isTrusted, String macroName, String macroSource) {
     String identity =
         token == null ? MapTool.getClient().getImpersonation().getIdentity() : token.getName();
-    msg = getPrefix(identity + ":", isTrusted, macroName, macroSource) + " " + applyChatColor(msg);
+    var prefixHtml =
+        List.of(
+            getPrefixHtml(identity + ":", isTrusted, macroName, macroSource),
+            new TextNode(" "),
+            applyChatColorHtml(msg));
 
-    return "<div class='say'>" + getAvatarMessage(msg, token, identity) + "</div>";
+    return stringify(
+        new Element("div")
+            .addClass("say")
+            .appendChild(getAvatarMessageHtml(prefixHtml, token, identity)));
   }
 
   public static String getFormattedOoc(String msg) {
-    return "<div class='ooc'>"
-        + MapTool.getPlayer().getName()
-        + ": "
-        + applyChatColor("(( " + msg + " ))")
-        + "</div>";
+    return stringify(
+        new Element("div")
+            .addClass("ooc")
+            .text(MapTool.getPlayer().getName())
+            .text(": ")
+            .appendChild(applyChatColorHtml("(( " + msg + " ))")));
   }
 
   public static String getFormattedSelf(String msg) {
-    return "<div class='self'>" + msg + "</div>";
+    return stringify(new Element("div").addClass("self").text(msg));
   }
 
   public static String getFormattedSystemMsg(String msg) {
-    return "<div class='system'>" + msg + "</div>";
+    return stringify(new Element("div").addClass("system").text(msg));
   }
 
   public static String getFormattedToGmRecipient(
       String msg, String sender, boolean isTrusted, String macroName, String macroSource) {
-    return "<div class='to-gm'>"
-        + getPrefix(I18N.getText("togm.saysToGM", sender), isTrusted, macroName, macroSource)
-        + " "
-        + msg
-        + "</div>";
+    return stringify(
+        new Element("div")
+            .addClass("to-gm")
+            .appendChild(
+                getPrefixHtml(
+                    I18N.getText("togm.saysToGM", sender), isTrusted, macroName, macroSource))
+            .text(" ")
+            .text(msg));
   }
 
   public static String getFormattedToGmSender(String msg) {
-    return "<div class='to-gm'>" + I18N.getText("togm.self", msg) + "</div>";
+    return stringify(new Element("div").addClass("to-gm").text(I18N.getText("togm.self", msg)));
   }
 
   public static String getFormattedWhisperRecipient(String msg, String sender) {
-    return "<div class='whisper'>" + I18N.getText("whisper.string", sender, msg) + "</div>";
+    return stringify(
+        new Element("div").addClass("whisper").text(I18N.getText("whisper.string", sender, msg)));
   }
 
   public static String getFormattedWhisperSender(String msg, String recipients) {
-    return "<div class='whisper'>" + I18N.getText("whisper.you.string", recipients, msg) + "</div>";
+    return stringify(
+        new Element("div")
+            .addClass("whisper")
+            .text(I18N.getText("whisper.you.string", recipients, msg)));
   }
 
-  private static String getAvatarMessage(String msg, Token token, String identity) {
-    StringBuilder sb = new StringBuilder();
+  /**
+   * Builds an HTML fragment with an the impersonated token represnted in the message.
+   *
+   * @param msgHtml An HTML fragment to use as the message.
+   * @param token
+   * @param identity
+   * @return An HTML fragment
+   */
+  private static Element getAvatarMessageHtml(List<Node> msgHtml, Token token, String identity) {
+    var element = new Element("table").addClass("ava-msg");
 
-    sb.append("<table class='ava-msg'><tr valign='top'>");
+    var row = new Element("tr").attr("valign", "top");
+    element.appendChild(row);
 
     if (AppPreferences.showAvatarInChat.get()) {
       if (token == null && MapTool.getClient().getImpersonation().isImpersonating()) {
@@ -152,39 +194,54 @@ public class MessageUtil {
           token = zone.getTokenByName(identity);
         }
       }
-      sb.append("<td class='avatar'>");
+
+      var avatarCell = new Element("td").addClass("avatar");
+      row.appendChild(avatarCell);
+
       if (token != null) {
         MD5Key imageId = token.getPortraitImage();
         if (imageId == null) {
           imageId = token.getImageAssetId();
         }
-        sb.append("<img src=\"asset://").append(imageId).append("-40\" >");
+        var img = new Element("img");
+        avatarCell.appendChild(img);
+        img.attr("src", "asset://" + imageId + "-40");
       }
-      sb.append("</td>");
     }
 
-    sb.append("<td class='message'>").append(msg).append("</td></tr></table>");
+    var messageCell = new Element("td").addClass("message").appendChildren(msgHtml);
+    row.appendChild(messageCell);
 
-    return sb.toString();
+    return element;
   }
 
-  private static String getPrefix(
+  /**
+   * Builds an HTML fragment to use as the start of a formatted message.
+   *
+   * @param prefixStr
+   * @param isTrusted
+   * @param macroName
+   * @param macroSource
+   * @return An HTML fragment
+   */
+  private static Element getPrefixHtml(
       String prefixStr, boolean isTrusted, String macroName, String macroSource) {
-    StringBuilder sb = new StringBuilder();
+    var element = new Element("span");
 
     if (isTrusted && macroName != null && !MapTool.getPlayer().isGM()) {
-      sb.append("<span class='trusted-prefix' title='").append(macroName);
-      if (macroSource != null && macroSource.length() > 0) {
-        sb.append("@").append(macroSource);
+      element.addClass("trusted-prefix");
+
+      var title = macroName;
+      if (macroSource != null && !macroSource.isEmpty()) {
+        title += "@" + macroSource;
       }
-      sb.append("'>");
+      element.attr("title", title);
     } else {
-      sb.append("<span class='prefix'>");
+      element.addClass("prefix");
     }
+    element.text(prefixStr);
 
-    sb.append(prefixStr).append("</span>");
-
-    return sb.toString();
+    return element;
   }
 
   public static String getChatColorHex() {
@@ -209,11 +266,21 @@ public class MessageUtil {
     return String.format("#%06X", color.getRGB() & 0x00FFFFFF);
   }
 
-  private static String applyChatColor(String str) {
+  /**
+   * Builds an HTML fragment to use as coloured text.
+   *
+   * @param str
+   * @return An HTML fragment.
+   */
+  private static Element applyChatColorHtml(String str) {
+    var element = new Element("span");
+
     var color = getChatColorHex();
-    if (color.isEmpty()) {
-      return str;
+    if (!color.isEmpty()) {
+      element.attr("style", String.format("color:%s", color));
     }
-    return String.format("<span style='color:" + color + "'>%s</span>", str);
+    element.text(str);
+
+    return element;
   }
 }

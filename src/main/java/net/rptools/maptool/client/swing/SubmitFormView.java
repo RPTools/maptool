@@ -229,7 +229,7 @@ public class SubmitFormView extends FormView {
           try {
             vals.put(name, encode(pd.getText(0, pd.getLength())));
           } catch (BadLocationException e1) {
-            getLog().error(e1.getStackTrace());
+            getLog().error("Unexpected error while getting text area contents", e1);
           }
         } else if (type == null && model instanceof ComboBoxModel) {
           vals.put(name, ((ComboBoxModel<?>) model).getSelectedItem().toString());
@@ -238,7 +238,7 @@ public class SubmitFormView extends FormView {
           try {
             vals.put(name, encode(pd.getText(0, pd.getLength())));
           } catch (BadLocationException e1) {
-            getLog().error(e1.getStackTrace());
+            getLog().error("Unexpected error while getting text input contents", e1);
           }
         } else if ("submit".equals(type)) {
           // Ignore
@@ -260,7 +260,7 @@ public class SubmitFormView extends FormView {
           try {
             vals.put(name, encode(pd.getText(0, pd.getLength())));
           } catch (BadLocationException e1) {
-            getLog().error(e1.getStackTrace());
+            getLog().error("Unexpected error while getting password input contents", e1);
           }
         } else if ("hidden".equals(type)) {
           vals.put(name, encode(encode((String) as.getAttribute(HTML.Attribute.VALUE))));
