@@ -14,45 +14,48 @@
  */
 package net.rptools.maptool.client.script.javascript;
 
-import com.oracle.truffle.js.scriptengine.*;
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
-import javax.script.*;
-import net.rptools.maptool.client.MapTool;
+import java.util.function.Function;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.client.script.javascript.api.*;
-import net.rptools.maptool.language.I18N;
+import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
+import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.*;
-import org.graalvm.polyglot.HostAccess.*;
 import org.reflections.Reflections;
 
 public class JSScriptEngine {
-
-  private static Context.Builder cbuilder;
-  private static final JSScriptEngine jsScriptEngine = new JSScriptEngine();
   private static final Logger log = LogManager.getLogger(JSScriptEngine.class);
-  private static final Map<String, JSContext> contexts = new HashMap<String, JSContext>();
-  private static final Map<String, JSContext> addOnContexts = new HashMap<String, JSContext>();
-  private static final Stack<JSContext> contextStack = new Stack<>();
+  private static final JSScriptEngine jsScriptEngine = new JSScriptEngine();
 
-  public static JSContext getCurrentContext() {
-    return contextStack.peek();
+  public static JSScriptEngine getInstance() {
+    return jsScriptEngine;
   }
 
-  public static boolean inTrustedContext() {
-    if (JSScriptEngine.contextStack.empty()) {
-      return false;
-    }
-    return JSScriptEngine.contextStack.peek().trusted();
-  }
+  private final HostAccess hostAccess;
+  private final Map<String, JSAPIRegisteredMacro> macros = new HashMap<>();
+  private final Map<String, JSContext> contexts = new HashMap<>();
+  private final Map<String, JSContext> addOnContexts = new HashMap<>();
+  private final Stack<JSContext> contextStack = new Stack<>();
 
-  private void registerAPIObject(Value bindings, MapToolJSAPIInterface apiObj) {
-    MapToolJSAPIDefinition def = apiObj.getClass().getAnnotation(MapToolJSAPIDefinition.class);
-    bindings.putMember(def.javaScriptVariableName(), apiObj);
-  }
+  // region Cached API bindings to avoid redundant reflection.
+
+  private record ApiDefinition(
+      Class<? extends MapToolJSAPIInterface> type, MapToolJSAPIDefinition annotation) {}
+
+  private List<ApiDefinition> apiDefinitions = null;
+
+  // endregion
 
   private JSScriptEngine() {
     HostAccess.Builder habuilder = HostAccess.newBuilder();
@@ -62,161 +65,304 @@ public class JSScriptEngine {
     habuilder.allowMapAccess(true);
     habuilder.targetTypeMapping(
         Value.class, Object.class, (v) -> v.hasArrayElements(), (v) -> v.as(List.class));
-
-    HostAccess access = habuilder.build();
-
-    cbuilder = Context.newBuilder("js");
-    cbuilder.allowHostAccess(access);
-    cbuilder.option("js.ecmascript-version", "2021");
+    hostAccess = habuilder.build();
   }
 
-  public static JSContext registerContext(String name, boolean trusted, boolean makeTrusted)
-      throws ParserException {
-    if (!trusted) {
-      JSContext jc = contexts.get(name);
-      if (jc != null) {
-        throw new ParserException("Context " + name + " already exists");
-      }
-    }
-    if (!trusted && makeTrusted) {
-      throw new ParserException("Cannot make a trusted JS context from an untrusted context");
-    }
-    JSContext c = new JSContext(makeTrusted, jsScriptEngine.makeContext(), name);
-    contexts.put(name, c);
-    return c;
+  public JSAPIRegisteredMacro registerMacro(String name, Function<Object, Object> callable) {
+    var newMacro = new JSAPIRegisteredMacro(name, callable, getCurrentContext());
+    macros.put(name, newMacro);
+    return newMacro;
   }
 
-  public static void removeContext(String name, boolean trusted) throws ParserException {
-    if (trusted) {
-      contexts.remove(name);
-      return;
-    }
-    JSContext c = contexts.get(name);
-    if (c == null || c.trusted()) {
-      throw new ParserException(I18N.getText("macro.function.general.noPermJS", name));
-    }
-    contexts.remove(name);
-    return;
+  public Optional<JSAPIRegisteredMacro> getMacro(String name) {
+    return Optional.ofNullable(macros.get(name));
   }
 
-  public static void resetContexts() {
-    JSMacro.clear();
+  private @Nullable Map<String, JSContext> getContextMap(ContextType type) {
+    return switch (type) {
+      case Anonymous -> null;
+      case Regular -> contexts;
+      case AddOn -> addOnContexts;
+    };
+  }
+
+  public JSContext getCurrentContext() {
+    return contextStack.peek();
+  }
+
+  public boolean inTrustedContext() {
+    if (contextStack.empty()) {
+      return false;
+    }
+    return contextStack.peek().trusted();
+  }
+
+  public void resetContexts() {
+    macros.clear();
     contexts.clear();
     addOnContexts.clear();
   }
 
-  public static JSContext registerAddOnContext(String name) {
-    JSContext c = new JSContext(true, jsScriptEngine.makeContext(), name);
-    addOnContexts.put(name, c);
-    return c;
+  public Optional<JSContext> getContext(String name, ContextType type) {
+    var contextMap = getContextMap(type);
+    if (contextMap == null) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(contextMap.get(name));
   }
 
-  public static void removeAddOnContext(String name) {
-    addOnContexts.remove(name);
+  /**
+   * Creates a new context if none already exists for the name and type.
+   *
+   * <p>If a context with the given name and type already exists, no new context is created and
+   * {@code null} is returned. If you just need to make sure a context exists, and don't need to
+   * handle the case of name collision, call {@link #ensureContext(String, ContextType, boolean)}.
+   * Or if you need to create a new context regardless of whether one already exists, call {@link
+   * #putContext(String, ContextType, boolean)}.
+   *
+   * @param name The name of the new context.
+   * @param type The type of the next context.
+   * @param makeTrusted Whether the new context should be trusted.
+   * @return The newly created context, or {@code null} if one already exists.
+   */
+  public @Nullable JSContext createContextIfAbsent(
+      @Nonnull String name, ContextType type, boolean makeTrusted) {
+    var contextMap = getContextMap(type);
+    if (contextMap == null) {
+      // Anonymous. Don't mess around with checks, just make the thing.
+      return new JSContext(name, makeTrusted, type, makeContext());
+    }
+
+    if (contextMap.containsKey(name)) {
+      return null;
+    }
+    var context = new JSContext(name, makeTrusted, type, makeContext());
+    contextMap.put(name, context);
+    return context;
   }
 
-  public static boolean hasContext(String name) {
-    return contexts.containsKey(name);
+  /**
+   * Ensures that a context exists with the given name and type.
+   *
+   * @param name The name of the context.
+   * @param type The type of the context.
+   * @param makeNewContextTrusted If a new context is created, whether it should be trusted.
+   * @return The existing context matching {@code name} and {@code type} if there is one, otherwise
+   *     a new context.
+   */
+  public @Nonnull JSContext ensureContext(
+      @Nonnull String name, ContextType type, boolean makeNewContextTrusted) {
+    var contextMap = getContextMap(type);
+    if (contextMap == null) {
+      // Anonymous. Always a new one.
+      return new JSContext(name, makeNewContextTrusted, type, makeContext());
+    }
+
+    return contextMap.computeIfAbsent(
+        name, key -> new JSContext(key, makeNewContextTrusted, type, makeContext()));
   }
 
-  public static boolean hasAddOnContext(String name) {
-    return addOnContexts.containsKey(name);
-  }
-
-  public static Set<JSContext> getContexts() {
-    return new HashSet<>(contexts.values());
-  }
-
-  public Context makeContext() {
-    Context context = cbuilder.build();
-    Value bindings = context.getBindings("js");
-
-    Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
-    Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
-
-    for (Class<?> apiClass : annotated) {
-      try {
-        if (MapToolJSAPIInterface.class.isAssignableFrom(apiClass)) {
-          registerAPIObject(bindings, (MapToolJSAPIInterface) apiClass.newInstance());
-        } else {
-          log.error("Could not add API object " + apiClass.getName() + " (missing interface)");
-        }
-      } catch (Exception e) {
-        log.error("Could not add API object " + apiClass.getName(), e);
-      }
+  /**
+   * Creates a new context with the given name and type.
+   *
+   * <p>If a context already exists for {@code name} and {@code type}, it is removed and a new one
+   * is inserted instead. If you just need to make sure a context exists, call {@link
+   * #ensureContext(String, ContextType, boolean)} to avoid removing the existing context.
+   *
+   * @param name The name of the new context.
+   * @param type The type of the new context.
+   * @param makeTrusted Whether the new context should be trusted.
+   * @return The newly created context.
+   */
+  public @Nonnull JSContext putContext(String name, ContextType type, boolean makeTrusted) {
+    var context = new JSContext(name, makeTrusted, type, makeContext());
+    var contextMap = getContextMap(type);
+    if (contextMap != null) {
+      contextMap.put(name, context);
     }
     return context;
   }
 
-  public static JSScriptEngine getJSScriptEngine() {
-    return jsScriptEngine;
+  public Collection<JSContext> getContexts(ContextType type) {
+    var contextMap = getContextMap(type);
+    if (contextMap == null) {
+      return List.of();
+    }
+    return List.copyOf(contextMap.values());
   }
 
-  public Value evalScript(String contextName, String script)
-      throws ScriptException, ParserException {
-    return evalScript(contextName, script, MapTool.getParser().isMacroTrusted());
+  private List<ApiDefinition> getApiDefinitions() {
+    if (apiDefinitions == null) {
+      Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
+      Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
+
+      var definitions = new ArrayList<ApiDefinition>();
+      for (Class<?> apiClass : annotated) {
+        Class<? extends MapToolJSAPIInterface> type;
+        try {
+          type = apiClass.asSubclass(MapToolJSAPIInterface.class);
+        } catch (ClassCastException e) {
+          log.error(
+              "Could not add API object {} as it does not implement {}",
+              apiClass.getName(),
+              MapToolJSAPIInterface.class.getName());
+          continue;
+        }
+
+        MapToolJSAPIDefinition annotation = type.getAnnotation(MapToolJSAPIDefinition.class);
+        if (annotation == null) {
+          log.error(
+              "Unexpected error: annotation {} not present on {}",
+              MapToolJSAPIDefinition.class.getName(),
+              type.getName());
+        }
+
+        definitions.add(new ApiDefinition(type, annotation));
+      }
+
+      // Make sure out list doesn't change in the future.
+      apiDefinitions = List.copyOf(definitions);
+    }
+    return apiDefinitions;
   }
 
-  public Value evalScript(String contextName, String script, boolean trusted)
-      throws ScriptException, ParserException {
-    if (contextName == null) {
-      return evalAnonymous(script);
-    }
-    JSContext jc = contexts.get(contextName);
-    if (jc == null) {
-      jc = registerContext(contextName, trusted, trusted);
+  private Context makeContext() {
+    Context context =
+        Context.newBuilder("js")
+            .allowHostAccess(hostAccess)
+            .option("js.ecmascript-version", "2021")
+            .build();
+    Value bindings = context.getBindings("js");
+
+    var apiDefinitions = getApiDefinitions();
+    for (var definition : apiDefinitions) {
+      MapToolJSAPIInterface apiObject;
+      try {
+        apiObject = definition.type().getDeclaredConstructor().newInstance();
+      } catch (InstantiationException
+          | IllegalAccessException
+          | InvocationTargetException
+          | NoSuchMethodException e) {
+        log.error(
+            "Could not instantiate API object of type {} using default constructor",
+            definition.type().getName());
+        continue;
+      }
+
+      try {
+        bindings.putMember(definition.annotation().javaScriptVariableName(), apiObject);
+      } catch (Exception e) {
+        log.error("Could not bind API object of type {}", definition.type().getName(), e);
+      }
     }
 
-    return evalScript(jc, script, trusted);
+    return context;
   }
 
-  public Value evalAddOnScript(String contextName, String script, boolean trusted)
-      throws ScriptException, ParserException {
-    JSContext jc = addOnContexts.get(contextName);
-    return evalScript(jc, script, trusted);
+  public enum ContextType {
+    Anonymous,
+    Regular,
+    AddOn
   }
 
-  public Value evalScript(JSContext context, String script, boolean trusted)
-      throws ScriptException, ParserException {
+  public final class JSContext {
+    private final String name;
+    private final boolean trusted;
+    private final ContextType type;
+    private final Context context;
 
-    if (context.trusted() && !trusted) {
-      throw new ParserException(I18N.getText("macro.function.general.noPermJS", context.name()));
+    private JSContext(String name, boolean trusted, ContextType type, Context context) {
+      this.name = name;
+      this.trusted = trusted;
+      this.type = type;
+      this.context = context;
     }
-    contextStack.push(context);
-    try {
-      return context.context().eval("js", script);
-    } finally {
-      contextStack.pop();
+
+    public String name() {
+      return name;
+    }
+
+    public boolean trusted() {
+      return trusted;
+    }
+
+    public Context context() {
+      return context;
+    }
+
+    public Value eval(String script) {
+      if (type == ContextType.Anonymous) {
+        script = "(function() { var args = MTScript.getMTScriptCallingArgs(); " + script + "})();";
+      }
+
+      contextStack.push(this);
+      try {
+        return context.eval("js", script);
+      } finally {
+        contextStack.pop();
+      }
+    }
+
+    public void remove() {
+      Map<String, JSContext> contextMap = getContextMap(type);
+      if (contextMap == null) {
+        // Not stored in the engine, so nothing to do.
+        return;
+      }
+
+      // Don't assume this instance is still the one associated with its name.
+      // Instead, check that it is.
+      // Null return signals removal.
+      contextMap.compute(name, (key, value) -> this == value ? null : value);
     }
   }
 
-  public Object applyFunction(JSAPIRegisteredMacro macro, Object[] args) {
-    contextStack.push(macro.context);
-    Object[] modifiedArgs = new Object[args.length];
-    for (int i = 0; i < args.length; i++) {
-      modifiedArgs[i] = MacroJavaScriptBridge.getInstance().HostObjectToJavaScriptType(args[i]);
-    }
-    try {
-      return macro.callable.apply(modifiedArgs);
-    } finally {
-      contextStack.pop();
-    }
-  }
+  public final class JSAPIRegisteredMacro extends AbstractFunction {
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-  public Value evalAnonymous(String script) throws ScriptException {
+    private final String name;
+    private final Function<Object, Object> callable;
+    private final JSContext context;
 
-    StringBuilder wrapped = new StringBuilder();
-    wrapped
-        .append("(function() { var args = MTScript.getMTScriptCallingArgs(); ")
-        .append(script)
-        .append("})();");
-    Context c = makeContext();
-    JSContext jc = new JSContext(MapTool.getParser().isMacroTrusted(), c, "<anonymous>");
-    contextStack.push(jc);
-    try {
-      return makeContext().eval("js", wrapped.toString());
-    } finally {
-      contextStack.pop();
+    public JSAPIRegisteredMacro(
+        String macroName, Function<Object, Object> callable, JSContext context) {
+      this.name = macroName;
+      this.callable = callable;
+      this.context = context;
+    }
+
+    private Object apply(List<Object> args) {
+      contextStack.push(context);
+      List<Object> modifiedArgs =
+          Lists.transform(
+              args, arg -> MacroJavaScriptBridge.getInstance().HostObjectToJavaScriptType(arg));
+      try {
+        return callable.apply(modifiedArgs);
+      } finally {
+        contextStack.pop();
+      }
+    }
+
+    @Override
+    public Object childEvaluate(
+        Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
+        throws ParserException {
+      var ret = apply(parameters);
+      if (ret == null) {
+        return "";
+      }
+
+      var bridge = MacroJavaScriptBridge.getInstance();
+
+      if (ret instanceof Value val) {
+        return bridge.ValueToMTScriptType(val, new ArrayList<>());
+      }
+
+      Object r = bridge.HostObjectToMTScriptType(ret, new ArrayList<>());
+      if (r instanceof List || r instanceof AbstractMap) {
+        return gson.toJson(r);
+      }
+      return r;
     }
   }
 }

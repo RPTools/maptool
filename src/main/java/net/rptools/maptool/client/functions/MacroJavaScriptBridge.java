@@ -22,23 +22,23 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import javax.script.ScriptException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.JSArray;
-import net.rptools.maptool.client.script.javascript.JSContext;
 import net.rptools.maptool.client.script.javascript.JSObject;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine.ContextType;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine.JSContext;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.*;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.*;
 import org.graalvm.polyglot.*;
-import org.graalvm.polyglot.proxy.*;
 
 public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSpecialVariables {
   private static final String NOT_ENOUGH_PARAM =
@@ -72,11 +72,12 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     variableResolver = (MapToolVariableResolver) resolver;
-    String contextName = null;
 
     if ("js.listNS".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 0);
+
       JsonArray array = new JsonArray();
-      JSScriptEngine.getContexts().stream()
+      JSScriptEngine.getInstance().getContexts(ContextType.Regular).stream()
           .sorted(Comparator.comparing(JSContext::name))
           .forEach(
               c -> {
@@ -86,86 +87,123 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
                 array.add(obj);
               });
       return array;
-    }
+    } else if ("js.removeNS".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 1);
 
-    if ("js.evalNS".equalsIgnoreCase(functionName) || "js.evalURI".equalsIgnoreCase(functionName)) {
-      if (args.size() < 2) {
-        throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
-      }
-      contextName = (String) args.remove(0);
-    }
-
-    if ("js.removeNS".equalsIgnoreCase(functionName)) {
-      if (args.size() < 1) {
-        throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
-      }
-      contextName = (String) args.remove(0);
-      JSScriptEngine.removeContext(contextName, MapTool.getParser().isMacroTrusted());
-      return "removed";
-    }
-    if ("js.createNS".equalsIgnoreCase(functionName)) {
-      if (args.size() < 1) {
-        throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
-      }
-      contextName = (String) args.remove(0);
-      boolean makeTrusted = MapTool.getParser().isMacroTrusted();
-      if (args.size() > 0) {
-        makeTrusted = !BigDecimal.ZERO.equals(args.remove(0));
-      }
-      JSScriptEngine.registerContext(
-          contextName, MapTool.getParser().isMacroTrusted(), makeTrusted);
-      return "created";
-    }
-
-    String script;
-    if ("js.evalURI".equalsIgnoreCase(functionName)) {
-      if (args.size() < 1) {
-        throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
-      }
-      URL url;
-      try {
-        url = new URL(args.get(0).toString());
-      } catch (MalformedURLException e) {
-        throw new ParserException(e);
-      }
-      Optional<Library> library;
-      try {
-        library = new LibraryManager().getLibrary(url).get();
-        if (library.isPresent()) {
-          script = library.get().readAsString(url).get();
-        } else {
+      var contextName = args.get(0).toString();
+      var jsEngine = JSScriptEngine.getInstance();
+      var context = jsEngine.getContext(contextName, ContextType.Regular).orElse(null);
+      if (context != null) {
+        if (!MapTool.getParser().isMacroTrusted() && context.trusted()) {
           throw new ParserException(
-              I18N.getText("macro.function.jsevalURI.invalidURI", args.get(0).toString()));
+              I18N.getText("macro.function.general.noPermJS", context.name()));
         }
-      } catch (ExecutionException | InterruptedException | IOException | CompletionException e) {
-        if (e.getCause() instanceof LibraryNotValidException lnve) {
-          throw new ParserException(lnve.getMessage());
-        } else if (e.getCause() != null) {
-          throw new ParserException(e.getCause());
-        }
-        throw new ParserException(e);
+        context.remove();
+      }
+      return "removed";
+    } else if ("js.createNS".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 2);
+
+      var contextName = args.get(0).toString();
+      var makeTrusted =
+          args.size() > 1
+              ? !BigDecimal.ZERO.equals(args.get(1))
+              : MapTool.getParser().isMacroTrusted();
+
+      var trusted = MapTool.getParser().isMacroTrusted();
+      if (!trusted && makeTrusted) {
+        throw new ParserException("Cannot make a trusted JS context from an untrusted context");
       }
 
+      var jsEngine = JSScriptEngine.getInstance();
+      if (trusted) {
+        // In trusted contexts, allow overwriting existing namespaces.
+        jsEngine.putContext(contextName, ContextType.Regular, true);
+      } else {
+        var newContext = jsEngine.createContextIfAbsent(contextName, ContextType.Regular, false);
+        if (newContext == null) {
+          throw new ParserException("Context " + contextName + " already exists");
+        }
+      }
+
+      return "created";
     } else {
-      script = args.get(0).toString();
-    }
-    List<Object> scriptArgs = new ArrayList<>();
-    if (args.size() > 1) {
-      for (int i = 1; i < args.size(); i++) {
-        scriptArgs.add(HostObjectToJavaScriptType(args.get(i)));
-      }
-    }
+      /* js.evalURI(), js.evalNS(), js.eval() */
+      var trusted = MapTool.getParser().isMacroTrusted();
+      var engine = JSScriptEngine.getInstance();
 
-    callingArgsStack.push(scriptArgs);
-    try {
-      return JavaScriptToMTScriptType(
-          JSScriptEngine.getJSScriptEngine().evalScript(contextName, script));
-    } catch (PolyglotException e) {
-      throw toParserException(e);
-    } catch (ScriptException e) {
-      throw new ParserException(e);
-    } finally {
-      callingArgsStack.pop();
+      JSContext context;
+      String script;
+      List<Object> rest;
+      if ("js.evalURI".equalsIgnoreCase(functionName)) {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+
+        var contextName = args.get(0).toString();
+        var urlString = args.get(1).toString();
+        rest = args.subList(2, args.size());
+
+        context = engine.ensureContext(contextName, ContextType.Regular, trusted);
+
+        // Look up the script in the named library.
+        URL url;
+        try {
+          url = new URL(urlString);
+        } catch (MalformedURLException e) {
+          throw new ParserException(I18N.getText("macro.function.html5.invalidURI", urlString));
+        }
+
+        Optional<Library> library;
+        try {
+          library = new LibraryManager().getLibrary(url).get();
+          if (library.isPresent()) {
+            script = library.get().readAsString(url).get();
+          } else {
+            throw new ParserException(
+                I18N.getText("macro.function.jsevalURI.invalidURI", urlString));
+          }
+        } catch (ExecutionException | InterruptedException | IOException | CompletionException e) {
+          if (e.getCause() instanceof LibraryNotValidException lnve) {
+            throw new ParserException(lnve.getMessage());
+          } else if (e.getCause() != null) {
+            throw new ParserException(e.getCause());
+          }
+          throw new ParserException(e);
+        }
+      } else if ("js.evalNS".equalsIgnoreCase(functionName)) {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+
+        var contextName = args.get(0).toString();
+        script = args.get(1).toString();
+        rest = args.subList(2, args.size());
+
+        context = engine.ensureContext(contextName, ContextType.Regular, trusted);
+      } else {
+        /* js.eval() */
+        FunctionUtil.checkNumberParam(functionName, args, 1, UNLIMITED_PARAMETERS);
+
+        script = args.get(0).toString();
+        rest = args.subList(1, args.size());
+
+        context = engine.ensureContext("<anonymous>", ContextType.Anonymous, trusted);
+      }
+
+      List<Object> scriptArgs = new ArrayList<>();
+      for (var arg : rest) {
+        scriptArgs.add(HostObjectToJavaScriptType(arg));
+      }
+
+      if (!trusted && context.trusted()) {
+        throw new ParserException(I18N.getText("macro.function.general.noPermJS", context.name()));
+      }
+
+      callingArgsStack.push(scriptArgs);
+      try {
+        return JavaScriptToMTScriptType(context.eval(script));
+      } catch (PolyglotException e) {
+        throw toParserException(e);
+      } finally {
+        callingArgsStack.pop();
+      }
     }
   }
 

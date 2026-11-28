@@ -42,7 +42,7 @@ public class JSAPITokens implements MapToolJSAPIInterface {
 
   public List<Object> getMapTokens(ZoneRenderer zr) {
     final List<Object> tokens = new ArrayList<>();
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     zr.getZone()
         .getAllTokens()
@@ -58,7 +58,7 @@ public class JSAPITokens implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public JSAPIToken getTokenByName(String tokenName) {
-    boolean trusted = JSScriptEngine.inTrustedContext();
+    boolean trusted = JSScriptEngine.getInstance().inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     for (ZoneRenderer z : MapTool.getFrame().getZoneRenderers()) {
       if (trusted || z.getZone().isVisible()) {
@@ -110,7 +110,8 @@ public class JSAPITokens implements MapToolJSAPIInterface {
       }
     }
     if (token != null
-        && (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName()))) {
+        && (JSScriptEngine.getInstance().inTrustedContext()
+            || token.isOwner(MapTool.getPlayer().getName()))) {
       return token;
     }
     return null;
@@ -122,7 +123,8 @@ public class JSAPITokens implements MapToolJSAPIInterface {
     Token findToken =
         MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(uuid));
     if (findToken != null
-        && (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName()))) {
+        && (JSScriptEngine.getInstance().inTrustedContext()
+            || token.isOwner(MapTool.getPlayer().getName()))) {
       token = new JSAPIToken(findToken);
       token.setMap(MapTool.getFrame().getCurrentZoneRenderer().getZone());
     }

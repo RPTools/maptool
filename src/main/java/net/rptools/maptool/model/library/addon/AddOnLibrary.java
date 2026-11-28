@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import javax.script.ScriptException;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
@@ -39,6 +38,8 @@ import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine.ContextType;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine.JSContext;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
@@ -463,9 +464,9 @@ public class AddOnLibrary implements Library {
   @Override
   public void cleanup() {
     // Remove any existing JavaScript context if it exists
-    if (JSScriptEngine.hasAddOnContext(jsContextName)) {
-      JSScriptEngine.removeAddOnContext(jsContextName);
-    }
+    JSScriptEngine.getInstance()
+        .getContext(jsContextName, ContextType.AddOn)
+        .ifPresent(JSContext::remove);
   }
 
   @Override
@@ -616,12 +617,8 @@ public class AddOnLibrary implements Library {
                         data.needsInitialization()
                             .thenAccept(
                                 needInit -> {
-                                  // First remove any existing JavaScript context if it exists
-                                  if (JSScriptEngine.hasAddOnContext(jsContextName)) {
-                                    JSScriptEngine.removeAddOnContext(jsContextName);
-                                  }
-                                  // Then create a new JavaScript context for the add-on library
-                                  JSScriptEngine.registerAddOnContext(jsContextName);
+                                  var jsEngine = JSScriptEngine.getInstance();
+                                  jsEngine.putContext(jsContextName, ContextType.AddOn, true);
                                   if (needInit) {
                                     if (jsEventNameMap.containsKey(FIRST_INIT_EVENT)) {
                                       runJS(jsEventNameMap.get(FIRST_INIT_EVENT));
@@ -696,12 +693,9 @@ public class AddOnLibrary implements Library {
     readFile(file)
         .thenAccept(
             script -> {
-              try {
-                JSScriptEngine.getJSScriptEngine()
-                    .evalScript(jsContextName, script.asAsset().getDataAsString(), true);
-              } catch (ParserException | ScriptException e) {
-                throw new RuntimeException(e);
-              }
+              var engine = JSScriptEngine.getInstance();
+              var context = engine.ensureContext(jsContextName, ContextType.Regular, true);
+              context.eval(script.asAsset().getDataAsString());
             })
         .join();
   }
