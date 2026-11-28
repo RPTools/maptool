@@ -103,7 +103,8 @@ public class FacingArrowRenderer {
           useThinStroke =
               position.token().getSizeScale() < 0.7
                   || position.token().getFootprint(zone.getGrid()).getScale() < 0.7;
-          if (AppPreferences.selectMarqueeAlignToImage.get()) {
+          if (AppPreferences.selectMarqueeAlignToImage.get()
+              && position.token().getShape() != TokenShape.FIGURE) {
             paintArrowWorld(
                 worldG, token.getFacing(), tokenShape, position.token().getImageBounds(zone));
           } else {
