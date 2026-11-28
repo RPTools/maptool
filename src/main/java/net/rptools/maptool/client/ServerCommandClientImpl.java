@@ -15,9 +15,12 @@
 package net.rptools.maptool.client;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import java.awt.Color;
 import java.awt.geom.Area;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,6 +30,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Zone.ShowCoordinates;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -232,48 +236,31 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   /**
-   * Send the command updateTokenProperty to the server. The method doesn't send the whole Token,
-   * greatly reducing lag.
+   * Simplifies the arguments for the method above.
    *
-   * @param zoneGUID the GUID of the zone the token is on
-   * @param tokenGUID the GUID of the token
-   * @param update the type of token update
-   * @param parameters an array of parameters
+   * @param token the token to be updated
    */
-  public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, Token.Update update, List<TokenPropertyValueDto> parameters) {
+  private void updateTokenProperty(Token token, List<TokenUpdateDto> updates) {
+    updateTokenProperty(token.getZoneRenderer().getZone(), token, updates);
+  }
+
+  /**
+   * Simplifies the arguments for the method above.
+   *
+   * @param token the token to be updated
+   */
+  private void updateTokenProperty(Zone zone, Token token, List<TokenUpdateDto> updates) {
+    // Update locally right away.
+    token.updateProperties(zone, updates);
+
+    // And then update remotely.
     var msg =
-        UpdateTokenPropertyMsg.newBuilder()
-            .setTokenGuid(tokenGUID.toString())
-            .setZoneGuid(zoneGUID.toString())
-            .setProperty(TokenUpdateDto.valueOf(update.name()))
-            .addAllValues(parameters);
+        UpdateTokenMsg.newBuilder()
+            .setTokenGuid(token.getId().toDto())
+            .setZoneGuid(zone.getId().toDto())
+            .addAllUpdate(updates)
+            .build();
     makeServerCall(Message.newBuilder().setUpdateTokenPropertyMsg(msg).build());
-  }
-
-  /**
-   * Simplifies the arguments for the method above.
-   *
-   * @param token the token to be updated
-   * @param update the type of token update
-   * @param parameters an array of parameters
-   */
-  public void updateTokenProperty(
-      Token token, Token.Update update, TokenPropertyValueDto... parameters) {
-    updateTokenProperty(token.getZoneRenderer().getZone(), token, update, List.of(parameters));
-  }
-
-  /**
-   * Simplifies the arguments for the method above.
-   *
-   * @param token the token to be updated
-   * @param update the type of token update
-   * @param parameters The message data
-   */
-  private void updateTokenProperty(
-      Zone zone, Token token, Token.Update update, List<TokenPropertyValueDto> parameters) {
-    token.updateProperty(zone, update, parameters); // update locally right away
-    updateTokenProperty(zone.getId(), token.getId(), update, parameters);
   }
 
   public void putLabel(GUID zoneGUID, Label label) {
@@ -680,39 +667,116 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   @Override
+  public void setTokenType(Token token, Token.Type type) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetType(type.toDto()).build()));
+  }
+
+  @Override
+  public void setTokenName(Token token, String name) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetName(name).build()));
+  }
+
+  @Override
+  public void setTokenGmName(Token token, String gmName) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetGmName(gmName).build()));
+  }
+
+  @Override
+  public void setTokenLabel(Token token, String label) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetLabel(label).build()));
+  }
+
+  @Override
+  public void setTokenSpeechName(Token token, String speechName) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetSpeechName(speechName).build()));
+  }
+
+  @Override
+  public void setTokenNotes(Token token, String notes) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetNotes(notes).build()));
+  }
+
+  @Override
+  public void setTokenGmNotes(Token token, String gmNotes) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetGmNotes(gmNotes).build()));
+  }
+
+  @Override
   public void toggleLightSourceOnToken(Token token, boolean toggleOn, LightSource lightSource) {
-    var update = toggleOn ? Token.Update.addLightSource : Token.Update.removeLightSource;
     // We only need to send the ID of the light source.
+    var update = TokenUpdateDto.newBuilder();
+    if (toggleOn) {
+      update.setEnableLightSource(lightSource.getId().toDto());
+    } else {
+      update.setDisableLightSource(lightSource.getId().toDto());
+    }
+
+    updateTokenProperty(token, List.of(update.build()));
+  }
+
+  @Override
+  public void clearTokenLightSources(Token token) {
     updateTokenProperty(
         token,
-        update,
-        TokenPropertyValueDto.newBuilder()
-            .setLightSourceId(lightSource.getId().toString())
-            .build());
+        List.of(TokenUpdateDto.newBuilder().setClearLightSources(Empty.newBuilder()).build()));
   }
 
   @Override
   public void toggleHaloSourceOnToken(Token token, boolean toggleOn, Halo halo) {
-    var update = toggleOn ? Token.Update.addHalo : Token.Update.removeHalo;
+    var update = TokenUpdateDto.newBuilder();
+    if (toggleOn) {
+      update.setEnableHalo(halo.getId().toDto());
+    } else {
+      update.setDisableHalo(halo.getId().toDto());
+    }
+
     // We only need to send the ID of the halo source.
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setHaloId(halo.getId().toString()).build());
+    updateTokenProperty(token, List.of(update.build()));
   }
 
+  @Override
+  public void clearTokenHalos(Token token) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setClearHalos(Empty.newBuilder()).build()));
+  }
+
+  @Override
+  public void setTokenHaloColor(Token token, Color color) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetHaloColor(color.getRGB()).build()));
+  }
+
+  @Override
+  public void clearTokenHaloColor(Token token) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setClearHaloColor(Empty.newBuilder()).build()));
+  }
+
+  @Override
+  public void setTokenHasSight(Token token, boolean hasSight) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetHasSight(hasSight).build()));
+  }
+
+  @Override
+  public void setTokenSightType(Token token, String sightTypeName) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetSightType(sightTypeName).build()));
+  }
+
+  @Override
   public void setTokenMaskTopology(
       Token token, @Nullable Area area, Zone.TopologyType topologyType) {
-    if (area == null) {
-      // Will be converted back to null on the other end.
-      area = new Area();
+    var mask = TokenUpdateDto.Mask.newBuilder();
+    mask.setType(topologyType.toDto());
+    if (area != null) {
+      mask.setArea(Mapper.map(area));
     }
 
     updateTokenProperty(
-        token,
-        Token.Update.setMaskTopology,
-        TokenPropertyValueDto.newBuilder().setTopologyType(topologyType.name()).build(),
-        TokenPropertyValueDto.newBuilder().setArea(Mapper.map(area)).build());
+        token, List.of(TokenUpdateDto.newBuilder().setSetTokenMaskTopology(mask).build()));
   }
 
   @Override
@@ -720,145 +784,303 @@ public class ServerCommandClientImpl implements ServerCommand {
     updateTokenProperty(
         zone,
         token,
-        Token.Update.setFootprint,
         List.of(
-            TokenPropertyValueDto.newBuilder().setGridType(gridType.toDto()).build(),
-            TokenPropertyValueDto.newBuilder().setFootprintId(footprintId.toDto()).build()));
+            TokenUpdateDto.newBuilder()
+                .setSetFootprint(
+                    TokenUpdateDto.Footprint.newBuilder()
+                        .setType(gridType.toDto())
+                        .setId(footprintId.toDto())
+                        .build())
+                .build()));
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update, int value) {
+  public void setTokenPropertyType(Token token, String propertyTypeName) {
     updateTokenProperty(
-        token, update, TokenPropertyValueDto.newBuilder().setIntValue(value).build());
+        token, List.of(TokenUpdateDto.newBuilder().setSetPropertyType(propertyTypeName).build()));
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update, String value1, String value2) {
-    var value1Dto = TokenPropertyValueDto.newBuilder();
-    if (value1 != null) {
-      value1Dto.setStringValue(value1);
+  public void setTokenProperty(Token token, String propertyName, String propertyValue) {
+    updateTokenProperty(
+        token,
+        List.of(
+            TokenUpdateDto.newBuilder()
+                .setSetProperty(
+                    TokenUpdateDto.Property.newBuilder()
+                        .setName(propertyName)
+                        .setValue(propertyValue)
+                        .build())
+                .build()));
+  }
+
+  @Override
+  public void resetTokenProperty(Token token, String propertyName) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setResetProperty(propertyName).build()));
+  }
+
+  @Override
+  public void setTokenLayer(Token token, Zone.Layer layer) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetLayer(layer.toDto()).build()));
+  }
+
+  @Override
+  public void setTokenShape(Token token, Token.TokenShape shape) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetShape(shape.toDto()).build()));
+  }
+
+  @Override
+  public void setTokenLayerShape(Token token, Zone.Layer layer, Token.TokenShape shape) {
+    updateTokenProperty(
+        token,
+        List.of(
+            TokenUpdateDto.newBuilder().setSetLayer(layer.toDto()).build(),
+            TokenUpdateDto.newBuilder().setSetShape(shape.toDto()).build()));
+  }
+
+  @Override
+  public void setTokenImageAsset(Token token, MD5Key assetId) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetImageAsset(assetId.toString()).build()));
+  }
+
+  @Override
+  public void setTokenPortraitImage(Token token, MD5Key assetId) {
+    var update = TokenUpdateDto.newBuilder();
+    if (assetId == null) {
+      update.setClearPortraitAsset(Empty.newBuilder());
+    } else {
+      update.setSetPortraitAsset(assetId.toString());
+    }
+    updateTokenProperty(token, List.of(update.build()));
+  }
+
+  @Override
+  public void setTokenCharsheetImage(Token token, @Nullable MD5Key assetId) {
+    var update = TokenUpdateDto.newBuilder();
+    if (assetId == null) {
+      update.setClearCharsheetAsset(Empty.newBuilder());
+    } else {
+      update.setSetCharsheetAsset(assetId.toString());
+      ;
+    }
+    updateTokenProperty(token, List.of(update.build()));
+  }
+
+  @Override
+  public void setTokenOpacity(Token token, double opacity) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetOpacity(opacity).build()));
+  }
+
+  @Override
+  public void addTokenOwner(Token token, String ownerName) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setAddOwner(ownerName).build()));
+  }
+
+  @Override
+  public void clearTokenOwners(Token token) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setClearOwners(Empty.newBuilder()).build()));
+  }
+
+  @Override
+  public void setTokenOwnedByAll(Token token, boolean ownedByAll) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetOwnedByAll(ownedByAll).build()));
+  }
+
+  @Override
+  public void setTokenVisible(Token token, boolean visible) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetVisible(visible).build()));
+  }
+
+  @Override
+  public void setTokenVisibleOnlyToOwner(Token token, boolean visibleOnlyToOwner) {
+    updateTokenProperty(
+        token,
+        List.of(TokenUpdateDto.newBuilder().setSetVisibleToOwnerOnly(visibleOnlyToOwner).build()));
+  }
+
+  @Override
+  public void setTokenAlwaysVisible(Token token, boolean alwaysVisible) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetAlwaysVisible(alwaysVisible).build()));
+  }
+
+  @Override
+  public void putTokenMacros(Token token, List<MacroButtonProperties> macros) {
+    var macrosDto = TokenUpdateDto.Macros.newBuilder();
+    for (var macro : macros) {
+      macrosDto.addMacros(macro.toDto());
+    }
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setPutMacros(macrosDto).build()));
+  }
+
+  @Override
+  public void replaceTokenMacros(Token token, List<MacroButtonProperties> macros) {
+    var macrosDto = TokenUpdateDto.Macros.newBuilder();
+    for (var macro : macros) {
+      macrosDto.addMacros(macro.toDto());
+    }
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setReplaceMacros(macrosDto).build()));
+  }
+
+  @Override
+  public void saveTokenMacro(Token token, MacroButtonProperties macro) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSaveMacro(macro.toDto()).build()));
+  }
+
+  @Override
+  public void deleteTokenMacro(Token token, int macroIndex) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setDeleteMacro(macroIndex).build()));
+  }
+
+  @Override
+  public void setTokenXY(Token token, int x, int y) {
+    updateTokenProperty(
+        token,
+        List.of(
+            TokenUpdateDto.newBuilder().setSetX(x).build(),
+            TokenUpdateDto.newBuilder().setSetY(y).build()));
+  }
+
+  @Override
+  public void setTokenZOrder(Token token, int zOrder) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetZ(zOrder).build()));
+  }
+
+  @Override
+  public void clearTokenFacing(Token token) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setClearFacing(Empty.newBuilder()).build()));
+  }
+
+  @Override
+  public void setTokenFlippedX(Token token, boolean flippedX) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetFlippedX(flippedX).build()));
+  }
+
+  @Override
+  public void setTokenFlippedY(Token token, boolean flippedY) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetFlippedY(flippedY).build()));
+  }
+
+  @Override
+  public void setTokenFlippedIso(Token token, boolean flippedIso) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetFlippedIso(flippedIso).build()));
+  }
+
+  @Override
+  public void setTokenFacing(Token token, int facing) {
+    updateTokenProperty(token, List.of(TokenUpdateDto.newBuilder().setSetFacing(facing).build()));
+  }
+
+  @Override
+  public void setTokenScaleXY(Token token, double scaleX, double scaleY) {
+    updateTokenProperty(
+        token,
+        List.of(
+            TokenUpdateDto.newBuilder().setSetScaleX(scaleX).build(),
+            TokenUpdateDto.newBuilder().setSetScaleY(scaleY).build()));
+  }
+
+  @Override
+  public void setTokenLayout(Token token, double scale, int offsetX, int offsetY) {
+    updateTokenProperty(
+        token,
+        List.of(
+            TokenUpdateDto.newBuilder().setSetSizeScale(scale).build(),
+            TokenUpdateDto.newBuilder().setSetAnchorX(offsetX).build(),
+            TokenUpdateDto.newBuilder().setSetAnchorY(offsetY).build()));
+  }
+
+  @Override
+  public void setTokenTerrainModifiersIgnored(
+      Token token, Collection<TerrainModifierOperation> operations) {
+    var ignored = TokenUpdateDto.IgnoredModifiers.newBuilder();
+    for (var operation : operations) {
+      ignored.addModifiers(operation.toDto());
     }
 
-    var value2Dto = TokenPropertyValueDto.newBuilder();
-    if (value2 != null) {
-      value2Dto.setStringValue(value2);
-    }
-
-    updateTokenProperty(token, update, value1Dto.build(), value2Dto.build());
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetIgnoredModifiers(ignored).build()));
   }
 
   @Override
-  public void updateTokenProperty(
-      Token token, Token.Update update, List<MacroButtonProperties> workingMacros, boolean b) {
-    var list =
-        MacroButtonPropertiesListDto.newBuilder()
-            .addAllMacros(
-                workingMacros.stream()
-                    .map(MacroButtonProperties::toDto)
-                    .collect(Collectors.toList()));
+  public void setTokenTerrainModifier(Token token, double modifier) {
+    updateTokenProperty(
+        token, List.of(TokenUpdateDto.newBuilder().setSetTerrainModifier(modifier).build()));
+  }
+
+  @Override
+  public void setTokenTerrainModifierOperation(Token token, TerrainModifierOperation operation) {
     updateTokenProperty(
         token,
-        update,
-        TokenPropertyValueDto.newBuilder().setMacros(list).build(),
-        TokenPropertyValueDto.newBuilder().setBoolValue(b).build());
+        List.of(
+            TokenUpdateDto.newBuilder().setSetTerrainModifierOperation(operation.toDto()).build()));
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update) {
-    updateTokenProperty(token, update, new TokenPropertyValueDto[] {});
-  }
-
-  @Override
-  public void updateTokenProperty(Token token, Token.Update update, MacroButtonProperties value) {
-    var list = MacroButtonPropertiesListDto.newBuilder().addMacros(value.toDto());
-    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setMacros(list).build());
-  }
-
-  @Override
-  public void updateTokenProperty(Token token, Token.Update update, String value) {
+  public void setTokenSnapToGrid(Token token, boolean snapToGrid) {
     updateTokenProperty(
-        token, update, TokenPropertyValueDto.newBuilder().setStringValue(value).build());
+        token, List.of(TokenUpdateDto.newBuilder().setSetSnapToGrid(snapToGrid).build()));
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update, int value1, int value2) {
+  public void setTokenSnapToGridAndXY(Token token, boolean snapToGrid, int x, int y) {
     updateTokenProperty(
         token,
-        update,
-        TokenPropertyValueDto.newBuilder().setIntValue(value1).build(),
-        TokenPropertyValueDto.newBuilder().setIntValue(value2).build());
+        List.of(
+            TokenUpdateDto.newBuilder().setSetSnapToGrid(snapToGrid).build(),
+            TokenUpdateDto.newBuilder().setSetX(x).build(),
+            TokenUpdateDto.newBuilder().setSetY(y).build()));
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update, boolean value) {
+  public void setTokenSnapToScale(Token token, boolean snapToScale) {
     updateTokenProperty(
-        token, update, TokenPropertyValueDto.newBuilder().setBoolValue(value).build());
+        token, List.of(TokenUpdateDto.newBuilder().setSetSnapToScale(snapToScale).build()));
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update, double value1, double value2) {
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setDoubleValue(value1).build(),
-        TokenPropertyValueDto.newBuilder().setDoubleValue(value2).build());
-  }
-
-  @Override
-  public void updateTokenProperty(
-      Token token, Token.Update update, double value1, int value2, int value3) {
+  public void setTokenState(Token token, String stateName, boolean stateOn) {
     updateTokenProperty(
         token,
-        update,
-        TokenPropertyValueDto.newBuilder().setDoubleValue(value1).build(),
-        TokenPropertyValueDto.newBuilder().setIntValue(value2).build(),
-        TokenPropertyValueDto.newBuilder().setIntValue(value3).build());
+        List.of(
+            TokenUpdateDto.newBuilder()
+                .setSetState(
+                    TokenUpdateDto.State.newBuilder().setName(stateName).setOn(stateOn).build())
+                .build()));
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update, List<String> values) {
+  public void setTokenBar(Token token, String barName, BigDecimal barValue) {
     updateTokenProperty(
         token,
-        update,
-        TokenPropertyValueDto.newBuilder()
-            .setStringValues(StringListDto.newBuilder().addAllValues(values).build())
-            .build());
+        List.of(
+            TokenUpdateDto.newBuilder()
+                .setSetBar(
+                    TokenUpdateDto.Bar.newBuilder()
+                        .setName(barName)
+                        .setValue(barValue.doubleValue())
+                        .build())
+                .build()));
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update, double value) {
+  public void setAllTokenStates(Token token, boolean statesOn) {
     updateTokenProperty(
-        token, update, TokenPropertyValueDto.newBuilder().setDoubleValue(value).build());
-  }
-
-  @Override
-  public void updateTokenProperty(
-      Token token, Token.Update update, boolean value1, int value2, int value3) {
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setBoolValue(value1).build(),
-        TokenPropertyValueDto.newBuilder().setIntValue(value2).build(),
-        TokenPropertyValueDto.newBuilder().setIntValue(value3).build());
-  }
-
-  @Override
-  public void updateTokenProperty(Token token, Token.Update update, String value1, boolean value2) {
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setStringValue(value1).build(),
-        TokenPropertyValueDto.newBuilder().setBoolValue(value2).build());
-  }
-
-  @Override
-  public void updateTokenProperty(
-      Token token, Token.Update update, String value, BigDecimal value2) {
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setStringValue(value).build(),
-        TokenPropertyValueDto.newBuilder().setDoubleValue(value2.doubleValue()).build());
+        token, List.of(TokenUpdateDto.newBuilder().setSetAllStates(statesOn).build()));
   }
 
   @Override

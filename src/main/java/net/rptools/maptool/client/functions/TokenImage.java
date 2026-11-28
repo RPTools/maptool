@@ -104,11 +104,10 @@ public class TokenImage extends AbstractFunction {
       }
 
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
-      String strOpacity = args.get(0).toString();
-      FunctionUtil.paramAsFloat(functionName, args, 0, true);
+      var opacity = FunctionUtil.paramAsFloat(functionName, args, 0, true);
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setOpacity, strOpacity);
+      MapTool.serverCommand().setTokenOpacity(token, opacity);
       return token.getTokenOpacity();
     }
 
@@ -332,18 +331,17 @@ public class TokenImage extends AbstractFunction {
 
   private static void setImage(Token token, String assetName) throws ParserException {
     MD5Key md5key = getMD5Key(assetName, SET_IMAGE);
-    MapTool.serverCommand()
-        .updateTokenProperty(token, Token.Update.setImageAsset, md5key.toString());
+    MapTool.serverCommand().setTokenImageAsset(token, md5key);
   }
 
   private static void setPortrait(Token token, String assetName) throws ParserException {
-    var md5key = "".equals(assetName) ? "" : getMD5Key(assetName, SET_PORTRAIT).toString();
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setPortraitImage, md5key);
+    var md5key = "".equals(assetName) ? null : getMD5Key(assetName, SET_PORTRAIT);
+    MapTool.serverCommand().setTokenPortraitImage(token, md5key);
   }
 
   private static void setHandout(Token token, String assetName) throws ParserException {
-    var md5key = "".equals(assetName) ? "" : getMD5Key(assetName, SET_HANDOUT).toString();
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setCharsheetImage, md5key);
+    var md5key = "".equals(assetName) ? null : getMD5Key(assetName, SET_HANDOUT);
+    MapTool.serverCommand().setTokenCharsheetImage(token, md5key);
   }
 
   private static Token findImageToken(final String name, String functionName) {

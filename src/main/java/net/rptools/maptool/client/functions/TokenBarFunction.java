@@ -96,7 +96,7 @@ public class TokenBarFunction extends AbstractFunction {
    */
   public static Object setValue(Token token, String bar, Object value) {
     BigDecimal val = getBigDecimalValue(value);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, val);
+    MapTool.serverCommand().setTokenBar(token, bar, val);
     return val;
   }
 
@@ -116,7 +116,7 @@ public class TokenBarFunction extends AbstractFunction {
    * @return If the bar visible or not
    */
   public static BigDecimal setVisible(Token token, String bar, boolean show) {
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, show);
+    MapTool.serverCommand().setTokenState(token, bar, show);
     return show ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
@@ -128,7 +128,7 @@ public class TokenBarFunction extends AbstractFunction {
    *     that can't be converted to numbers return {@link BigDecimal#ZERO}
    */
   public static BigDecimal getBigDecimalValue(Object value) {
-    BigDecimal val = null;
+    BigDecimal val;
     if (value instanceof BigDecimal) {
       val = (BigDecimal) value;
     } else if (value == null) {

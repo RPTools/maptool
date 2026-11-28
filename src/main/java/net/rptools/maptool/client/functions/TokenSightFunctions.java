@@ -79,13 +79,13 @@ public class TokenSightFunctions extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("setHasSight")) {
       boolean hasSight = !parameters.get(0).equals(BigDecimal.ZERO);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setHasSight, hasSight);
+      MapTool.serverCommand().setTokenHasSight(token, hasSight);
       return token.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     if (functionName.equalsIgnoreCase("setSightType")) {
       String sightType = parameters.get(0).toString();
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSightType, sightType);
+      MapTool.serverCommand().setTokenSightType(token, sightType);
       return token.getSightType();
     }
 

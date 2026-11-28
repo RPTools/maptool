@@ -235,21 +235,19 @@ public class MacroButtonPopupMenu extends JPopupMenu {
                   }
                 }
                 // Updates the client macros. Fixes #1657.
-                MapTool.serverCommand()
-                    .updateTokenProperty(
-                        nextToken, Token.Update.saveMacroList, workingMacros, true);
+                MapTool.serverCommand().replaceTokenMacros(nextToken, workingMacros);
               }
             }
           } else {
             int index = button.getProperties().getIndex();
             Token token = button.getToken();
-            MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
+            MapTool.serverCommand().deleteTokenMacro(token, index);
           }
         } else if (button.getToken() != null) {
           if (AppUtil.playerOwns(button.getToken())) {
             int index = button.getProperties().getIndex();
             Token token = button.getToken();
-            MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
+            MapTool.serverCommand().deleteTokenMacro(token, index);
           }
         }
       }

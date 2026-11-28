@@ -715,7 +715,7 @@ public class MacroFunctions extends AbstractFunction {
     // Untrusted macros are set to be editable by players
     if (!MapTool.getParser().isMacroTrusted()) mbp.setAllowPlayerEdits(true);
 
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, mbp);
+    MapTool.serverCommand().saveTokenMacro(token, mbp);
     return BigDecimal.valueOf(mbp.getIndex());
   }
 
@@ -832,7 +832,7 @@ public class MacroFunctions extends AbstractFunction {
             I18N.getText(KEY_NO_PERM, "setMacroProps", index, token.getName()));
       }
       setMacroProps(mbp, props, delim);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, mbp);
+      MapTool.serverCommand().saveTokenMacro(token, mbp);
     } else {
       List<MacroButtonProperties> mbpList = new ArrayList<>();
       for (MacroButtonProperties mbp : token.getMacroList(false)) {
@@ -849,8 +849,7 @@ public class MacroFunctions extends AbstractFunction {
         }
       }
       // Replaces the matching macros with the new versions
-      MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.saveMacroList, mbpList, false);
+      MapTool.serverCommand().putTokenMacros(token, mbpList);
     }
     return "";
   }
@@ -910,7 +909,7 @@ public class MacroFunctions extends AbstractFunction {
           I18N.getText(KEY_OUT_OF_RANGE, "setMacroCommand", index, token.getName()));
     }
     mbp.setCommand(command);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, mbp);
+    MapTool.serverCommand().saveTokenMacro(token, mbp);
     return "";
   }
 
@@ -974,7 +973,7 @@ public class MacroFunctions extends AbstractFunction {
     }
 
     String label = mbp.getLabel();
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
+    MapTool.serverCommand().deleteTokenMacro(token, index);
     MapTool.getFrame().updateKeyStrokes(); // ensure hotkeys are updated
     return "Removed macro button " + label + "(index = " + index + ") from " + token.getName();
   }

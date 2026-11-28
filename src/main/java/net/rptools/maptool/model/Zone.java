@@ -70,6 +70,7 @@ import net.rptools.maptool.model.zones.WallTopologyChanged;
 import net.rptools.maptool.model.zones.ZoneLightingChanged;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.DrawnElementListDto;
+import net.rptools.maptool.server.proto.TopologyTypeDto;
 import net.rptools.maptool.server.proto.ZoneDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -128,6 +129,28 @@ public class Zone {
     GM("layer.gm"),
     OBJECT("layer.object"),
     BACKGROUND("layer.background");
+
+    public ZoneDto.LayerDto toDto() {
+      return switch (this) {
+        case TOKEN -> ZoneDto.LayerDto.TOKEN;
+        case GM -> ZoneDto.LayerDto.HIDDEN;
+        case OBJECT -> ZoneDto.LayerDto.OBJECT;
+        case BACKGROUND -> ZoneDto.LayerDto.BACKGROUND;
+      };
+    }
+
+    public static Layer fromDto(ZoneDto.LayerDto dto) {
+      return switch (dto) {
+        case TOKEN -> TOKEN;
+        case HIDDEN -> GM;
+        case OBJECT -> OBJECT;
+        case BACKGROUND -> BACKGROUND;
+        case UNRECOGNIZED -> {
+          log.warn("Received unrecognized layer. Defaulting to {}", TOKEN.name());
+          yield TOKEN;
+        }
+      };
+    }
 
     /**
      * Gets the layer that players should be on by default.
@@ -310,6 +333,30 @@ public class Zone {
     PIT_VBL,
     COVER_VBL,
     MBL;
+
+    public TopologyTypeDto toDto() {
+      return switch (this) {
+        case WALL_VBL -> TopologyTypeDto.WALL_VBL;
+        case HILL_VBL -> TopologyTypeDto.HILL_VBL;
+        case PIT_VBL -> TopologyTypeDto.PIT_VBL;
+        case COVER_VBL -> TopologyTypeDto.COVER_VBL;
+        case MBL -> TopologyTypeDto.MBL;
+      };
+    }
+
+    public static TopologyType fromDto(TopologyTypeDto dto) {
+      return switch (dto) {
+        case WALL_VBL -> WALL_VBL;
+        case HILL_VBL -> HILL_VBL;
+        case PIT_VBL -> PIT_VBL;
+        case COVER_VBL -> COVER_VBL;
+        case MBL -> MBL;
+        case UNRECOGNIZED -> {
+          log.warn("Received unrecognized type. Defaulting to {}", WALL_VBL.name());
+          yield WALL_VBL;
+        }
+      };
+    }
   }
 
   /**

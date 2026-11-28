@@ -57,7 +57,7 @@ public class TokenLightFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.clearLightSources);
+      MapTool.serverCommand().clearTokenLightSources(token);
       return "";
     }
     if (functionName.equalsIgnoreCase("setLight")) {

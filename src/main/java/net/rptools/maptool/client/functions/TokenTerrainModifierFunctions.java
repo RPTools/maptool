@@ -32,7 +32,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
-import net.rptools.maptool.model.Token.Update;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -167,9 +166,7 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
           TerrainModifierOperation terrainModifierOperation =
               TerrainModifierOperation.valueOf(terrainModifierOperationPrimitive.getAsString());
 
-          MapTool.serverCommand()
-              .updateTokenProperty(
-                  token, Update.setTerrainModifierOperation, terrainModifierOperation.name());
+          MapTool.serverCommand().setTokenTerrainModifierOperation(token, terrainModifierOperation);
         }
       } catch (java.lang.IllegalArgumentException iae) {
         throw new ParserException(
@@ -194,18 +191,12 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
         Set<TerrainModifierOperation> ignoredTerrainOperationsSet =
             ignoredTerrainOperationsList.stream().filter(Objects::nonNull).collect(toSet());
 
-        MapTool.serverCommand()
-            .updateTokenProperty(
-                token,
-                Update.setTerrainModifiersIgnored,
-                ignoredTerrainOperationsSet.stream()
-                    .map(TerrainModifierOperation::name)
-                    .collect(Collectors.toList()));
+        MapTool.serverCommand().setTokenTerrainModifiersIgnored(token, ignoredTerrainOperationsSet);
       }
     }
 
     // Finally, set and return the terrainModifier
-    MapTool.serverCommand().updateTokenProperty(token, Update.setTerrainModifier, terrainModifier);
+    MapTool.serverCommand().setTokenTerrainModifier(token, terrainModifier);
 
     return terrainModifier;
   }
